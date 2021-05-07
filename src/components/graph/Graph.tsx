@@ -510,61 +510,6 @@ export const Graph = () => {
 
   const classes = useStyles();
 
-  function createUpload() {
-    return (
-      <ModalView
-        onClose={() => setUpload(false)}
-        open={upload}
-        content={
-          <UploadSource
-            onSubmit={() => {
-              setUpload(false);
-            }}
-          />
-        }
-      />
-    );
-  }
-
-  const history = useHistory();
-
-  function buttons() {
-    return (
-      <div className={classes.buttonContainer}>
-        <IconButton
-          className={classes.button}
-          component="span"
-          color="inherit"
-          onClick={() => {
-            graphService.persistGraph().then((e) => console.log(e));
-          }}
-        >
-          <SaveIcon />
-        </IconButton>
-        <IconButton
-          className={classes.button}
-          component="span"
-          color="inherit"
-          onClick={() => setUpload(true)}
-        >
-          <CloudUpload />
-        </IconButton>
-        {createUpload()}
-        <IconButton
-          className={classes.button}
-          component="span"
-          color="inherit"
-          onClick={(e: any) => {
-            history.push("/pipelines");
-            e.stopPropagation();
-          }}
-        >
-          <RotateRightIcon />
-        </IconButton>
-      </div>
-    );
-  }
-
   function domainList() {
     return (
       <DomainList
@@ -607,7 +552,6 @@ export const Graph = () => {
 
   return (
     <>
-      {buttons()}
       {domainList()}
 
       <div className={classes.overlay}>{editSection()}</div>
