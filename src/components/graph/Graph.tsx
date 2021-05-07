@@ -413,11 +413,14 @@ export const Graph = () => {
                 // @ts-ignore
                 return d.d;
               } else {
-                // @ts-ignore
                 return D3Helper.selectionPath(
+                  // @ts-ignore
                   selected.x,
+                  // @ts-ignore
                   selected.y,
+                  // @ts-ignore
                   selected.x,
+                  // @ts-ignore
                   selected.y
                 );
               }
