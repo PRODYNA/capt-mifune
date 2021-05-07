@@ -44,7 +44,7 @@ public class GraphService {
 
   public static final String GRAPH_JSON = "graph.json";
   private final Pattern COLOR_PATTERN = Pattern.compile("#[0-9,A-F]{6}");
-  @ConfigProperty(name = "c4k.model.dir")
+  @ConfigProperty(name = "mifune.model.dir")
   protected String model;
   Graph graph = new Graph();
 

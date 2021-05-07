@@ -24,7 +24,7 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 public class SourceResource {
 
-  @ConfigProperty(name = "c4k.upload.dir")
+  @ConfigProperty(name = "mifune.upload.dir")
   protected String uploadDir;
 
 

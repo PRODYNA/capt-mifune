@@ -61,9 +61,9 @@ public class GraphResource {
   protected Logger log;
   @Inject
   protected GraphService graphService;
-  @ConfigProperty(name = "c4k.upload.dir")
+  @ConfigProperty(name = "mifune.upload.dir")
   protected String uploadDir;
-  @ConfigProperty(name = "c4k.model.dir")
+  @ConfigProperty(name = "mifune.model.dir")
   protected String modelDir;
   @Inject
   protected Driver driver;
