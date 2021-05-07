@@ -2,3 +2,6 @@
 .idea/
 target/
 .DS_Store
+.settings/
+.project
+.classpath
