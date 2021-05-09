@@ -60,40 +60,32 @@ export function Navigation() {
     >
       <BottomNavigationAction
         label="Save"
-        icon={
-          <SaveIcon
-            onClick={() => {
-              graphService.persistGraph().then((e) => console.log(e));
-            }}
-          />
-        }
+        onClick={() => {
+          graphService.persistGraph().then((e) => console.log(e));
+        }}
+        icon={<SaveIcon />}
       />
       <BottomNavigationAction
         label="Upload"
-        icon={<CloudUpload onClick={() => setUpload(true)} />}
+        onClick={() => setUpload(true)}
+        icon={<CloudUpload />}
       />
       {createUpload(upload, setUpload)}
       <BottomNavigationAction
+        onClick={(e: any) => {
+          history.push("/");
+          e.stopPropagation();
+        }}
         label="Graph"
-        icon={
-          <BubbleChartIcon
-            onClick={(e: any) => {
-              history.push("/");
-              e.stopPropagation();
-            }}
-          />
-        }
+        icon={<BubbleChartIcon />}
       />
       <BottomNavigationAction
+        onClick={(e: any) => {
+          history.push("/pipelines");
+          e.stopPropagation();
+        }}
         label="Pipelines"
-        icon={
-          <RotateRightIcon
-            onClick={(e: any) => {
-              history.push("/pipelines");
-              e.stopPropagation();
-            }}
-          />
-        }
+        icon={<RotateRightIcon />}
       />
     </BottomNavigation>
   );
