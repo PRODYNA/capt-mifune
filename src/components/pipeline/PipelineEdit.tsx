@@ -66,6 +66,15 @@ export const PipelineEdit = (props: DomainEditProps) => {
     });
   }, [props]);
 
+  useEffect(() => {
+    graphService.loadDefaultMappingConfig(value).then((r) => {
+      setValue({
+        ...value,
+        csvJsonMapping: JSON.stringify(r.data, null, 2),
+      });
+    });
+  }, [props]);
+
   return (
     <form
       className={classes.root}
