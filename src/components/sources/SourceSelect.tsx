@@ -16,8 +16,10 @@ export const SourceSelect = (props: SourceSelectProps) => {
       value={props.file}
       onChange={(e) => props.onChange(e.target.value as string)}
     >
-      {props.sources.map((s) => (
-        <MenuItem value={s.name}>{s.name}</MenuItem>
+      {props.sources.map((s, i) => (
+        <MenuItem key={s.name + i} value={s.name}>
+          {s.name}
+        </MenuItem>
       ))}
     </Select>
   );
