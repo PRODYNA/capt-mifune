@@ -109,7 +109,7 @@ public class GraphService {
 
   private boolean validateDomainMapping(Domain d) {
     // todo: validate mapping again model, not only if mapping exist
-    return Objects.nonNull(d.getCsvJsonMapping())
+    return Objects.nonNull(d.getColumnMapping())
            && Objects.nonNull(d.getFile());
   }
 
@@ -125,7 +125,7 @@ public class GraphService {
     domain.setRootNodeId(model.rootNodeId());
 
     domain.setFile(model.file());
-    domain.setCsvJsonMapping(model.csvJsonMapping());
+    domain.setColumnMapping(model.columnMapping());
     graph.getDomains().add(domain);
     return domain;
   }
@@ -142,7 +142,7 @@ public class GraphService {
     domain.setName(model.name());
     domain.setRootNodeId(model.rootNodeId());
     domain.setFile(model.file());
-    domain.setCsvJsonMapping(model.csvJsonMapping());
+    domain.setColumnMapping(model.columnMapping());
     return domain;
   }
 

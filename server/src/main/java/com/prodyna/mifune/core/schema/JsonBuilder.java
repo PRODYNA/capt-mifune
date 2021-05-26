@@ -37,7 +37,6 @@ public class JsonBuilder {
 
   private final Set<String> labels = new HashSet<>();
   private final ObjectNode json = new ObjectMapper().createObjectNode();
-  private final CypherContext cypherContext = new CypherContext();
   private final UUID domainId;
 
 
@@ -61,9 +60,8 @@ public class JsonBuilder {
   ) {
     var contextVarPath = new ArrayList<>(varPath);
     var currentNode = parentNode.putObject(nodeVarName(node));
-    buildProperies(currentNode, node.getProperties());
+    buildProperties(currentNode, node.getProperties());
     contextVarPath.add(nodeVarName(node));
-    cypherContext.getStatements().add(buildMerge(contextVarPath, node));
     var add = labels.add(node.getLabel());
     if (add) {
       node.getRelations().stream()
@@ -96,31 +94,15 @@ public class JsonBuilder {
       RelationModel r,
       ObjectNode currentNode
   ) {
-    buildProperies(currentNode, r.getProperties());
+    buildProperties(currentNode, r.getProperties());
     if (r.getTo().isPrimary()) {
       var newPath = new ArrayList<>(varPath);
       newPath.add(relationVarName(r));
       buildSubContext(newPath, currentNode, r.getTo());
-      cypherContext.getStatements().add(
-          "merge(%s)-[%s:%s]->(%s)"
-              .formatted(nodeVarName(r.getFrom()), relationVarName(r), r.getType(),
-                  nodeVarName(r.getTo()))
-      );
     } else {
       var newPath = new ArrayList<>(varPath);
       newPath.add(relationVarName(r));
       buildSubContext(newPath, currentNode, r.getTo());
-      cypherContext.getStatements().add(
-          "merge(%s)-[%s:%s]->(%s:%s)"
-              .formatted(
-                  nodeVarName(r.getFrom()),
-                  relationVarName(r),
-                  r.getType(),
-                  nodeVarName(r.getTo()),
-                  r.getTo().getLabel()
-              )
-      );
-
     }
   }
 
@@ -129,39 +111,13 @@ public class JsonBuilder {
       RelationModel r,
       ObjectNode currentNode
   ) {
-    buildProperies(currentNode, r.getProperties());
+    buildProperties(currentNode, r.getProperties());
     var varName = nodeVarName(r.getFrom());
     var contextVarPath = new ArrayList<>(List.of(varName));
     buildSubContext(contextVarPath, currentNode, r.getTo());
-
   }
 
-  private String buildMerge(List<String> varPath, NodeModel node) {
-    return "merge(%s:%s%s)".formatted(nodeVarName(node), node.getLabel(),
-        primaryKeys(varPath, node.getProperties()));
-  }
-
-  private String primaryKeys(List<String> varPath, List<Property> properties) {
-    var primaryKeys = Optional.ofNullable(properties)
-        .stream()
-        .flatMap(Collection::stream)
-        .filter(Property::isPrimary).collect(Collectors.toList());
-    if (primaryKeys.isEmpty()) {
-      return "";
-    }
-
-    var sb = new StringBuilder(" {");
-    primaryKeys.forEach(property -> sb.append(property.getName())
-        .append(":")
-        .append(String.join(".", varPath))
-        .append(".")
-        .append(property.getName()));
-    sb.append("}");
-    return sb.toString();
-  }
-
-
-  private void buildProperies(ObjectNode jsonNodes, List<Property> properties) {
+  private void buildProperties(ObjectNode jsonNodes, List<Property> properties) {
     Optional.ofNullable(properties)
         .stream()
         .flatMap(Collection::stream)

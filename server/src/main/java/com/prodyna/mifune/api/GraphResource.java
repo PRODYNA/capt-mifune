@@ -25,8 +25,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.prodyna.json.converter.JsonTransformer;
 import com.prodyna.mifune.core.GraphService;
+import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.core.schema.CypherBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
+import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Domain;
 import com.prodyna.mifune.domain.DomainCreate;
 import com.prodyna.mifune.domain.DomainUpdate;
@@ -44,7 +46,6 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
@@ -179,8 +180,10 @@ public class GraphResource {
 
   @GET
   @Path("/domain/{domainId}/mapping")
-  public Uni<ObjectNode> createJsonModel(@PathParam("domainId") UUID id) {
-    return Uni.createFrom().item(graphService.buildJsonModel(id));
+  public Multi<String> createJsonModel(@PathParam("domainId") UUID id) throws IOException {
+    ObjectNode jsonModel = graphService.buildJsonModel(id);
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    return Multi.createFrom().items(paths.stream());
 
   }
 
@@ -194,14 +197,20 @@ public class GraphResource {
     var domain = graph.getDomains().stream().filter(d -> d.getId().equals(domainId))
         .findFirst()
         .orElseThrow(NotFoundException::new);
-    var cypher = new CypherBuilder(new GraphModel(graph), domainId).getCypher();
+    GraphModel graphModel = new GraphModel(graph);
+    var cypher = new CypherBuilder(graphModel, domainId).getCypher();
     log.info(cypher);
 
     var mapper = new ObjectMapper();
-    var jsonNode = mapper.readTree(domain.getCsvJsonMapping().getBytes(StandardCharsets.UTF_8));
+    ObjectNode jsonModel = new JsonBuilder(graphModel, domainId).getJson();
+    JsonPathEditor jsonPathEditor = new JsonPathEditor();
+    domain.getColumnMapping().forEach(
+            (key,value)-> jsonPathEditor.update(jsonModel,key,value)
+    );
+
     var importFile = Paths.get(uploadDir, domain.getFile());
 
-    var transformer = new JsonTransformer(jsonNode, 50);
+    var transformer = new JsonTransformer(jsonModel, 50);
 
 
     var multi = Multi.createFrom()
