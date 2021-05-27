@@ -46,13 +46,18 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -180,11 +185,16 @@ public class GraphResource {
 
   @GET
   @Path("/domain/{domainId}/mapping")
-  public Multi<String> createJsonModel(@PathParam("domainId") UUID id) throws IOException {
+  public Uni<HashMap<String,String>> createJsonModel(@PathParam("domainId") UUID id) throws IOException {
     ObjectNode jsonModel = graphService.buildJsonModel(id);
+    var mapping = graphService.fetchDomain(id).getColumnMapping();
     List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-    return Multi.createFrom().items(paths.stream());
-
+    var hashmap = new HashMap<String, String>();
+    paths.forEach(path -> hashmap.put(path, null));
+    //TODO Einzelwerte die nicht mehr existieren sollen entfernt werden (hashmap.computeIfPresent oderso)
+    Optional.ofNullable(mapping).ifPresent(m -> 
+    m.forEach((key, value) -> hashmap.put(key, value)));
+    return Uni.createFrom().item(hashmap);
   }
 
   @GET
@@ -201,19 +211,20 @@ public class GraphResource {
     var cypher = new CypherBuilder(graphModel, domainId).getCypher();
     log.info(cypher);
 
-    var mapper = new ObjectMapper();
+    //TODO: Check if each jsonpath has a mapping
     ObjectNode jsonModel = new JsonBuilder(graphModel, domainId).getJson();
     JsonPathEditor jsonPathEditor = new JsonPathEditor();
+    var header = fileHeader(domain.getFile());
     domain.getColumnMapping().forEach(
-            (key,value)-> jsonPathEditor.update(jsonModel,key,value)
+            (key,value)-> jsonPathEditor.update(jsonModel,key,String.valueOf(header.indexOf(value)))
     );
-
+    System.out.println(jsonModel);
     var importFile = Paths.get(uploadDir, domain.getFile());
 
     var transformer = new JsonTransformer(jsonModel, 50);
 
 
-    var multi = Multi.createFrom()
+    Multi.createFrom()
         .publisher(FlowAdapters.toProcessor(transformer))
         .emitOn(Infrastructure.getDefaultWorkerPool())
         .onItem()
@@ -265,5 +276,17 @@ public class GraphResource {
     }
   }
 
-
+  private List<String> fileHeader(String fileName) {
+    var path = Paths.get(uploadDir, fileName);
+    try {
+      return Files.lines(path).findFirst().map(s -> s.split(","))
+          .map(Arrays::asList)
+          .stream()
+          .flatMap(Collection::stream)
+          .map(String::strip)
+          .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException();
+    }
+  }
 }

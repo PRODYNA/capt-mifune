@@ -42,13 +42,18 @@ public class JsonPathEditor {
         String[] parts = jsonPath.split("\\.");
         System.out.println(Arrays.toString(parts));
         String part = "";
-        for (String s : parts) {
-            part = s;
+        for (int i=0; i<parts.length; i++) {
+            part = parts[i];
             if (part.endsWith("[]")) {
                 part = part.substring(0, part.length() - 2);
                 node = node.get(part);
                 if (node.isArray() && node.get(0).isObject()) {
                     node = node.get(0);
+                }
+            }
+            else {
+                if(i<(parts.length-1)){
+                    node = node.get(part);
                 }
             }
         }
