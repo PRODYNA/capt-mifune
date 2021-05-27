@@ -13,7 +13,7 @@ export const SourceSelect = (props: SourceSelectProps) => {
     <Select
       labelId="demo-simple-select-label"
       id="demo-simple-select"
-      value={props.file}
+      value={props.file ? props.file : "please Select"}
       onChange={(e) => props.onChange(e.target.value as string)}
     >
       {props.sources.map((s, i) => (
