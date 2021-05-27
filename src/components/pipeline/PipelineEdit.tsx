@@ -147,6 +147,7 @@ export const PipelineEdit = (props: DomainEditProps) => {
                   <p>{key}</p>
                   <OpenSelect
                     key={key}
+                    columnMapping={value.columnMapping}
                     menuItems={getMenuItems()}
                     changeHandler={eventHandler}
                     refersTo={key}

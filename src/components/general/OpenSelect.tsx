@@ -21,12 +21,14 @@ interface IOpenSelect {
    * The item it refers to
    */
   refersTo: string;
+  columnMapping: any;
 }
 
 const OpenSelect: React.FunctionComponent<IOpenSelect> = ({
   menuItems,
   changeHandler,
   refersTo,
+  columnMapping,
 }) => {
   const classes = useStyles();
 
@@ -54,6 +56,7 @@ const OpenSelect: React.FunctionComponent<IOpenSelect> = ({
           labelId="demo-controlled-open-select-label"
           id="demo-controlled-open-select"
           open={open}
+          value={columnMapping[refersTo] ?? menuItems[columnMapping[refersTo]]}
           onClose={handleClose}
           onOpen={handleOpen}
           onChange={handleChange}
