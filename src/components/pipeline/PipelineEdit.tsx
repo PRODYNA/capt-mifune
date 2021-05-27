@@ -16,12 +16,12 @@ import graphService from "../../api/GraphService";
 import { SourceSelect } from "../sources/SourceSelect";
 import { rest } from "../../api/axios";
 import { useHistory } from "react-router-dom";
+import OpenSelect from "../general/OpenSelect";
 
 interface DomainEditProps {
   domain: Domain;
   onSubmit: (domain: Domain) => void;
 }
-
 export const PipelineEdit = (props: DomainEditProps) => {
   const history = useHistory();
 
@@ -64,16 +64,44 @@ export const PipelineEdit = (props: DomainEditProps) => {
     rest.get<Source[]>("/sources").then((r) => {
       setSources(r.data);
     });
-  }, [props]);
+  }, [props.domain]);
 
   useEffect(() => {
     graphService.loadDefaultMappingConfig(value).then((r) => {
       setValue({
         ...value,
-        csvJsonMapping: JSON.stringify(r.data, null, 2),
+        columnMapping: r.data,
       });
+      console.log(r.data);
     });
-  }, [props]);
+  }, [props.domain]);
+
+  const getMenuItems = () => {
+    if (sources) {
+      const data = sources.filter((s) => s.name === value.file)[0];
+      if (data) {
+        return data.header;
+      }
+    }
+    return [];
+  };
+
+  const getColumnMappingKeys = () => {
+    let keys: string[] = [];
+    if (value.columnMapping) {
+      for (const [key, v] of Object.entries(value.columnMapping)) {
+        console.log(key, v);
+        keys.push(key);
+      }
+    }
+    return keys;
+  };
+
+  const eventHandler = (headerName: string, refersTo: string) => {
+    if (value.columnMapping) {
+      value.columnMapping[refersTo] = headerName;
+    }
+  };
 
   return (
     <form
@@ -113,32 +141,27 @@ export const PipelineEdit = (props: DomainEditProps) => {
           />
 
           <div className={classes.label}>
-            <TextField
-              multiline
-              rows={20}
-              autoComplete="off"
-              id="domain-name"
-              value={value.csvJsonMapping}
-              onChange={(e) => {
-                setValue({ ...value, csvJsonMapping: e.target.value });
-              }}
-            />
-            <div className={classes.headerList}>
-              {sources
-                .filter((s) => s.name === value.file)[0]
-                ?.header.map((header, i) => (
-                  <pre>
-                    {i}:{header}
-                  </pre>
-                ))}
-            </div>
+            {getColumnMappingKeys().map((key) => {
+              return (
+                <>
+                  <p>{key}</p>
+                  <OpenSelect
+                    key={key}
+                    menuItems={getMenuItems()}
+                    changeHandler={eventHandler}
+                    refersTo={key}
+                  ></OpenSelect>
+                </>
+              );
+            })}
           </div>
+
           <IconButton
             onClick={(e) => {
               graphService.loadDefaultMappingConfig(value).then((r) => {
                 setValue({
                   ...value,
-                  csvJsonMapping: JSON.stringify(r.data, null, 2),
+                  columnMapping: r.data,
                 });
               });
             }}
