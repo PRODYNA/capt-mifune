@@ -81,6 +81,16 @@ class JsonConverterTest {
   }
 
   @Test
+  public void illegalConfig() {
+    var model = new ObjectMapper().createObjectNode();
+    model.put("sport", "0");
+    var csv = List.of(
+        List.of("JuJutsu")
+    );
+    var jsonNodes = new JsonConverter().toJson(model, csv);
+  }
+
+  @Test
   public void simpleInt() {
     JsonNode model = new ObjectMapper().createObjectNode().put("age", "0:int");
     var csv = List.of(List.of("1"));
