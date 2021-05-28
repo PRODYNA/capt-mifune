@@ -20,16 +20,16 @@ package com.prodyna.mifune.core.json;
  * #L%
  */
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonFactoryBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class JsonPathEditor {
@@ -42,7 +42,7 @@ public class JsonPathEditor {
         String[] parts = jsonPath.split("\\.");
         System.out.println(Arrays.toString(parts));
         String part = "";
-        for (int i=0; i<parts.length; i++) {
+        for (int i = 0; i < parts.length; i++) {
             part = parts[i];
             if (part.endsWith("[]")) {
                 part = part.substring(0, part.length() - 2);
@@ -50,9 +50,8 @@ public class JsonPathEditor {
                 if (node.isArray() && node.get(0).isObject()) {
                     node = node.get(0);
                 }
-            }
-            else {
-                if(i<(parts.length-1)){
+            } else {
+                if (i < (parts.length - 1)) {
                     node = node.get(part);
                 }
             }
@@ -63,6 +62,32 @@ public class JsonPathEditor {
 
         } else if (node.isObject()) {
             ((ObjectNode) node).put(part, value);
+        } else {
+            throw new IllegalArgumentException("Path not valid");
+        }
+    }
+    public void remove(JsonNode node, String jsonPath) {
+        String[] parts = jsonPath.split("\\.");
+        System.out.println(Arrays.toString(parts));
+        String part = "";
+        for (int i = 0; i < parts.length; i++) {
+            part = parts[i];
+            if (part.endsWith("[]")) {
+                part = part.substring(0, part.length() - 2);
+                node = node.get(part);
+                if (node.isArray() && node.get(0).isObject()) {
+                    node = node.get(0);
+                }
+            } else {
+                if (i < (parts.length - 1)) {
+                    node = node.get(part);
+                }
+            }
+        }
+        if (node.isArray()) {
+            ((ArrayNode) node).removeAll();
+        } else if (node.isObject()) {
+            ((ObjectNode) node).remove(part);
         } else {
             throw new IllegalArgumentException("Path not valid");
         }

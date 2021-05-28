@@ -74,6 +74,28 @@ class JsonPathEditorTest {
         System.out.println(jsonNode);
         editor.extractFieldPaths(jsonNode)
         .forEach(System.out::println);
-
+    }
+    @Test
+    public void remove() throws IOException {
+        JsonPathEditor editor = new JsonPathEditor();
+        String json = """
+                {
+                    "name" : "name",
+                    "roles" : [
+                    {
+                        "name":"name"
+                    }],
+                    "simple" : ["0"]
+                    
+                }
+                """;
+        JsonNode jsonNode = new ObjectMapper().readTree(json);
+        System.out.println(jsonNode);
+        editor.remove(jsonNode,"name");
+        System.out.println(jsonNode);
+        editor.remove(jsonNode,"roles[].name");
+        System.out.println(jsonNode);
+        editor.remove(jsonNode,"simple[]");
+        System.out.println(jsonNode);
     }
 }

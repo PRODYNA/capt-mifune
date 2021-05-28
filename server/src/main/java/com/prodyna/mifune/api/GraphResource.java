@@ -9,9 +9,9 @@ package com.prodyna.mifune.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,18 +43,13 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.vertx.mutiny.core.eventbus.EventBus;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -71,6 +66,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
@@ -83,210 +79,216 @@ import org.reactivestreams.FlowAdapters;
 @Tag(name = "graph")
 public class GraphResource {
 
-  @Inject
-  protected Logger log;
-  @Inject
-  protected GraphService graphService;
-  @ConfigProperty(name = "mifune.upload.dir")
-  protected String uploadDir;
-  @ConfigProperty(name = "mifune.model.dir")
-  protected String modelDir;
-  @Inject
-  protected Driver driver;
+    @Inject
+    protected Logger log;
+    @Inject
+    protected GraphService graphService;
+    @ConfigProperty(name = "mifune.upload.dir")
+    protected String uploadDir;
+    @ConfigProperty(name = "mifune.model.dir")
+    protected String modelDir;
+    @Inject
+    protected Driver driver;
 
-  @Inject
-  EventBus eventBus;
-
-
-  @GET
-  public Uni<Graph> loadGraph() {
-    return Uni.createFrom().item(graphService.graph());
-  }
-
-  @POST
-  public Uni<Void> persistGraph() throws IOException {
-    graphService.perist();
-    return Uni.createFrom().voidItem();
-  }
-
-  @POST
-  @Path("/reset")
-  public void reset() {
-    graphService.reset();
-  }
-
-  @GET
-  @Path("/domains")
-  public Multi<Domain> fetchDomains() {
-    return Multi.createFrom().iterable(graphService.fetchDomains());
-  }
-
-  @POST
-  @Path("/domain")
-  public Uni<Domain> createDomain(@Valid DomainCreate model) {
-    return Uni.createFrom().item(graphService.createDomain(model));
-  }
-
-  @GET
-  @Path("/domain/{id}")
-  public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
-    return Uni.createFrom().item(graphService.fetchDomain(id));
-  }
-
-  @PUT
-  @Path("/domain/{id}")
-  public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
-    return Uni.createFrom().item(graphService.updateDomain(id, model));
-  }
-
-  @DELETE
-  @Path("/domain/{id}")
-  public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
-    return Uni.createFrom().item(graphService.deleteDomain(id));
-  }
+    @Inject
+    EventBus eventBus;
 
 
-  @POST
-  @Path("/node")
-  public Uni<Node> createNode(@Valid NodeCreate model) {
-    return Uni.createFrom().item(graphService.createNode(model));
-  }
+    @GET
+    public Uni<Graph> loadGraph() {
+        return Uni.createFrom().item(graphService.graph());
+    }
 
-  @PUT
-  @Path("/node/{id}")
-  public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
-    return Uni.createFrom().item(graphService.updateNode(id, model));
-  }
+    @POST
+    public Uni<Void> persistGraph() throws IOException {
+        graphService.perist();
+        return Uni.createFrom().voidItem();
+    }
 
-  @DELETE
-  @Path("/node/{id}")
-  public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
-    return Uni.createFrom().item(graphService.deleteNode(id));
-  }
+    @POST
+    @Path("/reset")
+    public void reset() {
+        graphService.reset();
+    }
 
-  @POST
-  @Path("/relation")
-  public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
-    return Uni.createFrom().item(graphService.createRelation(model));
-  }
+    @GET
+    @Path("/domains")
+    public Multi<Domain> fetchDomains() {
+        return Multi.createFrom().iterable(graphService.fetchDomains());
+    }
 
-  @PUT
-  @Path("/relation/{id}")
-  public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
-    return Uni.createFrom().item(graphService.updateRelation(id, model));
-  }
+    @POST
+    @Path("/domain")
+    public Uni<Domain> createDomain(@Valid DomainCreate model) {
+        return Uni.createFrom().item(graphService.createDomain(model));
+    }
 
-  @DELETE
-  @Path("/relation/{id}")
-  public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
-    return Uni.createFrom().item(graphService.deleteRelation(id));
-  }
+    @GET
+    @Path("/domain/{id}")
+    public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
+        return Uni.createFrom().item(graphService.fetchDomain(id));
+    }
+
+    @PUT
+    @Path("/domain/{id}")
+    public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
+        return Uni.createFrom().item(graphService.updateDomain(id, model));
+    }
+
+    @DELETE
+    @Path("/domain/{id}")
+    public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
+        return Uni.createFrom().item(graphService.deleteDomain(id));
+    }
 
 
-  @GET
-  @Path("/domain/{domainId}/mapping")
-  public Uni<HashMap<String,String>> createJsonModel(@PathParam("domainId") UUID id) throws IOException {
-    ObjectNode jsonModel = graphService.buildJsonModel(id);
-    var mapping = graphService.fetchDomain(id).getColumnMapping();
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-    var hashmap = new HashMap<String, String>();
-    paths.forEach(path -> hashmap.put(path, null));
-    //TODO Einzelwerte die nicht mehr existieren sollen entfernt werden (hashmap.computeIfPresent oderso)
-    Optional.ofNullable(mapping).ifPresent(m -> 
-    m.forEach((key, value) -> hashmap.put(key, value)));
-    return Uni.createFrom().item(hashmap);
-  }
+    @POST
+    @Path("/node")
+    public Uni<Node> createNode(@Valid NodeCreate model) {
+        return Uni.createFrom().item(graphService.createNode(model));
+    }
 
-  @GET
-  @Path("/domain/{domainId}/import")
+    @PUT
+    @Path("/node/{id}")
+    public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
+        return Uni.createFrom().item(graphService.updateNode(id, model));
+    }
+
+    @DELETE
+    @Path("/node/{id}")
+    public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
+        return Uni.createFrom().item(graphService.deleteNode(id));
+    }
+
+    @POST
+    @Path("/relation")
+    public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
+        return Uni.createFrom().item(graphService.createRelation(model));
+    }
+
+    @PUT
+    @Path("/relation/{id}")
+    public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
+        return Uni.createFrom().item(graphService.updateRelation(id, model));
+    }
+
+    @DELETE
+    @Path("/relation/{id}")
+    public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
+        return Uni.createFrom().item(graphService.deleteRelation(id));
+    }
+
+
+    @GET
+    @Path("/domain/{domainId}/mapping")
+    public Uni<HashMap<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
+        ObjectNode jsonModel = graphService.buildJsonModel(id);
+        var mapping = Optional.ofNullable(graphService.fetchDomain(id).getColumnMapping()).orElse(Map.of());
+        List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+        var hashmap = new HashMap<String, String>();
+        paths.forEach(path -> hashmap.put(path, mapping.getOrDefault(path, null)));
+        return Uni.createFrom().item(hashmap);
+    }
+
+    @GET
+    @Path("/domain/{domainId}/import")
 //  @Produces(MediaType.SERVER_SENT_EVENTS)
-  public Uni<String> runImport(@PathParam("domainId") UUID domainId) throws IOException {
+    public Uni<String> runImport(@PathParam("domainId") UUID domainId) throws IOException {
 
-    var counter = new AtomicInteger();
-    var graph = graphService.graph();
-    var domain = graph.getDomains().stream().filter(d -> d.getId().equals(domainId))
-        .findFirst()
-        .orElseThrow(NotFoundException::new);
-    GraphModel graphModel = new GraphModel(graph);
-    var cypher = new CypherBuilder(graphModel, domainId).getCypher();
-    log.info(cypher);
+        var counter = new AtomicInteger();
+        var graph = graphService.graph();
+        var domain = graph.getDomains().stream().filter(d -> d.getId().equals(domainId))
+                .findFirst()
+                .orElseThrow(NotFoundException::new);
+        GraphModel graphModel = new GraphModel(graph);
+        var cypher = new CypherBuilder(graphModel, domainId).getCypher();
+        log.info(cypher);
 
-    //TODO: Check if each jsonpath has a mapping
-    ObjectNode jsonModel = new JsonBuilder(graphModel, domainId).getJson();
-    JsonPathEditor jsonPathEditor = new JsonPathEditor();
-    var header = fileHeader(domain.getFile());
-    domain.getColumnMapping().forEach(
-            (key,value)-> jsonPathEditor.update(jsonModel,key,String.valueOf(header.indexOf(value)))
-    );
-    System.out.println(jsonModel);
-    var importFile = Paths.get(uploadDir, domain.getFile());
+        ObjectNode jsonModel = new JsonBuilder(graphModel, domainId).getJson();
+        JsonPathEditor jsonPathEditor = new JsonPathEditor();
+        var header = fileHeader(domain.getFile());
+        List<String> existingPath = jsonPathEditor.extractFieldPaths(jsonModel);
+        domain.getColumnMapping()
+                .forEach(
+                        (key, value) -> {
+                            if (existingPath.contains(key) && Objects.nonNull(value)) {
+                                //todo: replace string with type of graph model
+                                jsonPathEditor.update(jsonModel, key, String.valueOf(header.indexOf(value))+":string");
+                            } else {
+                                jsonPathEditor.remove(jsonModel, key);
+                            }
+                        }
+                );
+        System.out.println(jsonModel);
+        var importFile = Paths.get(uploadDir, domain.getFile());
 
-    var transformer = new JsonTransformer(jsonModel, 50);
+        var transformer = new JsonTransformer(jsonModel, 50);
 
 
-    Multi.createFrom()
-        .publisher(FlowAdapters.toProcessor(transformer))
-        .emitOn(Infrastructure.getDefaultWorkerPool())
-        .onItem()
-        .transformToUni(node -> {
-          var entry = new ObjectMapper().convertValue(node, Map.class);
-          var session = driver.asyncSession();
-          return Uni.createFrom().completionStage(
-              session.writeTransactionAsync(tx -> tx.runAsync(cypher, Map.of("model", entry)))
-                  .thenCompose(r -> session.closeAsync())
-                  .thenApply(v -> counter.incrementAndGet())
-          );
+        var multi = Multi.createFrom()
+                .publisher(FlowAdapters.toProcessor(transformer))
+                .emitOn(Infrastructure.getDefaultWorkerPool())
+                .onItem()
+                .transformToUni(node -> {
+                    System.out.println(node);
+                    var entry = new ObjectMapper().convertValue(node, Map.class);
+                    var session = driver.asyncSession();
+                    return Uni.createFrom().completionStage(
+                            session.writeTransactionAsync(tx -> tx.runAsync(cypher, Map.of("model", entry)))
+                                    .thenCompose(r -> session.closeAsync())
+                                    .thenApply(v -> counter.incrementAndGet())
+                    );
 
-        })
+                })
 
-        .withRequests(1)
-        .concatenate()
-        .subscribe()
-        .with(
-            s -> eventBus.publish(domainId.toString(),s),
-            ()-> {
-              //  todo: persist complete domain
-              log.info("done");});
+                .withRequests(1)
+                .concatenate()
+                .subscribe()
+                .with(
+                        s -> eventBus.publish(domainId.toString(), s),
+                        throwable -> log.error("error in pipeline", throwable),
+                        () -> log.info("done")
+                );
 
-    Infrastructure.getDefaultExecutor().execute(() -> {
-      pipeFile(importFile, transformer::accept);
-      transformer.onComplete();
+        Infrastructure.getDefaultExecutor().execute(() -> {
+            pipeFile(importFile, transformer::accept);
+            transformer.onComplete();
 
-    });
-    return Uni.createFrom().item("OK");
+        });
+        return Uni.createFrom().item("OK");
 
-  }
-
-  @GET
-  @Path("/domain/{domainId}/stats")
-  @Produces(MediaType.SERVER_SENT_EVENTS)
-  public Multi<Object> stats(@PathParam("domainId") UUID domainId) throws IOException {
-    return eventBus.localConsumer(domainId.toString()).bodyStream().toMulti();
-  }
-
-  public void pipeFile(java.nio.file.Path importFile, Consumer<? super List<String>> consumer) {
-    try {
-      StreamSupport
-          .stream(new CSVReader(new FileReader(importFile.toFile())).spliterator(), false)
-          .skip(1)
-          .map(Arrays::asList)
-          .forEach(consumer);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
     }
-  }
 
-  private List<String> fileHeader(String fileName) {
-    var path = Paths.get(uploadDir, fileName);
-    try {
-      return Files.lines(path).findFirst().map(s -> s.split(","))
-          .map(Arrays::asList)
-          .stream()
-          .flatMap(Collection::stream)
-          .map(String::strip)
-          .collect(Collectors.toList());
-    } catch (IOException e) {
-      throw new RuntimeException();
+    @GET
+    @Path("/domain/{domainId}/stats")
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    public Multi<Object> stats(@PathParam("domainId") UUID domainId) {
+        return eventBus.localConsumer(domainId.toString()).bodyStream().toMulti();
     }
-  }
+
+    public void pipeFile(java.nio.file.Path importFile, Consumer<? super List<String>> consumer) {
+        try {
+            StreamSupport
+                    .stream(new CSVReader(new FileReader(importFile.toFile())).spliterator(), false)
+                    .skip(1)
+                    .map(Arrays::asList)
+                    .forEach(consumer);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<String> fileHeader(String fileName) {
+        var path = Paths.get(uploadDir, fileName);
+        try {
+            return Files.lines(path).findFirst().map(s -> s.split(","))
+                    .map(Arrays::asList)
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .map(String::strip)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
 }
