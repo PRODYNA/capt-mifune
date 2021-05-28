@@ -21,6 +21,8 @@ package com.prodyna.mifune.domain;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.Map;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,7 +36,7 @@ public class Domain {
 
   private String file;
 
-  private String csvJsonMapping;
+  private Map<String,String> columnMapping;
 
   private boolean modelValid;
 
@@ -65,12 +67,13 @@ public class Domain {
     this.rootNodeId = rootNodeId;
   }
 
-  public String getCsvJsonMapping() {
-    return csvJsonMapping;
+
+  public Map<String, String> getColumnMapping() {
+    return columnMapping;
   }
 
-  public void setCsvJsonMapping(String csvJsonMapping) {
-    this.csvJsonMapping = csvJsonMapping;
+  public void setColumnMapping(Map<String, String> columnMapping) {
+    this.columnMapping = columnMapping;
   }
 
   public String getFile() {
