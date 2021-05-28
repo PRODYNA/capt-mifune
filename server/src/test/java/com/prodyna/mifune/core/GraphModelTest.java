@@ -136,6 +136,7 @@ class GraphModelTest {
         set var_1.name = coalesce($model.user.name, var_1.name)\s
         with *
         	call {
+        	return 1 union
         	with var_1
         	with *
         	unwind $model.user.friend as var_2
@@ -217,6 +218,7 @@ class GraphModelTest {
         merge(var_1:User {id:$model.user.id})
         with *
         	call {
+        	return 1 union
         	with var_1
         	with * where 1=1 and exists($model.user.hasCar.car.id)
         	merge(var_2:Car {id:$model.user.hasCar.car.id})
@@ -317,6 +319,7 @@ class GraphModelTest {
         merge(var_1:User {id:$model.user.id})
         with *
         	call {
+        	return 1 union
         	with var_1
         	with *
         	unwind $model.user.hasCar as var_2
@@ -419,6 +422,7 @@ class GraphModelTest {
         merge(var_1:User {id:$model.user.id})
         with *
         	call {
+        	return 1 union
         	with var_1
         	with *
         	unwind $model.user.hasCar as var_2
