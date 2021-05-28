@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
-import { Domain } from "../../api/model/Model";
-import { makeStyles } from "@material-ui/core";
 import { useParams } from "react-router-dom";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import { makeStyles } from "@material-ui/core";
+
+import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import { PipelineEdit } from "./PipelineEdit";
 
@@ -32,10 +36,16 @@ export const PipelinesDetail = (props: any) => {
   }
 
   return (
-    <div>
-      <h1>Detail</h1>
-      <h1>{domain?.name}</h1>
-      {mapping()}
-    </div>
+    <Container>
+      <Row>
+        <Col md="auto">
+          <h1>Detail</h1>
+        </Col>
+        <Col>
+          <h1>{domain?.name}</h1>
+        </Col>
+      </Row>
+      <Container>{mapping()}</Container>
+    </Container>
   );
 };
