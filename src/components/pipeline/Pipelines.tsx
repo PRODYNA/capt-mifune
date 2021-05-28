@@ -63,7 +63,7 @@ export const Pipelines = () => {
       <TableContainer component={Paper}>
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
-            <TableRow>
+            <TableRow key="table-header">
               <TableCell>Name</TableCell>
               <TableCell>Model Valid</TableCell>
               <TableCell>Mapping Valid</TableCell>
