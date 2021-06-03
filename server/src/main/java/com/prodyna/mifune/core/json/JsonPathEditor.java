@@ -40,7 +40,6 @@ public class JsonPathEditor {
 
     public void update(JsonNode node, String jsonPath, String value) {
         String[] parts = jsonPath.split("\\.");
-        System.out.println(Arrays.toString(parts));
         String part = "";
         for (int i = 0; i < parts.length; i++) {
             part = parts[i];
@@ -68,7 +67,6 @@ public class JsonPathEditor {
     }
     public void remove(JsonNode node, String jsonPath) {
         String[] parts = jsonPath.split("\\.");
-        System.out.println(Arrays.toString(parts));
         String part = "";
         for (int i = 0; i < parts.length; i++) {
             part = parts[i];
