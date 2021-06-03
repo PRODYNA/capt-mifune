@@ -122,6 +122,7 @@ export const Graph = () => {
         targetId: target.node.id,
         multiple: false,
         primary: false,
+        properties: [],
         type: "",
         color: "red",
       };
@@ -542,6 +543,7 @@ export const Graph = () => {
               domainIds: [domain!.id],
               color: "blue",
               label: "",
+              properties: []
             })
           );
           setSelectedDomain(domain);

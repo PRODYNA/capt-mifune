@@ -17,8 +17,9 @@ import DeleteIcon from "@material-ui/icons/Delete";
 
 interface PropertyEditProps {
   property: Property;
-  onSubmit: (model: Property) => void;
-  onDelete: (model: Property) => void;
+  idx: number;
+  onSubmit: (idx: number, model: Property) => void;
+  onDelete: (idx: number) => void;
 }
 
 export const PropertyEdit = (props: PropertyEditProps) => {
@@ -30,12 +31,12 @@ export const PropertyEdit = (props: PropertyEditProps) => {
 
   const updateType = (event: React.ChangeEvent<{ value: unknown }>) => {
     let value = event.target.value as string;
-    props.onSubmit({ ...model, type: value });
+    props.onSubmit(props.idx, { ...model, type: value });
   };
 
-  const updateName = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const updateName = ( event: React.ChangeEvent<{ value: unknown }>) => {
     let value = event.target.value as string;
-    props.onSubmit({ ...model, name: value });
+    props.onSubmit(props.idx,{ ...model, name: value });
   };
 
   const updatePrimary = (
@@ -43,7 +44,7 @@ export const PropertyEdit = (props: PropertyEditProps) => {
     checked: boolean
   ) => {
     let value = checked;
-    props.onSubmit({ ...model, primary: value });
+    props.onSubmit(props.idx,{ ...model, primary: value });
   };
 
   const useStyles = makeStyles((theme: Theme) =>
@@ -61,7 +62,7 @@ export const PropertyEdit = (props: PropertyEditProps) => {
   const classes = useStyles();
 
   return (
-    <FormControl className={classes.root} key={model.id}>
+    <FormControl className={classes.root} key={props.idx}>
       <FormGroup aria-label="position" row>
         <FormControlLabel
           className={classes.label}
@@ -107,7 +108,7 @@ export const PropertyEdit = (props: PropertyEditProps) => {
           }
         />
         <div>
-          <IconButton onClick={() => props.onDelete(model)}>
+          <IconButton onClick={() => props.onDelete(props.idx)}>
             <DeleteIcon />
           </IconButton>
         </div>
