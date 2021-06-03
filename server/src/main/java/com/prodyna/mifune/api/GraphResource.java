@@ -219,7 +219,6 @@ public class GraphResource {
                             }
                         }
                 );
-        System.out.println(jsonModel);
         var importFile = Paths.get(uploadDir, domain.getFile());
 
         var transformer = new JsonTransformer(jsonModel, 50);
@@ -230,7 +229,6 @@ public class GraphResource {
                 .emitOn(Infrastructure.getDefaultWorkerPool())
                 .onItem()
                 .transformToUni(node -> {
-                    System.out.println(node);
                     var entry = new ObjectMapper().convertValue(node, Map.class);
                     var session = driver.asyncSession();
                     return Uni.createFrom().completionStage(

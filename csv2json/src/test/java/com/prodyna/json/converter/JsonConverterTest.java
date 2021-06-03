@@ -59,36 +59,6 @@ class JsonConverterTest {
     assertEquals(35, trainer.get("age").asInt());
   }
 
-  @Test
-  public void testNullValuesInObject() {
-    var model = new ObjectMapper().createObjectNode();
-    model.put("sport", 0)
-        .putObject("trainer")
-        .put("name", 1)
-        .put("age", "2:int");
-    var csv = List.of(
-        List.of("JuJutsu", "Kay", "35"),
-        List.of("JuJutsu", "Kay", "")
-    );
-    var jsonNodes = new JsonConverter().toJson(model, csv);
-    assertEquals(jsonNodes.size(), 1);
-    var node = jsonNodes.elements().next();
-    assertTrue(node.get("sport").isTextual());
-    assertEquals(node.get("sport").asText(), "JuJutsu");
-    var trainer = node.get("trainer");
-    assertEquals("Kay", trainer.get("name").asText());
-    assertEquals(35, trainer.get("age").asInt());
-  }
-
-  @Test
-  public void illegalConfig() {
-    var model = new ObjectMapper().createObjectNode();
-    model.put("sport", "0");
-    var csv = List.of(
-        List.of("JuJutsu")
-    );
-    var jsonNodes = new JsonConverter().toJson(model, csv);
-  }
 
   @Test
   public void simpleInt() {
