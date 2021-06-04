@@ -85,7 +85,6 @@ export const NodeEdit = (props: NodeEditProps) => {
     setValue((value) => ({
       ...value,
       properties: (value.properties ?? []).concat({
-        id: ID(),
         type: "string",
         name: "",
         primary: false,
@@ -93,18 +92,19 @@ export const NodeEdit = (props: NodeEditProps) => {
     }));
   }
 
-  function deleteProperty(model: Property) {
+  function deleteProperty(idx: number) {
+    let props = value.properties
+    props.splice(idx,1)
     setValue((value) => ({
       ...value,
-      properties: (value.properties ?? []).filter((p) => p.id !== model.id),
+      properties: props,
     }));
   }
 
-  const updateProperty = (model: Property) => {
+  const updateProperty = (idx: number, model: Property) => {
     setValue((value) => {
-      let index = value.properties?.findIndex((p) => p.id === model.id);
       let properties = value.properties;
-      properties!![index!!] = model;
+      properties[idx] =  model;
       return {
         ...value,
         properties: properties,
@@ -116,10 +116,10 @@ export const NodeEdit = (props: NodeEditProps) => {
     return (
       <>
         <h3>Properties</h3>
-        {value.properties?.map((p) => (
-          <div key={p.id}>
+        {value.properties?.map((p, idx) => (
+          <div key={idx}>
             <PropertyEdit
-              key={p.id}
+                idx={idx}
               property={p}
               onSubmit={updateProperty}
               onDelete={deleteProperty}

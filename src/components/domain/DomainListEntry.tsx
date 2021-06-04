@@ -30,9 +30,11 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: 15,
       margin: 2,
     },
+      right: {
+        float: 'right'
+      },
     buttons: {
-      display: "flex",
-      flexDirection: "row",
+      width: 100,
     },
     values: {
       display: "flex",
@@ -80,6 +82,7 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
           <AddIcon />
         </IconButton>
         <IconButton
+            className={classes.right}
           size={"small"}
           onClick={() => {
             graphService
