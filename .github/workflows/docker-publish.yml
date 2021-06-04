@@ -55,7 +55,7 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry
-        run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login  harbor.prodyna.com -u ${{ secrets.HARBOR_USER }} --password-stdin
+        run: docker login -p "${{ secrets.HARBOR_PASSWORD }}" -u  ${{ secrets.HARBOR_USER }} harbor.prodyna.com
 
       - name: Push image
         run: |
