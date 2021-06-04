@@ -9,9 +9,9 @@ package com.prodyna.mifune.core;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,26 +54,43 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response.Status;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
+
 
 @ApplicationScoped
 public class GraphService {
 
+  @Inject
+  protected Logger log;
+
   public static final String GRAPH_JSON = "graph.json";
+
   private final Pattern COLOR_PATTERN = Pattern.compile("#[0-9,A-F]{6}");
+
   @ConfigProperty(name = "mifune.model.dir")
   protected String model;
   Graph graph = new Graph();
 
-  void onStart(@Observes StartupEvent ev) throws IOException {
+  void onStart(@Observes StartupEvent ev)  {
 
     var modelPath = Paths.get(model, GRAPH_JSON);
     if (modelPath.toFile().exists()) {
-      var json = Files.readString(modelPath);
-      this.graph = new ObjectMapper().readerFor(Graph.class).readValue(json);
+      log.infov("load {0}" , modelPath.toAbsolutePath());
+      String json = null;
+      try {
+        json = Files.readString(modelPath);
+        this.graph = new ObjectMapper().readerFor(Graph.class).readValue(json);
+      } catch (IOException e) {
+        log.error("fail to parse graph model",e);
+      }
+    }else{
+      log.warnv("no graph model found at {0}",modelPath);
     }
 
   }
