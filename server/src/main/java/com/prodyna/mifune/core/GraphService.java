@@ -272,6 +272,13 @@ public class GraphService {
     rel.setDomainIds(model.domainIds());
     rel.setColor(nodeById(rel.getSourceId()).getColor());
 
+    if(model.domainIds().size() ==1){
+      Node node = nodeById(model.targetId());
+      node.getDomainIds().addAll(model.domainIds());
+      graphDelta.getChangedNodes().add(node);
+    }
+
+
     graph.getRelations().add(rel);
 
     graphDelta.getChangedRelations().add(rel);
