@@ -4,6 +4,9 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -47,31 +50,30 @@ const OpenSelect: React.FunctionComponent<IOpenSelect> = ({
   };
 
   return (
-    <div>
-      <FormControl className={classes.formControl}>
-        <InputLabel id="demo-controlled-open-select-label">
-          PleaseSelect
-        </InputLabel>
-        <Select
-          labelId="demo-controlled-open-select-label"
-          id="demo-controlled-open-select"
-          open={open}
-          value={columnMapping[refersTo] ?? menuItems[columnMapping[refersTo]]}
-          onClose={handleClose}
-          onOpen={handleOpen}
-          onChange={handleChange}
-        >
-          <MenuItem value="">
-            <em>None</em>
+    <FormControl className={classes.formControl}>
+      <InputLabel id="demo-controlled-open-select-label">
+        PleaseSelect
+      </InputLabel>
+
+      <Select
+        labelId="demo-controlled-open-select-label"
+        id="demo-controlled-open-select"
+        open={open}
+        value={columnMapping[refersTo] ?? menuItems[columnMapping[refersTo]]}
+        onClose={handleClose}
+        onOpen={handleOpen}
+        onChange={handleChange}
+      >
+        <MenuItem value="">
+          <em>None</em>
+        </MenuItem>
+        {menuItems.map((header, index) => (
+          <MenuItem key={header + index} value={header}>
+            <em>{header}</em>
           </MenuItem>
-          {menuItems.map((header, index) => (
-            <MenuItem key={header + index} value={header}>
-              <em>{header}</em>
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </div>
+        ))}
+      </Select>
+    </FormControl>
   );
 };
 
