@@ -7,6 +7,9 @@ import { rest } from "../../api/axios";
 
 import FormSelect from "../form/FormSelect";
 import Formular from "../form/Formular";
+import { Button, Col, Form, Row } from "react-bootstrap";
+import { SourceSelect } from "../sources/SourceSelect";
+import SaveAndCancel from "../form/SavenAndCancel";
 
 interface DomainEditProps {
   domain: Domain;
@@ -57,7 +60,9 @@ export const PipelineEdit = (props: DomainEditProps) => {
     return keys;
   };
 
-  const onChangeEventHandler = (event: React.ChangeEvent<HTMLFormElement>) => {
+  const onNodeChangeEventHandler = (
+    event: React.ChangeEvent<HTMLFormElement>
+  ) => {
     const refersTo = event.target.parentElement?.innerText.split(
       "\n"
     )[0] as string;
@@ -68,7 +73,13 @@ export const PipelineEdit = (props: DomainEditProps) => {
     }
   };
 
-  const getNodes = (values: string[]) => {
+  const onFileChangeEventHandler = (
+    event: React.ChangeEvent<HTMLFormElement>
+  ) => {
+    setValue({ ...value, file: event.target.value });
+  };
+
+  const getReactNodes = (values: string[]) => {
     return getColumnMappingKeys().map((key) => {
       return (
         <FormSelect
@@ -76,7 +87,7 @@ export const PipelineEdit = (props: DomainEditProps) => {
           title={key}
           options={values}
           value={value.columnMapping[key] ? value.columnMapping[key] : "None"}
-          onChangeHandler={onChangeEventHandler}
+          onChangeHandler={onNodeChangeEventHandler}
         />
       );
     });
@@ -86,7 +97,27 @@ export const PipelineEdit = (props: DomainEditProps) => {
     values.push("None");
   }
 
-  const childrens = getNodes(values);
+  const childrens: React.ReactNode[] = getReactNodes(values);
+  childrens.unshift(
+    <FormSelect
+      key="FileSelection"
+      title="Select file to map"
+      options={sources.map((source) => {
+        return source.name;
+      })}
+      value={value.file}
+      onChangeHandler={onFileChangeEventHandler}
+    />
+  );
+
+  childrens.push(
+    <SaveAndCancel
+      saveText="Save"
+      cancelText="Cancel"
+      onCancelEvent={() => history.push("/pipelines")}
+    />
+  );
+
   return (
     <Formular
       childrens={childrens}
