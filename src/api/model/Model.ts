@@ -52,7 +52,7 @@ export interface Node {
   domainIds: string[];
   label: string;
   color: string;
-  properties?: Property[];
+  properties: Property[];
 }
 
 export interface RelationCreate {
@@ -84,11 +84,10 @@ export interface Relation {
   primary: boolean;
   multiple: boolean;
   color: string;
-  properties?: Property[];
+  properties: Property[];
 }
 
 export interface Property {
-  id: string;
   name: string;
   type: string;
   primary: boolean;
