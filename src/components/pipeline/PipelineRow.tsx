@@ -16,14 +16,7 @@ export const PipelineRow = (props: { domain: Domain }) => {
     },
   })();
 
-  const [process, setProcess] = useState({});
   const [message, setMessage] = useState();
-  const [listening, setListening] = useState(false);
-
-  const statusMessage = {
-    subscribed: "Subscribed",
-    unsubscribed: "Unsubscribed",
-  };
 
   useEffect(() => {
     let sseClient = new EventSource(
@@ -31,6 +24,11 @@ export const PipelineRow = (props: { domain: Domain }) => {
     );
     sseClient.onmessage = function (e) {
       setMessage(e.data);
+    };
+
+    return function cleanUp() {
+      console.log("Closing SSEClient");
+      sseClient.close();
     };
   }, []);
 
