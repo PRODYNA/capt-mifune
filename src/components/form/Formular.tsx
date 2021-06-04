@@ -1,22 +1,23 @@
 import * as React from "react";
-import { FormEventHandler } from "react";
-import { Form } from "react-bootstrap";
+import { FormEvent, FormEventHandler } from "react";
+import { Button, Form } from "react-bootstrap";
 
 interface IForm {
-  body: React.ReactNode[];
-  onSubmit: (event: FormEventHandler<HTMLFormElement>) => void;
+  childrens: React.ReactNode[];
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
 
-const Formular: React.FunctionComponent<IForm> = ({ body, onSubmit }) => {
-  const handleSubmit = (event: any) => {
+const Formular: React.FunctionComponent<IForm> = ({ childrens, onSubmit }) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     onSubmit(event);
   };
 
   return (
     <Form onSubmit={handleSubmit}>
-      {body.map((node) => {
-        return node;
+      {childrens.map((child) => {
+        return child;
       })}
+      <Button type="submit">Speichern</Button>
     </Form>
   );
 };

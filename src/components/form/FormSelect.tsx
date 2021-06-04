@@ -4,18 +4,28 @@ import { Form } from "react-bootstrap";
 interface IFormSelectProps {
   title: string;
   options: string[];
+  value?: string;
+  onChangeHandler?: (event: any) => void;
 }
 
 const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
   title,
   options,
+  value,
+  onChangeHandler,
 }) => {
+  const handleChange = (event: React.ChangeEvent) => {
+    if (onChangeHandler) {
+      onChangeHandler(event);
+    }
+  };
+
   return (
     <Form.Group controlId="exampleForm.ControlSelect1">
       <Form.Label>{title}</Form.Label>
-      <Form.Control as="select">
+      <Form.Control onChange={handleChange} as="select" value={value}>
         {options.map((option: string) => {
-          <option>{option}</option>;
+          return <option key={option}>{option}</option>;
         })}
       </Form.Control>
     </Form.Group>
