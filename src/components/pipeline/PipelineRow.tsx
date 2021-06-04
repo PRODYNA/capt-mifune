@@ -27,7 +27,6 @@ export const PipelineRow = (props: { domain: Domain }) => {
     };
 
     return function cleanUp() {
-      console.log("Closing SSEClient");
       sseClient.close();
     };
   }, []);
