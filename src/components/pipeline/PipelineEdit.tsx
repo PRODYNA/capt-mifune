@@ -105,7 +105,7 @@ export const PipelineEdit = (props: DomainEditProps) => {
       options={sources.map((source) => {
         return source.name;
       })}
-      value={value.file}
+      value={value.file ? value.file : "None"}
       onChangeHandler={onFileChangeEventHandler}
     />
   );
