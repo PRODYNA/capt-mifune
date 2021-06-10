@@ -24,6 +24,7 @@ import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Domain;
@@ -34,10 +35,13 @@ import com.prodyna.mifune.domain.GraphDelta;
 import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.NodeCreate;
 import com.prodyna.mifune.domain.NodeUpdate;
+import com.prodyna.mifune.domain.Property;
 import com.prodyna.mifune.domain.Relation;
 import com.prodyna.mifune.domain.RelationCreate;
 import com.prodyna.mifune.domain.RelationUpdate;
 import io.quarkus.runtime.StartupEvent;
+import io.vertx.core.json.JsonObject;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,7 +49,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -120,14 +126,57 @@ public class GraphService {
   }
 
   private boolean validateDomainModel(Domain d) {
-    //todo;
-    return true;
+    // TODO: Check with Kay about this
+    // Ob von Startknoten alle anderen Knoten erreichbar 
+    return Objects.nonNull(d.getId()) && Objects.nonNull(d.getName()) &&Objects.nonNull(d.getRootNodeId());
   }
 
   private boolean validateDomainMapping(Domain d) {
     // todo: validate mapping again model, not only if mapping exist
-    return Objects.nonNull(d.getColumnMapping())
-           && Objects.nonNull(d.getFile());
+    Map<String, String> mapping = d.getColumnMapping();
+    ObjectNode jsonModel = buildJsonModel(d.getId());
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+
+    Boolean valid = false;
+
+    //Check mapping keys are the same as in domain  
+    valid = mapping.keySet().equals(new HashSet<String>(paths));
+
+
+    // Check Each Primary Key of Node is mapped
+
+    //get nodes in this domain
+    var nodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+
+    Set<String> pathToProp = new HashSet<String>();
+    for(var node: nodes){
+      node.getProperties().forEach(p -> pathToProp.add(node.getLabel() + "." + p.getName()));     
+    } 
+    
+
+    outerloop: for(String path: mapping.keySet()){
+      for(String propPath: pathToProp){
+        if(path.length()>0 && propPath.length() >0){
+          char c[] = propPath.toCharArray();
+          c[0] = Character.toLowerCase(c[0]);
+          propPath = new String(c);
+
+          if(path.contains(propPath)){
+            if(mapping.get(path) != null && !"None".equals(mapping.get(path))){
+              valid = true;
+              System.out.println("True");
+            } else {
+              System.out.println("False");
+              valid = false;
+              break outerloop;
+            }
+          }
+        }
+      
+      }
+    }
+    
+    return valid;
   }
 
 
