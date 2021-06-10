@@ -23,7 +23,11 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
   return (
     <Form.Group controlId="exampleForm.ControlSelect1">
       <Form.Label>{title}</Form.Label>
-      <Form.Control onChange={handleChange} as="select" value={value}>
+      <Form.Control
+        onChange={handleChange}
+        as="select"
+        value={value ? value : "None"}
+      >
         {options.map((option: string) => {
           return <option key={option}>{option}</option>;
         })}
