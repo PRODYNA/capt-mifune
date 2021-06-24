@@ -120,6 +120,7 @@ export class GraphService {
       targetId: relation.targetId,
       multiple: relation.multiple,
       primary: relation.primary,
+      properties: relation.properties
     };
   }
 
