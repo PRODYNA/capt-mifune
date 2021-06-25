@@ -1,19 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import { NodeEdit } from "./NodeEdit";
-import { IconButton } from "@material-ui/core";
-import CloudUpload from "@material-ui/icons/CloudUpload";
-import SaveIcon from "@material-ui/icons/Save";
-import RotateRightIcon from "@material-ui/icons/RotateRight";
 import { Domain, GraphDelta, Node, Relation } from "../../api/model/Model";
 import { useStyles } from "./FromStyle";
 import { RelationEdit } from "./RelationEdit";
 import graphService from "../../api/GraphService";
 import { DomainList } from "../domain/DomainList";
-import { ModalView } from "../../components/ModalView";
-import { UploadSource } from "../sources/UploadSource";
+
 import { D3Helper } from "./D3Helper";
-import { useHistory } from "react-router-dom";
 
 export interface D3Node extends d3.SimulationNodeDatum {
   kind: string;
@@ -543,7 +537,7 @@ export const Graph = () => {
               domainIds: [domain!.id],
               color: "blue",
               label: "",
-              properties: []
+              properties: [],
             })
           );
           setSelectedDomain(domain);
