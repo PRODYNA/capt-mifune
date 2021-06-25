@@ -126,9 +126,54 @@ public class GraphService {
   }
 
   private boolean validateDomainModel(Domain d) {
-    // TODO: Check with Kay about this
-    // Ob von Startknoten alle anderen Knoten erreichbar 
-    return Objects.nonNull(d.getId()) && Objects.nonNull(d.getName()) &&Objects.nonNull(d.getRootNodeId());
+    UUID startNode = d.getRootNodeId();
+    Set<Node> allNodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+    Set<UUID> allNodeIds = allNodes.stream().map(n -> n.getId()).collect(Collectors.toSet());
+    Set<Relation> allRelations = graph.getRelations().stream().filter(r -> r.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+
+    // Wenn im ersten Durchlauf keine Relationen vorhanden sind und mehr als ein Knoten vorhanden ist, ist das Model falsch
+    if (allRelations.size() <= 0 && allNodeIds.size() > 1){
+      return false;
+    }
+
+
+    Set<UUID> subGraph = validate(startNode, allNodeIds, allRelations);
+    // Wenn der subGraph alle Knoten enthält, waren alle erreichbar.
+    return subGraph.equals(allNodeIds)? true : false;
+  }
+
+  private Set<UUID> validate(UUID startNode, Set<UUID> allNodes, Set<Relation> allRelations){
+    // wenn keine Relationen mehr vorhanden brich ab.
+    if(allRelations.size() <= 0){
+      Set<UUID> result = new HashSet<UUID>();
+      result.add(startNode);
+      return result;
+    }
+
+    Set<Relation> usedRelations = new HashSet<Relation>();
+    Set<UUID> reachableNodes = new HashSet<UUID>();
+    Set<UUID> subGraph = new HashSet<UUID>();
+    Set<UUID> copyAllNodes = new HashSet<UUID>();
+
+    copyAllNodes.addAll(allNodes);
+
+    // Finde alle Relationen, die den Startknoten als Anfang haben
+    usedRelations.addAll(allRelations.stream().filter(r -> r.getSourceId().equals(startNode)).collect(Collectors.toSet()));
+    // finde alle Knoten die an diesen Relationen hängen
+    reachableNodes.addAll(usedRelations.stream().map(r -> r.getTargetId()).collect(Collectors.toSet()));
+    // Lösche die "durchlaufenen" Relationen
+    allRelations.removeIf(r -> usedRelations.contains(r));
+    // Lösche Startknoten aus allen Knoten, damit wir den Graphen darunter erhalten
+    copyAllNodes.remove(startNode);
+    // Speichere alle vom StartKnoten erreichbaren Knoten im Subgraphen
+    subGraph.addAll(reachableNodes);
+    for(UUID node : reachableNodes){
+      // Rekursion füge alle weitern Knoten die erreichbar sind dem Subgraphen hinzu.
+      subGraph.addAll(validate(node, copyAllNodes, allRelations));
+    }
+
+    // happy: Wenn alle Knoten des Subgraphen allen Knoten minus Startknoten entsprechen, waren alle Knoten erreichbar. Gib den kompletten Graphen zurück
+    return subGraph.equals(copyAllNodes)? allNodes : subGraph;
   }
 
   private boolean validateDomainMapping(Domain d) {
@@ -140,6 +185,9 @@ public class GraphService {
     Boolean valid = false;
 
     //Check mapping keys are the same as in domain  
+    if(mapping == null){
+      return valid;
+    }
     valid = mapping.keySet().equals(new HashSet<String>(paths));
 
 
