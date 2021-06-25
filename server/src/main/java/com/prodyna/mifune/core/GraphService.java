@@ -24,6 +24,7 @@ import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Domain;
@@ -34,10 +35,13 @@ import com.prodyna.mifune.domain.GraphDelta;
 import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.NodeCreate;
 import com.prodyna.mifune.domain.NodeUpdate;
+import com.prodyna.mifune.domain.Property;
 import com.prodyna.mifune.domain.Relation;
 import com.prodyna.mifune.domain.RelationCreate;
 import com.prodyna.mifune.domain.RelationUpdate;
 import io.quarkus.runtime.StartupEvent;
+import io.vertx.core.json.JsonObject;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -45,7 +49,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -120,14 +126,105 @@ public class GraphService {
   }
 
   private boolean validateDomainModel(Domain d) {
-    //todo;
-    return true;
+    UUID startNode = d.getRootNodeId();
+    Set<Node> allNodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+    Set<UUID> allNodeIds = allNodes.stream().map(n -> n.getId()).collect(Collectors.toSet());
+    Set<Relation> allRelations = graph.getRelations().stream().filter(r -> r.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+
+    // Wenn im ersten Durchlauf keine Relationen vorhanden sind und mehr als ein Knoten vorhanden ist, ist das Model falsch
+    if (allRelations.size() <= 0 && allNodeIds.size() > 1){
+      return false;
+    }
+
+
+    Set<UUID> subGraph = validate(startNode, allNodeIds, allRelations);
+    // Wenn der subGraph alle Knoten enthält, waren alle erreichbar.
+    return subGraph.equals(allNodeIds)? true : false;
+  }
+
+  private Set<UUID> validate(UUID startNode, Set<UUID> allNodes, Set<Relation> allRelations){
+    // wenn keine Relationen mehr vorhanden brich ab.
+    if(allRelations.size() <= 0){
+      Set<UUID> result = new HashSet<UUID>();
+      result.add(startNode);
+      return result;
+    }
+
+    Set<Relation> usedRelations = new HashSet<Relation>();
+    Set<UUID> reachableNodes = new HashSet<UUID>();
+    Set<UUID> subGraph = new HashSet<UUID>();
+    Set<UUID> copyAllNodes = new HashSet<UUID>();
+
+    copyAllNodes.addAll(allNodes);
+
+    // Finde alle Relationen, die den Startknoten als Anfang haben
+    usedRelations.addAll(allRelations.stream().filter(r -> r.getSourceId().equals(startNode)).collect(Collectors.toSet()));
+    // finde alle Knoten die an diesen Relationen hängen
+    reachableNodes.addAll(usedRelations.stream().map(r -> r.getTargetId()).collect(Collectors.toSet()));
+    // Lösche die "durchlaufenen" Relationen
+    allRelations.removeIf(r -> usedRelations.contains(r));
+    // Lösche Startknoten aus allen Knoten, damit wir den Graphen darunter erhalten
+    copyAllNodes.remove(startNode);
+    // Speichere alle vom StartKnoten erreichbaren Knoten im Subgraphen
+    subGraph.addAll(reachableNodes);
+    for(UUID node : reachableNodes){
+      // Rekursion füge alle weitern Knoten die erreichbar sind dem Subgraphen hinzu.
+      subGraph.addAll(validate(node, copyAllNodes, allRelations));
+    }
+
+    // happy: Wenn alle Knoten des Subgraphen allen Knoten minus Startknoten entsprechen, waren alle Knoten erreichbar. Gib den kompletten Graphen zurück
+    return subGraph.equals(copyAllNodes)? allNodes : subGraph;
   }
 
   private boolean validateDomainMapping(Domain d) {
     // todo: validate mapping again model, not only if mapping exist
-    return Objects.nonNull(d.getColumnMapping())
-           && Objects.nonNull(d.getFile());
+    Map<String, String> mapping = d.getColumnMapping();
+    ObjectNode jsonModel = buildJsonModel(d.getId());
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+
+    Boolean valid = false;
+
+    //Check mapping keys are the same as in domain  
+    if(mapping == null){
+      return valid;
+    }
+    valid = mapping.keySet().equals(new HashSet<String>(paths));
+
+
+    // Check Each Primary Key of Node is mapped
+
+    //get nodes in this domain
+    var nodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+
+    Set<String> pathToProp = new HashSet<String>();
+    for(var node: nodes){
+      node.getProperties().forEach(p -> pathToProp.add(node.getLabel() + "." + p.getName()));     
+    } 
+    
+
+    outerloop: for(String path: mapping.keySet()){
+      for(String propPath: pathToProp){
+        if(path.length()>0 && propPath.length() >0){
+          char c[] = propPath.toCharArray();
+          c[0] = Character.toLowerCase(c[0]);
+          propPath = new String(c);
+
+          if(path.contains(propPath)){
+            if(mapping.get(path) != null && !"None".equals(mapping.get(path))){
+              valid = true;
+              System.out.println("True");
+            } else {
+              System.out.println("False");
+              valid = false;
+              break outerloop;
+            }
+          }
+        }
+      
+      }
+    }
+    
+    return valid;
   }
 
 
