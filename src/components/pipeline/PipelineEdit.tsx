@@ -7,8 +7,6 @@ import { rest } from "../../api/axios";
 
 import FormSelect from "../form/FormSelect";
 import Formular from "../form/Formular";
-import { Button, Col, Form, Row } from "react-bootstrap";
-import { SourceSelect } from "../sources/SourceSelect";
 import SaveAndCancel from "../form/SavenAndCancel";
 
 interface DomainEditProps {
