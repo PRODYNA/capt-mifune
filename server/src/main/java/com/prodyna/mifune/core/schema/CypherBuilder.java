@@ -138,6 +138,7 @@ public class CypherBuilder {
     var varName = generateVar();
     var newPath = new ArrayList<>(varPath);
     newPath.add(relationVarName(r));
+    context.getVariables().add(varName);
     context.getStatements().add("unwind %s as %s".formatted(String.join(".", newPath), varName));
     var contextVarPath = new ArrayList<>(List.of(varName));
     var toNodeVarName = generateVar();
