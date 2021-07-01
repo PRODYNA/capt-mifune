@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class CypherContext {
 
@@ -32,6 +33,7 @@ public class CypherContext {
   private String label;
   private boolean root = false;
   private List<String> statements = new ArrayList<>();
+  private List<String> variables = new ArrayList<>();
 
   private List<String> existChecks = new ArrayList<>();
   private String rootVar;
@@ -54,6 +56,14 @@ public class CypherContext {
 
   public void addExistCheck(String propertyPath){
     this.existChecks.add(propertyPath);
+  }
+
+  public List<String> getVariables() {
+    return variables;
+  }
+
+  public void setVariables(List<String> variables) {
+    this.variables = variables;
   }
 
   public boolean isRoot() {
@@ -89,6 +99,13 @@ public class CypherContext {
   }
 
   public String toCypher(boolean addReturn, int tabCount, AtomicInteger counter) {
+    return toCypher(addReturn,tabCount,counter,new ArrayList<>());
+  }
+
+  private  String toCypher(boolean addReturn, int tabCount, AtomicInteger counter, List<String> rootVars) {
+    var vars = new ArrayList<String>(rootVars);
+    vars.add(this.rootVar);
+    vars.addAll(this.variables);
     var statements = new ArrayList<>(this.statements);
     if(!subContext.isEmpty()){
       statements.add("with *");
@@ -102,6 +119,7 @@ public class CypherContext {
            .collect(Collectors.joining("and", " where 1=1 and ", ""));
       }
 
+      var currentCounter = counter.incrementAndGet();
       var subContext = """
           call {
           return %s union
@@ -112,11 +130,11 @@ public class CypherContext {
           }
           """
           .formatted(
-                  counter.incrementAndGet(),
-              this.rootVar,
+                  currentCounter,
+                  vars.stream().collect(Collectors.joining(",")),
               checks,
-              c.toCypher(false,tabCount,counter),
-                  counter.get()
+              c.toCypher(false,tabCount,counter,vars),
+                  currentCounter
 
           );
       statements.add(addTabs(subContext,tabCount+1));
