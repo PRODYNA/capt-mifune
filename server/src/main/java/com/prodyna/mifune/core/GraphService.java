@@ -75,17 +75,20 @@ public class GraphService {
   @Inject
   protected Logger log;
 
-  public static final String GRAPH_JSON = "graph.json";
+  private static final Pattern COLOR_PATTERN = Pattern.compile("#[0-9,A-F]{6}");
 
-  private final Pattern COLOR_PATTERN = Pattern.compile("#[0-9,A-F]{6}");
+  @ConfigProperty(name = "mifune.model.graph-file")
+  protected String graphFile = "graph.json";
+
 
   @ConfigProperty(name = "mifune.model.dir")
   protected String model;
+
   Graph graph = new Graph();
 
   void onStart(@Observes StartupEvent ev)  {
 
-    var modelPath = Paths.get(model, GRAPH_JSON);
+    var modelPath = Paths.get(model, graphFile);
     if (modelPath.toFile().exists()) {
       log.infov("load {0}" , modelPath.toAbsolutePath());
       String json = null;
@@ -109,7 +112,7 @@ public class GraphService {
   public void perist() throws IOException {
     var mapper = new ObjectMapper();
     var json = mapper.writeValueAsString(graph);
-    Files.write(Path.of(model, GRAPH_JSON), Collections.singleton(json), StandardCharsets.UTF_8);
+    Files.write(Path.of(model, graphFile), Collections.singleton(json), StandardCharsets.UTF_8);
   }
 
   public Domain fetchDomain(UUID id) {
