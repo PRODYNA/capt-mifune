@@ -68,7 +68,6 @@ import javax.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
-
 @ApplicationScoped
 public class GraphService {
 
@@ -80,30 +79,28 @@ public class GraphService {
   @ConfigProperty(name = "mifune.model.graph-file")
   protected String graphFile = "graph.json";
 
-
   @ConfigProperty(name = "mifune.model.dir")
   protected String model;
 
   Graph graph = new Graph();
 
-  void onStart(@Observes StartupEvent ev)  {
+  void onStart(@Observes StartupEvent ev) {
 
     var modelPath = Paths.get(model, graphFile);
     if (modelPath.toFile().exists()) {
-      log.infov("load {0}" , modelPath.toAbsolutePath());
+      log.infov("load {0}", modelPath.toAbsolutePath());
       String json = null;
       try {
         json = Files.readString(modelPath);
         this.graph = new ObjectMapper().readerFor(Graph.class).readValue(json);
       } catch (IOException e) {
-        log.error("fail to parse graph model",e);
+        log.error("fail to parse graph model", e);
       }
-    }else{
-      log.warnv("no graph model found at {0}",modelPath);
+    } else {
+      log.warnv("no graph model found at {0}", modelPath);
     }
 
   }
-
 
   public Graph graph() {
     return graph;
@@ -116,38 +113,37 @@ public class GraphService {
   }
 
   public Domain fetchDomain(UUID id) {
-    return graph.getDomains().stream()
-        .filter(d -> d.getId().equals(id)).findFirst()
+    return graph.getDomains().stream().filter(d -> d.getId().equals(id)).findFirst()
         .orElseThrow(NotFoundException::new);
   }
 
   public List<Domain> fetchDomains() {
-    return graph.getDomains().stream()
-        .peek(d -> d.setModelValid(validateDomainModel(d)))
-        .peek(d -> d.setMappingValid(validateDomainMapping(d)))
-        .collect(Collectors.toList());
+    return graph.getDomains().stream().peek(d -> d.setModelValid(validateDomainModel(d)))
+        .peek(d -> d.setMappingValid(validateDomainMapping(d))).collect(Collectors.toList());
   }
 
   private boolean validateDomainModel(Domain d) {
     UUID startNode = d.getRootNodeId();
-    Set<Node> allNodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+    Set<Node> allNodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId()))
+        .collect(Collectors.toSet());
     Set<UUID> allNodeIds = allNodes.stream().map(n -> n.getId()).collect(Collectors.toSet());
-    Set<Relation> allRelations = graph.getRelations().stream().filter(r -> r.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
+    Set<Relation> allRelations = graph.getRelations().stream().filter(r -> r.getDomainIds().contains(d.getId()))
+        .collect(Collectors.toSet());
 
-    // Wenn im ersten Durchlauf keine Relationen vorhanden sind und mehr als ein Knoten vorhanden ist, ist das Model falsch
-    if (allRelations.size() <= 0 && allNodeIds.size() > 1){
+    // Wenn im ersten Durchlauf keine Relationen vorhanden sind und mehr als ein
+    // Knoten vorhanden ist, ist das Model falsch
+    if (allRelations.size() <= 0 && allNodeIds.size() > 1) {
       return false;
     }
 
-
     Set<UUID> subGraph = validate(startNode, allNodeIds, allRelations);
     // Wenn der subGraph alle Knoten enthält, waren alle erreichbar.
-    return subGraph.equals(allNodeIds)? true : false;
+    return subGraph.equals(allNodeIds) ? true : false;
   }
 
-  private Set<UUID> validate(UUID startNode, Set<UUID> allNodes, Set<Relation> allRelations){
+  private Set<UUID> validate(UUID startNode, Set<UUID> allNodes, Set<Relation> allRelations) {
     // wenn keine Relationen mehr vorhanden brich ab.
-    if(allRelations.size() <= 0){
+    if (allRelations.size() <= 0) {
       Set<UUID> result = new HashSet<UUID>();
       result.add(startNode);
       return result;
@@ -161,7 +157,8 @@ public class GraphService {
     copyAllNodes.addAll(allNodes);
 
     // Finde alle Relationen, die den Startknoten als Anfang haben
-    usedRelations.addAll(allRelations.stream().filter(r -> r.getSourceId().equals(startNode)).collect(Collectors.toSet()));
+    usedRelations
+        .addAll(allRelations.stream().filter(r -> r.getSourceId().equals(startNode)).collect(Collectors.toSet()));
     // finde alle Knoten die an diesen Relationen hängen
     reachableNodes.addAll(usedRelations.stream().map(r -> r.getTargetId()).collect(Collectors.toSet()));
     // Lösche die "durchlaufenen" Relationen
@@ -170,50 +167,52 @@ public class GraphService {
     copyAllNodes.remove(startNode);
     // Speichere alle vom StartKnoten erreichbaren Knoten im Subgraphen
     subGraph.addAll(reachableNodes);
-    for(UUID node : reachableNodes){
+    for (UUID node : reachableNodes) {
       // Rekursion füge alle weitern Knoten die erreichbar sind dem Subgraphen hinzu.
       subGraph.addAll(validate(node, copyAllNodes, allRelations));
     }
 
-    // happy: Wenn alle Knoten des Subgraphen allen Knoten minus Startknoten entsprechen, waren alle Knoten erreichbar. Gib den kompletten Graphen zurück
-    return subGraph.equals(copyAllNodes)? allNodes : subGraph;
+    // happy: Wenn alle Knoten des Subgraphen allen Knoten minus Startknoten
+    // entsprechen, waren alle Knoten erreichbar. Gib den kompletten Graphen zurück
+    return subGraph.equals(copyAllNodes) ? allNodes : subGraph;
   }
 
   private boolean validateDomainMapping(Domain d) {
-    // todo: validate mapping again model, not only if mapping exist
     Map<String, String> mapping = d.getColumnMapping();
     ObjectNode jsonModel = buildJsonModel(d.getId());
     List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
 
     Boolean valid = false;
 
-    //Check mapping keys are the same as in domain  
-    if(mapping == null){
+    // Check mapping keys are the same as in domain
+    if (mapping == null) {
       return valid;
     }
     valid = mapping.keySet().equals(new HashSet<String>(paths));
 
-
     // Check Each Primary Key of Node is mapped
 
-    //get nodes in this domain
+    // get nodes in this domain
     var nodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId())).collect(Collectors.toSet());
 
     Set<String> pathToProp = new HashSet<String>();
-    for(var node: nodes){
-      node.getProperties().forEach(p -> pathToProp.add(node.getLabel() + "." + p.getName()));     
-    } 
-    
+    for (var node : nodes) {
+      node.getProperties().forEach(p -> {
+        if (p.isPrimary()) {
+          pathToProp.add(node.getLabel() + "." + p.getName());
+        }
+      });
+    }
 
-    outerloop: for(String path: mapping.keySet()){
-      for(String propPath: pathToProp){
-        if(path.length()>0 && propPath.length() >0){
+    outerloop: for (String path : mapping.keySet()) {
+      for (String propPath : pathToProp) {
+        if (path.length() > 0 && propPath.length() > 0) {
           char c[] = propPath.toCharArray();
           c[0] = Character.toLowerCase(c[0]);
           propPath = new String(c);
 
-          if(path.contains(propPath)){
-            if(mapping.get(path) != null && !"None".equals(mapping.get(path))){
+          if (path.contains(propPath)) {
+            if (mapping.get(path) != null && !"None".equals(mapping.get(path))) {
               valid = true;
               System.out.println("True");
             } else {
@@ -223,13 +222,12 @@ public class GraphService {
             }
           }
         }
-      
+
       }
     }
-    
+
     return valid;
   }
-
 
   public Domain createDomain(DomainCreate model) {
     var nameExit = graph.getDomains().stream().anyMatch(d -> d.getName().equals(model.name()));
@@ -250,8 +248,7 @@ public class GraphService {
   public Domain updateDomain(UUID id, DomainUpdate model) {
     var domain = graph.getDomains().stream().filter(d -> d.getId().equals(id)).findAny()
         .orElseThrow(() -> new ClientErrorException(Status.NOT_FOUND));
-    var nameExit = graph.getDomains().stream()
-        .filter(not(d -> d.getId().equals(id)))
+    var nameExit = graph.getDomains().stream().filter(not(d -> d.getId().equals(id)))
         .anyMatch(d -> d.getName().equals(model.name()));
     if (nameExit) {
       throw new ClientErrorException(Status.CONFLICT);
@@ -271,16 +268,13 @@ public class GraphService {
 
     var graphDelta = new GraphDelta();
     graphDelta.getRemovedDomains().add(id);
-    var removedNodeIds = graph.getNodes().stream()
-        .filter(n -> n.getDomainIds().size() <= 1)
-        .filter(n -> n.getDomainIds().contains(id))
-        .map(Node::getId).collect(Collectors.toSet());
+    var removedNodeIds = graph.getNodes().stream().filter(n -> n.getDomainIds().size() <= 1)
+        .filter(n -> n.getDomainIds().contains(id)).map(Node::getId).collect(Collectors.toSet());
 
-    removedNodeIds.stream().map(this::deleteNode)
-        .forEach(gd -> {
-          graphDelta.getRemovedNodes().addAll(gd.getRemovedNodes());
-          graphDelta.getRemovedRelations().addAll(gd.getRemovedRelations());
-        });
+    removedNodeIds.stream().map(this::deleteNode).forEach(gd -> {
+      graphDelta.getRemovedNodes().addAll(gd.getRemovedNodes());
+      graphDelta.getRemovedRelations().addAll(gd.getRemovedRelations());
+    });
 
     graphDelta.setRemovedNodes(removedNodeIds);
 
@@ -299,11 +293,8 @@ public class GraphService {
     node.setLabel(model.label());
     node.setProperties(model.properties());
     node.setDomainIds(model.domainIds());
-    Optional.ofNullable(model.color())
-        .filter(c -> COLOR_PATTERN.matcher(c).find())
-        .ifPresentOrElse(node::setColor,
-            () -> node.setColor(colorFromUUID(uuid))
-        );
+    Optional.ofNullable(model.color()).filter(c -> COLOR_PATTERN.matcher(c).find()).ifPresentOrElse(node::setColor,
+        () -> node.setColor(colorFromUUID(uuid)));
 
     graph.getNodes().add(node);
     return node;
@@ -318,17 +309,13 @@ public class GraphService {
   public GraphDelta updateNode(UUID id, NodeUpdate model) {
     var graphDelta = new GraphDelta();
     checkDominIds(model.domainIds());
-    var node = graph.getNodes().stream()
-        .filter(n -> n.getId().equals(id))
-        .findAny()
+    var node = graph.getNodes().stream().filter(n -> n.getId().equals(id)).findAny()
         .orElseThrow(() -> new ClientErrorException(Status.NOT_FOUND));
     // check label
-    graph.getNodes().stream()
-        .filter(not(n -> n.getId().equals(id)))
-        .filter(n -> n.getLabel().equals(model.label()))
+    graph.getNodes().stream().filter(not(n -> n.getId().equals(id))).filter(n -> n.getLabel().equals(model.label()))
         .findAny().ifPresent(n -> {
-      throw new ClientErrorException(Status.CONFLICT);
-    });
+          throw new ClientErrorException(Status.CONFLICT);
+        });
 
     node.setLabel(model.label());
     node.setDomainIds(model.domainIds());
@@ -347,15 +334,14 @@ public class GraphService {
     }
     graphDelta.getRemovedNodes().add(id);
     var removedRelationIds = graph.getRelations().stream()
-        .filter(r -> r.getSourceId().equals(id) || r.getTargetId().equals(id))
-        .map(Relation::getId).collect(Collectors.toSet());
+        .filter(r -> r.getSourceId().equals(id) || r.getTargetId().equals(id)).map(Relation::getId)
+        .collect(Collectors.toSet());
 
     graph.getRelations().removeIf(r -> removedRelationIds.contains(r.getId()));
 
     graphDelta.setRemovedRelations(removedRelationIds);
     return graphDelta;
   }
-
 
   public GraphDelta createRelation(RelationCreate model) {
     var graphDelta = new GraphDelta();
@@ -372,12 +358,11 @@ public class GraphService {
     rel.setDomainIds(model.domainIds());
     rel.setColor(nodeById(rel.getSourceId()).getColor());
 
-    if(model.domainIds().size() ==1){
+    if (model.domainIds().size() == 1) {
       Node node = nodeById(model.targetId());
       node.getDomainIds().addAll(model.domainIds());
       graphDelta.getChangedNodes().add(node);
     }
-
 
     graph.getRelations().add(rel);
 
@@ -401,9 +386,7 @@ public class GraphService {
   public GraphDelta updateRelation(UUID id, RelationUpdate model) {
     checkDominIds(model.domainIds());
     var graphDelta = new GraphDelta();
-    var relation = graph.getRelations().stream()
-        .filter(r -> r.getId().equals(id))
-        .findAny()
+    var relation = graph.getRelations().stream().filter(r -> r.getId().equals(id)).findAny()
         .orElseThrow(() -> new ClientErrorException(Status.NOT_FOUND));
     relation.setType(model.type());
     relation.setPrimary(model.primary());
@@ -423,8 +406,7 @@ public class GraphService {
   }
 
   public ObjectNode buildJsonModel(UUID id) {
-    return new JsonBuilder(new GraphModel(graph), id)
-        .getJson();
+    return new JsonBuilder(new GraphModel(graph), id).getJson();
   }
 
   public void reset() {
@@ -433,11 +415,9 @@ public class GraphService {
   }
 
   private Node nodeById(UUID id) {
-    return graph.getNodes().stream().filter(n -> n.getId().equals(id))
-        .findFirst()
-        .orElseThrow(() -> {
-          throw new ClientErrorException(Status.NOT_FOUND);
-        });
+    return graph.getNodes().stream().filter(n -> n.getId().equals(id)).findFirst().orElseThrow(() -> {
+      throw new ClientErrorException(Status.NOT_FOUND);
+    });
   }
 
   private void checkNodeIds(UUID... nodeIds) {
@@ -446,6 +426,5 @@ public class GraphService {
       throw new ClientErrorException(Status.NOT_FOUND);
     }
   }
-
 
 }
