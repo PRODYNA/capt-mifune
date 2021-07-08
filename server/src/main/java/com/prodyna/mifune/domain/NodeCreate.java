@@ -36,7 +36,7 @@ public record NodeCreate(
 ) {
 
   public NodeCreate(String label, UUID domainId) {
-    this(label, Set.of(domainId), null, List.of());
+    this(label, Set.<UUID>of(domainId), null, List.of());
   }
 
 }
