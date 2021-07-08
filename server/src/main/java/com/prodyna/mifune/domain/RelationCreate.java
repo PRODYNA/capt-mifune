@@ -57,7 +57,7 @@ public record RelationCreate(
 ) {
 
   public RelationCreate(String type, UUID sourceId, UUID targetId, UUID domainId) {
-    this(type, sourceId, targetId, Set.of(domainId), false, false, List.of());
+    this(type, sourceId, targetId, Set.<UUID>of(domainId), false, false, List.of());
   }
   public RelationCreate(String type, UUID sourceId, UUID targetId, Set<UUID> domainIds) {
     this(type, sourceId, targetId, domainIds, false, false, List.of());

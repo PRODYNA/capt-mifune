@@ -47,7 +47,7 @@ public record RelationUpdate(
 ) {
 
   public RelationUpdate(String type, UUID domainId) {
-    this(type,  Set.of(domainId), false, false, List.of());
+    this(type, Set.<UUID>of(domainId), false, false, List.of());
   }
 
   public RelationUpdate(String type, Set<UUID> domainIds) {
