@@ -47,6 +47,7 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -267,12 +268,12 @@ public class GraphResource {
     public void pipeFile(java.nio.file.Path importFile, Consumer<? super List<String>> consumer) {
         try {
             StreamSupport
-                    .stream(new CSVReader(new FileReader(importFile.toFile())).spliterator(), false)
+                    .stream(new CSVReader(new FileReader(importFile.toFile(), StandardCharsets.UTF_8)).spliterator(), false)
                     .skip(1)
                     .map(Arrays::asList)
                     .forEach(consumer);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
