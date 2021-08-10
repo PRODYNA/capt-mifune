@@ -24,22 +24,23 @@ import java.util.List;
 
 public class Source {
 
-  private String name;
-  private List<String> header;
+	private String name;
 
-  public String getName() {
-    return name;
-  }
+	private List<String> header;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public List<String> getHeader() {
-    return header;
-  }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public void setHeader(List<String> header) {
-    this.header = header;
-  }
+	public List<String> getHeader() {
+		return header;
+	}
+
+	public void setHeader(List<String> header) {
+		this.header = header;
+	}
 }

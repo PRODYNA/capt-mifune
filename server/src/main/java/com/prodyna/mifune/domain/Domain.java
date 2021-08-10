@@ -21,82 +21,79 @@ package com.prodyna.mifune.domain;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.Map;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Domain {
 
-  private UUID id;
+	private UUID id;
 
-  private String name;
+	private String name;
 
-  private UUID rootNodeId;
+	private UUID rootNodeId;
 
-  private String file;
+	private String file;
 
-  private Map<String,String> columnMapping;
+	private Map<String, String> columnMapping;
 
-  private boolean modelValid;
+	private boolean modelValid;
 
-  private boolean mappingValid;
+	private boolean mappingValid;
 
+	public UUID getId() {
+		return id;
+	}
 
-  public UUID getId() {
-    return id;
-  }
+	public void setId(UUID id) {
+		this.id = id;
+	}
 
-  public void setId(UUID id) {
-    this.id = id;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public String getName() {
-    return name;
-  }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	public UUID getRootNodeId() {
+		return rootNodeId;
+	}
 
-  public UUID getRootNodeId() {
-    return rootNodeId;
-  }
+	public void setRootNodeId(UUID rootNodeId) {
+		this.rootNodeId = rootNodeId;
+	}
 
-  public void setRootNodeId(UUID rootNodeId) {
-    this.rootNodeId = rootNodeId;
-  }
+	public Map<String, String> getColumnMapping() {
+		return columnMapping;
+	}
 
+	public void setColumnMapping(Map<String, String> columnMapping) {
+		this.columnMapping = columnMapping;
+	}
 
-  public Map<String, String> getColumnMapping() {
-    return columnMapping;
-  }
+	public String getFile() {
+		return file;
+	}
 
-  public void setColumnMapping(Map<String, String> columnMapping) {
-    this.columnMapping = columnMapping;
-  }
+	public void setFile(String file) {
+		this.file = file;
+	}
 
-  public String getFile() {
-    return file;
-  }
+	public boolean isModelValid() {
+		return modelValid;
+	}
 
-  public void setFile(String file) {
-    this.file = file;
-  }
+	public void setModelValid(boolean modelValid) {
+		this.modelValid = modelValid;
+	}
 
-  public boolean isModelValid() {
-    return modelValid;
-  }
+	public boolean isMappingValid() {
+		return mappingValid;
+	}
 
-  public void setModelValid(boolean modelValid) {
-    this.modelValid = modelValid;
-  }
-
-  public boolean isMappingValid() {
-    return mappingValid;
-  }
-
-  public void setMappingValid(boolean mappingValid) {
-    this.mappingValid = mappingValid;
-  }
+	public void setMappingValid(boolean mappingValid) {
+		this.mappingValid = mappingValid;
+	}
 }

@@ -28,15 +28,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record NodeUpdate(
-    @NotBlank String label,
-    @Size(min = 1) Set<UUID> domainIds,
-    String color,
-    List<Property> properties
-) {
+public record NodeUpdate(@NotBlank String label, @Size(min = 1) Set<UUID> domainIds, String color,
+		List<Property> properties) {
 
-  public NodeUpdate(String label, UUID domainId) {
-    this(label, Set.<UUID>of(domainId), null, List.of());
-  }
+	public NodeUpdate(String label, UUID domainId) {
+		this(label, Set.<UUID>of(domainId), null, List.of());
+	}
 
 }
