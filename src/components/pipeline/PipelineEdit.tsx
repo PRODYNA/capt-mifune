@@ -11,7 +11,7 @@ import SaveAndCancel from "../form/SavenAndCancel";
 
 interface DomainEditProps {
   domain: Domain;
-  onSubmit: (domain: Domain) => void;
+  onSubmit: (domain: Domain) => Promise<any> ;
 }
 export const PipelineEdit = (props: DomainEditProps) => {
   const history = useHistory();
@@ -38,10 +38,15 @@ export const PipelineEdit = (props: DomainEditProps) => {
     if (sources) {
       const data = sources.filter((s) => s.name === value.file)[0];
       if (data) {
-        return data.header;
+        let header = data.header;
+        if(!(header.find( h => h === '') === '')){
+          header = [''].concat(header)
+        }
+        console.log(JSON.stringify(header))
+        return header;
       }
     }
-    return [];
+    return [''];
   };
 
   /**
@@ -84,16 +89,13 @@ export const PipelineEdit = (props: DomainEditProps) => {
           key={key}
           title={key}
           options={values}
-          value={value.columnMapping[key] ? value.columnMapping[key] : "None"}
+          value={value.columnMapping[key]}
           onChangeHandler={onNodeChangeEventHandler}
         />
       );
     });
   };
   const values = getMenuItems();
-  if (!values.find((value) => value === "None")) {
-    values.push("None");
-  }
 
   const childrens: React.ReactNode[] = getReactNodes(values);
   childrens.unshift(
@@ -121,9 +123,11 @@ export const PipelineEdit = (props: DomainEditProps) => {
       childrens={childrens}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         console.log("domain edit " + value.name);
-        props.onSubmit(value);
+        props.onSubmit(value).then(() => {
+          history.goBack();
+        });
         event.preventDefault();
-        history.goBack();
+
       }}
     />
   );
