@@ -21,7 +21,6 @@ package com.prodyna.json.converter;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prodyna.json.converter.JsonTransformer;
 
 import java.util.List;
 import java.util.concurrent.SubmissionPublisher;

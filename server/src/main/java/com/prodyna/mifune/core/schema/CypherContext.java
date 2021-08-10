@@ -25,133 +25,123 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class CypherContext {
 
-  public List<CypherContext> subContext = new ArrayList<>();
-  private String label;
-  private boolean root = false;
-  private List<String> statements = new ArrayList<>();
-  private List<String> variables = new ArrayList<>();
+	public List<CypherContext> subContext = new ArrayList<>();
+	private String label;
+	private boolean root = false;
+	private List<String> statements = new ArrayList<>();
+	private List<String> variables = new ArrayList<>();
 
-  private List<String> existChecks = new ArrayList<>();
-  private String rootVar;
+	private List<String> existChecks = new ArrayList<>();
+	private String rootVar;
 
-  public List<String> getExistChecks() {
-    return existChecks;
-  }
+	public List<String> getExistChecks() {
+		return existChecks;
+	}
 
-  public void setExistChecks(List<String> existChecks) {
-    this.existChecks = existChecks;
-  }
+	public void setExistChecks(List<String> existChecks) {
+		this.existChecks = existChecks;
+	}
 
-  public String getRootVar() {
-    return rootVar;
-  }
+	public String getRootVar() {
+		return rootVar;
+	}
 
-  public void setRootVar(String rootVar) {
-    this.rootVar = rootVar;
-  }
+	public void setRootVar(String rootVar) {
+		this.rootVar = rootVar;
+	}
 
-  public void addExistCheck(String propertyPath){
-    this.existChecks.add(propertyPath);
-  }
+	public void addExistCheck(String propertyPath) {
+		this.existChecks.add(propertyPath);
+	}
 
-  public List<String> getVariables() {
-    return variables;
-  }
+	public List<String> getVariables() {
+		return variables;
+	}
 
-  public void setVariables(List<String> variables) {
-    this.variables = variables;
-  }
+	public void setVariables(List<String> variables) {
+		this.variables = variables;
+	}
 
-  public boolean isRoot() {
-    return root;
-  }
+	public boolean isRoot() {
+		return root;
+	}
 
-  public void setRoot(boolean root) {
-    this.root = root;
-  }
+	public void setRoot(boolean root) {
+		this.root = root;
+	}
 
-  public String getLabel() {
-    return label;
-  }
+	public String getLabel() {
+		return label;
+	}
 
-  public void setLabel(String label) {
-    this.label = label;
-  }
+	public void setLabel(String label) {
+		this.label = label;
+	}
 
-  public List<String> getStatements() {
-    return statements;
-  }
+	public List<String> getStatements() {
+		return statements;
+	}
 
-  public void setStatements(List<String> statements) {
-    this.statements = statements;
-  }
+	public void setStatements(List<String> statements) {
+		this.statements = statements;
+	}
 
-  public List<CypherContext> getSubContext() {
-    return subContext;
-  }
+	public List<CypherContext> getSubContext() {
+		return subContext;
+	}
 
-  public void setSubContext(List<CypherContext> subContext) {
-    this.subContext = subContext;
-  }
+	public void setSubContext(List<CypherContext> subContext) {
+		this.subContext = subContext;
+	}
 
-  public String toCypher(boolean addReturn, int tabCount, AtomicInteger counter) {
-    return toCypher(addReturn,tabCount,counter,new ArrayList<>());
-  }
+	public String toCypher(boolean addReturn, int tabCount, AtomicInteger counter) {
+		return toCypher(addReturn, tabCount, counter, new ArrayList<>());
+	}
 
-  private  String toCypher(boolean addReturn, int tabCount, AtomicInteger counter, List<String> rootVars) {
-    var vars = new ArrayList<String>(rootVars);
-    vars.add(this.rootVar);
-    vars.addAll(this.variables);
-    var statements = new ArrayList<>(this.statements);
-    if(!subContext.isEmpty()){
-      statements.add("with *");
-    }
+	private String toCypher(boolean addReturn, int tabCount, AtomicInteger counter, List<String> rootVars) {
+		var vars = new ArrayList<String>(rootVars);
+		vars.add(this.rootVar);
+		vars.addAll(this.variables);
+		var statements = new ArrayList<>(this.statements);
+		if (!subContext.isEmpty()) {
+			statements.add("with *");
+		}
 
-    subContext.forEach(c -> {
-      var checks ="";
-      if(!c.existChecks.isEmpty()){
-       checks = c.existChecks.stream()
-           .map("exists(%s)"::formatted)
-           .collect(Collectors.joining("and", " where 1=1 and ", ""));
-      }
+		subContext.forEach(c -> {
+			var checks = "";
+			if (!c.existChecks.isEmpty()) {
+				checks = c.existChecks.stream().map("exists(%s)"::formatted)
+						.collect(Collectors.joining("and", " where 1=1 and ", ""));
+			}
 
-      var currentCounter = counter.incrementAndGet();
-      var subContext = """
-          call {
-          return %s union
-          with %s
-          with *%s 
-          %s
-          return %s
-          }
-          """
-          .formatted(
-                  currentCounter,
-                  vars.stream().collect(Collectors.joining(",")),
-              checks,
-              c.toCypher(false,tabCount,counter,vars),
-                  currentCounter
+			var currentCounter = counter.incrementAndGet();
+			var subContext = """
+					call {
+					return %s union
+					with %s
+					with *%s
+					%s
+					return %s
+					}
+					""".formatted(currentCounter, vars.stream().collect(Collectors.joining(",")), checks,
+					c.toCypher(false, tabCount, counter, vars), currentCounter
 
-          );
-      statements.add(addTabs(subContext,tabCount+1));
-    });
+			);
+			statements.add(addTabs(subContext, tabCount + 1));
+		});
 
-    if(addReturn){
-      statements.add("return 'done'");
-    }
-    return statements.stream().map(s -> addTabs(s,tabCount)).collect(Collectors.joining("\n"));
-  }
+		if (addReturn) {
+			statements.add("return 'done'");
+		}
+		return statements.stream().map(s -> addTabs(s, tabCount)).collect(Collectors.joining("\n"));
+	}
 
-  String addTabs(String value, int tabCount){
-    var tabs =  IntStream.range(0, tabCount).boxed().map(i -> "\t").collect(Collectors.joining());
-    return value.lines()
-        .map(s -> tabs + s)
-        .collect(Collectors.joining("\n"));
-  }
-
+	String addTabs(String value, int tabCount) {
+		var tabs = IntStream.range(0, tabCount).boxed().map(i -> "\t").collect(Collectors.joining());
+		return value.lines().map(s -> tabs + s).collect(Collectors.joining("\n"));
+	}
 
 }
