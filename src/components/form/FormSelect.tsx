@@ -26,10 +26,11 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
       <Form.Control
         onChange={handleChange}
         as="select"
-        value={value ? value : "None"}
+        value={value}
+
       >
         {options.map((option: string) => {
-          return <option key={option}>{option}</option>;
+          return <option key={option} value={option !== '' ? option : undefined} label={option !== '' ? option : 'None'}/>;
         })}
       </Form.Control>
     </Form.Group>
