@@ -21,20 +21,13 @@ package com.prodyna.mifune.domain;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.Map;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record DomainUpdate
-    (
-        String name,
-        UUID rootNodeId,
-        String file,
-        Map<String,String> columnMapping
-    ) {
+public record DomainUpdate(String name, UUID rootNodeId, String file, Map<String, String> columnMapping) {
 
-  public DomainUpdate(String name) {
-    this(name, null, null, null);
-  }
+	public DomainUpdate(String name) {
+		this(name, null, null, null);
+	}
 }

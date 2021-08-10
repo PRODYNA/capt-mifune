@@ -21,19 +21,14 @@ package com.prodyna.json.converter;
  */
 
 import static com.prodyna.json.converter.JsonConverterUtil.mergeModel;
-import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 
@@ -47,7 +42,7 @@ public class JsonConverter {
     Map<Integer, MappingObject> objectMap = new HashMap<>();
     lines.forEach(line -> mergeModel(model, objectMap, line));
     var arrayNode = new ObjectMapper().createArrayNode();
-    objectMap.values().stream().map(MappingObject::toJson).forEach(arrayNode::add);
+    objectMap.values().stream().map(mo -> mo.toJson(true)).forEach(arrayNode::add);
     return arrayNode;
   }
 

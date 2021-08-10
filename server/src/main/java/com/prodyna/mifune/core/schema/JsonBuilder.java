@@ -35,114 +35,93 @@ import java.util.stream.Collectors;
 
 public class JsonBuilder {
 
-  private final Set<String> labels = new HashSet<>();
-  private final ObjectNode json = new ObjectMapper().createObjectNode();
-  private final UUID domainId;
+	private final Set<String> labels = new HashSet<>();
+	private final ObjectNode json = new ObjectMapper().createObjectNode();
+	private final UUID domainId;
+	private final boolean primaryOnly;
 
+	public JsonBuilder(GraphModel graphModel, UUID domainId, boolean primaryOnly) {
+		this.domainId = domainId;
+		this.primaryOnly = primaryOnly;
+		var rootNode = graphModel.rootNode(domainId);
+		var varPath = new ArrayList<String>();
+		varPath.add("model");
+		buildSubContext(varPath, json, rootNode);
 
-  public JsonBuilder(GraphModel graphModel, UUID domainId) {
-    this.domainId = domainId;
-    var rootNode = graphModel.rootNode(domainId);
-    var varPath = new ArrayList<String>();
-    varPath.add("model");
-    buildSubContext(varPath, json, rootNode);
+	}
 
-  }
+	public ObjectNode getJson() {
+		return json;
+	}
 
-  public ObjectNode getJson() {
-    return json;
-  }
+	private void buildSubContext(List<String> varPath, ObjectNode parentNode, NodeModel node) {
+		var contextVarPath = new ArrayList<>(varPath);
+		var currentNode = parentNode.putObject(nodeVarName(node));
+		buildProperties(currentNode, node.getProperties());
+		contextVarPath.add(nodeVarName(node));
+		var add = labels.add(node.getLabel());
+		if (add) {
+			node.getRelations().stream().filter(r -> r.getDomainIds().contains(domainId))
+					.filter(r -> r.getTo().getDomainIds().contains(domainId))
+					.forEach(r -> buildRelation(contextVarPath, currentNode, r));
+		}
 
-  private void buildSubContext(
-      List<String> varPath,
-      ObjectNode parentNode,
-      NodeModel node
-  ) {
-    var contextVarPath = new ArrayList<>(varPath);
-    var currentNode = parentNode.putObject(nodeVarName(node));
-    buildProperties(currentNode, node.getProperties());
-    contextVarPath.add(nodeVarName(node));
-    var add = labels.add(node.getLabel());
-    if (add) {
-      node.getRelations().stream()
-          .filter(r -> r.getDomainIds().contains(domainId))
-          .filter(r -> r.getTo().getDomainIds().contains(domainId))
-          .forEach(
-          r -> buildRelation(contextVarPath, currentNode, r)
-      );
-    }
+	}
 
-  }
+	private void buildRelation(List<String> varPath, ObjectNode parentNode, RelationModel r) {
+		if (!r.isMultiple()) {
+			var currentNode = parentNode.putObject(relationVarName(r));
+			buildSingleRelation(varPath, r, currentNode);
+		} else {
+			var arrayNode = parentNode.putArray(relationVarName(r));
+			var currentNode = arrayNode.addObject();
+			buildMultiRelation(varPath, r, currentNode);
+		}
 
-  private void buildRelation(
-      List<String> varPath,
-      ObjectNode parentNode,
-      RelationModel r) {
-    if (!r.isMultiple()) {
-      var currentNode = parentNode.putObject(relationVarName(r));
-      buildSingleRelation(varPath, r, currentNode);
-    } else {
-      var arrayNode = parentNode.putArray(relationVarName(r));
-      var currentNode = arrayNode.addObject();
-      buildMultiRelation(varPath, r, currentNode);
-    }
+	}
 
-  }
+	private void buildSingleRelation(List<String> varPath, RelationModel r, ObjectNode currentNode) {
+		buildProperties(currentNode, r.getProperties());
+		if (r.getTo().isPrimary()) {
+			var newPath = new ArrayList<>(varPath);
+			newPath.add(relationVarName(r));
+			buildSubContext(newPath, currentNode, r.getTo());
+		} else {
+			var newPath = new ArrayList<>(varPath);
+			newPath.add(relationVarName(r));
+			buildSubContext(newPath, currentNode, r.getTo());
+		}
+	}
 
-  private void buildSingleRelation(
-      List<String> varPath,
-      RelationModel r,
-      ObjectNode currentNode
-  ) {
-    buildProperties(currentNode, r.getProperties());
-    if (r.getTo().isPrimary()) {
-      var newPath = new ArrayList<>(varPath);
-      newPath.add(relationVarName(r));
-      buildSubContext(newPath, currentNode, r.getTo());
-    } else {
-      var newPath = new ArrayList<>(varPath);
-      newPath.add(relationVarName(r));
-      buildSubContext(newPath, currentNode, r.getTo());
-    }
-  }
+	private void buildMultiRelation(List<String> varPath, RelationModel r, ObjectNode currentNode) {
+		buildProperties(currentNode, r.getProperties());
+		var varName = nodeVarName(r.getFrom());
+		var contextVarPath = new ArrayList<>(List.of(varName));
+		buildSubContext(contextVarPath, currentNode, r.getTo());
+	}
 
-  private void buildMultiRelation(
-      List<String> varPath,
-      RelationModel r,
-      ObjectNode currentNode
-  ) {
-    buildProperties(currentNode, r.getProperties());
-    var varName = nodeVarName(r.getFrom());
-    var contextVarPath = new ArrayList<>(List.of(varName));
-    buildSubContext(contextVarPath, currentNode, r.getTo());
-  }
+	private void buildProperties(ObjectNode jsonNodes, List<Property> properties) {
+		Optional.ofNullable(properties).stream().flatMap(Collection::stream).filter(p -> p.isPrimary() || !primaryOnly)
+				.forEach(p -> {
+					switch (p.getType()) {
+						case "string" -> jsonNodes.put(p.getName(), "string");
+						case "long" -> jsonNodes.put(p.getName(), 1L);
+						case "boolean" -> jsonNodes.put(p.getName(), true);
+					}
+				});
+	}
 
-  private void buildProperties(ObjectNode jsonNodes, List<Property> properties) {
-    Optional.ofNullable(properties)
-        .stream()
-        .flatMap(Collection::stream)
-    .forEach(p -> {
-      switch (p.getType()) {
-        case "string" -> jsonNodes.put(p.getName(), "string");
-        case "long" -> jsonNodes.put(p.getName(), 1L);
-        case "boolean" -> jsonNodes.put(p.getName(), true);
-      }
-    });
-  }
+	private String nodeVarName(NodeModel node) {
+		var label = node.getLabel();
+		return label.substring(0, 1).toLowerCase() + label.substring(1);
+	}
 
-  private String nodeVarName(NodeModel node) {
-    var label = node.getLabel();
-    return label.substring(0, 1).toLowerCase() + label.substring(1);
-  }
-
-  private String relationVarName(RelationModel relationModel) {
-    var type = relationModel.getType();
-    var parts = Arrays.asList(type.split("_"));
-    var varName = parts.stream()
-        .map(String::toLowerCase)
-        .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
-        .collect(Collectors.joining());
-    return varName.substring(0, 1).toLowerCase() + varName.substring(1);
-  }
+	private String relationVarName(RelationModel relationModel) {
+		var type = relationModel.getType();
+		var parts = Arrays.asList(type.split("_"));
+		var varName = parts.stream().map(String::toLowerCase).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+				.collect(Collectors.joining());
+		return varName.substring(0, 1).toLowerCase() + varName.substring(1);
+	}
 
 }
