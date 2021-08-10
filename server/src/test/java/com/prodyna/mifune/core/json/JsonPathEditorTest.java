@@ -23,79 +23,74 @@ package com.prodyna.mifune.core.json;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class JsonPathEditorTest {
 
+	@Test
+	public void test() throws JsonProcessingException {
+		JsonPathEditor editor = new JsonPathEditor();
+		String json = """
+				{
+				    "name" : "name",
+				    "roles" : [
+				    {
+				        "name":"name"
+				    }],
+				    "simple" : ["0"]
 
-    @Test
-    public void test() throws JsonProcessingException {
-        JsonPathEditor editor = new JsonPathEditor();
-        String json = """
-                {
-                    "name" : "name",
-                    "roles" : [
-                    {
-                        "name":"name"
-                    }],
-                    "simple" : ["0"]
-                    
-                }
-                """;
-        JsonNode jsonNode = new ObjectMapper().readTree(json);
-        System.out.println(jsonNode);
-        editor.update(jsonNode,"name", "Kay");
-        System.out.println(jsonNode);
-        editor.update(jsonNode,"roles[].name", "Kay");
-        System.out.println(jsonNode);
-        editor.update(jsonNode,"simple[]", "Simple");
-        System.out.println(jsonNode);
-    }
+				}
+				""";
+		JsonNode jsonNode = new ObjectMapper().readTree(json);
+		System.out.println(jsonNode);
+		editor.update(jsonNode, "name", "Kay");
+		System.out.println(jsonNode);
+		editor.update(jsonNode, "roles[].name", "Kay");
+		System.out.println(jsonNode);
+		editor.update(jsonNode, "simple[]", "Simple");
+		System.out.println(jsonNode);
+	}
 
-    @Test
-    public void extractKeys() throws IOException {
-        JsonPathEditor editor = new JsonPathEditor();
-        String json = """
-                {
-                    "name" : "name",
-                    "roles" : [
-                    {
-                        "name":"name"
-                    }],
-                    "simple" : ["0"]
-                    
-                }
-                """;
-        JsonNode jsonNode = new ObjectMapper().readTree(json);
-        System.out.println(jsonNode);
-        editor.extractFieldPaths(jsonNode)
-        .forEach(System.out::println);
-    }
-    @Test
-    public void remove() throws IOException {
-        JsonPathEditor editor = new JsonPathEditor();
-        String json = """
-                {
-                    "name" : "name",
-                    "roles" : [
-                    {
-                        "name":"name"
-                    }],
-                    "simple" : ["0"]
-                    
-                }
-                """;
-        JsonNode jsonNode = new ObjectMapper().readTree(json);
-        System.out.println(jsonNode);
-        editor.remove(jsonNode,"name");
-        System.out.println(jsonNode);
-        editor.remove(jsonNode,"roles[].name");
-        System.out.println(jsonNode);
-        editor.remove(jsonNode,"simple[]");
-        System.out.println(jsonNode);
-    }
+	@Test
+	public void extractKeys() throws IOException {
+		JsonPathEditor editor = new JsonPathEditor();
+		String json = """
+				{
+				    "name" : "name",
+				    "roles" : [
+				    {
+				        "name":"name"
+				    }],
+				    "simple" : ["0"]
+
+				}
+				""";
+		JsonNode jsonNode = new ObjectMapper().readTree(json);
+		System.out.println(jsonNode);
+		editor.extractFieldPaths(jsonNode).forEach(System.out::println);
+	}
+	@Test
+	public void remove() throws IOException {
+		JsonPathEditor editor = new JsonPathEditor();
+		String json = """
+				{
+				    "name" : "name",
+				    "roles" : [
+				    {
+				        "name":"name"
+				    }],
+				    "simple" : ["0"]
+
+				}
+				""";
+		JsonNode jsonNode = new ObjectMapper().readTree(json);
+		System.out.println(jsonNode);
+		editor.remove(jsonNode, "name");
+		System.out.println(jsonNode);
+		editor.remove(jsonNode, "roles[].name");
+		System.out.println(jsonNode);
+		editor.remove(jsonNode, "simple[]");
+		System.out.println(jsonNode);
+	}
 }

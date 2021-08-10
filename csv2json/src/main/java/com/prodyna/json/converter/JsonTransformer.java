@@ -20,97 +20,98 @@ package com.prodyna.json.converter;
  * #L%
  */
 
-import static com.prodyna.json.converter.JsonConverterUtil.generateHash;
-import static com.prodyna.json.converter.JsonConverterUtil.mergeField;
-import static java.util.function.Predicate.not;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.SubmissionPublisher;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.prodyna.json.converter.JsonConverterUtil.generateHash;
+import static com.prodyna.json.converter.JsonConverterUtil.mergeField;
 
 public class JsonTransformer extends SubmissionPublisher<JsonNode>
-    implements Flow.Processor<List<String>, JsonNode> {
+        implements Flow.Processor<List<String>, JsonNode> {
 
-  private final int bufferSize;
-  private JsonNode model;
-  private Subscription subscription;
-  private int cacheCounter = 0;
-  private HashMap<Integer, MappingObject> cache = new HashMap<>();
-  private LinkedList<Integer> lastAccessOrder = new LinkedList<>();
+    private final int bufferSize;
+    private JsonNode model;
+    private Subscription subscription;
+    private int cacheCounter = 0;
+    private HashMap<Integer, MappingObject> cache = new HashMap<>();
+    private LinkedList<Integer> lastAccessOrder = new LinkedList<>();
+    private final AtomicInteger counter = new AtomicInteger(1);
 
-  public JsonTransformer(JsonNode model, int bufferSize) {
-    super();
-    this.model = model;
-    this.bufferSize = bufferSize;
-  }
-
-  @Override
-  public void onSubscribe(Subscription subscription) {
-    this.subscription = subscription;
-    subscription.request(1);
-  }
-
-  @Override
-  public void onNext(List<String> line) {
-    var hash = generateHash(model, line);
-    final MappingObject mappingObject;
-    if (cache.containsKey(hash)) {
-      mappingObject = cache.get(hash);
-    } else {
-      mappingObject = new MappingObject();
-      cache.put(hash, mappingObject);
-    }
-    cacheCounter++;
-    mappingObject.lineCounter++;
-    lastAccessOrder.remove((Object) hash);
-    lastAccessOrder.addFirst(hash);
-    model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
-    if (cacheCounter >= bufferSize) {
-      var lastObject = cache.remove(lastAccessOrder.removeLast());
-      cacheCounter -= lastObject.lineCounter;
-      var item = lastObject.toJson();
-      submit(item);
+    public JsonTransformer(JsonNode model, int bufferSize) {
+        super();
+        this.model = model;
+        this.bufferSize = bufferSize;
     }
 
-    subscription.request(1);
-  }
-
-  @Override
-  public void onError(Throwable t) {
-    t.printStackTrace();
-  }
-
-  @Override
-  public void onComplete() {
-    lastAccessOrder.forEach(
-        hash -> {
-          submit(cache.remove(hash).toJson());
-        });
-    close();
-  }
-
-  public void accept(List<String> line) {
-    var hash = generateHash(model, line);
-    final MappingObject mappingObject;
-    if (cache.containsKey(hash)) {
-      mappingObject = cache.get(hash);
-      lastAccessOrder.remove((Object) hash);
-    } else {
-      mappingObject = new MappingObject();
-      cache.put(hash, mappingObject);
+    @Override
+    public void onSubscribe(Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(1);
     }
-    mappingObject.lineCounter++;
-    lastAccessOrder.addFirst(hash);
-    model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
-  }
+
+    @Override
+    public void onNext(List<String> line) {
+        var count = counter.getAndIncrement();
+        var hash = generateHash(model, line);
+        final MappingObject mappingObject;
+        if (cache.containsKey(hash)) {
+            mappingObject = cache.get(hash);
+        } else {
+            mappingObject = new MappingObject();
+            cache.put(hash, mappingObject);
+        }
+        mappingObject.fromLines.add(count);
+        cacheCounter++;
+        mappingObject.lineCounter++;
+        lastAccessOrder.remove((Object) hash);
+        lastAccessOrder.addFirst(hash);
+        model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
+        if (cacheCounter >= bufferSize) {
+            var lastObject = cache.remove(lastAccessOrder.removeLast());
+            cacheCounter -= lastObject.lineCounter;
+            var item = lastObject.toJson(true);
+            submit(item);
+        }
+
+        subscription.request(1);
+    }
+
+    @Override
+    public void onError(Throwable t) {
+        t.printStackTrace();
+    }
+
+    @Override
+    public void onComplete() {
+        lastAccessOrder.forEach(
+                hash -> {
+                    submit(cache.remove(hash).toJson(true));
+                });
+        close();
+    }
+
+    public void accept(List<String> line) {
+        var count = counter.getAndIncrement();
+        var hash = generateHash(model, line);
+        final MappingObject mappingObject;
+        if (cache.containsKey(hash)) {
+            mappingObject = cache.get(hash);
+            lastAccessOrder.remove((Object) hash);
+        } else {
+            mappingObject = new MappingObject();
+            cache.put(hash, mappingObject);
+        }
+        mappingObject.fromLines.add(count);
+        mappingObject.lineCounter++;
+        lastAccessOrder.addFirst(hash);
+        model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
+    }
 
 }
