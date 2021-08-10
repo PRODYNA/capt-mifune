@@ -29,53 +29,53 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Node {
 
-  private UUID id;
+	private UUID id;
 
-  private String label;
+	private String label;
 
-  private Set<UUID> domainIds;
+	private Set<UUID> domainIds;
 
-  private String color;
+	private String color;
 
-  private List<Property> properties = new ArrayList<>();
+	private List<Property> properties = new ArrayList<>();
 
-  public Set<UUID> getDomainIds() {
-    return domainIds;
-  }
+	public Set<UUID> getDomainIds() {
+		return domainIds;
+	}
 
-  public void setDomainIds(Set<UUID> domainIds) {
-    this.domainIds = domainIds;
-  }
+	public void setDomainIds(Set<UUID> domainIds) {
+		this.domainIds = domainIds;
+	}
 
-  public UUID getId() {
-    return id;
-  }
+	public UUID getId() {
+		return id;
+	}
 
-  public void setId(UUID id) {
-    this.id = id;
-  }
+	public void setId(UUID id) {
+		this.id = id;
+	}
 
-  public String getLabel() {
-    return label;
-  }
+	public String getLabel() {
+		return label;
+	}
 
-  public void setLabel(String label) {
-    this.label = label;
-  }
+	public void setLabel(String label) {
+		this.label = label;
+	}
 
-  public List<Property> getProperties() {
-    return properties;
-  }
+	public List<Property> getProperties() {
+		return properties;
+	}
 
-  public void setProperties(List<Property> properties) {
-    this.properties = properties;
-  }
+	public void setProperties(List<Property> properties) {
+		this.properties = properties;
+	}
 
-  public String getColor() {
-    return color;
-  }
+	public String getColor() {
+		return color;
+	}
 
-  public void setColor(String color) {
-    this.color = color;
-  }
+	public void setColor(String color) {
+		this.color = color;
+	}
 }
