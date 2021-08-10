@@ -22,6 +22,8 @@ package com.prodyna.json.converter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
@@ -29,13 +31,14 @@ import java.util.Objects;
 public class MappingObject {
 
   Integer lineCounter = 0;
+  ArrayList<Integer> fromLines = new ArrayList<>();
   LinkedHashMap<String, Object> primitiveFieldValues = new LinkedHashMap<>();
   LinkedHashMap<String, List<Object>> primitiveArrayFieldValues = new LinkedHashMap<>();
   LinkedHashMap<String, MappingObject> objectFieldValues = new LinkedHashMap<>();
   LinkedHashMap<String, LinkedHashMap<Integer, MappingObject>> objectFieldArrayValues =
       new LinkedHashMap<>();
 
-  public JsonNode toJson() {
+  public JsonNode toJson(boolean addLines) {
     ObjectMapper mapper = new ObjectMapper();
 
     var objectNode = mapper.createObjectNode();
@@ -72,19 +75,24 @@ public class MappingObject {
               });
           objectNode.set(k, array);
         });
-    objectFieldValues.forEach((k, v) -> objectNode.set(k, v.toJson()));
+    objectFieldValues.forEach((k, v) -> objectNode.set(k, v.toJson(false)));
     objectFieldArrayValues.forEach(
         (k, v) -> {
           var array = mapper.createArrayNode();
-          v.values().stream().map(MappingObject::toJson).forEach(array::add);
+          v.values().stream().map(mo -> mo.toJson(false)).forEach(array::add);
           objectNode.set(k, array);
         });
 
+    if(addLines){
+        var lineArray = mapper.createArrayNode();
+        fromLines.forEach(lineArray::add);
+        objectNode.set("lines", lineArray);
+    }
     return objectNode;
   }
 
   @Override
   public String toString() {
-    return toJson().toPrettyString();
+    return toJson(false).toPrettyString();
   }
 }
