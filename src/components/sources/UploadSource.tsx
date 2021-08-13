@@ -54,7 +54,7 @@ export const UploadSource = (props: UploadSourceProps) => {
         data.append("name", file.file.name);
         data.append("file", file.file);
         rest
-          .post("/graph/sources", data, {
+          .post("/sources", data, {
             // receive two parameter endpoint url ,form data
           })
           .then((res) => {
