@@ -63,6 +63,9 @@ public class GraphService {
 	@Inject
 	protected SourceService sourceService;
 
+	@Inject
+	protected DeletionService deletionService;
+
 	Graph graph = new Graph();
 
 	void onStart(@Observes StartupEvent ev) {
@@ -193,7 +196,20 @@ public class GraphService {
 		return domain;
 	}
 
+	/**
+	 * This method generates a Graph Delta, to tell the Frontend which nodes are to
+	 * be deleted.
+	 * 
+	 * @param id
+	 *            of the domain
+	 * @return GraphDelta to tell Fronted which nodes and relations are to be
+	 *         deleted
+	 */
 	public GraphDelta deleteDomain(UUID id) {
+		Boolean test = deletionService.deleteDomainFromDatabase(id, graph);
+		if (test){
+			log.debug("Test");
+		}
 		var remove = graph.getDomains().removeIf(d -> d.getId().equals(id));
 		if (!remove) {
 			throw new ClientErrorException(Status.NOT_FOUND);
