@@ -85,12 +85,14 @@ public class ImportService {
 		var importFile = Paths.get(uploadDir, domain.getFile());
 		var session = driver.asyncSession();
 
+		// Create the domain Node
 		var domainTask = Uni.createFrom()
 				.completionStage(session
 						.writeTransactionAsync(tx -> tx.runAsync("merge(d:Domain {id:$id}) set d.name = $name",
 								Map.of("id", domain.getId().toString(), "name", domain.getName())))
 						.thenCompose(r -> session.closeAsync().toCompletableFuture()));
-
+						
+		// Create all nodes under this domain
 		var importTask = Multi.createFrom().publisher(FlowAdapters.toProcessor(transformer))
 				.emitOn(Infrastructure.getDefaultWorkerPool()).onItem().transformToUni(node -> {
 					var entry = new ObjectMapper().convertValue(node, Map.class);

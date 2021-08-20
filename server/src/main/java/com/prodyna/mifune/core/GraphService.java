@@ -206,10 +206,9 @@ public class GraphService {
 	 *         deleted
 	 */
 	public GraphDelta deleteDomain(UUID id) {
-		Boolean test = deletionService.deleteDomainFromDatabase(id, graph);
-		if (test){
-			log.debug("Test");
-		}
+		// delete domain from Database
+		deletionService.deleteDomainFromDatabase(id, graph);
+
 		var remove = graph.getDomains().removeIf(d -> d.getId().equals(id));
 		if (!remove) {
 			throw new ClientErrorException(Status.NOT_FOUND);
@@ -220,12 +219,25 @@ public class GraphService {
 		var removedNodeIds = graph.getNodes().stream().filter(n -> n.getDomainIds().size() <= 1)
 				.filter(n -> n.getDomainIds().contains(id)).map(Node::getId).collect(Collectors.toSet());
 
+
+		// Delete the domain id from all nodes that are also in other domain
+		List<Node> nodesAlsoInOtherDomain = graph.getNodes().stream().filter(n -> n.getDomainIds().size() > 1).collect(Collectors.toList());
+		Set<Node> changedNodes = new HashSet<Node>();
+		for(var node: nodesAlsoInOtherDomain){
+			var sizeBefore = node.getDomainIds().size();
+			node.getDomainIds().removeIf(domainId -> domainId.equals(id));
+			if (node.getDomainIds().size() < sizeBefore){
+				changedNodes.add(node);
+			}
+		}
+
 		removedNodeIds.stream().map(this::deleteNode).forEach(gd -> {
 			graphDelta.getRemovedNodes().addAll(gd.getRemovedNodes());
 			graphDelta.getRemovedRelations().addAll(gd.getRemovedRelations());
 		});
 
 		graphDelta.setRemovedNodes(removedNodeIds);
+		graphDelta.setChangedNodes(changedNodes);
 
 		return graphDelta;
 	}
