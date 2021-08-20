@@ -1,7 +1,6 @@
 import { Domain, GraphDelta, Node } from "../../api/model/Model";
 import { createStyles, IconButton, makeStyles, Theme } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
-import { useState } from "react";
 import { DomainListEntry } from "./DomainListEntry";
 import graphService from "../../api/GraphService";
 
