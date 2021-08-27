@@ -58,9 +58,7 @@ public class DeletionService {
 
 		nodesToBeDeleted.removeAll(nodesAlsoInOtherDomain);
 		// build cypher to delete these nodes with all corresponding relations detach
-		// TODO: Maybe Limit Data Size skip limit
 		// delete
-
 		for (var node : nodesToBeDeleted) {
 			var cypher = String.format("MATCH(n:%s) detach delete n", node.getLabel());
 			var session = driver.asyncSession();
@@ -71,10 +69,8 @@ public class DeletionService {
 		// Delete Domain Node (used for line count)
 		Set<Domain> domains = graph.getDomains().stream().filter(domain -> domain.getId().equals(domainId))
 				.collect(Collectors.toSet());
-		log.info("domain size: " + domains.size());
 		for (var domain : domains) {
 			String domainLabel = domain.getName();
-			log.info("domainLabel: " + domainLabel);
 			var cypher = String.format("MATCH(n:Domain {name:\"%s\"}) detach delete n", domainLabel);
 			var session = driver.asyncSession();
 			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(fn -> fn.consumeAsync()))
