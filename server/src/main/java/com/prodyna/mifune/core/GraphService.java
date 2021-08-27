@@ -198,10 +198,10 @@ public class GraphService {
 
 	/**
 	 * This method generates a Graph Delta, to tell the Frontend which nodes are to
-	 * be deleted.
+	 * be deleted. In addition it calls the Deletion Service, to delete the nodes, related to
+	 * the deleted domain inside Neo4J.
 	 * 
-	 * @param id
-	 *            of the domain
+	 * @param id of the domain to be deleted
 	 * @return GraphDelta to tell Fronted which nodes and relations are to be
 	 *         deleted
 	 */
