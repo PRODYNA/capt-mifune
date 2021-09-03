@@ -103,7 +103,7 @@ public class GraphResource {
 
 	@POST
 	@Path("/node")
-	public Uni<Node> createNode(@Valid NodeCreate model) {
+	public Uni<GraphDelta> createNode(@Valid NodeCreate model) {
 		return Uni.createFrom().item(graphService.createNode(model));
 	}
 
@@ -140,10 +140,11 @@ public class GraphResource {
 	@GET
 	@Path("/domain/{domainId}/mapping")
 	public Uni<Map<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
-		ObjectNode jsonModel = graphService.buildJsonModel(id);
+		ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
 		var mapping = Optional.ofNullable(graphService.fetchDomain(id).getColumnMapping()).orElse(Map.of());
 		List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-		var hashmap = new TreeMap<String, String>(Comparator.comparing(String::length));
+		var hashmap = new TreeMap<String, String>(
+				Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s));
 		paths.forEach(path -> hashmap.put(path, mapping.getOrDefault(path, null)));
 		return Uni.createFrom().item(hashmap);
 	}

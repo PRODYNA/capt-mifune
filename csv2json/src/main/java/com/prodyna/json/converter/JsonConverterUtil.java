@@ -24,47 +24,48 @@ public class JsonConverterUtil {
                                 var config = fieldConfig.asText();
                                 var parts = config.split(":");
                                 var index = Integer.parseInt(parts[0]);
-                                if(index< line.size()){
+                                if (index < line.size()) {
                                     var field = line.get(index);
                                     hashFields.add(field);
                                 }
                             }
                         });
 
-            model
-                    .fields()
-                    .forEachRemaining(
-                            f -> {
-                                if (f.getValue().isObject()) {
-                                    hashFields.add(generateHash(f.getValue(), line));
-                                }
-                            });
+        model
+                .fields()
+                .forEachRemaining(
+                        f -> {
+                            if (f.getValue().isObject()) {
+                                hashFields.add(generateHash(f.getValue(), line));
+                            }
+                        });
 
         return Objects.hash(hashFields.toArray());
     }
 
-    static void  mergeModel(JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
+    static void mergeModel(JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
         var result = new MappingObject();
         int hash = generateHash(model, line);
         var mappingObject = results.computeIfAbsent(hash, x -> result);
         model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
     }
 
-    static  void mergeField(
+    static void mergeField(
             String name, JsonNode fieldConfig, MappingObject mappingObject, List<String> line) {
         if (fieldConfig.isInt()) {
             mappingObject.primitiveFieldValues.putIfAbsent(name, line.get(fieldConfig.asInt()));
         } else if (fieldConfig.isTextual()) {
             handleTypeConfig(name, fieldConfig, mappingObject, line);
-
         } else if (fieldConfig.isObject()) {
             handleObject(name, fieldConfig, mappingObject, line);
         } else if (fieldConfig.isArray()) {
             handleArray(name, fieldConfig, mappingObject, line);
+        }else {
+            throw new IllegalArgumentException("can't merge field");
         }
     }
 
-    static void   handleArray(
+    static void handleArray(
             String name, JsonNode fieldConfig, MappingObject mappingObject, List<String> line) {
         var next = fieldConfig.elements().next();
         if (next.isObject()) {
@@ -85,6 +86,10 @@ public class JsonConverterUtil {
                 list.add(field);
             } else if ("int".equals(config.getType())) {
                 list.add(Integer.parseInt(field));
+            } else if ("long".equals(config.getType())) {
+                list.add(Integer.parseInt(field));
+            } else if ("double".equals(config.getType())) {
+                list.add(Double.parseDouble(field));
             }
         }
     }
@@ -98,7 +103,7 @@ public class JsonConverterUtil {
                 .forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), newMappingObject, line));
     }
 
-    static  void handleTypeConfig(
+    static void handleTypeConfig(
             String name, JsonNode fieldConfig, MappingObject mappingObject, List<String> line) {
         var config = FieldConfig.fromString(fieldConfig.asText());
         var index = config.getIndex();
@@ -112,6 +117,14 @@ public class JsonConverterUtil {
         } else if ("int".equals(config.getType())) {
             mappingObject.primitiveFieldValues.putIfAbsent(name, field
                     .map(Integer::parseInt)
+                    .orElse(null));
+        } else if ("long".equals(config.getType())) {
+            mappingObject.primitiveFieldValues.putIfAbsent(name, field
+                    .map(Long::parseLong)
+                    .orElse(null));
+        } else if ("double".equals(config.getType())) {
+            mappingObject.primitiveFieldValues.putIfAbsent(name, field
+                    .map(Double::parseDouble)
                     .orElse(null));
         } else {
             throw new UnsupportedOperationException("type not implemented");

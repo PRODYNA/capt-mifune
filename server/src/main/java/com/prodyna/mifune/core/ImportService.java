@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.prodyna.json.converter.JsonTransformer;
 import com.prodyna.mifune.core.json.JsonPathEditor;
-import com.prodyna.mifune.core.schema.CypherBuilder;
+import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Domain;
@@ -75,7 +75,7 @@ public class ImportService {
 		var domain = graphService.fetchDomain(domainId);
 		log.debugf("start import found domain %s", domain.getName());
 		GraphModel graphModel = new GraphModel(graph);
-		var cypher = new CypherBuilder(graphModel, domainId).getCypher();
+		var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
 		log.info(cypher);
 
 		ObjectNode jsonModel = new JsonBuilder(graphModel, domainId, false).getJson();
@@ -120,7 +120,8 @@ public class ImportService {
 		existingPath.forEach(path -> {
 			var value = domain.getColumnMapping().get(path);
 			if (domain.getColumnMapping().containsKey(path) && Objects.nonNull(value)) {
-				jsonPathEditor.update(jsonModel, path, String.valueOf(header.indexOf(value)) + ":string");
+				jsonPathEditor.update(jsonModel, path,
+						String.valueOf(header.indexOf(value)) + ":" + jsonPathEditor.value(jsonModel, path).asText());
 			} else {
 				jsonPathEditor.remove(jsonModel, path);
 			}
