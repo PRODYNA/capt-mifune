@@ -29,10 +29,6 @@ interface NodeEditProps {
   onClose: () => void;
 }
 
-var ID = function () {
-  return "_" + Math.random().toString(36).substr(2, 9);
-};
-
 export const NodeEdit = (props: NodeEditProps) => {
   const [value, setValue] = useState<Node>(Object.create(props.node));
 

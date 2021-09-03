@@ -98,13 +98,15 @@ export const PipelineEdit = (props: DomainEditProps) => {
   const values = getMenuItems();
 
   const childrens: React.ReactNode[] = getReactNodes(values);
+  let options = ['']
+  sources.map((source) => {
+    return source.name;
+  }).forEach(s => options.push(s));
   childrens.unshift(
     <FormSelect
       key="FileSelection"
       title="Select file to map"
-      options={sources.map((source) => {
-        return source.name;
-      })}
+      options={options}
       value={value.file ? value.file : "None"}
       onChangeHandler={onFileChangeEventHandler}
     />
@@ -119,6 +121,8 @@ export const PipelineEdit = (props: DomainEditProps) => {
   );
 
   return (
+      <>
+        {/*<span>{JSON.stringify(getMenuItems())}</span>*/}
     <Formular
       childrens={childrens}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -130,5 +134,6 @@ export const PipelineEdit = (props: DomainEditProps) => {
 
       }}
     />
+      </>
   );
 };
