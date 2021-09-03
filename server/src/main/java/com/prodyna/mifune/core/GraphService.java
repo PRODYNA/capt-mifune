@@ -84,6 +84,8 @@ public class GraphService {
 	}
 
 	public Graph graph() {
+		graph.getDomains().forEach(this::validateDomainModel);
+		graph.getDomains().forEach(this::validateDomainModel);
 		return graph;
 	}
 
@@ -99,11 +101,11 @@ public class GraphService {
 	}
 
 	public List<Domain> fetchDomains() {
-		return graph.getDomains().stream().peek(d -> d.setModelValid(validateDomainModel(d)))
-				.peek(d -> d.setMappingValid(validateDomainMapping(d))).collect(Collectors.toList());
+		return graph.getDomains().stream().peek(this::validateDomainModel).peek(this::validateDomainMapping)
+				.collect(Collectors.toList());
 	}
 
-	private boolean validateDomainModel(Domain d) {
+	private void validateDomainModel(Domain d) {
 		UUID startNode = d.getRootNodeId();
 		Set<Node> allNodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(d.getId()))
 				.collect(Collectors.toSet());
@@ -112,11 +114,12 @@ public class GraphService {
 				.collect(Collectors.toSet());
 
 		if (allRelations.size() <= 0 && allNodeIds.size() > 1) {
-			return false;
+			d.setModelValid(false);
+			return;
 		}
 
 		Set<UUID> subGraph = validate(startNode, allNodeIds, allRelations);
-		return subGraph.equals(allNodeIds);
+		d.setModelValid(subGraph.equals(allNodeIds));
 	}
 
 	private Set<UUID> validate(UUID startNode, Set<UUID> allNodes, Set<Relation> allRelations) {
@@ -140,21 +143,23 @@ public class GraphService {
 		return subGraph.equals(copyAllNodes) ? allNodes : subGraph;
 	}
 
-	private boolean validateDomainMapping(Domain d) {
+	private void validateDomainMapping(Domain d) {
 		if (Objects.isNull(d.getFile()) || Objects.isNull(d.getColumnMapping())) {
-			return false;
+			d.setMappingValid(false);
+			return;
 		}
 		var header = sourceService.fileHeader(d.getFile());
 		if (!header.containsAll(
 				d.getColumnMapping().values().stream().filter(Objects::nonNull).collect(Collectors.toSet()))) {
 			log.debug("validate failed, header not exist in source file");
-			return false;
+			d.setMappingValid(false);
+			return;
 		}
 
 		Map<String, String> mapping = d.getColumnMapping();
 		ObjectNode jsonModel = new JsonBuilder(new GraphModel(graph), d.getId(), true).getJson();
 		List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-		return mapping.keySet().containsAll(paths);
+		d.setMappingValid(mapping.keySet().containsAll(paths));
 	}
 
 	public Domain createDomain(DomainCreate model) {
@@ -166,10 +171,11 @@ public class GraphService {
 		domain.setId(UUID.randomUUID());
 		domain.setName(model.name());
 		domain.setRootNodeId(model.rootNodeId());
-
 		domain.setFile(model.file());
 		domain.setColumnMapping(model.columnMapping());
 		graph.getDomains().add(domain);
+		validateDomainModel(domain);
+		validateDomainMapping(domain);
 		return domain;
 	}
 
@@ -190,6 +196,8 @@ public class GraphService {
 		domain.setRootNodeId(model.rootNodeId());
 		domain.setFile(model.file());
 		domain.setColumnMapping(mapping);
+		validateDomainModel(domain);
+		validateDomainMapping(domain);
 		return domain;
 	}
 
@@ -204,17 +212,36 @@ public class GraphService {
 		var removedNodeIds = graph.getNodes().stream().filter(n -> n.getDomainIds().size() <= 1)
 				.filter(n -> n.getDomainIds().contains(id)).map(Node::getId).collect(Collectors.toSet());
 
+		var changedNodes = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(id))
+				.peek(d -> d.getDomainIds().remove(id)).collect(Collectors.toSet());
+
+		var removedRelations = graph.getRelations().stream().filter(n -> n.getDomainIds().size() <= 1)
+				.filter(n -> n.getDomainIds().contains(id)).peek(d -> d.getDomainIds().remove(id))
+				.collect(Collectors.toSet());
+
+		graph.getRelations().removeAll(removedRelations);
+		removedRelations.stream().map(Relation::getId).forEach(graphDelta.getRemovedRelations()::add);
+
+		var changedRelations = graph.getRelations().stream().filter(n -> n.getDomainIds().contains(id))
+				.peek(d -> d.getDomainIds().remove(id)).collect(Collectors.toSet());
+
 		removedNodeIds.stream().map(this::deleteNode).forEach(gd -> {
+			graphDelta.getChangedRelations().addAll(gd.getChangedRelations());
+			graphDelta.getChangedDomains().addAll(gd.getChangedDomains());
 			graphDelta.getRemovedNodes().addAll(gd.getRemovedNodes());
 			graphDelta.getRemovedRelations().addAll(gd.getRemovedRelations());
 		});
 
-		graphDelta.setRemovedNodes(removedNodeIds);
+		graphDelta.getChangedRelations().addAll(changedRelations);
+		graphDelta.getChangedNodes().addAll(changedNodes);
+		graphDelta.getRemovedNodes().addAll(removedNodeIds);
+		graphDelta.getChangedNodes().removeIf(d -> graphDelta.getRemovedNodes().contains(d.getId()));
+		graphDelta.getChangedRelations().removeIf(d -> graphDelta.getRemovedRelations().contains(d.getId()));
 
 		return graphDelta;
 	}
 
-	public Node createNode(NodeCreate model) {
+	public GraphDelta createNode(NodeCreate model) {
 		checkDomainIds(model.domainIds());
 		var labelExist = graph.getNodes().stream().anyMatch(n -> n.getLabel().equals(model.label()));
 		if (labelExist) {
@@ -230,7 +257,12 @@ public class GraphService {
 				() -> node.setColor(colorFromUUID(uuid)));
 
 		graph.getNodes().add(node);
-		return node;
+		var graphDelta = new GraphDelta();
+		graphDelta.setTrigger(node.getId());
+		graphDelta.getChangedNodes().add(node);
+		graphDelta.setChangedDomains(graph().getDomains().stream().filter(d -> model.domainIds().contains(d.getId()))
+				.collect(Collectors.toSet()));
+		return graphDelta;
 	}
 
 	String colorFromUUID(UUID uuid) {
@@ -240,9 +272,11 @@ public class GraphService {
 	}
 
 	public GraphDelta updateNode(UUID id, NodeUpdate model) {
+		var changedDomains = new HashSet<UUID>(model.domainIds());
 		var graphDelta = new GraphDelta();
 		checkDomainIds(model.domainIds());
 		var node = nodeById(id);
+		changedDomains.addAll(node.getDomainIds());
 		checkForIfLabelExist(id, model);
 
 		node.setLabel(model.label());
@@ -251,6 +285,9 @@ public class GraphService {
 		node.setProperties(model.properties());
 
 		graphDelta.getChangedNodes().add(node);
+		graphDelta.setChangedDomains(graph().getDomains().stream().filter(d -> changedDomains.contains(d.getId()))
+				.collect(Collectors.toSet()));
+
 		return graphDelta;
 	}
 
@@ -263,10 +300,11 @@ public class GraphService {
 
 	public GraphDelta deleteNode(UUID id) {
 		var graphDelta = new GraphDelta();
-		var removed = graph.getNodes().removeIf(n -> n.getId().equals(id));
-		if (!removed) {
+		var node = graph.getNodes().stream().filter(n -> n.getId().equals(id)).findFirst().orElseThrow(() -> {
 			throw new ClientErrorException(Status.NOT_FOUND);
-		}
+		});
+		graph.getNodes().remove(node);
+
 		graphDelta.getRemovedNodes().add(id);
 		var removedRelationIds = graph.getRelations().stream()
 				.filter(r -> r.getSourceId().equals(id) || r.getTargetId().equals(id)).map(Relation::getId)
@@ -275,6 +313,8 @@ public class GraphService {
 		graph.getRelations().removeIf(r -> removedRelationIds.contains(r.getId()));
 
 		graphDelta.setRemovedRelations(removedRelationIds);
+		graphDelta.setChangedDomains(graph().getDomains().stream().filter(d -> node.getDomainIds().contains(d.getId()))
+				.collect(Collectors.toSet()));
 		return graphDelta;
 	}
 
@@ -302,6 +342,8 @@ public class GraphService {
 		graph.getRelations().add(rel);
 
 		graphDelta.getChangedRelations().add(rel);
+		graphDelta.setChangedDomains(graph().getDomains().stream().filter(d -> rel.getDomainIds().contains(d.getId()))
+				.collect(Collectors.toSet()));
 
 		return graphDelta;
 
@@ -309,25 +351,30 @@ public class GraphService {
 
 	public GraphDelta deleteRelation(UUID id) {
 		var graphDelta = new GraphDelta();
-		var removed = graph.getRelations().removeIf(r -> r.getId().equals(id));
-		if (removed) {
-			graphDelta.getRemovedRelations().add(id);
-		} else {
+		var removed = graph.getRelations().stream().filter(r -> r.getId().equals(id)).findFirst().orElseThrow(() -> {
 			throw new ClientErrorException(Status.NOT_FOUND);
-		}
+		});
+		graphDelta.getRemovedRelations().add(removed.getId());
+
+		graphDelta.setChangedDomains(graph().getDomains().stream()
+				.filter(d -> removed.getDomainIds().contains(d.getId())).collect(Collectors.toSet()));
 		return graphDelta;
 	}
 
 	public GraphDelta updateRelation(UUID id, RelationUpdate model) {
+		var changeDomainIds = new HashSet<UUID>(model.domainIds());
 		checkDomainIds(model.domainIds());
 		var graphDelta = new GraphDelta();
 		var relation = relationById(id);
+		changeDomainIds.addAll(relation.getDomainIds());
 		relation.setType(model.type());
 		relation.setPrimary(model.primary());
 		relation.setMultiple(model.multiple());
 		relation.setProperties(model.properties());
 		relation.setDomainIds(model.domainIds());
 		graphDelta.getChangedRelations().add(relation);
+		graphDelta.setChangedDomains(graph().getDomains().stream().filter(d -> changeDomainIds.contains(d.getId()))
+				.collect(Collectors.toSet()));
 		return graphDelta;
 	}
 
@@ -344,8 +391,10 @@ public class GraphService {
 		}
 	}
 
-	public ObjectNode buildJsonModel(UUID id) {
-		return new JsonBuilder(new GraphModel(graph), id, false).getJson();
+	public ObjectNode buildDomainJsonModel(UUID id) {
+		var graphModel = new GraphModel(graph);
+		var json = new JsonBuilder(graphModel, id, false).getJson();
+		return json;
 	}
 
 	public void reset() {

@@ -1,4 +1,4 @@
-package com.prodyna.mifune.api;
+package com.prodyna.mifune.core.schema;
 
 /*-
  * #%L
@@ -20,19 +20,7 @@ package com.prodyna.mifune.api;
  * #L%
  */
 
-import java.io.InputStream;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.core.MediaType;
-import org.jboss.resteasy.reactive.PartType;
-import org.jboss.resteasy.reactive.multipart.FileUpload;
+import java.util.Map;
 
-public class MultipartBody {
-
-	@FormParam("file")
-	@PartType(MediaType.APPLICATION_OCTET_STREAM)
-	public FileUpload file;
-
-	@FormParam("name")
-	@PartType(MediaType.TEXT_PLAIN)
-	public String name;
+public record QueryStatement(String cypher, Map<String, Object> parameter) {
 }

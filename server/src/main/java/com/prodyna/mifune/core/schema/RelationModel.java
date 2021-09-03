@@ -21,10 +21,8 @@ package com.prodyna.mifune.core.schema;
  */
 
 import com.prodyna.mifune.domain.Property;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RelationModel {
 
@@ -90,5 +88,13 @@ public class RelationModel {
 
 	public void setProperties(List<Property> properties) {
 		this.properties = properties;
+	}
+
+	public String varName() {
+		var type = getType();
+		var parts = Arrays.asList(type.split("_"));
+		var varName = parts.stream().map(String::toLowerCase).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+				.collect(Collectors.joining());
+		return varName.substring(0, 1).toLowerCase() + varName.substring(1);
 	}
 }

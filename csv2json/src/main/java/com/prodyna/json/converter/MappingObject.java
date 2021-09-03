@@ -50,8 +50,12 @@ public class MappingObject {
             objectNode.put(k, (Double) v);
           } else if (v instanceof String) {
             objectNode.put(k, (String) v);
+          } else if (v instanceof Long) {
+            objectNode.put(k, (Long) v);
           } else if (v instanceof Float) {
             objectNode.put(k, (Float) v);
+          } else if (v instanceof Boolean) {
+            objectNode.put(k, (Boolean) v);
           } else if (!Objects.isNull(v)) {
             throw new IllegalStateException();
           }
