@@ -26,7 +26,7 @@ export const useStyles = makeStyles((theme: Theme) =>
         margin: 8,
         backgroundColor: 'rgba(220, 220, 220, 0.7)',
         maxWidth: 300,
-        borderRadius: 30
+        borderRadius: 5
       },
       formControl: {
         margin: theme.spacing(3),

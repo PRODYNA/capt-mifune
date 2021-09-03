@@ -31,8 +31,15 @@ export class D3Helper {
   }
 
   static buildRelationPath = (rel: D3Relation) =>{
-    let source = rel.source as D3Node;
-    let target = rel.target as D3Node;
+    var source:D3Node;
+    var target:D3Node;
+    if(((rel.source  as D3Node).x??0.) <( (rel.target as D3Node).x??0.)){
+       source = rel.source as D3Node;
+       target = rel.target as D3Node;
+    }else{
+      source = rel.target as D3Node;
+      target = rel.source as D3Node;
+    }
     let sx = source.x ?? 0.
     let sy = source.y ?? 0.
     let tx = target.x ?? 0.

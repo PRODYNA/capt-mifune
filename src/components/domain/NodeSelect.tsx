@@ -37,8 +37,6 @@ export const NodeSelect = (props: NodeSelectProps) => {
   return (
     <Select
       className={props.className}
-      labelId="demo-mutiple-chip-label"
-      id="demo-mutiple-chip"
       value={props.nodeId}
       onChange={(e) => {
         let node = props.nodes.filter(
@@ -49,8 +47,9 @@ export const NodeSelect = (props: NodeSelectProps) => {
         console.log(node.label);
         console.log("select end");
         props.updateNode(node);
+        e.stopPropagation()
       }}
-      input={<Input id="select-multiple-chip" />}
+      input={<Input/>}
       MenuProps={MenuProps}
     >
       {props.nodes.map((n) => (

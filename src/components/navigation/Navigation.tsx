@@ -3,6 +3,7 @@ import BottomNavigation from "@material-ui/core/BottomNavigation";
 import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
 import CloudUpload from "@material-ui/icons/CloudUpload";
 import SaveIcon from "@material-ui/icons/Save";
+import PieChartIcon from '@material-ui/icons/PieChart';
 import RotateRightIcon from "@material-ui/icons/RotateRight";
 import BubbleChartIcon from "@material-ui/icons/BubbleChart";
 import {makeStyles} from "@material-ui/core";
@@ -88,6 +89,14 @@ export function Navigation() {
                     graphService.persistGraph().then((e) => console.log(e));
                 }}
                 icon={<SaveIcon/>}
+            />
+            <BottomNavigationAction
+                label="Analytics"
+                onClick={(e) => {
+                    history.push("/analytics");
+                    e.stopPropagation();
+                }}
+                icon={<PieChartIcon/>}
             />
         </BottomNavigation>
     );
