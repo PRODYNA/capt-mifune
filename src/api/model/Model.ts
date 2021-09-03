@@ -5,7 +5,8 @@ export interface Graph {
 }
 
 export interface GraphDelta {
-  domains: Domain[];
+  trigger: string
+  changedDomains: Domain[];
   changedNodes: Node[];
   changedRelations: Relation[];
   removedDomains: string[];

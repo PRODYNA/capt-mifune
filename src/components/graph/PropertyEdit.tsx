@@ -87,7 +87,7 @@ export const PropertyEdit = (props: PropertyEditProps) => {
               value={model.type}
               onChange={updateType}
             >
-              {["string", "long"].map((t) => (
+              {['string', 'int', 'double', 'long'].map((t) => (
                 <MenuItem key={t} value={t}>
                   {t}
                 </MenuItem>

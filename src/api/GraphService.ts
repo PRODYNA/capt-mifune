@@ -15,6 +15,15 @@ import {
 import { AxiosResponse } from "axios";
 
 export class GraphService {
+
+  data(domainId: String, results : String[], orders: String[]=[], filters:String[]=[]) :Promise<any[]> {
+    return rest.get<any[]>("data/domain/" + domainId, {params: {results: results, orders: orders,filters:filters}})
+        .then((res) => {
+      return res.data;
+    });
+
+  }
+
   domainGet(id: string): Promise<Domain> {
     return rest.get<Domain>("graph/domain/" + id).then((res) => {
       console.log("domainGet response", res.data);
@@ -50,6 +59,7 @@ export class GraphService {
       .delete<GraphDelta>("graph/domain/" + id)
       .then((res) => res.data);
   }
+
   domainImport(id: string): Promise<String> {
     return rest
       .get<String>("graph/domain/" + id + "/import")
@@ -63,9 +73,9 @@ export class GraphService {
     });
   }
 
-  nodePost(node: NodeCreate): Promise<Node> {
+  nodePost(node: NodeCreate): Promise<GraphDelta> {
     return rest
-      .post<Node>("graph/node", this.cleanNode(node))
+      .post<GraphDelta>("graph/node", this.cleanNode(node))
       .then((r) => r.data);
   }
 
@@ -101,6 +111,11 @@ export class GraphService {
     return rest.get("graph/domain/" + domain.id + "/mapping");
   }
 
+  loadQueryKeys(domain: Domain): Promise<string[]> {
+    return rest.get("data/domain/" + domain.id + "/keys")
+        .then( r => r.data);
+  }
+
   cleanNode(node: NodeCreate | NodeUpdate): NodeCreate | NodeUpdate {
     return {
       label: node.label,
@@ -127,6 +142,7 @@ export class GraphService {
   persistGraph(): Promise<any> {
     return rest.post<GraphDelta>("graph").then((r) => r.data);
   }
+
 }
 
 const graphService = new GraphService();

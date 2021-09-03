@@ -31,14 +31,14 @@ export const Graph = () => {
   const [nodes, setNodes] = useState<D3Node[]>([]);
   const [relations, setRelations] = useState<D3Relation[]>([]);
   const [selected, setSelected] = useState<D3Node | D3Relation>();
-  const [upload, setUpload] = useState(false);
   const d3Container = useRef(null);
 
   function updateState(graphDelta: GraphDelta) {
     setDomains(
       domains.filter(
-        (d) => !graphDelta.removedDomains.some((id) => id === d.id)
-      )
+        (d) => !graphDelta.removedDomains.concat(graphDelta.changedDomains.map(d=> d.id)).some((id) => id === d.id)
+
+      ).concat(graphDelta.changedDomains)
     );
     updateNodes(graphDelta);
     updateRelations(graphDelta);
@@ -163,6 +163,19 @@ export const Graph = () => {
         .classed("node", true);
     }
 
+    function drawNodeLabel(svg: d3.Selection<null, unknown, null, undefined>) {
+      return svg
+          .append("g")
+          .selectAll("text")
+          .data(nodes)
+          .join("text")
+          .text((d) => d.node.label)
+          .attr("dominant-baseline", "middle")
+          .attr("text-anchor", "middle")
+          .attr("class", "node-label")
+          .attr("background-color", n => n.node.color);
+    }
+
     function drawSelectionIndicator(
       svg: d3.Selection<null, unknown, null, undefined>
     ) {
@@ -211,40 +224,32 @@ export const Graph = () => {
 
       // @ts-ignore
       selection
-        .join("text")
-        .append("textPath")
-        .attr("href", (d) => "#" + d.relation.id)
-        .text((d) => d.relation.type)
-        .attr("dominant-baseline", "middle")
-        .attr("startOffset", "50%")
-        .attr("text-anchor", "middle")
-        .attr("class", "relation-label");
-      return relation;
-    }
+          .join("text")
+          .attr("dominant-baseline", "middle")
+          .append("textPath")
+          .attr("startOffset", "50%")
+          .attr("text-anchor", "middle")
+          .attr("href", (d) => "#" + d.relation.id)
+          .text((d) => d.relation.type + (d.relation.multiple?' []':'')
+      + (d.relation.primary?'*':''))
 
-    function drawNodeLabel(svg: d3.Selection<null, unknown, null, undefined>) {
-      return svg
-        .append("g")
-        .selectAll("text")
-        .data(nodes)
-        .join("text")
-        .text((d) => d.node.label)
-        .attr("dominant-baseline", "middle")
-        .attr("text-anchor", "middle")
-        .attr("class", "node-label");
+
+
+          .attr("class", "relation-label");
+      return relation;
     }
 
     function nodeMouseEvents(simulation: d3.Simulation<any, any>, node: any) {
       const dragstart = (event: any, d: any) => {
-        d.fx = d.x;
-        d.fy = d.y;
       };
       const dragged = (event: any, d: any) => {
         d.fx = event.x;
         d.fy = event.y;
-        simulation.restart();
+        simulation.alphaTarget(0.3).restart();
       };
-      const draggedend = (event: any, d: any) => {};
+      const dragend = (event: any, d: any) => {
+        simulation.stop();
+      };
 
       const click = (event: any, d: any) => {
         if (selected && "node" in selected && selected.node.id === d.id) {
@@ -260,7 +265,7 @@ export const Graph = () => {
         .drag()
         .on("start", dragstart)
         .on("drag", dragged)
-        .on("end", draggedend);
+        .on("end", dragend);
       node.call(drag).on("click", click);
     }
 
@@ -326,21 +331,23 @@ export const Graph = () => {
     function buildSimulation(relations: D3Relation[], tick: () => void) {
       return d3
         .forceSimulation()
-        .alpha(0.05)
+        // .alphaTarget(0.01)
         .nodes(nodes)
-        .force("charge", d3.forceManyBody().strength(-0.1))
+        .force("charge", d3.forceManyBody().strength(0.1))
         .force(
           "link",
           d3
             .forceLink<D3Node, D3Relation>(relations)
             .id((d) => d.node.id)
             .distance(100)
-            .strength(0.9)
+            .strength(0.1)
+
         )
-        .force("collision", d3.forceCollide().radius(70).strength(0.3))
-        .force("x", d3.forceX().strength(0.5))
-        .force("y", d3.forceY().strength(0.5))
-        .on("tick", tick);
+        .force("collision", d3.forceCollide().radius(100).strength(0.8))
+        .force("x", d3.forceX().strength(0.1))
+        .force("y", d3.forceY().strength(0.3))
+        .on("tick", tick)
+          ;
     }
 
     let width = window.innerWidth;
@@ -350,8 +357,8 @@ export const Graph = () => {
       const svg = d3.select(d3Container.current);
       svg.selectAll("*").remove();
       svg.append("style").text(`
-            .relation-label { font: bold 13px sans-serif; fill: white; text-shadow: 2px 2px 2px black; }
-            .node-label { font: bold 13px sans-serif; fill: white; text-shadow: 2px 2px 6px black; }
+            .relation-label { font: bold 13px sans-serif; fill: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+            .node-label { font: bold 13px sans-serif; fill: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
           `);
       var rels: D3Relation[];
       if (selected && "relation" in selected && selected.relation.id === "") {
@@ -447,11 +454,10 @@ export const Graph = () => {
           domains={domains}
           node={(selected as D3Node).node}
           nodes={nodes.map((n) => n.node)}
-          onCreate={(n) => {
-            graphService.nodePost(n).then((node) => {
-              let d3Node = wrapNode(node);
-              setNodes(nodes.concat(d3Node));
-              setSelected(d3Node);
+          onCreate={(node) => {
+            graphService.nodePost(node).then((graphDelta) => {
+              updateState(graphDelta)
+              setSelected(nodes.filter(n => n.node.id === node.id)[0]);
             });
           }}
           onSubmit={(n) => {
