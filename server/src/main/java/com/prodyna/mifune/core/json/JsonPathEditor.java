@@ -61,6 +61,34 @@ public class JsonPathEditor {
 			throw new IllegalArgumentException("Path not valid");
 		}
 	}
+	public JsonNode value(JsonNode node, String jsonPath) {
+		String[] parts = jsonPath.split("\\.");
+		String part = "";
+		for (int i = 0; i < parts.length; i++) {
+			part = parts[i];
+			if (part.endsWith("[]")) {
+				part = part.substring(0, part.length() - 2);
+				node = node.get(part);
+				if (node.isArray() && node.get(0).isObject()) {
+					node = node.get(0);
+				}
+			} else {
+				if (i < (parts.length - 1)) {
+					node = node.get(part);
+				}
+			}
+		}
+		if (node.isArray()) {
+			((ArrayNode) node).removeAll();
+			return ((ArrayNode) node).get(0);
+
+		} else if (node.isObject()) {
+			return ((ObjectNode) node).get(part);
+		} else {
+			throw new IllegalArgumentException("Path not valid");
+		}
+	}
+
 	public void remove(JsonNode node, String jsonPath) {
 		String[] parts = jsonPath.split("\\.");
 		String part = "";

@@ -68,6 +68,15 @@ class JsonConverterTest {
     var node = jsonNodes.elements().next();
     assertTrue(node.get("age").isInt());
     assertEquals(node.get("age").asInt(), 1);
+  } @Test
+  public void simpleDouble() {
+    JsonNode model = new ObjectMapper().createObjectNode().put("age", "0:double");
+    var csv = List.of(List.of("1"));
+    var jsonNodes = new JsonConverter().toJson(model, csv);
+    assertEquals(jsonNodes.size(), 1);
+    var node = jsonNodes.elements().next();
+    assertTrue(node.get("age").isDouble());
+    assertEquals(node.get("age").asDouble(), 1.);
   }
 
   @Test
