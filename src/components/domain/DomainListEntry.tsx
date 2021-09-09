@@ -95,7 +95,7 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
                 >
                     <AddIcon/>
                 </Fab>
-                <h3>{props.domain.name}</h3>
+                <span>{props.domain.name}</span>
             </div>
             {buildActive()}
 
