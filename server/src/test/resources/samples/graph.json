@@ -1,1 +1,166 @@
-{"domains":[{"id":"67233a4c-05a1-4df6-8a59-28372d8f776f","name":"Person","rootNodeId":"8e452c8e-907c-4a26-b1cb-439f9d8d0329","file":"employee.csv","columnMapping":{"person.name":"name","person.lead.person.id":"lead","person.id":"id","person.hasPosition[].position.name":"position"},"modelValid":true,"mappingValid":true},{"id":"f6214d95-223a-4cb3-a8f5-49df60bae4cb","name":"Car","rootNodeId":"906d0fb3-24e4-4ea4-99e9-3c7eb08845b1","file":"car.csv","columnMapping":{"car.driver.person.id":"employee","car.ps":"ps","car.driver.since":"since","car.fromVendor.company.name":"company","car.id":"car"},"modelValid":true,"mappingValid":true}],"nodes":[{"id":"8e452c8e-907c-4a26-b1cb-439f9d8d0329","label":"Person","domainIds":["67233a4c-05a1-4df6-8a59-28372d8f776f","f6214d95-223a-4cb3-a8f5-49df60bae4cb"],"color":"#8d0329","properties":[{"name":"id","type":"long","primary":true},{"name":"name","type":"string","primary":false}]},{"id":"9eabcb93-7cb9-40fa-abfd-3e8a637dd1c6","label":"Position","domainIds":["67233a4c-05a1-4df6-8a59-28372d8f776f"],"color":"#7dd1c6","properties":[{"name":"name","type":"string","primary":true}]},{"id":"906d0fb3-24e4-4ea4-99e9-3c7eb08845b1","label":"Car","domainIds":["f6214d95-223a-4cb3-a8f5-49df60bae4cb"],"color":"#8845b1","properties":[{"name":"id","type":"long","primary":true},{"name":"ps","type":"double","primary":false}]},{"id":"5c33a02d-9e7b-4720-99ef-b492991de1f1","label":"Company","domainIds":["f6214d95-223a-4cb3-a8f5-49df60bae4cb"],"color":"#1de1f1","properties":[{"name":"name","type":"string","primary":true}]}],"relations":[{"id":"5c25f7a2-acb7-4ef7-96af-e38b3dbb248e","sourceId":"8e452c8e-907c-4a26-b1cb-439f9d8d0329","targetId":"9eabcb93-7cb9-40fa-abfd-3e8a637dd1c6","domainIds":["67233a4c-05a1-4df6-8a59-28372d8f776f"],"type":"HAS_POSITION","primary":false,"multiple":true,"color":"#8d0329","properties":[]},{"id":"34cf82d6-94de-4b63-829e-9f2334eb4d1f","sourceId":"8e452c8e-907c-4a26-b1cb-439f9d8d0329","targetId":"8e452c8e-907c-4a26-b1cb-439f9d8d0329","domainIds":["67233a4c-05a1-4df6-8a59-28372d8f776f"],"type":"LEAD","primary":false,"multiple":false,"color":"#8d0329","properties":[]},{"id":"8e956c32-7a80-42b2-9113-206e602b398b","sourceId":"906d0fb3-24e4-4ea4-99e9-3c7eb08845b1","targetId":"5c33a02d-9e7b-4720-99ef-b492991de1f1","domainIds":["f6214d95-223a-4cb3-a8f5-49df60bae4cb"],"type":"FROM_VENDOR","primary":false,"multiple":false,"color":"#8845b1","properties":[]},{"id":"85955c89-ae4d-4556-8b2b-4ca5ac4a06bc","sourceId":"906d0fb3-24e4-4ea4-99e9-3c7eb08845b1","targetId":"8e452c8e-907c-4a26-b1cb-439f9d8d0329","domainIds":["f6214d95-223a-4cb3-a8f5-49df60bae4cb"],"type":"DRIVER","primary":false,"multiple":false,"color":"#8845b1","properties":[{"name":"since","type":"string","primary":false}]}]}
+{
+  "domains": [
+    {
+      "id": "67233a4c-05a1-4df6-8a59-28372d8f776f",
+      "name": "Person",
+      "rootNodeId": "8e452c8e-907c-4a26-b1cb-439f9d8d0329",
+      "file": "employee.csv",
+      "columnMapping": {
+        "person.name": "name",
+        "person.lead.person.id": "lead",
+        "person.id": "id",
+        "person.hasPosition[].position.name": "position"
+      },
+      "modelValid": true,
+      "mappingValid": true
+    },
+    {
+      "id": "f6214d95-223a-4cb3-a8f5-49df60bae4cb",
+      "name": "Car",
+      "rootNodeId": "906d0fb3-24e4-4ea4-99e9-3c7eb08845b1",
+      "file": "car.csv",
+      "columnMapping": {
+        "car.driver.person.id": "employee",
+        "car.ps": "ps",
+        "car.driver.since": "since",
+        "car.fromVendor.company.name": "company",
+        "car.id": "car"
+      },
+      "modelValid": true,
+      "mappingValid": true
+    }
+  ],
+  "nodes": [
+    {
+      "id": "8e452c8e-907c-4a26-b1cb-439f9d8d0329",
+      "label": "Person",
+      "domainIds": [
+        "67233a4c-05a1-4df6-8a59-28372d8f776f",
+        "f6214d95-223a-4cb3-a8f5-49df60bae4cb"
+      ],
+      "color": "#8d0329",
+      "properties": [
+        {
+          "name": "id",
+          "type": "long",
+          "primary": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "primary": false
+        }
+      ]
+    },
+    {
+      "id": "9eabcb93-7cb9-40fa-abfd-3e8a637dd1c6",
+      "label": "Position",
+      "domainIds": [
+        "67233a4c-05a1-4df6-8a59-28372d8f776f"
+      ],
+      "color": "#7dd1c6",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "primary": true
+        }
+      ]
+    },
+    {
+      "id": "906d0fb3-24e4-4ea4-99e9-3c7eb08845b1",
+      "label": "Car",
+      "domainIds": [
+        "f6214d95-223a-4cb3-a8f5-49df60bae4cb"
+      ],
+      "color": "#8845b1",
+      "properties": [
+        {
+          "name": "id",
+          "type": "long",
+          "primary": true
+        },
+        {
+          "name": "ps",
+          "type": "double",
+          "primary": false
+        }
+      ]
+    },
+    {
+      "id": "5c33a02d-9e7b-4720-99ef-b492991de1f1",
+      "label": "Company",
+      "domainIds": [
+        "f6214d95-223a-4cb3-a8f5-49df60bae4cb"
+      ],
+      "color": "#1de1f1",
+      "properties": [
+        {
+          "name": "name",
+          "type": "string",
+          "primary": true
+        }
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "id": "5c25f7a2-acb7-4ef7-96af-e38b3dbb248e",
+      "sourceId": "8e452c8e-907c-4a26-b1cb-439f9d8d0329",
+      "targetId": "9eabcb93-7cb9-40fa-abfd-3e8a637dd1c6",
+      "domainIds": [
+        "67233a4c-05a1-4df6-8a59-28372d8f776f"
+      ],
+      "type": "HAS_POSITION",
+      "primary": false,
+      "multiple": true,
+      "color": "#8d0329",
+      "properties": []
+    },
+    {
+      "id": "34cf82d6-94de-4b63-829e-9f2334eb4d1f",
+      "sourceId": "8e452c8e-907c-4a26-b1cb-439f9d8d0329",
+      "targetId": "8e452c8e-907c-4a26-b1cb-439f9d8d0329",
+      "domainIds": [
+        "67233a4c-05a1-4df6-8a59-28372d8f776f"
+      ],
+      "type": "LEAD",
+      "primary": false,
+      "multiple": false,
+      "color": "#8d0329",
+      "properties": []
+    },
+    {
+      "id": "8e956c32-7a80-42b2-9113-206e602b398b",
+      "sourceId": "906d0fb3-24e4-4ea4-99e9-3c7eb08845b1",
+      "targetId": "5c33a02d-9e7b-4720-99ef-b492991de1f1",
+      "domainIds": [
+        "f6214d95-223a-4cb3-a8f5-49df60bae4cb"
+      ],
+      "type": "FROM_VENDOR",
+      "primary": false,
+      "multiple": false,
+      "color": "#8845b1",
+      "properties": []
+    },
+    {
+      "id": "85955c89-ae4d-4556-8b2b-4ca5ac4a06bc",
+      "sourceId": "906d0fb3-24e4-4ea4-99e9-3c7eb08845b1",
+      "targetId": "8e452c8e-907c-4a26-b1cb-439f9d8d0329",
+      "domainIds": [
+        "f6214d95-223a-4cb3-a8f5-49df60bae4cb"
+      ],
+      "type": "DRIVER",
+      "primary": false,
+      "multiple": false,
+      "color": "#8845b1",
+      "properties": [
+        {
+          "name": "since",
+          "type": "string",
+          "primary": false
+        }
+      ]
+    }
+  ]
+}

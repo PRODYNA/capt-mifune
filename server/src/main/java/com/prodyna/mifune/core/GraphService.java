@@ -354,6 +354,7 @@ public class GraphService {
 		var removed = graph.getRelations().stream().filter(r -> r.getId().equals(id)).findFirst().orElseThrow(() -> {
 			throw new ClientErrorException(Status.NOT_FOUND);
 		});
+		graph.getRelations().remove(removed);
 		graphDelta.getRemovedRelations().add(removed.getId());
 
 		graphDelta.setChangedDomains(graph().getDomains().stream()

@@ -28,10 +28,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class SourceService {
+
+	@Inject
+	protected Logger logger;
 
 	@ConfigProperty(name = "mifune.upload.dir")
 	protected String uploadDir;
@@ -39,10 +44,14 @@ public class SourceService {
 	public List<String> fileHeader(String fileName) {
 		var path = Paths.get(uploadDir, fileName);
 		try {
+			if (!path.toFile().exists()) {
+				return List.of();
+			}
 			return Files.lines(path).findFirst().map(s -> s.split(",")).map(Arrays::asList).stream()
 					.flatMap(Collection::stream).map(String::strip).collect(Collectors.toList());
 		} catch (IOException e) {
-			throw new RuntimeException();
+			logger.error(e.getMessage(), e);
+			return List.of();
 		}
 	}
 
