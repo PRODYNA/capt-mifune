@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {HeatMap} from "@nivo/heatmap";
 import {ChartWrapper} from "./ChartWrapper";
+import {stringify} from "querystring";
+import {Slider} from "@material-ui/core";
 
 export const MifiuneHeatMap = () => {
     const [labelX, setLabelX] = useState<string>();
@@ -9,9 +11,10 @@ export const MifiuneHeatMap = () => {
     const [keys, setKeys] = useState<any[]>();
     const [min, setMin] = useState<number>(Number.MAX_VALUE);
     const [max, setMax] = useState<number>(Number.MIN_VALUE);
+    const [heatMax, setHeatMax] = useState<number>();
 
 
-    function dataPreparation(data: any[]): any[]|undefined {
+    function dataPreparation(data: any[]): any[] | undefined {
 
         const resultMap = new Map(
             data
@@ -27,7 +30,7 @@ export const MifiuneHeatMap = () => {
         let max = Number.MIN_VALUE;
         let keys: string[] = [];
         data.forEach((d) => {
-            resultMap.get(d[labelX!!])?.set(d[labelY!!], d[count!!]);
+            resultMap.get(d[labelX!!])?.set(d[labelY!!], parseInt(d[count!!]).toFixed(2));
             keys.push(d[labelY!!]);
             if (d[count!!]) {
                 if (d[count!!] < min) {
@@ -50,7 +53,8 @@ export const MifiuneHeatMap = () => {
 
         setMin(min);
         setMax(max);
-        if(result.length<1 || keys.length < 1){
+        setHeatMax(min + ((max - min)/2))
+        if (result.length < 1 || keys.length < 1) {
             setKeys(undefined)
             return undefined
 
@@ -75,22 +79,30 @@ export const MifiuneHeatMap = () => {
             return <h1>Ups</h1>;
         }
         return (
-            <HeatMap
-                height={300 + data.length * 25}
-                width={window.innerWidth - 30}
-                data={data}
-                keys={keys}
-                indexBy={labelX}
-                axisTop={{ tickSize: 5, tickPadding: 5, tickRotation: -50, legend: '', legendOffset: 36 }}
-                colors={"spectral"}
-                isInteractive={true}
-                animate={false}
-                margin={{top: 200, right: 60, bottom: 60, left: 250}}
-                forceSquare={false}
-                minValue={min - (max - min) / 3}
-                maxValue={max - (max - min) / 3}
-                labelTextColor={{from: "color", modifiers: [["darker", 1.8]]}}
-            />
+            <>
+                <Slider
+                    min={min}
+                    max={max}
+                    value={heatMax}
+                    onChange={(e,v) => setHeatMax((v as number))}
+                />
+                <HeatMap
+                    height={300 + data.length * 25}
+                    width={window.innerWidth - 30}
+                    data={data}
+                    keys={keys}
+                    indexBy={labelX}
+                    axisTop={{tickSize: 5, tickPadding: 5, tickRotation: -50, legend: '', legendOffset: 36}}
+                    colors={"oranges"}
+                    isInteractive={true}
+                    animate={false}
+                    margin={{top: 200, right: 60, bottom: 60, left: 250}}
+                    forceSquare={false}
+                    minValue={min}
+                    maxValue={heatMax}
+                    labelTextColor={{from: "color", modifiers: [["darker", 1.8]]}}
+                />
+            </>
         );
     }
 
@@ -103,10 +115,10 @@ export const MifiuneHeatMap = () => {
                           {
                               label: "Value",
                               fnDefault: "count",
-                              fnOptions:["count","sum","avg","min","max"],
+                              fnOptions: ["count", "sum", "avg", "min", "max"],
                               onChange: (v: string) => {
                                   console.log(v)
-                                  setCount(v );
+                                  setCount(v);
                               }
                           }
                       ]}
