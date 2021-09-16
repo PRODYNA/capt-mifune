@@ -39,6 +39,7 @@ export const Pipelines = () => {
               <TableCell>Model Valid</TableCell>
               <TableCell>Mapping Valid</TableCell>
               <TableCell>Play</TableCell>
+              <TableCell>Clear</TableCell>
               <TableCell>Counter</TableCell>
               <TableCell align="right">ID</TableCell>
             </TableRow>
