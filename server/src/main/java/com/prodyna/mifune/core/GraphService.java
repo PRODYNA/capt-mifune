@@ -25,8 +25,8 @@ import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prodyna.mifune.core.json.JsonPathEditor;
+import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
-import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.*;
 import io.quarkus.runtime.StartupEvent;
 import java.io.IOException;
@@ -160,7 +160,7 @@ public class GraphService {
 		}
 
 		Map<String, String> mapping = d.getColumnMapping();
-		ObjectNode jsonModel = new JsonBuilder(new GraphModel(graph), d.getId(), true).getJson();
+		ObjectNode jsonModel = new GraphJsonBuilder(new GraphModel(graph), d.getId(), true).getJson();
 		List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
 		d.setMappingValid(mapping.keySet().containsAll(paths));
 	}
@@ -206,10 +206,11 @@ public class GraphService {
 
 	/**
 	 * This method generates a Graph Delta, to tell the Frontend which nodes are to
-	 * be deleted. In addition it calls the Deletion Service, to delete the nodes, related to
-	 * the deleted domain inside Neo4J.
+	 * be deleted. In addition it calls the Deletion Service, to delete the nodes,
+	 * related to the deleted domain inside Neo4J.
 	 *
-	 * @param id of the domain to be deleted
+	 * @param id
+	 *            of the domain to be deleted
 	 * @return GraphDelta to tell Fronted which nodes and relations are to be
 	 *         deleted
 	 */
@@ -409,7 +410,7 @@ public class GraphService {
 
 	public ObjectNode buildDomainJsonModel(UUID id) {
 		var graphModel = new GraphModel(graph);
-		var json = new JsonBuilder(graphModel, id, false).getJson();
+		var json = new GraphJsonBuilder(graphModel, id, false).getJson();
 		return json;
 	}
 

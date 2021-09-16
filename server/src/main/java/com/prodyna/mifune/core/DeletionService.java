@@ -21,7 +21,6 @@ package com.prodyna.mifune.core;
  */
 
 import com.prodyna.mifune.domain.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
-
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
 
