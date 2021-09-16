@@ -80,4 +80,9 @@ public class NodeModel {
 	public void setProperties(List<Property> properties) {
 		this.properties = properties;
 	}
+
+	public String varName() {
+		var label = getLabel();
+		return label.substring(0, 1).toLowerCase() + label.substring(1);
+	}
 }

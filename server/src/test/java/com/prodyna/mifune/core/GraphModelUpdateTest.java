@@ -23,7 +23,7 @@ package com.prodyna.mifune.core;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prodyna.mifune.core.schema.CypherBuilder;
+import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Graph;
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
-class GraphModelTest {
+class GraphModelUpdateTest {
 
 	public static final UUID DOMAIN_ID = UUID.randomUUID();
 
@@ -64,7 +64,7 @@ class GraphModelTest {
 				}
 				""".replaceAll("\\$userId", userNodeId.toString()).replaceAll("\\$domainId", DOMAIN_ID.toString());
 		var updateModel = """
-				{"user":{"id":1}}
+				{"user":{"id":"long"}}
 				""";
 		var updateCypher = """
 				merge(var_1:User {id:$model.user.id})
@@ -72,6 +72,7 @@ class GraphModelTest {
 				merge(var_1)<-[source:DOMAIN]-(domain)
 				on create set source.lines = $model.lines
 				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				with *
 				return 'done'
 				""";
 		validateModel(graphModel, updateModel, updateCypher);
@@ -107,7 +108,7 @@ class GraphModelTest {
 				    "type":"FRIEND",
 				    "multiple": true,
 				    "properties":[
-				      {"name":"since", "type":"long"}
+				      {"name":"since", "type":"string"}
 				    ]
 				}]
 				}
@@ -116,12 +117,12 @@ class GraphModelTest {
 		var updateModel = """
 				{
 				  "user" : {
-				    "id" : 1,
+				    "id" : "long",
 				    "name" : "string",
 				    "friend" : [ {
-				      "since" : 1,
+				      "since" : "string",
 				      "user" : {
-				        "id" : 1,
+				        "id" : "long",
 				        "name" : "string"
 				      }
 				    } ]
@@ -139,12 +140,12 @@ class GraphModelTest {
 					call {
 					return 1 union
 					with var_1
-					with *
 					unwind $model.user.friend as var_2
 					merge(var_3:User {id:var_2.user.id})
 					set var_3.name = coalesce(var_2.user.name, var_3.name)
 					merge(var_1)-[friend:FRIEND]->(var_3)
 					set friend.since = coalesce(var_2.since, friend.since)
+					with *
 					return 1
 					}
 				return 'done'
@@ -210,7 +211,16 @@ class GraphModelTest {
 				.replaceAll("\\$hasCarId", UUID.randomUUID().toString())
 				.replaceAll("\\$domainId", DOMAIN_ID.toString());
 		var updateModel = """
-				{"user":{"id":1, "hasCar":{"car":{"id":1}}}}
+				{
+					"user":{
+						"id":"long",
+						"hasCar":{
+							"car":{
+								"id":"long"
+							}
+						}
+					}
+				}
 				""";
 
 		var updateCypher = """
@@ -226,6 +236,7 @@ class GraphModelTest {
 					with * where 1=1 and exists($model.user.hasCar.car.id)
 					merge(var_2:Car {id:$model.user.hasCar.car.id})
 					merge(var_1)-[hasCar:HAS_CAR]->(var_2)
+					with *
 					return 1
 					}
 				return 'done'
@@ -290,7 +301,7 @@ class GraphModelTest {
 				      "properties": [
 				        {
 				          "name": "since",
-				          "type": "long",
+				          "type": "string",
 				          "primary": false
 				        }
 				      ]
@@ -305,11 +316,11 @@ class GraphModelTest {
 		var updateModel = """
 				{
 				  "user":{
-				    "id":1,
+				    "id":"long",
 				    "hasCar":[{
-				      "since": 1,
+				      "since": "string",
 				      "car":{
-				        "id":1
+				        "id":"long"
 				        }
 				    }]
 				  }
@@ -326,11 +337,11 @@ class GraphModelTest {
 					call {
 					return 1 union
 					with var_1
-					with *
 					unwind $model.user.hasCar as var_2
 					merge(var_3:Car {id:var_2.car.id})
 					merge(var_1)-[hasCar:HAS_CAR]->(var_3)
 					set hasCar.since = coalesce(var_2.since, hasCar.since)
+					with *
 					return 1
 					}
 				return 'done'
@@ -393,7 +404,7 @@ class GraphModelTest {
 				       "properties": [
 				         {
 				           "name": "since",
-				           "type": "long",
+				           "type": "string",
 				           "primary": true
 				         }
 				       ]
@@ -408,12 +419,12 @@ class GraphModelTest {
 		var updateModel = """
 				 {
 				  "user":{
-				    "id": 1,
+				    "id": "long",
 				    "hasCar": [
 				    {
-				      "since": 1,
+				      "since": "string",
 				      "car":{
-				        "id": 1
+				        "id": "long"
 				      }
 				    }
 				    ]
@@ -431,10 +442,10 @@ class GraphModelTest {
 					call {
 					return 1 union
 					with var_1
-					with *
 					unwind $model.user.hasCar as var_2
 					merge(var_3:Car {id:var_2.car.id})
 					merge(var_1)-[hasCar:HAS_CAR {since:var_2.since}]->(var_3)
+					with *
 					return 1
 					}
 				return 'done'
@@ -504,10 +515,10 @@ class GraphModelTest {
 		var updateModel = """
 				 {
 				  "day":{
-				    "id": 1,
+				    "id": "long",
 				    "in": {
 				      "month":{
-				        "id": 1
+				        "id": "long"
 				      }
 				    }
 				  }
@@ -521,6 +532,7 @@ class GraphModelTest {
 				merge(var_1)<-[source:DOMAIN]-(domain)
 				on create set source.lines = $model.lines
 				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				with *
 				return 'done'
 				""";
 		validateModel(graphModel, updateModel, updateCypher);
@@ -532,7 +544,7 @@ class GraphModelTest {
 		var internalGraphModel = new GraphModel(graph);
 		var jsonBuilder = new JsonBuilder(internalGraphModel, DOMAIN_ID, false);
 		assertEquals(node.toPrettyString(), jsonBuilder.getJson().toPrettyString());
-		var builder = new CypherBuilder(internalGraphModel, DOMAIN_ID);
+		var builder = new CypherUpdateBuilder(internalGraphModel, DOMAIN_ID);
 		assertEquals(updateCypher.strip(), builder.getCypher());
 	}
 }

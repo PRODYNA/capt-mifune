@@ -7,6 +7,8 @@
   <version>1.0.0-SNAPSHOT</version>
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
+    <license.licenseName>apache_2.0</license.licenseName>
+    <license.licenseResolver>${project.baseUri}/src/license</license.licenseResolver>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.source>16</maven.compiler.source>
     <maven.compiler.target>16</maven.compiler.target>
@@ -16,10 +18,8 @@
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
     <quarkus.platform.version>2.1.1.Final</quarkus.platform.version>
-    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
     <spotless-maven-plugin.version>2.12.1</spotless-maven-plugin.version>
-    <license.licenseName>apache_2.0</license.licenseName>
-    <license.licenseResolver>${project.baseUri}/src/license</license.licenseResolver>
+    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -39,11 +39,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-jackson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-mutiny</artifactId>
+      <artifactId>quarkus-resteasy-reactive-jackson</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -51,7 +47,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy</artifactId>
+      <artifactId>quarkus-resteasy-reactive</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -85,10 +81,6 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-neo4j</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-resteasy-multipart</artifactId>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -98,16 +90,19 @@
         <version>2.0.0</version>
         <executions>
           <execution>
-              <id>first</id>
-              <goals>
-                  <goal>update-file-header</goal>
-              </goals>
-              <phase>process-sources</phase>
-              <configuration>
-                <licenseName>apache_2.0</licenseName>
-                <organizationName>PRODYNA SE</organizationName>
-                <inceptionYear>2021</inceptionYear>
-              </configuration>
+            <id>first</id>
+            <phase>process-sources</phase>
+            <goals>
+              <goal>update-file-header</goal>
+            </goals>
+            <configuration>
+              <licenseName>apache_2.0</licenseName>
+              <organizationName>PRODYNA SE</organizationName>
+              <inceptionYear>2021</inceptionYear>
+              <excludes>
+                <exclude>**/graph.json</exclude>
+              </excludes>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -137,7 +132,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
         <configuration>
@@ -151,17 +145,16 @@
         <version>${spotless-maven-plugin.version}</version>
         <executions>
           <execution>
+            <phase>compile</phase>
             <goals>
               <goal>apply</goal>
             </goals>
-            <phase>compile</phase>
           </execution>
         </executions>
         <configuration>
           <java>
-            <importOrder/>
-            <eclipse>
-            </eclipse>
+            <importOrder />
+            <eclipse></eclipse>
           </java>
         </configuration>
       </plugin>

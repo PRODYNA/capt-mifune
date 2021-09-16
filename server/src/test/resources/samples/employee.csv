@@ -1,8 +1,8 @@
-id, name, position, leap
-1, Mario, RM,0
-2, Kristina, TL,1
-3, Kay, CBO,2
-3, Kay, Hacker,2
-4, Moritz, Hacker,1
-5, Dennis, Hacker,1
-6, Qin, Hacker,2
+id,name,position,lead
+1,Mario,RM
+2,Kristina,TL,1
+3,Kay,CBO,2
+3,Kay,Hacker,2
+4,Moritz,Hacker,1
+5,Dennis,Hacker,1
+6,Qin,Hacker,2

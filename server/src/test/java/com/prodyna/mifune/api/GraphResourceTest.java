@@ -80,8 +80,8 @@ class GraphResourceTest {
 		var sampleDomain = createSampleDomain();
 		var nodeCreate = new NodeCreate("Person", sampleDomain.getId());
 
-		given().when().body(nodeCreate).contentType(ContentType.JSON).post("/graph/node").then().statusCode(200)
-				.body("label", equalTo("Person"));
+		given().when().body(nodeCreate).contentType(ContentType.JSON).post("/graph/node").then().statusCode(200).log()
+				.body().body("changedNodes[0].label", equalTo("Person"));
 	}
 
 	@Test
@@ -162,7 +162,8 @@ class GraphResourceTest {
 		var nodeCreate = new NodeCreate(label, sampleDomain.getId());
 
 		return given().when().body(nodeCreate).contentType(ContentType.JSON).post("/graph/node").then().statusCode(200)
-				.body("label", equalTo(label)).extract().as(Node.class);
+				.body("changedNodes[0].label", equalTo(label)).extract().as(GraphDelta.class).getChangedNodes().stream()
+				.findFirst().orElseThrow();
 	}
 
 	private Relation buildRelationBetweenNodes(Node personNode, Node carNode, String type) {

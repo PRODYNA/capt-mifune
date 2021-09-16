@@ -38,7 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.reactive.MultipartForm;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,7 +55,7 @@ public class SourceResource {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response fileUpload(@MultipartForm MultipartBody upload) throws IOException {
-		Files.copy(upload.file, Paths.get(uploadDir, upload.name));
+		Files.copy(upload.file.uploadedFile(), Paths.get(uploadDir, upload.name));
 		return Response.ok().build();
 	}
 
