@@ -59,6 +59,11 @@ export class GraphService {
       .delete<GraphDelta>("graph/domain/" + id)
       .then((res) => res.data);
   }
+  domainClear(id: string): Promise<String> {
+    return rest
+      .delete<String>("graph/domain/" + id + "/clear")
+      .then((res) => res.data);
+  }
 
   domainImport(id: string): Promise<String> {
     return rest
