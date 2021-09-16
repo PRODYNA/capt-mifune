@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
+import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
-import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Graph;
 import java.io.IOException;
 import java.util.UUID;
@@ -113,7 +113,7 @@ class GraphModelUpdateTest {
 				}]
 				}
 				""".replaceAll("\\$nodeId", nodeId.toString()).replaceAll("\\$relId", relId.toString())
-				.replaceAll("\\$domainId", DOMAIN_ID.toString());;
+				.replaceAll("\\$domainId", DOMAIN_ID.toString());
 		var updateModel = """
 				{
 				  "user" : {
@@ -542,7 +542,7 @@ class GraphModelUpdateTest {
 		var graph = new ObjectMapper().createParser(graphModel).readValueAs(Graph.class);
 		var node = new ObjectMapper().readTree(updateModel);
 		var internalGraphModel = new GraphModel(graph);
-		var jsonBuilder = new JsonBuilder(internalGraphModel, DOMAIN_ID, false);
+		var jsonBuilder = new GraphJsonBuilder(internalGraphModel, DOMAIN_ID, false);
 		assertEquals(node.toPrettyString(), jsonBuilder.getJson().toPrettyString());
 		var builder = new CypherUpdateBuilder(internalGraphModel, DOMAIN_ID);
 		assertEquals(updateCypher.strip(), builder.getCypher());
