@@ -26,8 +26,8 @@ import com.opencsv.CSVReader;
 import com.prodyna.json.converter.JsonTransformer;
 import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
+import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
-import com.prodyna.mifune.core.schema.JsonBuilder;
 import com.prodyna.mifune.domain.Domain;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -78,19 +78,21 @@ public class ImportService {
 		var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
 		log.info(cypher);
 
-		ObjectNode jsonModel = new JsonBuilder(graphModel, domainId, false).getJson();
+		ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
 		cleanJsonModel(domain, jsonModel);
 
 		var transformer = new JsonTransformer(jsonModel, 1);
 		var importFile = Paths.get(uploadDir, domain.getFile());
 		var session = driver.asyncSession();
 
+		// Create the domain Node
 		var domainTask = Uni.createFrom()
 				.completionStage(session
 						.writeTransactionAsync(tx -> tx.runAsync("merge(d:Domain {id:$id}) set d.name = $name",
 								Map.of("id", domain.getId().toString(), "name", domain.getName())))
 						.thenCompose(r -> session.closeAsync().toCompletableFuture()));
 
+		// Create all nodes under this domain
 		var importTask = Multi.createFrom().publisher(FlowAdapters.toProcessor(transformer))
 				.emitOn(Infrastructure.getDefaultWorkerPool()).onItem().transformToUni(node -> {
 					var entry = new ObjectMapper().convertValue(node, Map.class);
