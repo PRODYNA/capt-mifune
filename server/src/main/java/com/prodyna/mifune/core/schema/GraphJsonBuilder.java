@@ -25,14 +25,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prodyna.mifune.domain.Property;
 import java.util.*;
 
-public class JsonBuilder {
+public class GraphJsonBuilder {
 
 	private final Set<String> labels = new HashSet<>();
 	private final ObjectNode json = new ObjectMapper().createObjectNode();
 	private final UUID domainId;
 	private final boolean primaryOnly;
 
-	public JsonBuilder(GraphModel graphModel, UUID domainId, boolean primaryOnly) {
+	public GraphJsonBuilder(GraphModel graphModel, UUID domainId, boolean primaryOnly) {
 		this.domainId = domainId;
 		this.primaryOnly = primaryOnly;
 		var rootNode = graphModel.rootNode(domainId);

@@ -21,6 +21,7 @@ package com.prodyna.mifune.api;
  */
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.prodyna.mifune.core.DeletionService;
 import com.prodyna.mifune.core.GraphService;
 import com.prodyna.mifune.core.ImportService;
 import com.prodyna.mifune.core.json.JsonPathEditor;
@@ -50,6 +51,9 @@ public class GraphResource {
 	protected GraphService graphService;
 	@Inject
 	protected ImportService importService;
+
+	@Inject
+	protected DeletionService deletionService;
 
 	@Inject
 	protected EventBus eventBus;
@@ -153,7 +157,13 @@ public class GraphResource {
 	@Path("/domain/{domainId}/import")
 	public Uni<String> runImport(@PathParam("domainId") UUID domainId) {
 		return importService.runImport(domainId);
+	}
 
+	@DELETE
+	@Path("/domain/{domainId}/clear")
+	public Uni<String> clearDomain(@PathParam("domainId") UUID domainId) {
+		deletionService.deleteDomainFromDatabase(domainId, graphService.graph());
+		return Uni.createFrom().item("OK");
 	}
 
 	/**
