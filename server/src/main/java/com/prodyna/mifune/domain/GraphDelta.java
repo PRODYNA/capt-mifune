@@ -26,11 +26,21 @@ import java.util.UUID;
 
 public class GraphDelta {
 
+	private UUID trigger;
 	private Set<UUID> removedDomains = new HashSet<UUID>();
+	private Set<Domain> changedDomains = new HashSet<Domain>();
 	private Set<Node> changedNodes = new HashSet<Node>();
 	private Set<UUID> removedNodes = new HashSet<UUID>();
 	private Set<Relation> changedRelations = new HashSet<Relation>();
 	private Set<UUID> removedRelations = new HashSet<UUID>();
+
+	public UUID getTrigger() {
+		return trigger;
+	}
+
+	public void setTrigger(UUID trigger) {
+		this.trigger = trigger;
+	}
 
 	public Set<UUID> getRemovedDomains() {
 		return removedDomains;
@@ -38,6 +48,14 @@ public class GraphDelta {
 
 	public void setRemovedDomains(Set<UUID> removedDomains) {
 		this.removedDomains = removedDomains;
+	}
+
+	public Set<Domain> getChangedDomains() {
+		return changedDomains;
+	}
+
+	public void setChangedDomains(Set<Domain> changedDomains) {
+		this.changedDomains = changedDomains;
 	}
 
 	public Set<Node> getChangedNodes() {

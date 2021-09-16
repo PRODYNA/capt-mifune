@@ -22,13 +22,16 @@ package com.prodyna.mifune.core.schema;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CypherContext {
+public class CypherUpdateContext {
 
-	public List<CypherContext> subContext = new ArrayList<>();
+	public List<CypherUpdateContext> subContext = new ArrayList<>();
 	private String label;
 	private boolean root = false;
 	private List<String> statements = new ArrayList<>();
@@ -89,11 +92,11 @@ public class CypherContext {
 		this.statements = statements;
 	}
 
-	public List<CypherContext> getSubContext() {
+	public List<CypherUpdateContext> getSubContext() {
 		return subContext;
 	}
 
-	public void setSubContext(List<CypherContext> subContext) {
+	public void setSubContext(List<CypherUpdateContext> subContext) {
 		this.subContext = subContext;
 	}
 
@@ -107,14 +110,14 @@ public class CypherContext {
 		vars.addAll(this.variables);
 		var statements = new ArrayList<>(this.statements);
 		if (!subContext.isEmpty()) {
-			statements.add("with *");
+			// statements.add("with *");
 		}
 
 		subContext.forEach(c -> {
 			var checks = "";
 			if (!c.existChecks.isEmpty()) {
 				checks = c.existChecks.stream().map("exists(%s)"::formatted)
-						.collect(Collectors.joining("and", " where 1=1 and ", ""));
+						.collect(Collectors.joining(" and ", "where 1=1 and ", ""));
 			}
 
 			var currentCounter = counter.incrementAndGet();
@@ -122,12 +125,14 @@ public class CypherContext {
 					call {
 					return %s union
 					with %s
-					with *%s
 					%s
 					return %s
 					}
-					""".formatted(currentCounter, vars.stream().collect(Collectors.joining(",")), checks,
-					c.toCypher(false, tabCount, counter, vars), currentCounter
+					""".formatted(currentCounter,
+					vars.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
+					Optional.of(checks).filter(Predicate.not(String::isBlank)).map(s -> "with * " + s + "\n").orElse("")
+							+ c.toCypher(false, tabCount, counter, vars),
+					currentCounter
 
 			);
 			statements.add(addTabs(subContext, tabCount + 1));

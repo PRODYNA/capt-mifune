@@ -1,4 +1,5 @@
-employee, car, company
-1, 1, BMW
-2, 2, VW
-3, 3, Audi
+employee,car,ps,since,company
+1,1,200,"2020-03-02",BMW
+2,2,150,"2020-03-02",VW
+3,3,180,"2020-03-02",Audi
+4,4,160,"2020-03-02",Audi
