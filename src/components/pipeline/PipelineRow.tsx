@@ -6,6 +6,7 @@ import WarningIcon from "@material-ui/icons/Warning";
 import DoneOutlineIcon from "@material-ui/icons/DoneOutline";
 import { IconButton, makeStyles, TableCell, TableRow } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 export const PipelineRow = (props: { domain: Domain }) => {
   const history = useHistory();
@@ -57,6 +58,16 @@ export const PipelineRow = (props: { domain: Domain }) => {
           }}
         >
           <PlayArrowIcon />
+        </IconButton>
+      </TableCell>
+      <TableCell align="left">
+        <IconButton
+          onClick={(e) => {
+            graphService.domainClear(props.domain.id);
+            e.stopPropagation();
+          }}
+        >
+          <DeleteIcon />
         </IconButton>
       </TableCell>
       <TableCell align="left">{message}</TableCell>
