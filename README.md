@@ -10,7 +10,7 @@ Start keycloak with
 docker run -p 8080:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin -e DB_VENDOR=H2 jboss/keycloak
 ```
 
-then go to https://localhost:8080/auth/admin and log in using the credentials provided (admin/admin).
+then go to http://localhost:8080/auth/admin and log in using the credentials provided (admin/admin).
 
 ## Available Scripts
 
