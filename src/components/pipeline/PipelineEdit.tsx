@@ -3,15 +3,15 @@ import { useHistory } from "react-router-dom";
 
 import { Domain, Source } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
-import { rest } from "../../api/axios";
 
 import FormSelect from "../form/FormSelect";
 import Formular from "../form/Formular";
 import SaveAndCancel from "../form/SavenAndCancel";
+import HttpService from "../../services/HttpService";
 
 interface DomainEditProps {
   domain: Domain;
-  onSubmit: (domain: Domain) => Promise<any> ;
+  onSubmit: (domain: Domain) => Promise<any>;
 }
 export const PipelineEdit = (props: DomainEditProps) => {
   const history = useHistory();
@@ -20,9 +20,11 @@ export const PipelineEdit = (props: DomainEditProps) => {
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
-    rest.get<Source[]>("/sources").then((r) => {
-      setSources(r.data);
-    });
+    HttpService.getAxiosClient()
+      .get<Source[]>("/sources")
+      .then((r) => {
+        setSources(r.data);
+      });
   }, [props.domain]);
 
   useEffect(() => {
@@ -39,14 +41,14 @@ export const PipelineEdit = (props: DomainEditProps) => {
       const data = sources.filter((s) => s.name === value.file)[0];
       if (data) {
         let header = data.header;
-        if(!(header.find( h => h === '') === '')){
-          header = [''].concat(header)
+        if (!(header.find((h) => h === "") === "")) {
+          header = [""].concat(header);
         }
-        console.log(JSON.stringify(header))
+        console.log(JSON.stringify(header));
         return header;
       }
     }
-    return [''];
+    return [""];
   };
 
   /**
@@ -98,10 +100,12 @@ export const PipelineEdit = (props: DomainEditProps) => {
   const values = getMenuItems();
 
   const childrens: React.ReactNode[] = getReactNodes(values);
-  let options = ['']
-  sources.map((source) => {
-    return source.name;
-  }).forEach(s => options.push(s));
+  let options = [""];
+  sources
+    .map((source) => {
+      return source.name;
+    })
+    .forEach((s) => options.push(s));
   childrens.unshift(
     <FormSelect
       key="FileSelection"
@@ -121,19 +125,18 @@ export const PipelineEdit = (props: DomainEditProps) => {
   );
 
   return (
-      <>
-        {/*<span>{JSON.stringify(getMenuItems())}</span>*/}
-    <Formular
-      childrens={childrens}
-      onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        console.log("domain edit " + value.name);
-        props.onSubmit(value).then(() => {
-          history.goBack();
-        });
-        event.preventDefault();
-
-      }}
-    />
-      </>
+    <>
+      {/*<span>{JSON.stringify(getMenuItems())}</span>*/}
+      <Formular
+        childrens={childrens}
+        onSubmit={(event: FormEvent<HTMLFormElement>) => {
+          console.log("domain edit " + value.name);
+          props.onSubmit(value).then(() => {
+            history.goBack();
+          });
+          event.preventDefault();
+        }}
+      />
+    </>
   );
 };
