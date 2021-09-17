@@ -7,10 +7,15 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 Start keycloak with
 
 ```
-docker run -p 8080:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin -e DB_VENDOR=H2 jboss/keycloak
+docker run -p 8082:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin -e DB_VENDOR=H2 jboss/keycloak
 ```
 
-then go to http://localhost:8080/auth/admin and log in using the credentials provided (admin/admin).
+then go to http://localhost:8082/auth/admin and log in using the credentials provided (admin/admin).
+In keycloak, you should
+
+1. create a realm "capt-mifune-ui" and select it,
+2. create a user by setting up username and password credentials,
+3. create a client "react-client" with root URL "http://localhost:3000/", and leave everything else at default.
 
 ## Available Scripts
 
