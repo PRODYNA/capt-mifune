@@ -13,9 +13,12 @@ docker run -p 8082:8080 -e KEYCLOAK_USER=admin -e KEYCLOAK_PASSWORD=admin -e DB_
 then go to http://localhost:8082/auth/admin and log in using the credentials provided (admin/admin).
 In keycloak, you should
 
-1. create a realm "capt-mifune-ui" and select it,
+1. create a realm "capt-mifune-ui" (if it doesn't already exists), and select it,
 2. create a user by setting up username and password credentials,
-3. create a client "react-client" with root URL "http://localhost:3000/", and leave everything else at default.
+3. create a client "react-client" with root URL "http://localhost:3000/" (if it doesn't already exists),
+4. leave everything else at default.
+
+You can go to http://localhost:8082/auth/realms/capt-mifune-ui/account/ for user account management.
 
 ## Available Scripts
 

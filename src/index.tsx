@@ -17,18 +17,22 @@ export async function loadEnv(): Promise<void> {
 }
 
 const renderApp = () => {
-  loadEnv().then(() => {
-    ReactDOM.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>,
-      document.getElementById("root")
-    );
-  });
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    document.getElementById("root")
+  );
 };
 
-UserService.initKeycloak(renderApp);
-HttpService.configure();
+loadEnv().then(() => {
+  if (localStorage.getItem("LOGIN_REQUIRED") === "true") {
+    UserService.initKeycloak(renderApp);
+    HttpService.configure();
+  } else {
+    renderApp();
+  }
+});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
