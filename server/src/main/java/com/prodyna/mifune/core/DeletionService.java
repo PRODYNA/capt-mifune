@@ -31,6 +31,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.async.ResultCursor;
 
 @ApplicationScoped
 public class DeletionService {
@@ -41,37 +42,44 @@ public class DeletionService {
 	protected Driver driver;
 
 	public void deleteDomainFromDatabase(UUID domainId, Graph actualGraph) {
-		var graph = actualGraph;
 		// get all node labels connected to domain id
-		List<Node> nodesToBeDeleted = graph.getNodes().stream().filter(n -> n.getDomainIds().contains(domainId))
+		List<Node> nodesToBeDeleted = actualGraph.getNodes().stream()
+				.filter(n -> n.getDomainIds().contains(domainId))
+				.filter(n -> n.getDomainIds().size()<=1)
+				.collect(Collectors.toList());
+	List<Relation> relationsToBeDeleted = actualGraph.getRelations().stream()
+				.filter(n -> n.getDomainIds().contains(domainId))
+				.filter(n -> n.getDomainIds().size()<=1)
 				.collect(Collectors.toList());
 
-		// check for each node if it's in another domain
-		List<Node> nodesAlsoInOtherDomain = new ArrayList<Node>();
-		for (Node node : nodesToBeDeleted) {
-			if (node.getDomainIds().size() > 1) {
-				nodesAlsoInOtherDomain.add(node);
-			}
-		}
-
-		nodesToBeDeleted.removeAll(nodesAlsoInOtherDomain);
 		// build cypher to delete these nodes with all corresponding relations detach
 		// delete
+		for (var rel : relationsToBeDeleted) {
+			var cypher = String.format("MATCH(a:%s)-[r:%s]->(b:%s) delete r",
+					actualGraph.getNodes().stream().filter(n -> n.getId().equals(rel.getSourceId())).findFirst().orElseThrow().getLabel(),
+					rel.getType(),
+					actualGraph.getNodes().stream().filter(n -> n.getId().equals(rel.getTargetId())).findFirst().orElseThrow().getLabel()
+			);
+			var session = driver.asyncSession();
+			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(ResultCursor::consumeAsync))
+					.thenCompose(response -> session.closeAsync()).thenApply(signal -> Response.noContent().build());
+		}
 		for (var node : nodesToBeDeleted) {
 			var cypher = String.format("MATCH(n:%s) detach delete n", node.getLabel());
 			var session = driver.asyncSession();
-			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(fn -> fn.consumeAsync()))
+			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(ResultCursor::consumeAsync))
 					.thenCompose(response -> session.closeAsync()).thenApply(signal -> Response.noContent().build());
 		}
 
+
 		// Delete Domain Node (used for line count)
-		Set<Domain> domains = graph.getDomains().stream().filter(domain -> domain.getId().equals(domainId))
+		Set<Domain> domains = actualGraph.getDomains().stream().filter(domain -> domain.getId().equals(domainId))
 				.collect(Collectors.toSet());
 		for (var domain : domains) {
 			String domainLabel = domain.getName();
 			var cypher = String.format("MATCH(n:Domain {name:\"%s\"}) detach delete n", domainLabel);
 			var session = driver.asyncSession();
-			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(fn -> fn.consumeAsync()))
+			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(ResultCursor::consumeAsync))
 					.thenCompose(response -> session.closeAsync()).thenApply(signal -> Response.noContent().build());
 		}
 
