@@ -87,14 +87,14 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
             {buildBadge()}
 
             <div className={classes.flexBox}>
-                <Fab title={"create node"} size={"small"} color={"primary"}
+                <IconButton title={"create node"} size={"small"} color={"primary"}
                      onClick={(e) => {
                          props.addNode(props.domain);
                          e.stopPropagation();
                      }}
                 >
                     <AddIcon/>
-                </Fab>
+                </IconButton>
                 <span>{props.domain.name}</span>
             </div>
             {buildActive()}

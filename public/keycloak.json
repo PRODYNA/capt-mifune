@@ -1,8 +1,8 @@
 {
-    "realm": "capt-mifune-ui",
-    "auth-server-url": "http://localhost:8082/auth/",
+    "realm": "master",
+    "auth-server-url": "http://localhost:8080/auth/",
     "ssl-required": "external",
-    "resource": "react-client",
+    "resource": "mifune-ui",
     "public-client": true,
     "confidential-port": 0
 }
