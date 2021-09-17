@@ -9,6 +9,8 @@ import SaveIcon from "@material-ui/icons/Save";
 import React, { useState } from "react";
 import HttpService from "../../services/HttpService";
 
+const rest = HttpService.getAxiosClient();
+
 interface UploadSourceProps {
   onSubmit: () => void;
 }
@@ -53,7 +55,7 @@ export const UploadSource = (props: UploadSourceProps) => {
         const data = new FormData();
         data.append("name", file.file.name);
         data.append("file", file.file);
-        HttpService.getAxiosClient()
+        rest
           .post("/sources", data, {
             // receive two parameter endpoint url ,form data
           })
