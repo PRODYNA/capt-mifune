@@ -81,7 +81,7 @@ public class GraphService {
 				log.error("fail to parse graph model", e);
 			}
 		} else {
-			log.warnv("no graph model found at {0}", modelPath);
+			log.warnv("no graph model found at {0}", modelPath.toAbsolutePath());
 		}
 
 	}
