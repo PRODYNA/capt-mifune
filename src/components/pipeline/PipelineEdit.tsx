@@ -9,6 +9,8 @@ import Formular from "../form/Formular";
 import SaveAndCancel from "../form/SavenAndCancel";
 import HttpService from "../../services/HttpService";
 
+const rest = HttpService.getAxiosClient();
+
 interface DomainEditProps {
   domain: Domain;
   onSubmit: (domain: Domain) => Promise<any>;
@@ -20,11 +22,9 @@ export const PipelineEdit = (props: DomainEditProps) => {
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
-    HttpService.getAxiosClient()
-      .get<Source[]>("/sources")
-      .then((r) => {
-        setSources(r.data);
-      });
+    rest.get<Source[]>("/sources").then((r) => {
+      setSources(r.data);
+    });
   }, [props.domain]);
 
   useEffect(() => {
