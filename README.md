@@ -15,7 +15,7 @@ In keycloak, you should
 
 1. create a realm "capt-mifune-ui" (if it doesn't already exists), and select it,
 2. create a user by setting up username and password credentials,
-3. create a client "react-client" with root URL "http://localhost:3000/", (if it doesn't already exists),
+3. create a client "react-client" with root URL "http://localhost:3000/" (if it doesn't already exists),
 4. leave everything else at default.
 
 You can go to http://localhost:8082/auth/realms/capt-mifune-ui/account/ for user account management.
