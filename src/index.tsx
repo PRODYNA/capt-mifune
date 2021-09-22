@@ -26,7 +26,7 @@ const renderApp = () => {
 };
 
 loadEnv().then(() => {
-  if (localStorage.getItem("LOGIN_REQUIRED") === "true") {
+  if (UserService.loginRequired()) {
     UserService.initKeycloak(renderApp);
     HttpService.configure();
   } else {
