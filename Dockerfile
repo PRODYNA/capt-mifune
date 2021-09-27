@@ -1,6 +1,12 @@
 FROM maven:3.8.1-adoptopenjdk-16 as builder
-COPY . .
-RUN mvn clean install
+COPY ./pom.xml ./pom.xml
+COPY ./csv2json ./csv2json
+COPY ./server/pom.xml ./server/pom.xml
+RUN mvn -f csv2json/pom.xml install -DskipTests
+RUN mvn dependency:go-offline
+COPY ./server ./server
+RUN mvn install -DskipTests
+
 
 FROM adoptopenjdk:16_36-jre-hotspot-focal
 
