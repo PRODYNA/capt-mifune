@@ -19,6 +19,8 @@
     "axios": "^0.21.1",
     "bootstrap": "^4.6.0",
     "d3": "^6.3.1",
+    "keycloak-js": "^15.0.2",
+    "ng-event-source": "^1.0.14",
     "react": "^17.0.1",
     "react-bootstrap": "^1.6.0",
     "react-color": "^2.19.3",

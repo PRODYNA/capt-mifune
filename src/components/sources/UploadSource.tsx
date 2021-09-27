@@ -7,7 +7,9 @@ import {
 } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
 import React, { useState } from "react";
-import { rest } from "../../api/axios";
+import HttpService from "../../services/HttpService";
+
+const rest = HttpService.getAxiosClient();
 
 interface UploadSourceProps {
   onSubmit: () => void;

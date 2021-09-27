@@ -1,4 +1,4 @@
-import { rest } from "./axios";
+import HttpService from "../services/HttpService";
 import {
   Domain,
   DomainCreate,
@@ -13,15 +13,38 @@ import {
   RelationUpdate,
 } from "./model/Model";
 import { AxiosResponse } from "axios";
+import {EventSourcePolyfill} from "ng-event-source";
+import UserService from "../services/UserService";
+import {ENV} from "../env/Environments";
+
+const rest = HttpService.getAxiosClient();
 
 export class GraphService {
+  data(
+    domainId: String,
+    results: String[],
+    orders: String[] = [],
+    filters: String[] = []
+  ): Promise<any[]> {
+    return rest
+      .get<any[]>("data/domain/" + domainId, {
+        params: { results: results, orders: orders, filters: filters },
+      })
+      .then((res) => {
+        return res.data;
+      });
+  }
 
-  data(domainId: String, results : String[], orders: String[]=[], filters:String[]=[]) :Promise<any[]> {
-    return rest.get<any[]>("data/domain/" + domainId, {params: {results: results, orders: orders,filters:filters}})
-        .then((res) => {
-      return res.data;
-    });
-
+  importSource(domainId: string): EventSourcePolyfill {
+    let headers = {};
+    if(localStorage.getItem("LOGIN_REQUIRED")?.toUpperCase() === "TRUE"){
+      headers = {
+        'Authorization': `Bearer ${UserService.getToken()}`
+      }
+    }
+   return  new EventSourcePolyfill(
+       localStorage.getItem(ENV.API_SERVER)+"/graph/domain/" + domainId + "/stats",{headers: headers}
+    );
   }
 
   domainGet(id: string): Promise<Domain> {
@@ -117,8 +140,7 @@ export class GraphService {
   }
 
   loadQueryKeys(domain: Domain): Promise<string[]> {
-    return rest.get("data/domain/" + domain.id + "/keys")
-        .then( r => r.data);
+    return rest.get("data/domain/" + domain.id + "/keys").then((r) => r.data);
   }
 
   cleanNode(node: NodeCreate | NodeUpdate): NodeCreate | NodeUpdate {
@@ -140,14 +162,13 @@ export class GraphService {
       targetId: relation.targetId,
       multiple: relation.multiple,
       primary: relation.primary,
-      properties: relation.properties
+      properties: relation.properties,
     };
   }
 
   persistGraph(): Promise<any> {
     return rest.post<GraphDelta>("graph").then((r) => r.data);
   }
-
 }
 
 const graphService = new GraphService();
