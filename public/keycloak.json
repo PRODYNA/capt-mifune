@@ -1,8 +1,8 @@
 {
-    "realm": "master",
-    "auth-server-url": "http://localhost:8080/auth/",
+    "realm": "mifune",
+    "auth-server-url": "http://localhost:8888/auth/",
     "ssl-required": "external",
-    "resource": "mifune-ui",
+    "resource": "mifune-app",
     "public-client": true,
     "confidential-port": 0
 }
