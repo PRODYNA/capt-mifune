@@ -29,6 +29,11 @@ const isLoggedIn = () => !!_kc.token;
 const updateToken = (successCallback: () => Promise<AxiosRequestConfig>) =>
   _kc.updateToken(5).then(successCallback).catch(doLogin);
 
+const loginRequired = (): boolean =>
+  // Strings should be normalized to uppercase.
+  // A small group of characters, when they are converted to lowercase, cannot make a round trip.
+  localStorage.getItem("LOGIN_REQUIRED")?.toUpperCase() === "TRUE";
+
 const UserService = {
   initKeycloak,
   doLogin,
@@ -36,6 +41,7 @@ const UserService = {
   isLoggedIn,
   getToken,
   updateToken,
+  loginRequired,
 };
 
 export default UserService;
