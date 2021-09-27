@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {HeatMap} from "@nivo/heatmap";
 import {ChartWrapper} from "./ChartWrapper";
-import {stringify} from "querystring";
 import {Slider} from "@material-ui/core";
 
 export const MifiuneHeatMap = () => {
@@ -94,7 +93,7 @@ export const MifiuneHeatMap = () => {
                     indexBy={labelX}
                     axisTop={{tickSize: 5, tickPadding: 5, tickRotation: -50, legend: '', legendOffset: 36}}
                     colors={"oranges"}
-                    isInteractive={true}
+                    enableLabels={false}
                     animate={false}
                     margin={{top: 200, right: 60, bottom: 60, left: 250}}
                     forceSquare={false}

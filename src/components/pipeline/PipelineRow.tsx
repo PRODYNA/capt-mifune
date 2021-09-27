@@ -7,6 +7,9 @@ import DoneOutlineIcon from "@material-ui/icons/DoneOutline";
 import { IconButton, makeStyles, TableCell, TableRow } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
+import HttpService from "../../services/HttpService";
+import UserService from "../../services/UserService";
+import {EventSourcePolyfill} from "ng-event-source";
 
 export const PipelineRow = (props: { domain: Domain }) => {
   const history = useHistory();
@@ -17,12 +20,10 @@ export const PipelineRow = (props: { domain: Domain }) => {
     },
   })();
 
-  const [message, setMessage] = useState();
+  const [message, setMessage] = useState<String>();
 
   useEffect(() => {
-    let sseClient = new EventSource(
-      "http://localhost:8081/graph/domain/" + props.domain.id + "/stats"
-    );
+    let sseClient = graphService.importSource(props.domain.id);
     sseClient.onmessage = function (e) {
       setMessage(e.data);
     };
@@ -30,7 +31,7 @@ export const PipelineRow = (props: { domain: Domain }) => {
     return function cleanUp() {
       sseClient.close();
     };
-  }, []);
+  }, [props.domain.id]);
 
   function valid(valid: boolean) {
     if (valid) {
