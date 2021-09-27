@@ -43,23 +43,20 @@ public class DeletionService {
 
 	public void deleteDomainFromDatabase(UUID domainId, Graph actualGraph) {
 		// get all node labels connected to domain id
-		List<Node> nodesToBeDeleted = actualGraph.getNodes().stream()
-				.filter(n -> n.getDomainIds().contains(domainId))
-				.filter(n -> n.getDomainIds().size()<=1)
-				.collect(Collectors.toList());
-	List<Relation> relationsToBeDeleted = actualGraph.getRelations().stream()
-				.filter(n -> n.getDomainIds().contains(domainId))
-				.filter(n -> n.getDomainIds().size()<=1)
+		List<Node> nodesToBeDeleted = actualGraph.getNodes().stream().filter(n -> n.getDomainIds().contains(domainId))
+				.filter(n -> n.getDomainIds().size() <= 1).collect(Collectors.toList());
+		List<Relation> relationsToBeDeleted = actualGraph.getRelations().stream()
+				.filter(n -> n.getDomainIds().contains(domainId)).filter(n -> n.getDomainIds().size() <= 1)
 				.collect(Collectors.toList());
 
 		// build cypher to delete these nodes with all corresponding relations detach
 		// delete
 		for (var rel : relationsToBeDeleted) {
 			var cypher = String.format("MATCH(a:%s)-[r:%s]->(b:%s) delete r",
-					actualGraph.getNodes().stream().filter(n -> n.getId().equals(rel.getSourceId())).findFirst().orElseThrow().getLabel(),
-					rel.getType(),
-					actualGraph.getNodes().stream().filter(n -> n.getId().equals(rel.getTargetId())).findFirst().orElseThrow().getLabel()
-			);
+					actualGraph.getNodes().stream().filter(n -> n.getId().equals(rel.getSourceId())).findFirst()
+							.orElseThrow().getLabel(),
+					rel.getType(), actualGraph.getNodes().stream().filter(n -> n.getId().equals(rel.getTargetId()))
+							.findFirst().orElseThrow().getLabel());
 			var session = driver.asyncSession();
 			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(ResultCursor::consumeAsync))
 					.thenCompose(response -> session.closeAsync()).thenApply(signal -> Response.noContent().build());
@@ -70,7 +67,6 @@ public class DeletionService {
 			session.writeTransactionAsync(tx -> tx.runAsync(cypher).thenCompose(ResultCursor::consumeAsync))
 					.thenCompose(response -> session.closeAsync()).thenApply(signal -> Response.noContent().build());
 		}
-
 
 		// Delete Domain Node (used for line count)
 		Set<Domain> domains = actualGraph.getDomains().stream().filter(domain -> domain.getId().equals(domainId))
