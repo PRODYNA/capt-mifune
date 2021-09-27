@@ -23,12 +23,7 @@ export const PipelineRow = (props: { domain: Domain }) => {
   const [message, setMessage] = useState<String>();
 
   useEffect(() => {
-    HttpService.getAxiosClient().request({})
-    let sseClient = new EventSourcePolyfill(
-      "http://localhost:8081/graph/domain/" + props.domain.id + "/stats",{headers: {
-            'Authorization': `Bearer ${UserService.getToken()}`
-          }}
-    );
+    let sseClient = graphService.importSource(props.domain.id);
     sseClient.onmessage = function (e) {
       setMessage(e.data);
     };

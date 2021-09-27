@@ -13,6 +13,9 @@ import {
   RelationUpdate,
 } from "./model/Model";
 import { AxiosResponse } from "axios";
+import {EventSourcePolyfill} from "ng-event-source";
+import UserService from "../services/UserService";
+import {ENV} from "../env/Environments";
 
 const rest = HttpService.getAxiosClient();
 
@@ -30,6 +33,18 @@ export class GraphService {
       .then((res) => {
         return res.data;
       });
+  }
+
+  importSource(domainId: string): EventSourcePolyfill {
+    let headers = {};
+    if(localStorage.getItem("LOGIN_REQUIRED")?.toUpperCase() === "TRUE"){
+      headers = {
+        'Authorization': `Bearer ${UserService.getToken()}`
+      }
+    }
+   return  new EventSourcePolyfill(
+       localStorage.getItem(ENV.API_SERVER)+"/graph/domain/" + domainId + "/stats",{headers: headers}
+    );
   }
 
   domainGet(id: string): Promise<Domain> {
