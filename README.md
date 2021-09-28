@@ -20,7 +20,7 @@ In keycloak, you should
 3. create a client "mifune-app" with root URL "http://localhost:3000/" (if it doesn't already exist),
 4. leave everything else at default.
 
-You can go to http://localhost:8888/auth/realms/capt-mifune-ui/account/ for user account management.
+You can go to http://localhost:8888/auth/realms/mifune/account/ for user account management.
 
 ## Available Scripts
 
