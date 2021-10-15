@@ -50,13 +50,10 @@ public class GraphJsonBuilder {
 		var currentNode = parentNode.putObject(node.varName());
 		buildProperties(currentNode, node.getProperties());
 		contextVarPath.add(node.varName());
-		var add = labels.add(node.getLabel());
-		if (add) {
-			node.getRelations().stream().filter(r -> r.getDomainIds().contains(domainId))
-					.filter(r -> r.getTo().getDomainIds().contains(domainId))
-					.forEach(r -> buildRelation(contextVarPath, currentNode, r));
-		}
-
+		node.getRelations().stream().filter(r -> r.getDomainIds().contains(domainId))
+				.filter(r -> r.getTo().getDomainIds().contains(domainId))
+				.filter(r -> !varPath.contains(r.getTo().varName()))
+				.forEach(r -> buildRelation(contextVarPath, currentNode, r));
 	}
 
 	private void buildRelation(List<String> varPath, ObjectNode parentNode, RelationModel r) {
