@@ -68,6 +68,7 @@ public class ImportService {
 	@Inject
 	protected SourceService sourceService;
 
+	// This Method should be split up into domain import and file import
 	public Uni<String> runImport(UUID domainId) {
 		log.debug("start import");
 		var counter = new AtomicInteger();
@@ -105,7 +106,7 @@ public class ImportService {
 				});
 
 		importTask.withRequests(1).concatenate().subscribe().with(s -> eventBus.publish(domainId.toString(), s),
-				throwable -> log.error("error in pipeline on line " + counter.incrementAndGet(), throwable), () -> log.info("done"));
+				throwable -> log.error("error in pipeline: ", throwable), () -> log.info("done"));
 
 		// this gets called before the above is finished
 		return domainTask.onItem().invoke(() -> Infrastructure.getDefaultExecutor().execute(() -> {
