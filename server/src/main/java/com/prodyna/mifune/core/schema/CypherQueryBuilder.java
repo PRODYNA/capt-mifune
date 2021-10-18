@@ -172,12 +172,12 @@ public class CypherQueryBuilder {
 			contextVarPath.add(node.varName());
 			statements.add("optional match(%s:%s%s)".formatted(nodeVar, node.getLabel(), ""));
 		}
-		var add = labels.add(node.getLabel());
-		if (add) {
-			node.getRelations().stream().filter(r -> r.getDomainIds().contains(domainId))
-					.filter(r -> r.getTo().getDomainIds().contains(domainId))
-					.forEach(r -> buildSingleRelation(contextVarPath, nodeVar, r));
-		}
+
+		node.getRelations().stream().filter(r -> r.getDomainIds().contains(domainId))
+				.filter(r -> r.getTo().getDomainIds().contains(domainId))
+				.filter(r -> !varPath.contains(r.getTo().varName()))
+				.forEach(r -> buildSingleRelation(contextVarPath, nodeVar, r));
+
 	}
 
 	private void buildSingleRelation(List<String> varPath, String nodeVar, RelationModel r) {
