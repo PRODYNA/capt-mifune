@@ -22,6 +22,7 @@ package com.prodyna.mifune.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 
 import com.prodyna.mifune.core.GraphService;
@@ -31,11 +32,17 @@ import com.prodyna.mifune.domain.GraphDelta;
 import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.NodeCreate;
 import com.prodyna.mifune.domain.NodeUpdate;
+import com.prodyna.mifune.domain.Property;
 import com.prodyna.mifune.domain.Relation;
 import com.prodyna.mifune.domain.RelationCreate;
 import com.prodyna.mifune.domain.RelationUpdate;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
+import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,9 +159,55 @@ class GraphResourceTest {
 	void runImport() {
 	}
 
+	@Test
+	void testMapping() {
+		Domain sampleDomain = createSampleDomain();
+		Property name = new Property();
+		name.setName("name");
+		name.setType("string");
+		name.setPrimary(true);
+		Property other = new Property();
+		other.setName("other");
+		other.setType("string");
+		other.setPrimary(false);
+		List<Property> props = new ArrayList<Property>();
+
+		props.add(other);
+		props.add(name);
+
+		Node blaNode = createNodeInDomain(sampleDomain, "Bla");
+		Node blubNode = createNodeInDomain(sampleDomain, "Blub");
+		blubNode.setProperties(props);
+		Node bliNode = createNodeInDomain(sampleDomain, "Bli");
+		bliNode.setProperties(props);
+
+		blaNode = updateNodeInDomain(blaNode, blaNode.getLabel(), props);
+		blubNode = updateNodeInDomain(blubNode, blubNode.getLabel(), props);
+		bliNode = updateNodeInDomain(bliNode, bliNode.getLabel(), props);
+
+		Relation rel = buildRelationBetweenNodes(blaNode, blubNode, "HAS_BLUB");
+		Relation rel2 = buildRelationBetweenNodes(bliNode, blaNode, "HAS_BLA");
+		Relation rel3 = buildRelationBetweenNodes(blubNode, bliNode, "HAS_BLI");
+		Relation rel4 = buildRelationBetweenNodes(bliNode, blubNode, "HAS_ALSO_BLUB");
+		sampleDomain.setRootNodeId(blaNode.getId());
+		Domain updatedDomain = updateSampleDomain(sampleDomain);
+
+		JsonObject jo = new JsonObject(
+				"{\"bla.name\": null,\"bla.other\": null,\"bla.hasBlub.blub.name\": null,\"bla.hasBlub.blub.other\": null,\"bla.hasBlub.blub.hasBli.bli.name\": null,\"bla.hasBlub.blub.hasBli.bli.other\": null}");
+		given().when().get("/graph/domain/%s/mapping".formatted(updatedDomain.getId())).then().statusCode(200)
+				.body(is(jo.toString()));
+
+	}
+
 	private Domain createSampleDomain() {
 		var req = new DomainCreate("sample");
 		return given().when().body(req).contentType(ContentType.JSON).post("/graph/domain").then().statusCode(200)
+				.body("name", equalTo("sample")).extract().as(Domain.class);
+	}
+
+	private Domain updateSampleDomain(Domain domain) {
+		return given().when().body(domain).contentType(ContentType.JSON)
+				.put("/graph/domain/%s".formatted(domain.getId())).then().statusCode(200)
 				.body("name", equalTo("sample")).extract().as(Domain.class);
 	}
 
@@ -166,13 +219,20 @@ class GraphResourceTest {
 				.findFirst().orElseThrow();
 	}
 
+	private Node updateNodeInDomain(Node sampleNode, String label, List<Property> props) {
+		var nodeUpdate = new NodeUpdate(label, sampleNode.getDomainIds(), null, props);
+		System.out.println(props);
+		return given().when().body(nodeUpdate).contentType(ContentType.JSON)
+				.put("/graph/node/{nodeID}", sampleNode.getId()).then().statusCode(200).extract().as(GraphDelta.class)
+				.getChangedNodes().stream().findFirst().orElseThrow();
+	}
+
 	private Relation buildRelationBetweenNodes(Node personNode, Node carNode, String type) {
 		var relationCreate = new RelationCreate(type, personNode.getId(), carNode.getId(), personNode.getDomainIds());
 
 		var relation = given().when().body(relationCreate).contentType(ContentType.JSON).post("/graph/relation").then()
-				.statusCode(200).body("changedRelations", hasSize(1))
-				.body("changedRelations[0].type", equalTo("HAS_CAR")).extract().as(GraphDelta.class)
-				.getChangedRelations().iterator().next();
+				.statusCode(200).body("changedRelations", hasSize(1)).body("changedRelations[0].type", equalTo(type))
+				.extract().as(GraphDelta.class).getChangedRelations().iterator().next();
 		return relation;
 	}
 }
