@@ -22,6 +22,7 @@ package com.prodyna.mifune.api;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 
 import com.prodyna.mifune.core.GraphService;
@@ -38,16 +39,13 @@ import com.prodyna.mifune.domain.RelationUpdate;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.vertx.core.json.JsonObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.inject.Inject;  
+import javax.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.hamcrest.CoreMatchers.is;
 
 @QuarkusTest
 class GraphResourceTest {
@@ -187,15 +185,15 @@ class GraphResourceTest {
 		blubNode = updateNodeInDomain(blubNode, blubNode.getLabel(), props);
 		bliNode = updateNodeInDomain(bliNode, bliNode.getLabel(), props);
 
-
 		Relation rel = buildRelationBetweenNodes(blaNode, blubNode, "HAS_BLUB");
-		Relation rel2= buildRelationBetweenNodes(bliNode, blaNode, "HAS_BLA");
-		Relation rel3= buildRelationBetweenNodes(blubNode, bliNode, "HAS_BLI");
-		Relation rel4= buildRelationBetweenNodes(bliNode, blubNode, "HAS_ALSO_BLUB");
+		Relation rel2 = buildRelationBetweenNodes(bliNode, blaNode, "HAS_BLA");
+		Relation rel3 = buildRelationBetweenNodes(blubNode, bliNode, "HAS_BLI");
+		Relation rel4 = buildRelationBetweenNodes(bliNode, blubNode, "HAS_ALSO_BLUB");
 		sampleDomain.setRootNodeId(blaNode.getId());
 		Domain updatedDomain = updateSampleDomain(sampleDomain);
 
-		JsonObject jo = new JsonObject("{\"bla.name\": null,\"bla.other\": null,\"bla.hasBlub.blub.name\": null,\"bla.hasBlub.blub.other\": null,\"bla.hasBlub.blub.hasBli.bli.name\": null,\"bla.hasBlub.blub.hasBli.bli.other\": null}");
+		JsonObject jo = new JsonObject(
+				"{\"bla.name\": null,\"bla.other\": null,\"bla.hasBlub.blub.name\": null,\"bla.hasBlub.blub.other\": null,\"bla.hasBlub.blub.hasBli.bli.name\": null,\"bla.hasBlub.blub.hasBli.bli.other\": null}");
 		given().when().get("/graph/domain/%s/mapping".formatted(updatedDomain.getId())).then().statusCode(200)
 				.body(is(jo.toString()));
 
