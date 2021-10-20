@@ -1,4 +1,4 @@
-FROM maven:3.8.1-adoptopenjdk-16 as builder
+FROM maven:3.8.3-adoptopenjdk-16 as builder
 COPY ./pom.xml ./pom.xml
 COPY ./csv2json ./csv2json
 COPY ./server/pom.xml ./server/pom.xml
@@ -8,7 +8,7 @@ COPY ./server ./server
 RUN mvn install -DskipTests
 
 
-FROM adoptopenjdk:16_36-jre-hotspot-focal
+FROM adoptopenjdk:16-jre-hotspot-focal
 
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
