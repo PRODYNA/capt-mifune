@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
@@ -46,6 +47,7 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.async.ResultCursor;
 import org.reactivestreams.FlowAdapters;
 
 @ApplicationScoped
@@ -98,15 +100,19 @@ public class ImportService {
 				.emitOn(Infrastructure.getDefaultWorkerPool()).onItem().transformToUni(node -> {
 					var entry = new ObjectMapper().convertValue(node, Map.class);
 					var s = driver.asyncSession();
-					return Uni.createFrom()
-							.completionStage(s.writeTransactionAsync(
+					return Uni.createFrom().completionStage(s
+							.writeTransactionAsync(
 									tx -> tx.runAsync(cypher, Map.of("model", entry, "domainId", domainId.toString())))
-									.thenCompose(x1 -> session.closeAsync()).thenApply(v -> counter.incrementAndGet()));
+							.exceptionally(e -> {
+								log.error(" Failed item import in file: " + domain.getFile() + " on line "
+										+ counter.getAndIncrement() + " Message: " + e.getMessage());
+								return null;
+							}).thenCompose(x1 -> session.closeAsync()).thenApply(v -> counter.incrementAndGet()));
 
 				});
 
 		importTask.withRequests(1).concatenate().subscribe().with(s -> eventBus.publish(domainId.toString(), s),
-				throwable -> log.error("error in pipeline: ", throwable), () -> log.info("done"));
+				throwable -> log.error("error in pipeline: " + throwable.getMessage()), () -> log.info("done"));
 
 		// this gets called before the above is finished
 		return domainTask.onItem().invoke(() -> Infrastructure.getDefaultExecutor().execute(() -> {
