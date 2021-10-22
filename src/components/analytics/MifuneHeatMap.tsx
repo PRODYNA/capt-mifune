@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {HeatMap} from "@nivo/heatmap";
 import {ChartWrapper} from "./ChartWrapper";
 import {Slider} from "@material-ui/core";
+import {Button} from "react-bootstrap";
 
 export const MifiuneHeatMap = () => {
     const [labelX, setLabelX] = useState<string>();
@@ -13,7 +14,8 @@ export const MifiuneHeatMap = () => {
     const [heatMax, setHeatMax] = useState<number>();
 
 
-    function dataPreparation(data: any[]): any[] | undefined {
+
+    function dataPreparation(data: any[], scale:number): any[] | undefined {
 
         const resultMap = new Map(
             data
@@ -29,7 +31,7 @@ export const MifiuneHeatMap = () => {
         let max = Number.MIN_VALUE;
         let keys: string[] = [];
         data.forEach((d) => {
-            resultMap.get(d[labelX!!])?.set(d[labelY!!], parseInt(d[count!!]).toFixed(2));
+            resultMap.get(d[labelX!!])?.set(d[labelY!!], (parseFloat(d[count!!])/scale).toFixed(2));
             keys.push(d[labelY!!]);
             if (d[count!!]) {
                 if (d[count!!] < min) {
@@ -49,6 +51,8 @@ export const MifiuneHeatMap = () => {
                 .filter((v, i, s) => s.indexOf(v) === i)
                 .sort((one, two) => (one < two ? -1 : 1));
 
+        min = min/scale
+        max = max/scale
 
         setMin(min);
         setMax(max);
@@ -79,6 +83,7 @@ export const MifiuneHeatMap = () => {
         }
         return (
             <>
+
                 <Slider
                     min={min}
                     max={max}
@@ -93,7 +98,7 @@ export const MifiuneHeatMap = () => {
                     indexBy={labelX}
                     axisTop={{tickSize: 5, tickPadding: 5, tickRotation: -50, legend: '', legendOffset: 36}}
                     colors={"oranges"}
-                    enableLabels={false}
+                    enableLabels={true}
                     animate={false}
                     margin={{top: 200, right: 60, bottom: 60, left: 250}}
                     forceSquare={false}
