@@ -9,7 +9,7 @@ export const MifuneSankey = () => {
     const [to, setTo] = useState<string>();
     const [count, setCount] = useState<string>();
 
-    function prepareData(data: any[]): Data | undefined {
+    function prepareData(data: any[], scale:number): Data | undefined {
         if (data && from && to && count) {
             const nodes: SankeyDataNode[] = data.map((d) => d[from])
                 .concat(data.map(d => d[to]))

@@ -26,7 +26,7 @@ export interface SelectProps {
 interface ChartWrapperProps<T> {
     results: string[],
     orders: string[],
-    dataPreparation: (data: any[]) => T | undefined,
+    dataPreparation: (data: any[], scale:number ) => T | undefined,
     selects: SelectProps[],
     chart: (data: T) => React.ReactNode,
 }
@@ -39,6 +39,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     const [data, setData] = useState<any>();
     const [options, setOptions] = useState<string[]>();
     const [filters, setFilters] = useState<FilterProps[]>([]);
+    const [scale, setScale] = useState<number>(1);
 
     const useStyle = makeStyles({
 
@@ -117,7 +118,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
             graphService
                 .data(domain.id, props.results, props.orders, filters.map(f => f.key + ':' + f.value))
                 .then((data) => {
-                    setData(props.dataPreparation(data))
+                    setData(props.dataPreparation(data, scale))
                     setLoading(false)
                 })
                 .catch(e => console.error(e));
@@ -183,6 +184,15 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
                         }}>
                             add filter
                         </Button>
+                        Scale: <Button onClick={ e =>{
+                            setScale(scale *0.1)
+                        }
+
+                        }>-</Button>{scale}
+                        <Button onClick={ e =>{
+                           setScale(scale *10)
+                        }
+                        }>+</Button>
 
                     </div>
                     ,
