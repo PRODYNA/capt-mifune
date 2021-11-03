@@ -7,7 +7,7 @@ import HttpService from "./services/HttpService";
 import UserService from "./services/UserService";
 
 export async function loadEnv(): Promise<void> {
-  await fetch("/env.json")
+  await fetch("env.json")
     .then((r) => r.json())
     .then((env) => {
       Object.keys(env).forEach((k) => {

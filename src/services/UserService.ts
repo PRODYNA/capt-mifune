@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from "axios";
 import Keycloak from "keycloak-js";
 
-const _kc = new (Keycloak as any)("/keycloak.json");
+const _kc = new (Keycloak as any)("keycloak.json");
 
 /**
  * Initializes Keycloak instance and calls the provided callback function if successfully authenticated.
