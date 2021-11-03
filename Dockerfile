@@ -1,4 +1,4 @@
-FROM maven:3.8.3-adoptopenjdk-16 as builder
+FROM maven:3.8.3-eclipse-temurin-17 as builder
 COPY ./pom.xml ./pom.xml
 COPY ./csv2json ./csv2json
 COPY ./server/pom.xml ./server/pom.xml
@@ -8,8 +8,7 @@ COPY ./server ./server
 RUN mvn install -DskipTests
 
 
-FROM adoptopenjdk:16-jre-hotspot-focal
-
+FROM eclipse-temurin:17-alpine
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 # We make four distinct layers so if there are application changes the library layers can be re-used
