@@ -6,17 +6,23 @@ package com.prodyna.mifune.core;
  * %%
  * Copyright (C) 2021 PRODYNA SE
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  * #L%
  */
 
@@ -41,6 +47,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -69,6 +76,9 @@ public class ImportService {
 	@Inject
 	protected SourceService sourceService;
 
+	@Inject
+	protected CypherIndexBuilder cypherIndexBuilder;
+
 	// This Method should be split up into domain import and file import
 	public Uni<String> runImport(UUID domainId) {
 		log.debug("start import");
@@ -88,8 +98,19 @@ public class ImportService {
 		var importFile = Paths.get(uploadDir, domain.getFile());
 		var session = driver.asyncSession();
 
+		List<String> indexCypher = cypherIndexBuilder.getCypher(graph, domainId);
+		Multi<String> indexTask = Multi.createFrom().iterable(indexCypher);
+		indexTask.onItem().transformToUni((String statement) -> {
+			var se = driver.asyncSession();
+			log.error(statement);
+			return Uni.createFrom().completionStage(se.writeTransactionAsync(tx -> tx.runAsync(statement))
+					.thenCompose(r -> se.closeAsync().toCompletableFuture()));
+		});
+		indexTask.subscribe().with(s -> log.debug("Index created: " + s),
+				throwable -> log.error("Cannot create Indexes: " + throwable.getMessage()));
+
 		// Create the domain Node
-		var domainTask = Uni.createFrom()
+		Uni<Void> domainTask = Uni.createFrom()
 				.completionStage(session
 						.writeTransactionAsync(tx -> tx.runAsync("merge(d:Domain {id:$id}) set d.name = $name",
 								Map.of("id", domain.getId().toString(), "name", domain.getName())))
@@ -133,7 +154,6 @@ public class ImportService {
 			pipeFile(importFile, transformer::accept);
 			transformer.onComplete();
 		})).map(x -> "OK");
-
 	}
 
 	private void cleanJsonModel(Domain domain, ObjectNode jsonModel) {

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.prodyna.mifune.domain.Graph;
-import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.Property;
 
 public class CypherIndexBuilder {
