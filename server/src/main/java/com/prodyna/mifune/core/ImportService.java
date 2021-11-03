@@ -76,9 +76,6 @@ public class ImportService {
 	@Inject
 	protected SourceService sourceService;
 
-	@Inject
-	protected CypherIndexBuilder cypherIndexBuilder;
-
 	// This Method should be split up into domain import and file import
 	public Uni<String> runImport(UUID domainId) {
 		log.debug("start import");
