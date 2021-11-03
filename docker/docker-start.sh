@@ -7,9 +7,9 @@ if [ -z $BASE_PATH ]; then
 fi
 echo 'run server with base path: '$BASE_PATH
 if [ -z $LOGIN_REQUIRED ]; then
-  export $LOGIN_REQUIRED=true
+  export LOGIN_REQUIRED=true
 fi
-echo "$LOGIN_REQUIRED: "$LOGIN_REQUIRED
+echo "LOGIN_REQUIRED: "$LOGIN_REQUIRED
 if [ $LOGIN_REQUIRED = true ]; then
   if [ -z $OIDC_REALM ]; then
     echo 'env $OIDC_REALM not exist'
