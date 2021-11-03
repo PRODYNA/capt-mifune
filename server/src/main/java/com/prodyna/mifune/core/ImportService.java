@@ -98,17 +98,6 @@ public class ImportService {
 		var importFile = Paths.get(uploadDir, domain.getFile());
 		var session = driver.asyncSession();
 
-		List<String> indexCypher = cypherIndexBuilder.getCypher(graph, domainId);
-		Multi<String> indexTask = Multi.createFrom().iterable(indexCypher);
-		indexTask.onItem().transformToUni((String statement) -> {
-			var se = driver.asyncSession();
-			log.error(statement);
-			return Uni.createFrom().completionStage(se.writeTransactionAsync(tx -> tx.runAsync(statement))
-					.thenCompose(r -> se.closeAsync().toCompletableFuture()));
-		});
-		indexTask.subscribe().with(s -> log.debug("Index created: " + s),
-				throwable -> log.error("Cannot create Indexes: " + throwable.getMessage()));
-
 		// Create the domain Node
 		Uni<Void> domainTask = Uni.createFrom()
 				.completionStage(session
