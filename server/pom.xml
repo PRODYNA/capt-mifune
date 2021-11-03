@@ -94,13 +94,13 @@
         <version>2.0.0</version>
         <executions>
           <execution>
-            <id>first</id>
+            <id>default-cli</id>
             <phase>process-sources</phase>
             <goals>
               <goal>update-file-header</goal>
             </goals>
             <configuration>
-              <licenseName>apache_2.0</licenseName>
+              <licenseName>mit</licenseName>
               <organizationName>PRODYNA SE</organizationName>
               <inceptionYear>2021</inceptionYear>
               <excludes>
