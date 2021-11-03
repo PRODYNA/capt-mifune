@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
 import com.prodyna.json.converter.JsonTransformer;
 import com.prodyna.mifune.core.json.JsonPathEditor;
+import com.prodyna.mifune.core.schema.CypherIndexBuilder;
 import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
 import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
@@ -38,7 +39,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
@@ -47,7 +47,6 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.async.ResultCursor;
 import org.reactivestreams.FlowAdapters;
 
 @ApplicationScoped
@@ -79,6 +78,7 @@ public class ImportService {
 		log.debugf("start import found domain %s", domain.getName());
 		GraphModel graphModel = new GraphModel(graph);
 		var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
+		List<String> indexCyphers = new CypherIndexBuilder().getCypher(domainId, graph);
 		log.info(cypher);
 
 		ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
@@ -94,6 +94,20 @@ public class ImportService {
 						.writeTransactionAsync(tx -> tx.runAsync("merge(d:Domain {id:$id}) set d.name = $name",
 								Map.of("id", domain.getId().toString(), "name", domain.getName())))
 						.thenCompose(r -> session.closeAsync().toCompletableFuture()));
+
+		// Create Indexes on Import
+		var indexTask = Multi.createFrom().iterable(indexCyphers).onItem().transformToUni(indexCypher -> {
+			var s = driver.asyncSession();
+			return Uni.createFrom()
+					.completionStage(s.writeTransactionAsync(tx -> tx.runAsync(indexCypher)).exceptionally(e -> {
+						log.error(" Failed creating index: " + e.getMessage());
+						return null;
+					}).thenCompose(x1 -> s.closeAsync()));
+		});
+
+		indexTask.withRequests(1).concatenate().subscribe().with(s -> log.info(" created Index: " + s),
+				s -> log.error(" Failed creating Index: " + s.getMessage()),
+				() -> log.info(" Creating Indexes: Done! "));
 
 		// Create all nodes under this domain
 		var importTask = Multi.createFrom().publisher(FlowAdapters.toProcessor(transformer))
