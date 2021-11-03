@@ -1,44 +1,69 @@
 package com.prodyna.mifune.core.schema;
 
+/*-
+ * #%L
+ * prodyna-mifune-server
+ * %%
+ * Copyright (C) 2021 PRODYNA SE
+ * %%
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ * #L%
+ */
+
+import com.prodyna.mifune.domain.Graph;
+import com.prodyna.mifune.domain.Property;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.prodyna.mifune.domain.Graph;
-import com.prodyna.mifune.domain.Property;
-
 public class CypherIndexBuilder {
-    public List<String> getCypher(UUID domainId, Graph graph){
-        List<String> result = new ArrayList<String>();
+	public List<String> getCypher(UUID domainId, Graph graph) {
+		List<String> result = new ArrayList<String>();
 
-        for(var node : graph.getNodes()){
-            if(node.getDomainIds().contains(domainId)){
-                List<Property> props = new ArrayList<Property>();
-                for(Property prop : node.getProperties()){
-                    if(prop.isPrimary()){
-                        props.add(prop);
-                    }
-                }
-                String propertiesString = getPropertiesString(props);
-                if(propertiesString != null){
-                    result.add("CREATE INDEX FOR (n:%s) ON (%s)".formatted(node.getLabel(), propertiesString));
-                }                
-            }
-        }
-        return result;
-    }
+		for (var node : graph.getNodes()) {
+			if (node.getDomainIds().contains(domainId)) {
+				List<Property> props = new ArrayList<Property>();
+				for (Property prop : node.getProperties()) {
+					if (prop.isPrimary()) {
+						props.add(prop);
+					}
+				}
+				String propertiesString = getPropertiesString(props);
+				if (propertiesString != null) {
+					result.add("CREATE INDEX FOR (n:%s) ON (%s)".formatted(node.getLabel(), propertiesString));
+				}
+			}
+		}
+		return result;
+	}
 
-    private String getPropertiesString(List<Property> props){
-        String result = new String();
-        List<String> propStrings = new ArrayList<String>();
+	private String getPropertiesString(List<Property> props) {
+		String result = new String();
+		List<String> propStrings = new ArrayList<String>();
 
-        for(Property prop: props){
-            propStrings.add("n.%s".formatted(prop.getName()));
-        }
-        if(propStrings.size() < 1){
-            return null;
-        } 
-        result = String.join(",", propStrings);
-        return result;
-    }
+		for (Property prop : props) {
+			propStrings.add("n.%s".formatted(prop.getName()));
+		}
+		if (propStrings.size() < 1) {
+			return null;
+		}
+		result = String.join(",", propStrings);
+		return result;
+	}
 }
