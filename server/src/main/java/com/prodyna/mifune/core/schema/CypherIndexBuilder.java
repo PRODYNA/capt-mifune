@@ -29,19 +29,17 @@ package com.prodyna.mifune.core.schema;
 import com.prodyna.mifune.domain.Graph;
 import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.Property;
-
-import org.jboss.logging.Logger;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class CypherIndexBuilder {
-    @Inject
+	@Inject
 	protected Logger log;
 
 	public List<String> getCypher(Graph graph, UUID domainId) {
@@ -63,14 +61,14 @@ public class CypherIndexBuilder {
 
 		for (var prop : node.getProperties()) {
 			if (prop.isPrimary()) {
-                String parameter = "n." + prop.getName();
+				String parameter = "n." + prop.getName();
 				propNames.add(parameter);
 			}
 		}
 
-        if(propNames.size() <= 1){
-            return propNames.get(0);
-        }
+		if (propNames.size() <= 1) {
+			return propNames.get(0);
+		}
 		return String.join(",", propNames);
 	}
 }
