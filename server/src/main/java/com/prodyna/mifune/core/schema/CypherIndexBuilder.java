@@ -1,4 +1,4 @@
-package com.prodyna.mifune.domain;
+package com.prodyna.mifune.core.schema;
 
 /*-
  * #%L
@@ -26,19 +26,51 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.prodyna.mifune.domain.Graph;
+import com.prodyna.mifune.domain.Node;
+import com.prodyna.mifune.domain.Property;
+
+import org.jboss.logging.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record NodeCreate(@NotBlank String label, @Size(min = 1) Set<UUID> domainIds, String color,
-		List<Property> properties) {
+@ApplicationScoped
+public class CypherIndexBuilder {
+    @Inject
+	protected Logger log;
 
-	public NodeCreate(String label, UUID domainId) {
-		this(label, Set.<UUID>of(domainId), null, List.of());
+	public List<String> getCypher(Graph graph, UUID domainId) {
+
+		var statements = new ArrayList<String>();
+		List<Node> nodes = new ArrayList<Node>();
+		nodes.addAll(graph.getNodes());
+
+		for (var node : nodes) {
+			if (node.getDomainIds().contains(domainId)) {
+				statements.add("CREATE INDEX FOR (n:%s) ON (%s);".formatted(node.getLabel(), getParameters(node)));
+			}
+		}
+		return statements;
 	}
 
+	private String getParameters(Node node) {
+		List<String> propNames = new ArrayList<String>();
+
+		for (var prop : node.getProperties()) {
+			if (prop.isPrimary()) {
+                String parameter = "n." + prop.getName();
+				propNames.add(parameter);
+			}
+		}
+
+        if(propNames.size() <= 1){
+            return propNames.get(0);
+        }
+		return String.join(",", propNames);
+	}
 }
