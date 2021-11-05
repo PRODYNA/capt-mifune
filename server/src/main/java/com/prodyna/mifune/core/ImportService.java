@@ -76,9 +76,6 @@ public class ImportService {
 	@Inject
 	protected SourceService sourceService;
 
-	@Inject
-	protected CypherIndexBuilder cypherIndexBuilder;
-
 	// This Method should be split up into domain import and file import
 	public Uni<String> runImport(UUID domainId) {
 		log.debug("start import");
@@ -88,6 +85,7 @@ public class ImportService {
 		log.debugf("start import found domain %s", domain.getName());
 		GraphModel graphModel = new GraphModel(graph);
 		var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
+		List<String> indexCyphers = new CypherIndexBuilder().getCypher(domainId, graph);
 		log.info(cypher);
 
 		ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
@@ -97,23 +95,26 @@ public class ImportService {
 		var importFile = Paths.get(uploadDir, domain.getFile());
 		var session = driver.asyncSession();
 
-		List<String> indexCypher = cypherIndexBuilder.getCypher(graph, domainId);
-		Multi<String> indexTask = Multi.createFrom().iterable(indexCypher);
-		indexTask.onItem().transformToUni((String statement) -> {
-			var se = driver.asyncSession();
-			log.error(statement);
-			return Uni.createFrom().completionStage(se.writeTransactionAsync(tx -> tx.runAsync(statement))
-					.thenCompose(r -> se.closeAsync().toCompletableFuture()));
-		});
-		indexTask.subscribe().with(s -> log.debug("Index created: " + s),
-				throwable -> log.error("Cannot create Indexes: " + throwable.getMessage()));
-
 		// Create the domain Node
 		Uni<Void> domainTask = Uni.createFrom()
 				.completionStage(session
 						.writeTransactionAsync(tx -> tx.runAsync("merge(d:Domain {id:$id}) set d.name = $name",
 								Map.of("id", domain.getId().toString(), "name", domain.getName())))
 						.thenCompose(r -> session.closeAsync().toCompletableFuture()));
+
+		// Create Indexes on Import
+		var indexTask = Multi.createFrom().iterable(indexCyphers).onItem().transformToUni(indexCypher -> {
+			var s = driver.asyncSession();
+			return Uni.createFrom()
+					.completionStage(s.writeTransactionAsync(tx -> tx.runAsync(indexCypher)).exceptionally(e -> {
+						log.error(" Failed creating index: " + e.getMessage());
+						return null;
+					}).thenCompose(x1 -> s.closeAsync()));
+		});
+
+		indexTask.withRequests(1).concatenate().subscribe().with(s -> log.info(" created Index: " + s),
+				s -> log.error(" Failed creating Index: " + s.getMessage()),
+				() -> log.info(" Creating Indexes: Done! "));
 
 		// Create all nodes under this domain
 		var importTask = Multi.createFrom().publisher(FlowAdapters.toProcessor(transformer))
