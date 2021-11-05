@@ -27,48 +27,43 @@ package com.prodyna.mifune.core.schema;
  */
 
 import com.prodyna.mifune.domain.Graph;
-import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.Property;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.jboss.logging.Logger;
 
-@ApplicationScoped
 public class CypherIndexBuilder {
-	@Inject
-	protected Logger log;
+	public List<String> getCypher(UUID domainId, Graph graph) {
+		List<String> result = new ArrayList<String>();
 
-	public List<String> getCypher(Graph graph, UUID domainId) {
-
-		var statements = new ArrayList<String>();
-		List<Node> nodes = new ArrayList<Node>();
-		nodes.addAll(graph.getNodes());
-
-		for (var node : nodes) {
+		for (var node : graph.getNodes()) {
 			if (node.getDomainIds().contains(domainId)) {
-				statements.add("CREATE INDEX FOR (n:%s) ON (%s);".formatted(node.getLabel(), getParameters(node)));
+				List<Property> props = new ArrayList<Property>();
+				for (Property prop : node.getProperties()) {
+					if (prop.isPrimary()) {
+						props.add(prop);
+					}
+				}
+				String propertiesString = getPropertiesString(props);
+				if (propertiesString != null) {
+					result.add("CREATE INDEX FOR (n:%s) ON (%s)".formatted(node.getLabel(), propertiesString));
+				}
 			}
 		}
-		return statements;
+		return result;
 	}
 
-	private String getParameters(Node node) {
-		List<String> propNames = new ArrayList<String>();
+	private String getPropertiesString(List<Property> props) {
+		String result = new String();
+		List<String> propStrings = new ArrayList<String>();
 
-		for (var prop : node.getProperties()) {
-			if (prop.isPrimary()) {
-				String parameter = "n." + prop.getName();
-				propNames.add(parameter);
-			}
+		for (Property prop : props) {
+			propStrings.add("n.%s".formatted(prop.getName()));
 		}
-
-		if (propNames.size() <= 1) {
-			return propNames.get(0);
+		if (propStrings.size() < 1) {
+			return null;
 		}
-		return String.join(",", propNames);
+		result = String.join(",", propStrings);
+		return result;
 	}
 }

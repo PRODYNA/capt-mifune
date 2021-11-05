@@ -27,7 +27,6 @@ package com.prodyna.mifune.core.schema;
  */
 
 import static java.util.function.Predicate.not;
-import static org.neo4j.driver.internal.types.TypeConstructor.INTEGER;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
