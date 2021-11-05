@@ -33,21 +33,22 @@ export class D3Helper {
   static buildRelationPath = (rel: D3Relation) =>{
     var source:D3Node;
     var target:D3Node;
+    let allRelCount = rel.relCount + rel.incomingRelationsCount - 1;
+    let nodeIndex =  (rel.relIndex);
+    let order = (allRelCount / 2) - nodeIndex
     if(((rel.source  as D3Node).x??0.) <( (rel.target as D3Node).x??0.)){
        source = rel.source as D3Node;
        target = rel.target as D3Node;
     }else{
       source = rel.target as D3Node;
       target = rel.source as D3Node;
+      order= order*-1;
     }
     let sx = source.x ?? 0.
     let sy = source.y ?? 0.
     let tx = target.x ?? 0.
     let ty = target.y ?? 0.
-    let nodeIndex = (rel.relIndex)
 
-    let allRelCount = rel.relCount + rel.incomingRelationsCount - 1;
-    let order = (allRelCount / 2) - nodeIndex
     const space = 50
 
     let correct = 1;
