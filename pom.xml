@@ -13,8 +13,8 @@
     <module>csv2json</module>
   </modules>
   <properties>
-    <maven-compiler-plugin.source>16</maven-compiler-plugin.source>
-    <maven-compiler-plugin.target>16</maven-compiler-plugin.target>
+    <maven-compiler-plugin.source>17</maven-compiler-plugin.source>
+    <maven-compiler-plugin.target>17</maven-compiler-plugin.target>
   </properties>
 
   <build>
