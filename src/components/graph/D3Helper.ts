@@ -36,7 +36,7 @@ export class D3Helper {
     let allRelCount = rel.relCount + rel.incomingRelationsCount - 1;
     let nodeIndex =  (rel.relIndex);
     let order = (allRelCount / 2) - nodeIndex
-    if(((rel.source  as D3Node).x??0.) <( (rel.target as D3Node).x??0.)){
+    if(((rel.source  as D3Node).x??0.) <= ( (rel.target as D3Node).x??0.)){
        source = rel.source as D3Node;
        target = rel.target as D3Node;
     }else{
