@@ -356,8 +356,20 @@ export const Graph = () => {
             const svg = d3.select(d3Container.current);
             svg.selectAll("*").remove();
             svg.append("style").text(`
-            .relation-label { font: bold 13px sans-serif; fill: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
-            .node-label { font: bold 13px sans-serif; fill: white; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+            .relation-label { 
+                font: bold 13px sans-serif; 
+                fill: white; 
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                cursor: default;
+                pointer-events: none;
+            }
+            .node-label {
+                font: bold 13px sans-serif; 
+                fill: white; 
+                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+                cursor: default;
+                pointer-events: none;
+            }
           `);
             var rels: D3Relation[];
             if (selected && "relation" in selected && selected.relation.id === "") {
