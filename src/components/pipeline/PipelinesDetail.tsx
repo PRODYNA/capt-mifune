@@ -1,18 +1,18 @@
-import {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 
-import {Domain} from "../../api/model/Model";
+import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
-import {PipelineEdit} from "./PipelineEdit";
+import { PipelineEdit } from "./PipelineEdit";
 
 export const PipelinesDetail = (props: any) => {
 
 
     const [domain, setDomain] = useState<Domain>();
-    let {id} = useParams<any>();
+    let { id } = useParams<any>();
 
     useEffect(() => {
         console.log("domain id {}", id);

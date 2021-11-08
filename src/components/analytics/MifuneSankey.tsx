@@ -1,6 +1,6 @@
-import React, {useState} from "react";
-import {Data, Sankey, SankeyDataLink, SankeyDataNode} from "@nivo/sankey";
-import {ChartWrapper} from "./ChartWrapper";
+import React, { useState } from "react";
+import { Data, Sankey, SankeyDataLink, SankeyDataNode } from "@nivo/sankey";
+import { ChartWrapper } from "./ChartWrapper";
 
 
 export const MifuneSankey = () => {
@@ -9,14 +9,14 @@ export const MifuneSankey = () => {
     const [to, setTo] = useState<string>();
     const [count, setCount] = useState<string>();
 
-    function prepareData(data: any[], scale:number): Data | undefined {
+    function prepareData(data: any[], scale: number): Data | undefined {
         if (data && from && to && count) {
             const nodes: SankeyDataNode[] = data.map((d) => d[from])
                 .concat(data.map(d => d[to]))
                 .filter(d => d)
                 .filter((v, i, a) => a.indexOf(v) === i)
                 .map(id => {
-                    return {id: id}
+                    return { id: id }
                 });
 
             const links: SankeyDataLink[] = data
@@ -31,7 +31,7 @@ export const MifuneSankey = () => {
 
             if (nodes.length > 1 && links.length > 1)
                 return {
-                    data: {nodes: nodes, links: links}
+                    data: { nodes: nodes, links: links }
                 }
         }
         return undefined
@@ -42,9 +42,9 @@ export const MifuneSankey = () => {
             width={window.innerWidth - 100}
             height={window.innerHeight}
             data={data.data}
-            margin={{top: 40, right: 160, bottom: 100, left: 50}}
+            margin={{ top: 40, right: 160, bottom: 100, left: 50 }}
             align="justify"
-            colors={{scheme: 'dark2'}}
+            colors={{ scheme: 'dark2' }}
         />
 
     }
@@ -53,20 +53,20 @@ export const MifuneSankey = () => {
     return (
 
         <ChartWrapper results={[from!!, to!!, count!!]} orders={[]} dataPreparation={prepareData}
-                      selects={[
-                          {label: "From", onChange: setFrom},
-                          {label: "To", onChange: setTo},
-                          {
-                              label: "Value",
-                              fnDefault: "count",
-                              fnOptions:["count","sum","avg","min","max"],
-                              onChange: (v: string) => {
-                                  console.log(v)
-                                  setCount(v );
-                              }
-                          }
-                      ]}
-                      chart={data => buildChart(data)}
+            selects={[
+                { label: "From", onChange: setFrom },
+                { label: "To", onChange: setTo },
+                {
+                    label: "Value",
+                    fnDefault: "count",
+                    fnOptions: ["count", "sum", "avg", "min", "max"],
+                    onChange: (v: string) => {
+                        console.log(v)
+                        setCount(v);
+                    }
+                }
+            ]}
+            chart={data => buildChart(data)}
         />
     )
 }

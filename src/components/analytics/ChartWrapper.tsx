@@ -1,12 +1,12 @@
-import {AnalyticFilter} from "./AnalyticFilter";
-import React, {useEffect, useState} from "react";
-import {Domain} from "../../api/model/Model";
+import { AnalyticFilter } from "./AnalyticFilter";
+import React, { useEffect, useState } from "react";
+import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import FormSelect from "../form/FormSelect";
 import Formular from "../form/Formular";
-import {Button, makeStyles} from "@material-ui/core";
-import {Spinner} from "react-bootstrap";
-import {AnalyticSelect} from "./AnalyticSelect";
+import { Button, makeStyles } from "@material-ui/core";
+import { Spinner } from "react-bootstrap";
+import { AnalyticSelect } from "./AnalyticSelect";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import FilterListIcon from '@material-ui/icons/FilterList';
 
@@ -19,14 +19,14 @@ export interface SelectProps {
     label: string,
     onChange: (v: string) => void
     fnOptions?: string[]
-    fnDefault?:string
+    fnDefault?: string
     options?: string[]
 }
 
 interface ChartWrapperProps<T> {
     results: string[],
     orders: string[],
-    dataPreparation: (data: any[], scale:number ) => T | undefined,
+    dataPreparation: (data: any[], scale: number) => T | undefined,
     selects: SelectProps[],
     chart: (data: T) => React.ReactNode,
 }
@@ -48,10 +48,10 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
             marginRight: "auto",
             minHeight: 200
         },
-        infoBox:{
+        infoBox: {
             textAlign: "center"
         },
-        box:{
+        box: {
             marginBottom: 10
         }
     });
@@ -60,39 +60,39 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     function filterElements() {
         return <>
             {filters.map((f, i) => {
-                    console.log(i)
-                    return <AnalyticFilter key={i} options={options}
-                                           domainId={domain?.id}
-                                           onKeyChange={(k) => {
-                                               setFilters(f =>
-                                                   f.map((f, idx) => {
-                                                       if (idx === i) {
-                                                           f.key = k;
-                                                       }
-                                                       return f;
-                                                   })
-                                               )
-                                           }}
-                                           onValueChange={(k) => {
-                                               console.log('value change:' + k)
-                                               setFilters(f =>
-                                                   f.map((f, idx) => {
-                                                       if (idx === i) {
-                                                           f.value = k;
-                                                       }
-                                                       return f;
-                                                   })
-                                               )
+                console.log(i)
+                return <AnalyticFilter key={i} options={options}
+                    domainId={domain?.id}
+                    onKeyChange={(k) => {
+                        setFilters(f =>
+                            f.map((f, idx) => {
+                                if (idx === i) {
+                                    f.key = k;
+                                }
+                                return f;
+                            })
+                        )
+                    }}
+                    onValueChange={(k) => {
+                        console.log('value change:' + k)
+                        setFilters(f =>
+                            f.map((f, idx) => {
+                                if (idx === i) {
+                                    f.value = k;
+                                }
+                                return f;
+                            })
+                        )
 
-                                           }}
-                                           onDelete={() => {
-                                               console.log(i)
-                                               console.log(JSON.stringify(filters))
-                                               setFilters(f => f.filter((item, j) => i !== j))
-                                           }}
+                    }}
+                    onDelete={() => {
+                        console.log(i)
+                        console.log(JSON.stringify(filters))
+                        setFilters(f => f.filter((item, j) => i !== j))
+                    }}
 
-                    />
-                }
+                />
+            }
             )}
         </>;
     }
@@ -149,7 +149,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     function buildChart() {
         if (loading) {
             return <div className={classes.infoBox}>
-                <Spinner animation={'border'}/>
+                <Spinner animation={'border'} />
             </div>
         } else if (!data) {
             return <div className={classes.infoBox}>
@@ -163,54 +163,54 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     return (
         <div>
             <div className={classes.box}>
-            <Formular
-                childrens={[
-                    getDomainSelect(),
-                    <>
-                        {props.selects.map(s => <AnalyticSelect fnOptions={s.fnOptions} fnDefault={s.fnDefault} label={s.label}  options={options ?? []}
-                                                            onChange={value => {
-                                                                setData(undefined)
-                                                                s.onChange(value)
-                                                            }}/>)}
-                    </>,
-                    <div className={classes.box}>
-                        {filterElements()}
-                        <Button
-                            startIcon={<FilterListIcon/>}
-                            variant={"contained"}
-                            color={"secondary"}
-                            onClick={() => {
-                            setFilters(f => f.concat({}))
-                        }}>
-                            add filter
+                <Formular
+                    childrens={[
+                        getDomainSelect(),
+                        <>
+                            {props.selects.map(s => <AnalyticSelect fnOptions={s.fnOptions} fnDefault={s.fnDefault} label={s.label} options={options ?? []}
+                                onChange={value => {
+                                    setData(undefined)
+                                    s.onChange(value)
+                                }} />)}
+                        </>,
+                        <div className={classes.box}>
+                            {filterElements()}
+                            <Button
+                                startIcon={<FilterListIcon />}
+                                variant={"contained"}
+                                color={"secondary"}
+                                onClick={() => {
+                                    setFilters(f => f.concat({}))
+                                }}>
+                                add filter
                         </Button>
-                        Scale: <Button onClick={ e =>{
-                            setScale(scale *0.1)
-                        }
+                        Scale: <Button onClick={e => {
+                                setScale(scale * 0.1)
+                            }
 
-                        }>-</Button>{scale}
-                        <Button onClick={ e =>{
-                           setScale(scale *10)
-                        }
-                        }>+</Button>
+                            }>-</Button>{scale}
+                            <Button onClick={e => {
+                                setScale(scale * 10)
+                            }
+                            }>+</Button>
 
-                    </div>
-                    ,
-                    <Button
-                        startIcon={<PlayArrowIcon/>}
-                        key="submit-button"
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                    >
-                        Run
+                        </div>
+                        ,
+                        <Button
+                            startIcon={<PlayArrowIcon />}
+                            key="submit-button"
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                        >
+                            Run
                     </Button>,
-                ]}
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    loadData();
-                }}
-            />
+                    ]}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        loadData();
+                    }}
+                />
             </div>
 
             <div className={classes.center}>
