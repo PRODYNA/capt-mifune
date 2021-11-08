@@ -12,10 +12,10 @@ package com.prodyna.mifune.core.schema;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,37 +33,39 @@ import java.util.List;
 import java.util.UUID;
 
 public class CypherIndexBuilder {
-	public List<String> getCypher(UUID domainId, Graph graph) {
-		List<String> result = new ArrayList<String>();
+  public List<String> getCypher(UUID domainId, Graph graph) {
+    List<String> result = new ArrayList<String>();
 
-		for (var node : graph.getNodes()) {
-			if (node.getDomainIds().contains(domainId)) {
-				List<Property> props = new ArrayList<Property>();
-				for (Property prop : node.getProperties()) {
-					if (prop.isPrimary()) {
-						props.add(prop);
-					}
-				}
-				String propertiesString = getPropertiesString(props);
-				if (propertiesString != null) {
-					result.add("CREATE INDEX FOR (n:%s) ON (%s)".formatted(node.getLabel(), propertiesString));
-				}
-			}
-		}
-		return result;
-	}
+    for (var node : graph.getNodes()) {
+      if (node.getDomainIds().contains(domainId)) {
+        List<Property> props = new ArrayList<Property>();
+        for (Property prop : node.getProperties()) {
+          if (prop.isPrimary()) {
+            props.add(prop);
+          }
+        }
+        String propertiesString = getPropertiesString(props);
+        if (propertiesString != null) {
+          result.add(
+              "CREATE INDEX IF NOT EXISTS FOR (n:%s) ON (%s)"
+                  .formatted(node.getLabel(), propertiesString));
+        }
+      }
+    }
+    return result;
+  }
 
-	private String getPropertiesString(List<Property> props) {
-		String result = new String();
-		List<String> propStrings = new ArrayList<String>();
+  private String getPropertiesString(List<Property> props) {
+    String result = new String();
+    List<String> propStrings = new ArrayList<String>();
 
-		for (Property prop : props) {
-			propStrings.add("n.%s".formatted(prop.getName()));
-		}
-		if (propStrings.size() < 1) {
-			return null;
-		}
-		result = String.join(",", propStrings);
-		return result;
-	}
+    for (Property prop : props) {
+      propStrings.add("n.%s".formatted(prop.getName()));
+    }
+    if (propStrings.size() < 1) {
+      return null;
+    }
+    result = String.join(",", propStrings);
+    return result;
+  }
 }

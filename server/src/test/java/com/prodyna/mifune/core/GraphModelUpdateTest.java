@@ -12,10 +12,10 @@ package com.prodyna.mifune.core;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -39,12 +39,13 @@ import org.junit.jupiter.api.Test;
 
 class GraphModelUpdateTest {
 
-	public static final UUID DOMAIN_ID = UUID.randomUUID();
+  public static final UUID DOMAIN_ID = UUID.randomUUID();
 
-	@Test
-	public void testMergeNodeByPrimaryKey() throws IOException {
-		var userNodeId = UUID.randomUUID();
-		var graphModel = """
+  @Test
+  public void testMergeNodeByPrimaryKey() throws IOException {
+    var userNodeId = UUID.randomUUID();
+    var graphModel =
+        """
 				{
 				  "domains": [
 				    {
@@ -68,11 +69,14 @@ class GraphModelUpdateTest {
 				    }
 				  ]
 				}
-				""".replaceAll("\\$userId", userNodeId.toString()).replaceAll("\\$domainId", DOMAIN_ID.toString());
-		var updateModel = """
+				"""
+            .replaceAll("\\$userId", userNodeId.toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
+    var updateModel = """
 				{"user":{"id":"long"}}
 				""";
-		var updateCypher = """
+    var updateCypher =
+        """
 				merge(var_1:User {id:$model.user.id})
 				merge (domain:Domain {id:$domainId})
 				merge(var_1)<-[source:DOMAIN]-(domain)
@@ -81,14 +85,15 @@ class GraphModelUpdateTest {
 				with *
 				return 'done'
 				""";
-		validateModel(graphModel, updateModel, updateCypher);
-	}
+    validateModel(graphModel, updateModel, updateCypher);
+  }
 
-	@Test
-	public void testMergeRelationSameNodeModel() throws IOException {
-		var nodeId = UUID.randomUUID();
-		var relId = UUID.randomUUID();
-		var graphModel = """
+  @Test
+  public void testMergeRelationSameNodeModel() throws IOException {
+    var nodeId = UUID.randomUUID();
+    var relId = UUID.randomUUID();
+    var graphModel =
+        """
 				{
 				"domains": [
 				  {
@@ -118,9 +123,12 @@ class GraphModelUpdateTest {
 				    ]
 				}]
 				}
-				""".replaceAll("\\$nodeId", nodeId.toString()).replaceAll("\\$relId", relId.toString())
-				.replaceAll("\\$domainId", DOMAIN_ID.toString());
-		var updateModel = """
+				"""
+            .replaceAll("\\$nodeId", nodeId.toString())
+            .replaceAll("\\$relId", relId.toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
+    var updateModel =
+        """
 				{
 				  "user" : {
 				    "id" : "long",
@@ -135,7 +143,8 @@ class GraphModelUpdateTest {
 				  }
 				}
 				""";
-		var updateCypher = """
+    var updateCypher =
+        """
 				merge(var_1:User {id:$model.user.id})
 				set var_1.name = coalesce($model.user.name, var_1.name)
 				merge (domain:Domain {id:$domainId})
@@ -156,12 +165,13 @@ class GraphModelUpdateTest {
 					}
 				return 'done'
 				 """;
-		validateModel(graphModel, updateModel, updateCypher);
-	}
+    validateModel(graphModel, updateModel, updateCypher);
+  }
 
-	@Test
-	public void testMergeRelationBetweenTwoNodeModels() throws IOException {
-		var graphModel = """
+  @Test
+  public void testMergeRelationBetweenTwoNodeModels() throws IOException {
+    var graphModel =
+        """
 				{
 				  "domains": [
 				    {
@@ -212,11 +222,13 @@ class GraphModelUpdateTest {
 				    }
 				  ]
 				}
-				""".replaceAll("\\$userId", UUID.randomUUID().toString())
-				.replaceAll("\\$carId", UUID.randomUUID().toString())
-				.replaceAll("\\$hasCarId", UUID.randomUUID().toString())
-				.replaceAll("\\$domainId", DOMAIN_ID.toString());
-		var updateModel = """
+				"""
+            .replaceAll("\\$userId", UUID.randomUUID().toString())
+            .replaceAll("\\$carId", UUID.randomUUID().toString())
+            .replaceAll("\\$hasCarId", UUID.randomUUID().toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
+    var updateModel =
+        """
 				{
 					"user":{
 						"id":"long",
@@ -229,7 +241,8 @@ class GraphModelUpdateTest {
 				}
 				""";
 
-		var updateCypher = """
+    var updateCypher =
+        """
 				merge(var_1:User {id:$model.user.id})
 				merge (domain:Domain {id:$domainId})
 				merge(var_1)<-[source:DOMAIN]-(domain)
@@ -248,13 +261,13 @@ class GraphModelUpdateTest {
 				return 'done'
 				""";
 
-		validateModel(graphModel, updateModel, updateCypher);
+    validateModel(graphModel, updateModel, updateCypher);
+  }
 
-	}
-
-	@Test
-	public void testMergeMultiRelationBetweenNodesWithPrimaryKeys() throws IOException {
-		var graphModel = """
+  @Test
+  public void testMergeMultiRelationBetweenNodesWithPrimaryKeys() throws IOException {
+    var graphModel =
+        """
 				{
 				  "domains": [
 				    {
@@ -314,12 +327,14 @@ class GraphModelUpdateTest {
 				    }
 				  ]
 				}
-				""".replaceAll("\\$userId", UUID.randomUUID().toString())
-				.replaceAll("\\$carId", UUID.randomUUID().toString())
-				.replaceAll("\\$hasCarId", UUID.randomUUID().toString())
-				.replaceAll("\\$domainId", DOMAIN_ID.toString());
+				"""
+            .replaceAll("\\$userId", UUID.randomUUID().toString())
+            .replaceAll("\\$carId", UUID.randomUUID().toString())
+            .replaceAll("\\$hasCarId", UUID.randomUUID().toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
 
-		var updateModel = """
+    var updateModel =
+        """
 				{
 				  "user":{
 				    "id":"long",
@@ -333,7 +348,8 @@ class GraphModelUpdateTest {
 				}
 				""";
 
-		var updateCypher = """
+    var updateCypher =
+        """
 				merge(var_1:User {id:$model.user.id})
 				merge (domain:Domain {id:$domainId})
 				merge(var_1)<-[source:DOMAIN]-(domain)
@@ -352,12 +368,13 @@ class GraphModelUpdateTest {
 					}
 				return 'done'
 				""";
-		validateModel(graphModel, updateModel, updateCypher);
-	}
+    validateModel(graphModel, updateModel, updateCypher);
+  }
 
-	@Test
-	public void testMergeCollectionByRelationWithKeyAndNodeWithoutPrimaryKeys() throws IOException {
-		var graphModel = """
+  @Test
+  public void testMergeCollectionByRelationWithKeyAndNodeWithoutPrimaryKeys() throws IOException {
+    var graphModel =
+        """
 				 {
 				   "domains": [
 				     {
@@ -417,12 +434,14 @@ class GraphModelUpdateTest {
 				     }
 				   ]
 				 }
-				""".replaceAll("\\$userId", UUID.randomUUID().toString())
-				.replaceAll("\\$carId", UUID.randomUUID().toString())
-				.replaceAll("\\$hasCarId", UUID.randomUUID().toString())
-				.replaceAll("\\$domainId", DOMAIN_ID.toString());
+				"""
+            .replaceAll("\\$userId", UUID.randomUUID().toString())
+            .replaceAll("\\$carId", UUID.randomUUID().toString())
+            .replaceAll("\\$hasCarId", UUID.randomUUID().toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
 
-		var updateModel = """
+    var updateModel =
+        """
 				 {
 				  "user":{
 				    "id": "long",
@@ -438,7 +457,8 @@ class GraphModelUpdateTest {
 				}
 				""";
 
-		var updateCypher = """
+    var updateCypher =
+        """
 				merge(var_1:User {id:$model.user.id})
 				merge (domain:Domain {id:$domainId})
 				merge(var_1)<-[source:DOMAIN]-(domain)
@@ -456,12 +476,13 @@ class GraphModelUpdateTest {
 					}
 				return 'done'
 				  """;
-		validateModel(graphModel, updateModel, updateCypher);
-	}
+    validateModel(graphModel, updateModel, updateCypher);
+  }
 
-	@Test
-	public void testCombinedPrimaryByRelation() throws IOException {
-		var graphModel = """
+  @Test
+  public void testCombinedPrimaryByRelation() throws IOException {
+    var graphModel =
+        """
 				{
 				  "domains": [
 				    {
@@ -514,11 +535,14 @@ class GraphModelUpdateTest {
 				    }
 				  ]
 				}
-				""".replaceAll("\\$dayId", UUID.randomUUID().toString())
-				.replaceAll("\\$monthId", UUID.randomUUID().toString())
-				.replaceAll("\\$inId", UUID.randomUUID().toString()).replaceAll("\\$domainId", DOMAIN_ID.toString());
+				"""
+            .replaceAll("\\$dayId", UUID.randomUUID().toString())
+            .replaceAll("\\$monthId", UUID.randomUUID().toString())
+            .replaceAll("\\$inId", UUID.randomUUID().toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
 
-		var updateModel = """
+    var updateModel =
+        """
 				 {
 				  "day":{
 				    "id": "long",
@@ -531,7 +555,8 @@ class GraphModelUpdateTest {
 				}
 				""";
 
-		var updateCypher = """
+    var updateCypher =
+        """
 				merge(var_2:Month {id:$model.day.in.month.id})
 				merge(var_2)<-[:IN]-(var_1:Day {id:$model.day.id})
 				merge (domain:Domain {id:$domainId})
@@ -541,16 +566,17 @@ class GraphModelUpdateTest {
 				with *
 				return 'done'
 				""";
-		validateModel(graphModel, updateModel, updateCypher);
-	}
+    validateModel(graphModel, updateModel, updateCypher);
+  }
 
-	private void validateModel(String graphModel, String updateModel, String updateCypher) throws IOException {
-		var graph = new ObjectMapper().createParser(graphModel).readValueAs(Graph.class);
-		var node = new ObjectMapper().readTree(updateModel);
-		var internalGraphModel = new GraphModel(graph);
-		var jsonBuilder = new GraphJsonBuilder(internalGraphModel, DOMAIN_ID, false);
-		assertEquals(node.toPrettyString(), jsonBuilder.getJson().toPrettyString());
-		var builder = new CypherUpdateBuilder(internalGraphModel, DOMAIN_ID);
-		assertEquals(updateCypher.strip(), builder.getCypher());
-	}
+  private void validateModel(String graphModel, String updateModel, String updateCypher)
+      throws IOException {
+    var graph = new ObjectMapper().createParser(graphModel).readValueAs(Graph.class);
+    var node = new ObjectMapper().readTree(updateModel);
+    var internalGraphModel = new GraphModel(graph);
+    var jsonBuilder = new GraphJsonBuilder(internalGraphModel, DOMAIN_ID, false);
+    assertEquals(node.toPrettyString(), jsonBuilder.getJson().toPrettyString());
+    var builder = new CypherUpdateBuilder(internalGraphModel, DOMAIN_ID);
+    assertEquals(updateCypher.strip(), builder.getCypher());
+  }
 }

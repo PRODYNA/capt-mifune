@@ -12,10 +12,10 @@ package com.prodyna.mifune.domain;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,38 +33,38 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Graph {
 
-	private List<Domain> domains = new ArrayList<>();
+  private List<Domain> domains = new ArrayList<>();
 
-	private List<Node> nodes = new ArrayList<>();
+  private List<Node> nodes = new ArrayList<>();
 
-	private List<Relation> relations = new ArrayList<>();
+  private List<Relation> relations = new ArrayList<>();
 
-	public List<Relation> getRelations() {
-		return relations;
-	}
+  public List<Relation> getRelations() {
+    return relations;
+  }
 
-	public void setRelations(List<Relation> relations) {
-		this.relations = relations;
-	}
+  public void setRelations(List<Relation> relations) {
+    this.relations = relations;
+  }
 
-	public List<Domain> getDomains() {
-		return domains;
-	}
+  public List<Domain> getDomains() {
+    return domains;
+  }
 
-	public void setDomains(List<Domain> domains) {
-		this.domains = domains;
-	}
+  public void setDomains(List<Domain> domains) {
+    this.domains = domains;
+  }
 
-	public List<Node> getNodes() {
-		return nodes;
-	}
+  public List<Node> getNodes() {
+    return nodes;
+  }
 
-	public void setNodes(List<Node> nodes) {
-		this.nodes = nodes;
-	}
+  public void setNodes(List<Node> nodes) {
+    this.nodes = nodes;
+  }
 
-	@Override
-	public String toString() {
-		return "Graph{" + "domains=" + domains + ", nodes=" + nodes + '}';
-	}
+  @Override
+  public String toString() {
+    return "Graph{" + "domains=" + domains + ", nodes=" + nodes + '}';
+  }
 }

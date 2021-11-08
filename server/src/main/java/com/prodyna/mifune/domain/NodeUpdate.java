@@ -12,10 +12,10 @@ package com.prodyna.mifune.domain;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,11 +34,13 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record NodeUpdate(@NotBlank String label, @Size(min = 1) Set<UUID> domainIds, String color,
-		List<Property> properties) {
+public record NodeUpdate(
+    @NotBlank String label,
+    @Size(min = 1) Set<UUID> domainIds,
+    String color,
+    List<Property> properties) {
 
-	public NodeUpdate(String label, UUID domainId) {
-		this(label, Set.<UUID>of(domainId), null, List.of());
-	}
-
+  public NodeUpdate(String label, UUID domainId) {
+    this(label, Set.<UUID>of(domainId), null, List.of());
+  }
 }

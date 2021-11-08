@@ -12,10 +12,10 @@ package com.prodyna.mifune.api;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,9 +31,6 @@ import com.prodyna.mifune.domain.Source;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -49,31 +46,32 @@ import org.jboss.resteasy.reactive.MultipartForm;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/sources")
-
 public class SourceResource {
 
-	@ConfigProperty(name = "mifune.upload.dir")
-	protected String uploadDir;
+  @ConfigProperty(name = "mifune.upload.dir")
+  protected String uploadDir;
 
-	@Inject
-	protected SourceService sourceService;
+  @Inject protected SourceService sourceService;
 
-	@POST
-	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response fileUpload(@MultipartForm MultipartBody upload) throws IOException {
-		Files.copy(upload.file.uploadedFile(), Paths.get(uploadDir, upload.name));
-		return Response.ok().build();
-	}
+  @POST
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  public Response fileUpload(@MultipartForm MultipartBody upload) throws IOException {
+    Files.copy(upload.file.uploadedFile(), Paths.get(uploadDir, upload.name));
+    return Response.ok().build();
+  }
 
-	@GET
-	public Response sources() throws IOException {
-		var files = sourceService.sources().stream().map(fileName -> {
-			var source = new Source();
-			source.setName(fileName);
-			source.setHeader(sourceService.fileHeader(fileName));
-			return source;
-		}).collect(Collectors.toList());
-		return Response.ok().entity(files).build();
-	}
-
+  @GET
+  public Response sources() throws IOException {
+    var files =
+        sourceService.sources().stream()
+            .map(
+                fileName -> {
+                  var source = new Source();
+                  source.setName(fileName);
+                  source.setHeader(sourceService.fileHeader(fileName));
+                  return source;
+                })
+            .collect(Collectors.toList());
+    return Response.ok().entity(files).build();
+  }
 }

@@ -12,10 +12,10 @@ package com.prodyna.mifune.core.schema;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -37,58 +37,60 @@ import java.util.UUID;
 
 public class NodeModel {
 
-	private UUID id;
-	private String label;
-	private Set<UUID> domainIds = new HashSet<>();
-	private Set<RelationModel> relations = new HashSet<>();
-	private List<Property> properties = new ArrayList<>();
+  private UUID id;
+  private String label;
+  private Set<UUID> domainIds = new HashSet<>();
+  private Set<RelationModel> relations = new HashSet<>();
+  private List<Property> properties = new ArrayList<>();
 
-	public UUID getId() {
-		return id;
-	}
+  public UUID getId() {
+    return id;
+  }
 
-	public void setId(UUID id) {
-		this.id = id;
-	}
+  public void setId(UUID id) {
+    this.id = id;
+  }
 
-	public boolean isPrimary() {
-		return Optional.ofNullable(properties).stream().flatMap(Collection::stream).anyMatch(Property::isPrimary);
-	}
+  public boolean isPrimary() {
+    return Optional.ofNullable(properties).stream()
+        .flatMap(Collection::stream)
+        .anyMatch(Property::isPrimary);
+  }
 
-	public String getLabel() {
-		return label;
-	}
+  public String getLabel() {
+    return label;
+  }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+  public void setLabel(String label) {
+    this.label = label;
+  }
 
-	public Set<UUID> getDomainIds() {
-		return domainIds;
-	}
+  public Set<UUID> getDomainIds() {
+    return domainIds;
+  }
 
-	public void setDomainIds(Set<UUID> domainIds) {
-		this.domainIds = domainIds;
-	}
+  public void setDomainIds(Set<UUID> domainIds) {
+    this.domainIds = domainIds;
+  }
 
-	public Set<RelationModel> getRelations() {
-		return relations;
-	}
+  public Set<RelationModel> getRelations() {
+    return relations;
+  }
 
-	public void setRelations(Set<RelationModel> relations) {
-		this.relations = relations;
-	}
+  public void setRelations(Set<RelationModel> relations) {
+    this.relations = relations;
+  }
 
-	public List<Property> getProperties() {
-		return properties;
-	}
+  public List<Property> getProperties() {
+    return properties;
+  }
 
-	public void setProperties(List<Property> properties) {
-		this.properties = properties;
-	}
+  public void setProperties(List<Property> properties) {
+    this.properties = properties;
+  }
 
-	public String varName() {
-		var label = getLabel();
-		return label.substring(0, 1).toLowerCase() + label.substring(1);
-	}
+  public String varName() {
+    var label = getLabel();
+    return label.substring(0, 1).toLowerCase() + label.substring(1);
+  }
 }
