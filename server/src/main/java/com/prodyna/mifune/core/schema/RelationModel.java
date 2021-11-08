@@ -12,10 +12,10 @@ package com.prodyna.mifune.core.schema;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,75 +32,78 @@ import java.util.stream.Collectors;
 
 public class RelationModel {
 
-	private Set<UUID> domainIds = new HashSet<>();
-	private String type;
-	private boolean multiple;
-	private NodeModel from;
-	private NodeModel to;
-	private boolean primary;
-	private List<Property> properties;
+  private Set<UUID> domainIds = new HashSet<>();
+  private String type;
+  private boolean multiple;
+  private NodeModel from;
+  private NodeModel to;
+  private boolean primary;
+  private List<Property> properties;
 
-	public Set<UUID> getDomainIds() {
-		return domainIds;
-	}
+  public Set<UUID> getDomainIds() {
+    return domainIds;
+  }
 
-	public void setDomainIds(Set<UUID> domainIds) {
-		this.domainIds = domainIds;
-	}
+  public void setDomainIds(Set<UUID> domainIds) {
+    this.domainIds = domainIds;
+  }
 
-	public String getType() {
-		return type;
-	}
+  public String getType() {
+    return type;
+  }
 
-	public void setType(String type) {
-		this.type = type;
-	}
+  public void setType(String type) {
+    this.type = type;
+  }
 
-	public boolean isMultiple() {
-		return multiple;
-	}
+  public boolean isMultiple() {
+    return multiple;
+  }
 
-	public void setMultiple(boolean multiple) {
-		this.multiple = multiple;
-	}
+  public void setMultiple(boolean multiple) {
+    this.multiple = multiple;
+  }
 
-	public NodeModel getFrom() {
-		return from;
-	}
+  public NodeModel getFrom() {
+    return from;
+  }
 
-	public void setFrom(NodeModel from) {
-		this.from = from;
-	}
+  public void setFrom(NodeModel from) {
+    this.from = from;
+  }
 
-	public NodeModel getTo() {
-		return to;
-	}
+  public NodeModel getTo() {
+    return to;
+  }
 
-	public void setTo(NodeModel to) {
-		this.to = to;
-	}
+  public void setTo(NodeModel to) {
+    this.to = to;
+  }
 
-	public boolean isPrimary() {
-		return primary;
-	}
+  public boolean isPrimary() {
+    return primary;
+  }
 
-	public void setPrimary(boolean primary) {
-		this.primary = primary;
-	}
+  public void setPrimary(boolean primary) {
+    this.primary = primary;
+  }
 
-	public List<Property> getProperties() {
-		return properties;
-	}
+  public List<Property> getProperties() {
+    return properties;
+  }
 
-	public void setProperties(List<Property> properties) {
-		this.properties = properties;
-	}
+  public void setProperties(List<Property> properties) {
+    this.properties = properties;
+  }
 
-	public String varName() {
-		var type = getType();
-		var parts = Arrays.asList(type.split("_"));
-		var varName = parts.stream().map(String::toLowerCase).map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
-				.collect(Collectors.joining());
-		return varName.substring(0, 1).toLowerCase() + varName.substring(1);
-	}
+  public String varName() {
+    var type = getType();
+    var parts = Arrays.asList(type.split("_"));
+    var varName =
+        parts.stream()
+            .map(String::toLowerCase)
+            .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+            .collect(Collectors.joining());
+    return varName.substring(0, 1).toLowerCase() + varName.substring(1);
+  }
 }

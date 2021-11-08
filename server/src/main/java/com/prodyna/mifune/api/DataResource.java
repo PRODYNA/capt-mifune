@@ -12,10 +12,10 @@ package com.prodyna.mifune.api;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -48,39 +48,41 @@ import org.neo4j.driver.async.AsyncSession;
 @Path("/data")
 public class DataResource {
 
-	@Inject
-	GraphService graphService;
+  @Inject GraphService graphService;
 
-	@Inject
-	protected Driver driver;
+  @Inject protected Driver driver;
 
-	@GET
-	@Path("/domain/{domainId}")
-	public CompletionStage<Response> query(@PathParam("domainId") UUID domainId,
-			@RestQuery("results[]") List<String> results, @RestQuery("orders[]") List<String> orders,
-			@RestQuery("filters[]") List<String> filters) {
-		var graphModel = new GraphModel(graphService.graph());
-		var cypherQueryBuilder = new CypherQueryBuilder(graphModel, domainId, results, orders, filters);
-		AsyncSession session = driver.asyncSession();
-		var statement = cypherQueryBuilder.getCypher();
-		System.out.println(statement);
-		return session.runAsync(statement.cypher(), statement.parameter())
-				.thenCompose(cursor -> cursor.listAsync(cypherQueryBuilder::buildResult))
-				.thenCompose(fruits -> session.closeAsync().thenApply(signal -> fruits)).thenApply(Response::ok)
-				.thenApply(Response.ResponseBuilder::build);
+  @GET
+  @Path("/domain/{domainId}")
+  public CompletionStage<Response> query(
+      @PathParam("domainId") UUID domainId,
+      @RestQuery("results[]") List<String> results,
+      @RestQuery("orders[]") List<String> orders,
+      @RestQuery("filters[]") List<String> filters) {
+    var graphModel = new GraphModel(graphService.graph());
+    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, domainId, results, orders, filters);
+    AsyncSession session = driver.asyncSession();
+    var statement = cypherQueryBuilder.getCypher();
+    System.out.println(statement);
+    return session
+        .runAsync(statement.cypher(), statement.parameter())
+        .thenCompose(cursor -> cursor.listAsync(cypherQueryBuilder::buildResult))
+        .thenCompose(fruits -> session.closeAsync().thenApply(signal -> fruits))
+        .thenApply(Response::ok)
+        .thenApply(Response.ResponseBuilder::build);
+  }
 
-	}
-
-	@GET
-	@Path("/domain/{domainId}/keys")
-	public Uni<List<String>> createJsonModel(@PathParam("domainId") UUID id) {
-		ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
-		List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-		var result = paths.stream().map(s -> s.replaceAll("\\[", "")).map(s -> s.replaceAll("]", ""))
-				.sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
-				.collect(Collectors.toList());
-		return Uni.createFrom().item(result);
-
-	}
-
+  @GET
+  @Path("/domain/{domainId}/keys")
+  public Uni<List<String>> createJsonModel(@PathParam("domainId") UUID id) {
+    ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    var result =
+        paths.stream()
+            .map(s -> s.replaceAll("\\[", ""))
+            .map(s -> s.replaceAll("]", ""))
+            .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
+            .collect(Collectors.toList());
+    return Uni.createFrom().item(result);
+  }
 }

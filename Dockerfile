@@ -1,14 +1,16 @@
-FROM maven:3.8.3-eclipse-temurin-17 as builder
+FROM eclipse-temurin:17 as builder
+COPY ./mvnw ./mvnw
+COPY .mvn .mvn
 COPY ./pom.xml ./pom.xml
 COPY ./csv2json ./csv2json
 COPY ./server/pom.xml ./server/pom.xml
-RUN mvn -f csv2json/pom.xml install -DskipTests
-RUN mvn dependency:go-offline
+RUN ./mvnw -f csv2json/pom.xml install -DskipTests
+RUN ./mvnw dependency:go-offline
 COPY ./server ./server
-RUN mvn install -DskipTests
+RUN ./mvnw install -DskipTests
 
 
-FROM eclipse-temurin:17-alpine
+FROM eclipse-temurin:17
 # Configure the JAVA_OPTIONS, you can add -XshowSettings:vm to also display the heap size.
 ENV JAVA_OPTIONS="-Dquarkus.http.host=0.0.0.0 -Djava.util.logging.manager=org.jboss.logmanager.LogManager"
 # We make four distinct layers so if there are application changes the library layers can be re-used
