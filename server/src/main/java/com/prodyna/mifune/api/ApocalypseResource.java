@@ -27,19 +27,15 @@ package com.prodyna.mifune.api;
  */
 
 import io.smallrye.mutiny.Multi;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
 
 @Path("/apocalypse")
 @Tag(name = "admin")
@@ -47,63 +43,54 @@ import java.util.function.Supplier;
 @Produces(MediaType.APPLICATION_JSON)
 public class ApocalypseResource {
 
-    @Inject
-    protected Logger log;
+	@Inject
+	protected Logger log;
 
-    @Inject
-    protected Driver driver;
+	@Inject
+	protected Driver driver;
 
+	@GET
+	@Operation(summary = "Reset the whole database", description = """
+			Remove all nodes and relation and delete each constraint and index
+			""")
+	@Produces(MediaType.SERVER_SENT_EVENTS)
+	public Multi<String> apocalypseNow() {
+		log.info("apocalypse starts now");
+		var session = driver.asyncSession();
 
-    @DELETE
-    @Operation(summary = "Reset the whole database", description = """
-            Remove all nodes and relation and delete each constraint and index
-            """)
-    @Produces(MediaType.SERVER_SENT_EVENTS)
-    public Multi<String> apocalypseNow() {
-        log.info("apocalypse starts now");
-        var session = driver.asyncSession();
+		Supplier<CompletionStage<Long>> deleteAndCountRel = () -> session
+				.runAsync("match()-[r]->() with r limit 10000 delete r return count(r) as count")
+				.thenCompose(r -> r.singleAsync().thenApply(count -> count.get("count").asLong()));
 
-        Supplier<CompletionStage<Long>> deleteAndCountRel = () ->
-                session.runAsync("match()-[r]->() with r limit 10000 delete r return count(r) as count")
-                        .thenCompose(r -> r.singleAsync().thenApply(count -> count.get("count").asLong()));
+		Supplier<CompletionStage<Long>> deleteAndCountNodes = () -> session
+				.runAsync("match(a) with a limit 10000 detach delete a return count(a) as count")
+				.thenCompose(r -> r.singleAsync().thenApply(count -> count.get("count").asLong()));
 
-        Supplier<CompletionStage<Long>> deleteAndCountNodes = () ->
-                session.runAsync("match(a) with a limit 10000 detach delete a return count(a) as count")
-                        .thenCompose(r -> r.singleAsync().thenApply(count -> count.get("count").asLong()));
+		Supplier<CompletionStage<Long>> dropIndex = () -> session.runAsync("""
+				call db.indexes() yield name
+				return name
+				""")
+				.thenCompose(cursor -> cursor
+						.forEachAsync(rec -> session.runAsync("drop index %s".formatted(rec.get("name").asString()))))
+				.thenApply(sr -> (long) sr.counters().indexesRemoved());
 
-        Supplier<CompletionStage<Long>> dropIndex = () ->
-                session.runAsync("""
-                                call db.indexes() yield name
-                                return name
-                                """)
-                        .thenCompose(cursor -> cursor
-                                .forEachAsync(rec -> session.runAsync("drop index %s".formatted(rec.get("name").asString()))))
-                        .thenApply(sr -> (long) sr.counters().indexesRemoved());
+		Supplier<CompletionStage<Long>> dropConstraints = () -> session.runAsync("""
+				call db.constraints() yield name
+				return name
+				""")
+				.thenCompose(cursor -> cursor.forEachAsync(
+						rec -> session.runAsync("drop constraint %s".formatted(rec.get("name").asString()))))
+				.thenApply(sr -> (long) sr.counters().indexesRemoved());
 
-        Supplier<CompletionStage<Long>> dropConstraints = () ->
-                session.runAsync("""
-                                call db.constraints() yield name
-                                return name
-                                """)
-                        .thenCompose(cursor -> cursor
-                                .forEachAsync(rec -> session.runAsync("drop constraint %s".formatted(rec.get("name").asString()))))
-                        .thenApply(sr -> (long) sr.counters().indexesRemoved());
-
-
-        return Multi.createBy().repeating().completionStage(deleteAndCountRel).whilst(l -> l > 0)
-                .map("%s relations removed"::formatted)
-                .onCompletion().switchTo(
-                        () -> Multi.createBy().repeating().completionStage(deleteAndCountNodes).whilst(l -> l > 0)
-                                .map("%s nodes removed"::formatted)
-                )
-                .onCompletion().switchTo(
-                        () -> Multi.createBy().repeating().completionStage(dropConstraints).whilst(l -> l > 0)
-                                .map("%s constraints removed"::formatted)
-                )
-                .onCompletion().switchTo(
-                        () -> Multi.createBy().repeating().completionStage(dropIndex).whilst(l -> l > 0)
-                                .map("%s indexes removed"::formatted)
-                )
-                .onCompletion().invoke(session::closeAsync);
-    }
+		return Multi.createBy().repeating().completionStage(deleteAndCountRel).whilst(l -> l > 0)
+				.map("%s relations removed"::formatted).onCompletion()
+				.switchTo(() -> Multi.createBy().repeating().completionStage(deleteAndCountNodes).whilst(l -> l > 0)
+						.map("%s nodes removed"::formatted))
+				.onCompletion()
+				.switchTo(() -> Multi.createBy().repeating().completionStage(dropConstraints).whilst(l -> l > 0)
+						.map("%s constraints removed"::formatted))
+				.onCompletion().switchTo(() -> Multi.createBy().repeating().completionStage(dropIndex)
+						.whilst(l -> l > 0).map("%s indexes removed"::formatted))
+				.onCompletion().invoke(session::closeAsync);
+	}
 }
