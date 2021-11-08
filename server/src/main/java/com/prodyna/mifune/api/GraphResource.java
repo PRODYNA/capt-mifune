@@ -38,7 +38,6 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -46,8 +45,6 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.async.AsyncSession;
-import org.neo4j.driver.reactive.RxSession;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,174 +52,190 @@ import org.neo4j.driver.reactive.RxSession;
 @Tag(name = "graph")
 public class GraphResource {
 
-	@Inject
-	protected Logger log;
+  @Inject protected Logger log;
 
-	@Inject
-	protected GraphService graphService;
-	@Inject
-	protected ImportService importService;
+  @Inject protected GraphService graphService;
+  @Inject protected ImportService importService;
 
-	@Inject
-	protected DeletionService deletionService;
+  @Inject protected DeletionService deletionService;
 
-	@Inject
-	protected EventBus eventBus;
+  @Inject protected EventBus eventBus;
 
-	@Inject
-	Driver driver;
+  @Inject Driver driver;
 
-	@GET
-	public Uni<Graph> loadGraph() {
-		return Uni.createFrom().item(graphService.graph());
-	}
+  @GET
+  public Uni<Graph> loadGraph() {
+    return Uni.createFrom().item(graphService.graph());
+  }
 
-	@GET
-	@Path("/stats")
-	@Produces(MediaType.SERVER_SENT_EVENTS)
-	public Multi<GraphStatistics> graphStats() {
-		return Multi.createFrom().ticks().every(Duration.ofSeconds(15)).onItem().transformToUniAndConcatenate(t -> {
-			var session = driver.asyncSession();
-			var stats = session
-					.readTransactionAsync(tx -> tx.runAsync("""
+  @GET
+  @Path("/stats")
+  @Produces(MediaType.SERVER_SENT_EVENTS)
+  public Multi<GraphStatistics> graphStats() {
+    return Multi.createFrom()
+        .ticks()
+        .every(Duration.ofSeconds(15))
+        .onItem()
+        .transformToUniAndConcatenate(
+            t -> {
+              var session = driver.asyncSession();
+              var stats =
+                  session
+                      .readTransactionAsync(
+                          tx ->
+                              tx.runAsync(
+                                      """
 									call {match (a) return count(a) as nodes}
 									call {match ()-[r]->() return count(r) as relations}
 									return nodes, relations
 							""")
-							.thenCompose(fn -> fn.singleAsync().thenApply(
-									r -> new GraphStatistics(r.get("nodes").asLong(), r.get("relations").asLong()))))
-					.thenCompose(c -> session.closeAsync().thenApply(v -> c));
-			return Uni.createFrom().completionStage(stats);
+                                  .thenCompose(
+                                      fn ->
+                                          fn.singleAsync()
+                                              .thenApply(
+                                                  r ->
+                                                      new GraphStatistics(
+                                                          r.get("nodes").asLong(),
+                                                          r.get("relations").asLong()))))
+                      .thenCompose(c -> session.closeAsync().thenApply(v -> c));
+              return Uni.createFrom().completionStage(stats);
+            });
+  }
 
-		});
+  @POST
+  public Uni<Void> persistGraph() throws IOException {
+    graphService.persist();
+    return Uni.createFrom().voidItem();
+  }
 
-	}
+  @POST
+  @Path("/reset")
+  public void reset() {
+    graphService.reset();
+  }
 
-	@POST
-	public Uni<Void> persistGraph() throws IOException {
-		graphService.persist();
-		return Uni.createFrom().voidItem();
-	}
+  @GET
+  @Path("/domains")
+  public Multi<Domain> fetchDomains() {
+    return Multi.createFrom().iterable(graphService.fetchDomains());
+  }
 
-	@POST
-	@Path("/reset")
-	public void reset() {
-		graphService.reset();
-	}
+  @POST
+  @Path("/domain")
+  public Uni<Domain> createDomain(@Valid DomainCreate model) {
+    return Uni.createFrom().item(graphService.createDomain(model));
+  }
 
-	@GET
-	@Path("/domains")
-	public Multi<Domain> fetchDomains() {
-		return Multi.createFrom().iterable(graphService.fetchDomains());
-	}
+  @GET
+  @Path("/domain/{id}")
+  public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.fetchDomain(id));
+  }
 
-	@POST
-	@Path("/domain")
-	public Uni<Domain> createDomain(@Valid DomainCreate model) {
-		return Uni.createFrom().item(graphService.createDomain(model));
-	}
+  @GET
+  @Path("/domain/{id}/count")
+  public Uni<Long> countDomainRootNodes(@PathParam("id") UUID id) {
+    var session = driver.asyncSession();
+    var count =
+        session
+            .runAsync(
+                "match(:Domain {id:$id})--(x) return count(x) as count",
+                Map.of("id", id.toString()))
+            .thenCompose(r -> r.singleAsync().thenApply(x -> x.get("count").asLong()))
+            .thenCompose(l -> session.closeAsync().thenApply(x -> l));
+    return Uni.createFrom().completionStage(count);
+  }
 
-	@GET
-	@Path("/domain/{id}")
-	public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
-		return Uni.createFrom().item(graphService.fetchDomain(id));
-	}
+  @PUT
+  @Path("/domain/{id}")
+  public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
+    return Uni.createFrom().item(graphService.updateDomain(id, model));
+  }
 
-	@GET
-	@Path("/domain/{id}/count")
-	public Uni<Long> countDomainRootNodes(@PathParam("id") UUID id) {
-		var session = driver.asyncSession();
-		var count = session
-				.runAsync("match(:Domain {id:$id})--(x) return count(x) as count", Map.of("id", id.toString()))
-				.thenCompose(r -> r.singleAsync().thenApply(x -> x.get("count").asLong()))
-				.thenCompose(l -> session.closeAsync().thenApply(x -> l));
-		return Uni.createFrom().completionStage(count);
-	}
+  @DELETE
+  @Path("/domain/{id}")
+  public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.deleteDomain(id));
+  }
 
-	@PUT
-	@Path("/domain/{id}")
-	public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
-		return Uni.createFrom().item(graphService.updateDomain(id, model));
-	}
+  @POST
+  @Path("/node")
+  public Uni<GraphDelta> createNode(@Valid NodeCreate model) {
+    return Uni.createFrom().item(graphService.createNode(model));
+  }
 
-	@DELETE
-	@Path("/domain/{id}")
-	public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
-		return Uni.createFrom().item(graphService.deleteDomain(id));
-	}
+  @PUT
+  @Path("/node/{id}")
+  public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
+    return Uni.createFrom().item(graphService.updateNode(id, model));
+  }
 
-	@POST
-	@Path("/node")
-	public Uni<GraphDelta> createNode(@Valid NodeCreate model) {
-		return Uni.createFrom().item(graphService.createNode(model));
-	}
+  @DELETE
+  @Path("/node/{id}")
+  public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.deleteNode(id));
+  }
 
-	@PUT
-	@Path("/node/{id}")
-	public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
-		return Uni.createFrom().item(graphService.updateNode(id, model));
-	}
+  @POST
+  @Path("/relation")
+  public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
+    return Uni.createFrom().item(graphService.createRelation(model));
+  }
 
-	@DELETE
-	@Path("/node/{id}")
-	public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
-		return Uni.createFrom().item(graphService.deleteNode(id));
-	}
+  @PUT
+  @Path("/relation/{id}")
+  public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
+    return Uni.createFrom().item(graphService.updateRelation(id, model));
+  }
 
-	@POST
-	@Path("/relation")
-	public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
-		return Uni.createFrom().item(graphService.createRelation(model));
-	}
+  @DELETE
+  @Path("/relation/{id}")
+  public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.deleteRelation(id));
+  }
 
-	@PUT
-	@Path("/relation/{id}")
-	public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
-		return Uni.createFrom().item(graphService.updateRelation(id, model));
-	}
+  @GET
+  @Path("/domain/{domainId}/mapping")
+  public Uni<Map<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
+    ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
+    var mapping =
+        Optional.ofNullable(graphService.fetchDomain(id).getColumnMapping()).orElse(Map.of());
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    var hashmap =
+        new TreeMap<String, String>(
+            Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s));
+    paths.forEach(path -> hashmap.put(path, mapping.getOrDefault(path, null)));
+    return Uni.createFrom().item(hashmap);
+  }
 
-	@DELETE
-	@Path("/relation/{id}")
-	public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
-		return Uni.createFrom().item(graphService.deleteRelation(id));
-	}
+  @GET
+  @Path("/domain/{domainId}/import")
+  public Uni<String> runImport(@PathParam("domainId") UUID domainId) {
+    return importService.runImport(domainId);
+  }
 
-	@GET
-	@Path("/domain/{domainId}/mapping")
-	public Uni<Map<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
-		ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
-		var mapping = Optional.ofNullable(graphService.fetchDomain(id).getColumnMapping()).orElse(Map.of());
-		List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-		var hashmap = new TreeMap<String, String>(
-				Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s));
-		paths.forEach(path -> hashmap.put(path, mapping.getOrDefault(path, null)));
-		return Uni.createFrom().item(hashmap);
-	}
+  @DELETE
+  @Path("/domain/{domainId}/clear")
+  public Uni<String> clearDomain(@PathParam("domainId") UUID domainId) {
+    deletionService.deleteDomainFromDatabase(domainId, graphService.graph());
+    return Uni.createFrom().item("OK");
+  }
 
-	@GET
-	@Path("/domain/{domainId}/import")
-	public Uni<String> runImport(@PathParam("domainId") UUID domainId) {
-		return importService.runImport(domainId);
-	}
-
-	@DELETE
-	@Path("/domain/{domainId}/clear")
-	public Uni<String> clearDomain(@PathParam("domainId") UUID domainId) {
-		deletionService.deleteDomainFromDatabase(domainId, graphService.graph());
-		return Uni.createFrom().item("OK");
-	}
-
-	/**
-	 * This is used for the counter inside the table of pipelines
-	 *
-	 * @param domainId
-	 * @return
-	 */
-	@GET
-	@Path("/domain/{domainId}/stats")
-	@Produces(MediaType.SERVER_SENT_EVENTS)
-	public Multi<Object> stats(@PathParam("domainId") UUID domainId) {
-		return eventBus.localConsumer(domainId.toString()).bodyStream().toMulti().onOverflow().dropPreviousItems();
-	}
-
+  /**
+   * This is used for the counter inside the table of pipelines
+   *
+   * @param domainId
+   * @return
+   */
+  @GET
+  @Path("/domain/{domainId}/stats")
+  @Produces(MediaType.SERVER_SENT_EVENTS)
+  public Multi<Object> stats(@PathParam("domainId") UUID domainId) {
+    return eventBus
+        .localConsumer(domainId.toString())
+        .bodyStream()
+        .toMulti()
+        .onOverflow()
+        .dropPreviousItems();
+  }
 }

@@ -12,10 +12,10 @@ package com.prodyna.mifune.domain;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,9 +31,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record DomainUpdate(String name, UUID rootNodeId, String file, Map<String, String> columnMapping) {
+public record DomainUpdate(
+    String name, UUID rootNodeId, String file, Map<String, String> columnMapping) {
 
-	public DomainUpdate(String name) {
-		this(name, null, null, null);
-	}
+  public DomainUpdate(String name) {
+    this(name, null, null, null);
+  }
 }

@@ -12,10 +12,10 @@ package com.prodyna.mifune.domain;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -33,73 +33,73 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Domain {
 
-	private UUID id;
+  private UUID id;
 
-	private String name;
+  private String name;
 
-	private UUID rootNodeId;
+  private UUID rootNodeId;
 
-	private String file;
+  private String file;
 
-	private Map<String, String> columnMapping;
+  private Map<String, String> columnMapping;
 
-	private boolean modelValid;
+  private boolean modelValid;
 
-	private boolean mappingValid;
+  private boolean mappingValid;
 
-	public UUID getId() {
-		return id;
-	}
+  public UUID getId() {
+    return id;
+  }
 
-	public void setId(UUID id) {
-		this.id = id;
-	}
+  public void setId(UUID id) {
+    this.id = id;
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public UUID getRootNodeId() {
-		return rootNodeId;
-	}
+  public UUID getRootNodeId() {
+    return rootNodeId;
+  }
 
-	public void setRootNodeId(UUID rootNodeId) {
-		this.rootNodeId = rootNodeId;
-	}
+  public void setRootNodeId(UUID rootNodeId) {
+    this.rootNodeId = rootNodeId;
+  }
 
-	public Map<String, String> getColumnMapping() {
-		return columnMapping;
-	}
+  public Map<String, String> getColumnMapping() {
+    return columnMapping;
+  }
 
-	public void setColumnMapping(Map<String, String> columnMapping) {
-		this.columnMapping = columnMapping;
-	}
+  public void setColumnMapping(Map<String, String> columnMapping) {
+    this.columnMapping = columnMapping;
+  }
 
-	public String getFile() {
-		return file;
-	}
+  public String getFile() {
+    return file;
+  }
 
-	public void setFile(String file) {
-		this.file = file;
-	}
+  public void setFile(String file) {
+    this.file = file;
+  }
 
-	public boolean isModelValid() {
-		return modelValid;
-	}
+  public boolean isModelValid() {
+    return modelValid;
+  }
 
-	public void setModelValid(boolean modelValid) {
-		this.modelValid = modelValid;
-	}
+  public void setModelValid(boolean modelValid) {
+    this.modelValid = modelValid;
+  }
 
-	public boolean isMappingValid() {
-		return mappingValid;
-	}
+  public boolean isMappingValid() {
+    return mappingValid;
+  }
 
-	public void setMappingValid(boolean mappingValid) {
-		this.mappingValid = mappingValid;
-	}
+  public void setMappingValid(boolean mappingValid) {
+    this.mappingValid = mappingValid;
+  }
 }
