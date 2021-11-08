@@ -12,10 +12,10 @@ package com.prodyna.mifune.api;
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,13 +36,18 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletionStage;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.async.AsyncSession;
+import org.neo4j.driver.reactive.RxSession;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -64,9 +69,33 @@ public class GraphResource {
 	@Inject
 	protected EventBus eventBus;
 
+	@Inject
+	Driver driver;
+
 	@GET
 	public Uni<Graph> loadGraph() {
 		return Uni.createFrom().item(graphService.graph());
+	}
+
+	@GET
+	@Path("/stats")
+	@Produces(MediaType.SERVER_SENT_EVENTS)
+	public Multi<GraphStatistics> graphStats() {
+		return Multi.createFrom().ticks().every(Duration.ofSeconds(15)).onItem().transformToUniAndConcatenate(t -> {
+			var session = driver.asyncSession();
+			var stats = session
+					.readTransactionAsync(tx -> tx.runAsync("""
+									call {match (a) return count(a) as nodes}
+									call {match ()-[r]->() return count(r) as relations}
+									return nodes, relations
+							""")
+							.thenCompose(fn -> fn.singleAsync().thenApply(
+									r -> new GraphStatistics(r.get("nodes").asLong(), r.get("relations").asLong()))))
+					.thenCompose(c -> session.closeAsync().thenApply(v -> c));
+			return Uni.createFrom().completionStage(stats);
+
+		});
+
 	}
 
 	@POST
@@ -97,6 +126,17 @@ public class GraphResource {
 	@Path("/domain/{id}")
 	public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
 		return Uni.createFrom().item(graphService.fetchDomain(id));
+	}
+
+	@GET
+	@Path("/domain/{id}/count")
+	public Uni<Long> countDomainRootNodes(@PathParam("id") UUID id) {
+		var session = driver.asyncSession();
+		var count = session
+				.runAsync("match(:Domain {id:$id})--(x) return count(x) as count", Map.of("id", id.toString()))
+				.thenCompose(r -> r.singleAsync().thenApply(x -> x.get("count").asLong()))
+				.thenCompose(l -> session.closeAsync().thenApply(x -> l));
+		return Uni.createFrom().completionStage(count);
 	}
 
 	@PUT
@@ -174,7 +214,7 @@ public class GraphResource {
 
 	/**
 	 * This is used for the counter inside the table of pipelines
-	 * 
+	 *
 	 * @param domainId
 	 * @return
 	 */
@@ -182,7 +222,7 @@ public class GraphResource {
 	@Path("/domain/{domainId}/stats")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
 	public Multi<Object> stats(@PathParam("domainId") UUID domainId) {
-		return eventBus.localConsumer(domainId.toString()).bodyStream().toMulti();
+		return eventBus.localConsumer(domainId.toString()).bodyStream().toMulti().onOverflow().dropPreviousItems();
 	}
 
 }
