@@ -16,6 +16,8 @@ export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => 
     const [message, setMessage] = useState<String>();
 
     useEffect(() => {
+        graphService.domainCountRootNodest(props.domain.id)
+            .then(l => setMessage("" + l))
         let sseClient = graphService.importSource(props.domain.id);
         sseClient.onmessage = function(e) {
             setMessage(e.data);
