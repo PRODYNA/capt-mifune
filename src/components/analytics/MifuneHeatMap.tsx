@@ -1,8 +1,8 @@
-import React, {useState} from "react";
-import {HeatMap} from "@nivo/heatmap";
-import {ChartWrapper} from "./ChartWrapper";
-import {Slider} from "@material-ui/core";
-import {Button} from "react-bootstrap";
+import React, { useState } from "react";
+import { HeatMap } from "@nivo/heatmap";
+import { ChartWrapper } from "./ChartWrapper";
+import { Slider } from "@material-ui/core";
+import { Button } from "react-bootstrap";
 
 export const MifiuneHeatMap = () => {
     const [labelX, setLabelX] = useState<string>();
@@ -15,7 +15,7 @@ export const MifiuneHeatMap = () => {
 
 
 
-    function dataPreparation(data: any[], scale:number): any[] | undefined {
+    function dataPreparation(data: any[], scale: number): any[] | undefined {
 
         const resultMap = new Map(
             data
@@ -31,7 +31,7 @@ export const MifiuneHeatMap = () => {
         let max = Number.MIN_VALUE;
         let keys: string[] = [];
         data.forEach((d) => {
-            resultMap.get(d[labelX!!])?.set(d[labelY!!], (parseFloat(d[count!!])/scale).toFixed(2));
+            resultMap.get(d[labelX!!])?.set(d[labelY!!], (parseFloat(d[count!!]) / scale).toFixed(2));
             keys.push(d[labelY!!]);
             if (d[count!!]) {
                 if (d[count!!] < min) {
@@ -51,12 +51,12 @@ export const MifiuneHeatMap = () => {
                 .filter((v, i, s) => s.indexOf(v) === i)
                 .sort((one, two) => (one < two ? -1 : 1));
 
-        min = min/scale
-        max = max/scale
+        min = min / scale
+        max = max / scale
 
         setMin(min);
         setMax(max);
-        setHeatMax(min + ((max - min)/2))
+        setHeatMax(min + ((max - min) / 2))
         if (result.length < 1 || keys.length < 1) {
             setKeys(undefined)
             return undefined
@@ -88,7 +88,7 @@ export const MifiuneHeatMap = () => {
                     min={min}
                     max={max}
                     value={heatMax}
-                    onChange={(e,v) => setHeatMax((v as number))}
+                    onChange={(e, v) => setHeatMax((v as number))}
                 />
                 <HeatMap
                     height={300 + data.length * 25}
@@ -96,15 +96,15 @@ export const MifiuneHeatMap = () => {
                     data={data}
                     keys={keys}
                     indexBy={labelX}
-                    axisTop={{tickSize: 5, tickPadding: 5, tickRotation: -50, legend: '', legendOffset: 36}}
+                    axisTop={{ tickSize: 5, tickPadding: 5, tickRotation: -50, legend: '', legendOffset: 36 }}
                     colors={"oranges"}
                     enableLabels={true}
                     animate={false}
-                    margin={{top: 200, right: 60, bottom: 60, left: 250}}
+                    margin={{ top: 200, right: 60, bottom: 60, left: 250 }}
                     forceSquare={false}
                     minValue={min}
                     maxValue={heatMax}
-                    labelTextColor={{from: "color", modifiers: [["darker", 1.8]]}}
+                    labelTextColor={{ from: "color", modifiers: [["darker", 1.8]] }}
                 />
             </>
         );
@@ -113,20 +113,20 @@ export const MifiuneHeatMap = () => {
 
     return (
         <ChartWrapper results={[labelX!!, labelY!!, count!!]} orders={[labelX!!]} dataPreparation={dataPreparation}
-                      selects={[
-                          {label: "X", onChange: setLabelX},
-                          {label: "Y", onChange: setLabelY},
-                          {
-                              label: "Value",
-                              fnDefault: "count",
-                              fnOptions: ["count", "sum", "avg", "min", "max"],
-                              onChange: (v: string) => {
-                                  console.log(v)
-                                  setCount(v);
-                              }
-                          }
-                      ]}
-                      chart={buildChart}/>
+            selects={[
+                { label: "X", onChange: setLabelX },
+                { label: "Y", onChange: setLabelY },
+                {
+                    label: "Value",
+                    fnDefault: "count",
+                    fnOptions: ["count", "sum", "avg", "min", "max"],
+                    onChange: (v: string) => {
+                        console.log(v)
+                        setCount(v);
+                    }
+                }
+            ]}
+            chart={buildChart} />
 
     );
 };

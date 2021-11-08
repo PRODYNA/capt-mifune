@@ -7,31 +7,31 @@ import HttpService from "./services/HttpService";
 import UserService from "./services/UserService";
 
 export async function loadEnv(): Promise<void> {
-  await fetch("env.json")
-    .then((r) => r.json())
-    .then((env) => {
-      Object.keys(env).forEach((k) => {
-        localStorage.setItem(k, env[k]);
-      });
-    });
+    await fetch("env.json")
+        .then((r) => r.json())
+        .then((env) => {
+            Object.keys(env).forEach((k) => {
+                localStorage.setItem(k, env[k]);
+            });
+        });
 }
 
 const renderApp = () => {
-  ReactDOM.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>,
-    document.getElementById("root")
-  );
+    ReactDOM.render(
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>,
+        document.getElementById("root")
+    );
 };
 
 loadEnv().then(() => {
-  if (UserService.loginRequired()) {
-    UserService.initKeycloak(renderApp);
-    HttpService.configure();
-  } else {
-    renderApp();
-  }
+    if (UserService.loginRequired()) {
+        UserService.initKeycloak(renderApp);
+        HttpService.configure();
+    } else {
+        renderApp();
+    }
 });
 
 // If you want to start measuring performance in your app, pass a function
