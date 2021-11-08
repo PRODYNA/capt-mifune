@@ -62,7 +62,7 @@ export class GraphService {
             localStorage.getItem(ENV.API_SERVER) + "graph/domain/" + domainId + "/stats",
             {
                 headers: this.header(),
-                heartbeatTimeout: 2
+                heartbeatTimeout: 10
             }
         );
     }
