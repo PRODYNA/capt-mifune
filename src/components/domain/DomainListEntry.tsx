@@ -1,4 +1,4 @@
-import {Domain, GraphDelta, Node} from "../../api/model/Model";
+import { Domain, GraphDelta, Node } from "../../api/model/Model";
 import {
     Button,
     createStyles, Fab,
@@ -9,11 +9,11 @@ import {
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
-import React, {useState} from "react";
+import React, { useState } from "react";
 import graphService from "../../api/GraphService";
 import SaveIcon from "@material-ui/icons/Save";
-import {NodeSelect} from "./NodeSelect";
-import {Badge} from "react-bootstrap";
+import { NodeSelect } from "./NodeSelect";
+import { Badge } from "react-bootstrap";
 
 interface DomainListEntryProps {
     domain: Domain;
@@ -88,12 +88,12 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
 
             <div className={classes.flexBox}>
                 <IconButton title={"create node"} size={"small"} color={"primary"}
-                     onClick={(e) => {
-                         props.addNode(props.domain);
-                         e.stopPropagation();
-                     }}
+                    onClick={(e) => {
+                        props.addNode(props.domain);
+                        e.stopPropagation();
+                    }}
                 >
-                    <AddIcon/>
+                    <AddIcon />
                 </IconButton>
                 <span>{props.domain.name}</span>
             </div>
@@ -105,9 +105,9 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
 
     function buildBadge() {
         if (props.domain.modelValid) {
-            return <Badge  variant={"success"}>valid</Badge>
+            return <Badge variant={"success"}>valid</Badge>
         } else {
-            return <Badge  variant={"danger"}>invalid</Badge>
+            return <Badge variant={"danger"}>invalid</Badge>
         }
     }
 
@@ -119,43 +119,43 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
 
         return [
             <div className={classes.box}>
-                    <TextField
-                        autoComplete="off"
-                        id="node-label"
-                        value={name}
-                        label="Name"
-                        onChange={(e) => {
-                            e.stopPropagation();
-                            setName(e.target.value);
-                        }}
-                        onClick={e => e.stopPropagation()}
-                    />
-                    <NodeSelect
-                        nodes={props.nodes}
-                        nodeId={rootNodeId}
-                        updateNode={(n) => {
-                            console.log(n.label);
-                            setRootNodeId(n.id);
-                        }}
-                    />
+                <TextField
+                    autoComplete="off"
+                    id="node-label"
+                    value={name}
+                    label="Name"
+                    onChange={(e) => {
+                        e.stopPropagation();
+                        setName(e.target.value);
+                    }}
+                    onClick={e => e.stopPropagation()}
+                />
+                <NodeSelect
+                    nodes={props.nodes}
+                    nodeId={rootNodeId}
+                    updateNode={(n) => {
+                        console.log(n.label);
+                        setRootNodeId(n.id);
+                    }}
+                />
             </div>,
             <div className={classes.flexBox}>
                 <Button className={classes.flex3} variant="contained" color="primary"
-                        startIcon={<SaveIcon/>}
-                        size={"small"}
-                        onClick={e => {
-                            executeUpdate();
-                            e.stopPropagation();
-                        }}
+                    startIcon={<SaveIcon />}
+                    size={"small"}
+                    onClick={e => {
+                        executeUpdate();
+                        e.stopPropagation();
+                    }}
                 />
                 <IconButton className={classes.flex1} color="secondary"
-                            size={"small"}
-                            onClick={() => {
-                                graphService
-                                    .domainDelete(props.domain.id)
-                                    .then((delta) => props.onDelete(delta));
-                            }}
-                ><DeleteIcon/>
+                    size={"small"}
+                    onClick={() => {
+                        graphService
+                            .domainDelete(props.domain.id)
+                            .then((delta) => props.onDelete(delta));
+                    }}
+                ><DeleteIcon />
                 </IconButton>
             </div>
         ]
