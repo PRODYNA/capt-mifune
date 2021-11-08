@@ -1,7 +1,7 @@
 import FormSelect from "../form/FormSelect";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import graphService from "../../api/GraphService";
-import {IconButton, makeStyles} from "@material-ui/core";
+import { IconButton, makeStyles } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 
@@ -31,12 +31,12 @@ export const AnalyticFilter = (props: AnalyticFilterProps) => {
         if (props.domainId && filter) {
             graphService.data(props.domainId, [filter], [filter])
                 .then(d => {
-                        let values = d.map(d => d[filter])
-                            .filter((v, i, s) => s.indexOf(v) === i);
-                        values.unshift('None')
-                        setValues(values)
-                        setValue(values[0])
-                    }
+                    let values = d.map(d => d[filter])
+                        .filter((v, i, s) => s.indexOf(v) === i);
+                    values.unshift('None')
+                    setValues(values)
+                    setValue(values[0])
+                }
                 )
         }
     }, [filter])
@@ -66,7 +66,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps) => {
             }}
         />
         <IconButton onClick={props.onDelete}>
-            <DeleteIcon/>
+            <DeleteIcon />
         </IconButton>
     </div>
 

@@ -1,8 +1,8 @@
-import React, {useState} from "react";
-import {Fab, IconButton, makeStyles} from "@material-ui/core";
-import {MifuneBarChart} from "./MifuneBarChart";
-import {MifuneSankey} from "./MifuneSankey";
-import {MifiuneHeatMap} from "./MifuneHeatMap";
+import React, { useState } from "react";
+import { Fab, makeStyles } from "@material-ui/core";
+import { MifuneBarChart } from "./MifuneBarChart";
+import { MifuneSankey } from "./MifuneSankey";
+import { MifiuneHeatMap } from "./MifuneHeatMap";
 import FireplaceIcon from '@material-ui/icons/Fireplace';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
@@ -26,11 +26,11 @@ export const Analytics = () => {
 
     function getChart() {
         if (chart === 'BarChart') {
-            return <MifuneBarChart/>
+            return <MifuneBarChart />
         } else if (chart === 'Sankey') {
-            return <MifuneSankey/>
+            return <MifuneSankey />
         } else if (chart === 'HeatMap') {
-            return <MifiuneHeatMap/>
+            return <MifiuneHeatMap />
         } else {
             return <></>
         }
@@ -41,13 +41,13 @@ export const Analytics = () => {
     }) {
         return <div className={classes.box}>
             <Fab className={classes.button} title={'BarChart'} onClick={() => setChart('BarChart')}>
-                <BarChartIcon/>
+                <BarChartIcon />
             </Fab>
             <Fab className={classes.button} title={'HeatMap'} onClick={() => setChart('HeatMap')}>
-                <FireplaceIcon/>
+                <FireplaceIcon />
             </Fab>
             <Fab className={classes.button} title={'Sankey'} onClick={() => setChart('Sankey')}>
-                <ShuffleIcon/>
+                <ShuffleIcon />
             </Fab>
         </div>
     }
