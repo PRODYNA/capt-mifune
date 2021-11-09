@@ -4,42 +4,33 @@ import graphService from "../../api/GraphService";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import WarningIcon from "@material-ui/icons/Warning";
 import DoneOutlineIcon from "@material-ui/icons/DoneOutline";
-import { IconButton, makeStyles, TableCell, TableRow } from "@material-ui/core";
+import { IconButton, TableCell, TableRow } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
+import StopIcon from "@material-ui/icons/Stop";
 
 export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
     const history = useHistory();
 
-    const [runImport, setRunImport] = useState<number>(1);
 
     const [message, setMessage] = useState<String>();
 
     useEffect(() => {
-        graphService.domainCountRootNodest(props.domain.id)
-            .then(l => setMessage("" + l))
         let sseClient = graphService.importSource(props.domain.id);
         sseClient.onmessage = function(e) {
             setMessage(e.data);
         };
 
-        sseClient.onerror = function() {
-            sseClient.close()
-
-            graphService.domainCountRootNodest(props.domain.id)
-                .then(l => setMessage("" + l))
-        }
-
         return function cleanUp() {
             sseClient.close();
         };
-    }, [runImport, props.domain.id, props.cleanActive]);
+    }, [ props.domain.id, props.cleanActive]);
 
     function valid(valid: boolean) {
         if (valid) {
-            return <DoneOutlineIcon />;
+            return <DoneOutlineIcon color={"primary"} />;
         } else {
-            return <WarningIcon />;
+            return <WarningIcon color={"error"}/>;
         }
     }
 
@@ -54,11 +45,9 @@ export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => 
             <TableCell align="left">{valid(props.domain.modelValid)}</TableCell>
             <TableCell align="left">{valid(props.domain.mappingValid)}</TableCell>
             <TableCell align="left">
-                <IconButton
+                <IconButton color={"primary"} disabled={props.cleanActive}
                     onClick={(e) => {
-                        graphService.domainImport(props.domain.id).then(
-                            () => setRunImport(runImport + 1)
-                        );
+                        graphService.domainRunImport(props.domain.id);
                         e.stopPropagation();
                     }}
                 >
@@ -66,11 +55,19 @@ export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => 
                 </IconButton>
             </TableCell>
             <TableCell align="left">
-                <IconButton
+                <IconButton color={"primary"}
                     onClick={(e) => {
-                        graphService.domainClear(props.domain.id).then(
-                            () => setRunImport(runImport + 1)
-                        );
+                        graphService.domainStopImport(props.domain.id);
+                        e.stopPropagation();
+                    }}
+                >
+                    <StopIcon />
+                </IconButton>
+            </TableCell>
+            <TableCell align="left">
+                <IconButton  color={"secondary"}
+                    onClick={(e) => {
+                        graphService.domainClear(props.domain.id);
                         e.stopPropagation();
                     }}
                 >
