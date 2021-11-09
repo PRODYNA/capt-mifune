@@ -52,7 +52,7 @@ export class GraphService {
             localStorage.getItem(ENV.API_SERVER) + "apocalypse",
             {
                 headers: this.header(),
-                heartbeatTimeout: 2
+                heartbeatTimeout: 2000
             }
         );
     }
@@ -62,7 +62,7 @@ export class GraphService {
             localStorage.getItem(ENV.API_SERVER) + "graph/domain/" + domainId + "/stats",
             {
                 headers: this.header(),
-                heartbeatTimeout: 10
+                heartbeatTimeout: 15000
             }
         );
     }
@@ -124,9 +124,15 @@ export class GraphService {
             .then((res) => res.data);
     }
 
-    domainImport(id: string): Promise<String> {
+    domainRunImport(id: string): Promise<String> {
         return rest
             .get<String>("graph/domain/" + id + "/import")
+            .then((res) => res.data);
+    }
+
+    domainStopImport(id: string): Promise<String> {
+        return rest
+            .delete<String>("graph/domain/" + id + "/import")
             .then((res) => res.data);
     }
 
