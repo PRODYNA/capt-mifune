@@ -85,10 +85,10 @@ public class GraphResource {
                           tx ->
                               tx.runAsync(
                                       """
-									call {match (a) return count(a) as nodes}
-									call {match ()-[r]->() return count(r) as relations}
-									return nodes, relations
-							""")
+                                                                                    call {match (a) return count(a) as nodes}
+                                                                                    call {match ()-[r]->() return count(r) as relations}
+                                                                                    return nodes, relations
+                                                                                    """)
                                   .thenCompose(
                                       fn ->
                                           fn.singleAsync()
@@ -135,6 +135,7 @@ public class GraphResource {
   @GET
   @Path("/domain/{id}/count")
   public Uni<Long> countDomainRootNodes(@PathParam("id") UUID id) {
+    log.infof("count domain %s", id);
     var session = driver.asyncSession();
     var count =
         session
@@ -215,6 +216,12 @@ public class GraphResource {
   }
 
   @DELETE
+  @Path("/domain/{domainId}/import")
+  public Uni<String> stopImport(@PathParam("domainId") UUID domainId) {
+    return importService.stopImport(domainId);
+  }
+
+  @DELETE
   @Path("/domain/{domainId}/clear")
   public Uni<String> clearDomain(@PathParam("domainId") UUID domainId) {
     deletionService.deleteDomainFromDatabase(domainId, graphService.graph());
@@ -230,12 +237,20 @@ public class GraphResource {
   @GET
   @Path("/domain/{domainId}/stats")
   @Produces(MediaType.SERVER_SENT_EVENTS)
-  public Multi<Object> stats(@PathParam("domainId") UUID domainId) {
-    return eventBus
-        .localConsumer(domainId.toString())
-        .bodyStream()
-        .toMulti()
-        .onOverflow()
-        .dropPreviousItems();
+  public Multi<Long> stats(@PathParam("domainId") UUID domainId) {
+
+    var count = this.countDomainRootNodes(domainId).toMulti();
+    var events =
+        eventBus
+            .localConsumer(domainId.toString())
+            .bodyStream()
+            .toMulti()
+            .map(Long.class::cast)
+            .onOverflow()
+            .buffer(20)
+            .onOverflow()
+            .dropPreviousItems()
+            .toHotStream();
+    return Multi.createBy().concatenating().streams(count, events);
   }
 }
