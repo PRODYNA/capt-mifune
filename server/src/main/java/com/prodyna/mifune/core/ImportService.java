@@ -39,17 +39,19 @@ import com.prodyna.mifune.domain.Domain;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
+import io.smallrye.mutiny.subscription.Cancellable;
 import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.StreamSupport;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
@@ -57,6 +59,8 @@ import org.reactivestreams.FlowAdapters;
 
 @ApplicationScoped
 public class ImportService {
+
+  private final Map<UUID, Cancellable> pipelineMap = new HashMap<>();
 
   @Inject protected Logger log;
 
@@ -72,8 +76,14 @@ public class ImportService {
 
   // This Method should be split up into domain import and file import
   public Uni<String> runImport(UUID domainId) {
+
+    if (pipelineMap.containsKey(domainId)) {
+      log.info("import for domain is running");
+      throw new BadRequestException();
+    }
+
     log.debug("start import");
-    var counter = new AtomicInteger();
+    var counter = new AtomicLong();
     var graph = graphService.graph();
     var domain = graphService.fetchDomain(domainId);
     log.debugf("start import found domain %s", domain.getName());
@@ -161,14 +171,20 @@ public class ImportService {
                               .thenApply(v -> counter.incrementAndGet()));
                 });
 
-    importTask
-        .withRequests(1)
-        .concatenate()
-        .subscribe()
-        .with(
-            s -> eventBus.publish(domainId.toString(), s),
-            throwable -> log.error("error in pipeline: " + throwable.getMessage()),
-            () -> log.info("done"));
+    var cancellable =
+        importTask
+            .withRequests(1)
+            .concatenate()
+            .subscribe()
+            .with(
+                s -> eventBus.publish(domainId.toString(), s),
+                throwable -> log.error("error in pipeline: " + throwable.getMessage()),
+                () -> {
+                  pipelineMap.remove(domainId);
+                  log.info("done");
+                });
+
+    pipelineMap.put(domainId, cancellable);
 
     // this gets called before the above is finished
     return domainTask
@@ -218,5 +234,11 @@ public class ImportService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public Uni<String> stopImport(UUID domainId) {
+    Optional.ofNullable(this.pipelineMap.remove(domainId)).ifPresent(Cancellable::cancel);
+
+    return Uni.createFrom().item("done");
   }
 }
