@@ -85,6 +85,7 @@ export const Pipelines = () => {
                                 <TableCell>Model Valid</TableCell>
                                 <TableCell>Mapping Valid</TableCell>
                                 <TableCell>Run Import</TableCell>
+                                <TableCell>Stop Import</TableCell>
                                 <TableCell>Delete Domain</TableCell>
                                 <TableCell>Root Nodes</TableCell>
                                 <TableCell align="right">ID</TableCell>
@@ -99,7 +100,7 @@ export const Pipelines = () => {
                 </TableContainer>
             </Container>
             <Container className={classes.container}>
-                <Fab color={"primary"} variant={"extended"} onClick={e => clean()}>
+                <Fab color={"primary"} variant={"extended"} onClick={() => clean()}>
                     <DeleteIcon />
                     {spinner()}
                     Clean Database
