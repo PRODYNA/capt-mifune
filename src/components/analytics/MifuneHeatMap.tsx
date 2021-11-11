@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HeatMap } from "@nivo/heatmap";
+import { ResponsiveHeatMap } from "@nivo/heatmap";
 import { ChartWrapper } from "./ChartWrapper";
 import { Slider } from "@material-ui/core";
 
@@ -11,8 +11,6 @@ export const MifiuneHeatMap = () => {
   const [min, setMin] = useState<number>(Number.MAX_VALUE);
   const [max, setMax] = useState<number>(Number.MIN_VALUE);
   const [heatMax, setHeatMax] = useState<number>();
-
-
 
   function dataPreparation(data: any[], scale: number): any[] | undefined {
 
@@ -26,7 +24,6 @@ export const MifiuneHeatMap = () => {
         })
     );
     let min = Number.MAX_VALUE;
-
     let max = Number.MIN_VALUE;
     let keys: string[] = [];
     data.forEach((d) => {
@@ -63,8 +60,6 @@ export const MifiuneHeatMap = () => {
     }
     setKeys(keys)
     return result
-
-
   }
 
   function buildChart(data: any[]) {
@@ -81,17 +76,14 @@ export const MifiuneHeatMap = () => {
       return <h1>Ups</h1>;
     }
     return (
-      <>
-
+      <div style={{ height: 300 + data.length * 25 }}>
         <Slider
           min={min}
           max={max}
           value={heatMax}
           onChange={(e, v) => setHeatMax((v as number))}
         />
-        <HeatMap
-          height={300 + data.length * 25}
-          width={window.innerWidth - 30}
+        <ResponsiveHeatMap
           data={data}
           keys={keys}
           indexBy={labelX}
@@ -99,13 +91,13 @@ export const MifiuneHeatMap = () => {
           colors={"oranges"}
           enableLabels={true}
           animate={false}
-          margin={{ top: 200, right: 60, bottom: 60, left: 250 }}
+          margin={{ top: 200, right: 60, bottom: 60, left: 150 }}
           forceSquare={false}
           minValue={min}
           maxValue={heatMax}
           labelTextColor={{ from: "color", modifiers: [["darker", 1.8]] }}
         />
-      </>
+      </div>
     );
   }
 

@@ -40,12 +40,6 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
   const [scale, setScale] = useState<number>(1);
 
   const useStyle = makeStyles({
-
-    center: {
-      marginLeft: "auto",
-      marginRight: "auto",
-      minHeight: 200
-    },
     infoBox: {
       textAlign: "center"
     }
@@ -210,9 +204,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
         </form>
       </Box>
 
-      <div className={classes.center}>
-        {buildChart()}
-      </div>
+      {buildChart()}
     </>
 
   );
