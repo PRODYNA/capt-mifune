@@ -5,4 +5,3 @@ export const ANALYTCIS = `${ROOT_PATH}analytics`
 export const UPLOAD = `${ROOT_PATH}upload`
 export const PIPELINES = `${ROOT_PATH}pipelines`
 export const PIPELINE = `${ROOT_PATH}pipeline`
-console.log(basePath)
