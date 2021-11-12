@@ -65,8 +65,8 @@
           <java>
             <importOrder/>
             <googleJavaFormat>
-              <version>1.11.0</version> <!-- optional -->
-              <style>GOOGLE</style>  <!-- or AOSP (optional) -->
+              <version>1.11.0</version>
+              <style>GOOGLE</style>
             </googleJavaFormat>
           </java>
         </configuration>

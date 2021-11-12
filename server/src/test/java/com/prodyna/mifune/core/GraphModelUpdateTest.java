@@ -265,6 +265,111 @@ class GraphModelUpdateTest {
   }
 
   @Test
+  public void testMergeRelationBetweenTwoNodeModelsWithProperty() throws IOException {
+    var graphModel =
+        """
+				{
+				  "domains": [
+				    {
+				      "id": "$domainId",
+				      "name": "sample",
+				      "rootNodeId": "$userId"
+				    }
+				  ],
+				  "nodes": [
+				    {
+				      "domainIds": [
+				        "$domainId"
+				      ],
+				      "id": "$userId",
+				      "label": "User",
+				      "properties": [
+				        {
+				          "name": "id",
+				          "type": "long",
+				          "primary": true
+				        }
+				      ]
+				    },
+				    {
+				      "domainIds": [
+				        "$domainId"
+				      ],
+				      "id": "$carId",
+				      "label": "Car",
+				      "properties": [
+				        {
+				          "name": "id",
+				          "type": "long",
+				          "primary": true
+				        }
+				      ]
+				    }
+				  ],
+				  "relations": [
+				    {
+				      "domainIds": [
+				        "$domainId"
+				      ],
+				      "sourceId": "$userId",
+				      "targetId": "$carId",
+				      "type": "HAS_CAR",
+				      "multiple": false,
+				       "properties": [
+				        {
+				          "name": "since",
+				          "type": "string",
+				          "primary": false
+				        }
+				      ]
+				    }
+				  ]
+				}
+				"""
+            .replaceAll("\\$userId", UUID.randomUUID().toString())
+            .replaceAll("\\$carId", UUID.randomUUID().toString())
+            .replaceAll("\\$hasCarId", UUID.randomUUID().toString())
+            .replaceAll("\\$domainId", DOMAIN_ID.toString());
+    var updateModel =
+        """
+				{
+					"user":{
+						"id":"long",
+						"hasCar":{
+							"since":"string",
+							"car":{
+								"id":"long"
+							}
+						}
+					}
+				}
+				""";
+
+    var updateCypher =
+        """
+				merge(var_1:User {id:$model.user.id})
+				merge (domain:Domain {id:$domainId})
+				merge(var_1)<-[source:DOMAIN]-(domain)
+				on create set source.lines = $model.lines
+				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				with *
+					call {
+					return 1 union
+					with var_1
+					with * where 1=1 and exists($model.user.hasCar.car.id)
+					merge(var_2:Car {id:$model.user.hasCar.car.id})
+					merge(var_1)-[hasCar:HAS_CAR]->(var_2)
+					set hasCar.since = coalesce($model.user.hasCar.since, hasCar.since)
+					with *
+					return 1
+					}
+				return 'done'
+				""";
+
+    validateModel(graphModel, updateModel, updateCypher);
+  }
+
+  @Test
   public void testMergeMultiRelationBetweenNodesWithPrimaryKeys() throws IOException {
     var graphModel =
         """

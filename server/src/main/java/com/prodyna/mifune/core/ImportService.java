@@ -89,6 +89,7 @@ public class ImportService {
     log.debugf("start import found domain %s", domain.getName());
     GraphModel graphModel = new GraphModel(graph);
     var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
+    log.info(cypher);
     List<String> indexCyphers = new CypherIndexBuilder().getCypher(domainId, graph);
     log.info(cypher);
 
