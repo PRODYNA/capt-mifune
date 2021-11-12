@@ -63,7 +63,6 @@ public class DataResource {
     var cypherQueryBuilder = new CypherQueryBuilder(graphModel, domainId, results, orders, filters);
     AsyncSession session = driver.asyncSession();
     var statement = cypherQueryBuilder.getCypher();
-    System.out.println(statement);
     return session
         .runAsync(statement.cypher(), statement.parameter())
         .thenCompose(cursor -> cursor.listAsync(cypherQueryBuilder::buildResult))
