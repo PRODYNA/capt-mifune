@@ -7,10 +7,11 @@ import PieChartIcon from "@material-ui/icons/PieChart";
 import RotateRightIcon from "@material-ui/icons/RotateRight";
 import SaveIcon from "@material-ui/icons/Save";
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { useHistory } from 'react-router';
+import { useHistory, useLocation } from 'react-router';
 import graphService from '../../api/GraphService';
 import UserService from '../../services/UserService';
 import { fontWhite } from '../Theme/CustomColors';
+import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes';
 
 const drawerWidth = 60;
 
@@ -53,19 +54,34 @@ const useStyles = makeStyles((theme: Theme) =>
     navTitle: {
       fontWeight: 600,
       margin: '2rem auto',
-    }
+    },
+    listItem: {
+      opacity: 0.6,
+      '&.Mui-selected': {
+        opacity: 1,
+      }
+    },
   }),
 );
 
+interface INavItems {
+  title: string;
+  icon: JSX.Element;
+  path?: string;
+  onClick?: () => void;
+}
+
 const Sidenavigation = (): JSX.Element => {
   const history = useHistory();
+  const { pathname } = useLocation();
+
   const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const navItems = [
-    { title: 'Graph', icon: <BubbleChartIcon />, onClick: () => history.push("/") },
-    { title: 'Upload', icon: <CloudUpload />, onClick: () => history.push("/upload") },
-    { title: 'Analytics', icon: <PieChartIcon />, onClick: () => history.push("/analytics") },
-    { title: 'Pipelines', icon: <RotateRightIcon />, onClick: () => history.push("/pipelines") },
+  const navItems: INavItems[] = [
+    { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
+    { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
+    { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
+    { title: 'Pipelines', icon: <RotateRightIcon />, path: PIPELINES },
     {
       title: 'Save', icon: <SaveIcon />,
       onClick: () => graphService.persistGraph().then((e) => console.log(e))
@@ -86,14 +102,22 @@ const Sidenavigation = (): JSX.Element => {
     }
   }
 
-  if(UserService.loginRequired()) navItems.push(logoutItem)
+  if (UserService.loginRequired()) navItems.push(logoutItem)
 
   return (
     <Drawer variant="permanent" open={open} className={`${classes.root} ${open ? 'open' : 'closed'}`}>
       <Typography color="inherit" variant="caption" className={classes.navTitle}>MiFune</Typography>
       <List>
         {navItems.map((item, index): JSX.Element => (
-          <ListItem button key={item.title} onClick={item.onClick || undefined}>
+          <ListItem
+            button key={item.title}
+            onClick={() => { 
+              if (item.path) history.push(item.path) 
+              else item.onClick && item.onClick() 
+            }}
+            className={classes.listItem}
+            selected={(item.path && pathname === item.path) || false}
+            >
             <ListItemIcon className={classes.icon}>
               {item.icon}
             </ListItemIcon>
