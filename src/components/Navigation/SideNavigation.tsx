@@ -21,7 +21,8 @@ const useStyles = makeStyles((theme: Theme) =>
       '& .MuiPaper-root': {
         width: drawerWidth,
         backgroundColor: theme.palette.primary.dark,
-        color: fontWhite
+        color: fontWhite,
+        overflow: "hidden"
       },
       '&.closed': {
         '& .MuiPaper-root': {
@@ -106,7 +107,7 @@ const Sidenavigation = (): JSX.Element => {
 
   return (
     <Drawer variant="permanent" open={open} className={`${classes.root} ${open ? 'open' : 'closed'}`}>
-      <Typography color="inherit" variant="caption" className={classes.navTitle}>MiFune</Typography>
+      <Typography color="inherit" variant="caption" className={classes.navTitle}>Mifune</Typography>
       <List>
         {navItems.map((item, index): JSX.Element => (
           <ListItem
