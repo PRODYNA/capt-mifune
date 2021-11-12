@@ -131,6 +131,25 @@ public class CypherUpdateBuilder {
               "merge(%s)-[%s:%s]->(%s:%s)"
                   .formatted(nodeVar, r.varName(), r.getType(), toNodeVarName, toNode.getLabel()));
     }
+    Optional.ofNullable(r.getProperties()).stream()
+        .flatMap(Collection::stream)
+        .filter(not(Property::isPrimary))
+        .forEach(
+            p -> {
+              var path = new ArrayList<>(varPath);
+              path.add(r.varName());
+              context
+                  .getStatements()
+                  .add(
+                      "set %s.%s = coalesce(%s.%s, %s.%s)"
+                          .formatted(
+                              r.varName(),
+                              p.getName(),
+                              String.join(".", path),
+                              p.getName(),
+                              r.varName(),
+                              p.getName()));
+            });
     context.getStatements().add("with *");
   }
 
