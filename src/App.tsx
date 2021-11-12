@@ -5,23 +5,27 @@ import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Graph } from "./components/graph/Graph";
 import { Pipelines } from "./components/pipeline/Pipelines";
 import { PipelinesDetail } from "./components/pipeline/PipelinesDetail";
-import { Navigation } from "./components/navigation/Navigation";
 import { Analytics } from "./components/analytics/Analytics";
-import { Container } from "@material-ui/core";
+import { Box, Container } from "@material-ui/core";
+import Sidenavigation from "./components/Navigation/SideNavigation";
+import Upload from "./pages/Upload";
 
 function App() {
   return (
     <Router>
+      <Sidenavigation />
       <Container>
-        <Switch>
-          <Route path="/" exact component={Graph} />
-          <Route path="/analytics" component={Analytics} />
-          <Route path="/pipelines" component={Pipelines} />
-          <Route path="/pipeline/:id" component={PipelinesDetail} />
-        </Switch>
+        <Box ml={5}>
+          <Switch>
+            <Route path="/" exact component={Graph} />
+            <Route path="/analytics" component={Analytics} />
+            <Route path="/upload" component={Upload} />
+            <Route path="/pipelines" component={Pipelines} />
+            <Route path="/pipeline/:id" component={PipelinesDetail} />
+          </Switch>
+        </Box>
       </Container>
-      <Navigation></Navigation>
-    </Router>
+    </Router >
   );
 }
 
