@@ -7,7 +7,7 @@ import Sidenavigation from '../components/Navigation/SideNavigation'
 import { Pipelines } from '../components/pipeline/Pipelines'
 import { PipelinesDetail } from '../components/pipeline/PipelinesDetail'
 import Upload from '../pages/Upload'
-import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from './routes'
+import { ANALYTCIS, PIPELINE, PIPELINES, ROOT_PATH, UPLOAD } from './routes'
 
 
 const MifuneRouter = (): JSX.Element => {
@@ -29,7 +29,7 @@ const MifuneRouter = (): JSX.Element => {
             <Route path={PIPELINES} exact>
               <Pipelines />
             </Route>
-            <Route path={`${PIPELINES}/:id`}>
+            <Route path={`${PIPELINE}/:id`}>
               <PipelinesDetail />
             </Route>
           </Switch>
