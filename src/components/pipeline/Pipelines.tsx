@@ -23,7 +23,7 @@ export const Pipelines = () => {
       minWidth: 650,
     },
     container: {
-      marginTop: 15
+      margin: 15,
     }
   })();
 
