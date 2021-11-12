@@ -56,7 +56,12 @@ export const MifuneBarChart = () => {
 
   return (
     <ChartWrapper results={[label ?? '', count ?? '']} orders={[count ?? '']}
-      dataPreparation={data => data.filter(d => d[label!!])}
+      dataPreparation={(data,scale) => data.filter(d => d[label!!])
+          .map( d =>  {
+            d[count!!] =  (parseFloat(d[count!!]) / scale).toFixed(2)
+            return d
+          } )
+      }
       selects={[
         {
           label: "Label", onChange: (v: string) => {
