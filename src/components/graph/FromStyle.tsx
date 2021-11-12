@@ -22,6 +22,7 @@ export const useStyles = makeStyles((theme: Theme) =>
             zIndex: 100,
             position: 'absolute',
             top: 5,
+            left: '1rem',
             boxShadow: '2px 2px 5px black',
             margin: 8,
             backgroundColor: 'rgba(220, 220, 220, 0.7)',
