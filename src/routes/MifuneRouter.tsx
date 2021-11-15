@@ -9,6 +9,7 @@ import { PipelinesDetail } from '../components/pipeline/PipelinesDetail'
 import SnackbarProvider from '../context/Snackbar'
 import Upload from '../pages/Upload'
 import { ANALYTCIS, PIPELINE, PIPELINES, ROOT_PATH, UPLOAD } from './routes'
+import ErrorBoundary from '../components/Error/ErrorBoundaries'
 
 
 const MifuneRouter = (): JSX.Element => {
@@ -20,19 +21,30 @@ const MifuneRouter = (): JSX.Element => {
           <Box ml={5}>
             <Switch>
               <Route path={ROOT_PATH} exact>
-                <Graph />
+                <ErrorBoundary>
+                  <Graph />
+                </ErrorBoundary>
               </Route>
               <Route path={ANALYTCIS}>
-                <Analytics />
+                <ErrorBoundary>
+                  <Analytics />
+                </ErrorBoundary>
               </Route>
               <Route path={UPLOAD}>
-                <Upload />
+                <ErrorBoundary>
+                  <Upload />
+                </ErrorBoundary>
               </Route>
               <Route path={PIPELINES} exact>
-                <Pipelines />
+                <ErrorBoundary>
+                  <Pipelines />
+                </ErrorBoundary>
               </Route>
               <Route path={`${PIPELINE}/:id`}>
-                <PipelinesDetail />
+                <ErrorBoundary>
+                  <PipelinesDetail />
+                </ErrorBoundary>
+
               </Route>
             </Switch>
           </Box>
