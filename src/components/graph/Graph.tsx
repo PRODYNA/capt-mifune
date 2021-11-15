@@ -8,6 +8,7 @@ import graphService from "../../api/GraphService";
 import { DomainList } from "../domain/DomainList";
 
 import { D3Helper } from "./D3Helper";
+import { drawerWidth, drawerWidthOpen } from "../Navigation/SideNavigation";
 
 export interface D3Node extends d3.SimulationNodeDatum {
     kind: string;
@@ -575,7 +576,7 @@ export const Graph = (props: IGraph) => {
             <div className={classes.overlay}>{editSection()}</div>
             <svg
                 className={classes.svg}
-                width={window.innerWidth - (openSidenav ? 160 : 59)}
+                width={window.innerWidth - (openSidenav ? drawerWidthOpen : drawerWidth)}
                 height={window.innerHeight}
                 ref={d3Container}
             />

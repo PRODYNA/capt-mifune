@@ -13,8 +13,8 @@ import UserService from '../../services/UserService';
 import { fontWhite } from '../Theme/CustomColors';
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes';
 
-const drawerWidth = 60;
-const drawerWidthOpen = 160;
+export const drawerWidth = 60;
+export const drawerWidthOpen = 160;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
