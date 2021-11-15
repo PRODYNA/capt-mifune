@@ -1,5 +1,5 @@
-import React from 'react'
-import { Container, Box } from '@material-ui/core'
+import React, { useState } from 'react'
+import { Container } from '@material-ui/core'
 import { Switch, Route } from 'react-router-dom'
 import { Analytics } from '../components/analytics/Analytics'
 import { Graph } from '../components/graph/Graph'
@@ -13,43 +13,44 @@ import ErrorBoundary from '../components/Error/ErrorBoundaries'
 
 
 const MifuneRouter = (): JSX.Element => {
+  const [openSidenav, setOpenSidenav] = useState(false);
+
   return (
     <>
-      <Sidenavigation />
+      <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
       <SnackbarProvider>
-        <Container>
-          <Box ml={5}>
-            <Switch>
-              <Route path={ROOT_PATH} exact>
-                <ErrorBoundary>
-                  <Graph />
-                </ErrorBoundary>
-              </Route>
-              <Route path={ANALYTCIS}>
-                <ErrorBoundary>
-                  <Analytics />
-                </ErrorBoundary>
-              </Route>
-              <Route path={UPLOAD}>
-                <ErrorBoundary>
-                  <Upload />
-                </ErrorBoundary>
-              </Route>
-              <Route path={PIPELINES} exact>
-                <ErrorBoundary>
-                  <Pipelines />
-                </ErrorBoundary>
-              </Route>
-              <Route path={`${PIPELINE}/:id`}>
-                <ErrorBoundary>
-                  <PipelinesDetail />
-                </ErrorBoundary>
+        <Container style={{ position: 'relative' }}>
+          <Switch>
+            <Route path={ROOT_PATH} exact>
+              <ErrorBoundary>
+                <Graph openSidenav={openSidenav} />
+              </ErrorBoundary>
+            </Route>
+            <Route path={ANALYTCIS}>
+              <ErrorBoundary>
+                <Analytics />
+              </ErrorBoundary>
+            </Route>
+            <Route path={UPLOAD}>
+              <ErrorBoundary>
+                <Upload />
+              </ErrorBoundary>
+            </Route>
+            <Route path={PIPELINES} exact>
+              <ErrorBoundary>
+                <Pipelines />
+              </ErrorBoundary>
+            </Route>
+            <Route path={`${PIPELINE}/:id`}>
+              <ErrorBoundary>
+                <PipelinesDetail />
+              </ErrorBoundary>
 
-              </Route>
-            </Switch>
-          </Box>
+            </Route>
+          </Switch>
         </Container>
       </SnackbarProvider>
+      <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
     </>
   )
 }
