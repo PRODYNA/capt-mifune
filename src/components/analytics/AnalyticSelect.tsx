@@ -1,61 +1,76 @@
 import FormSelect from "../form/FormSelect";
-import React, { useState } from "react";
-import { SelectProps } from "./ChartWrapper";
-import { Grid } from "@material-ui/core";
+import React, {useEffect, useState} from "react";
+import {SelectProps} from "./ChartWrapper";
+import {Grid} from "@material-ui/core";
 
 
 export const AnalyticSelect = (props: SelectProps) => {
 
-  const [fn, setFn] = useState<string | undefined>(props.fnDefault)
-  const [value, setValue] = useState<string>()
+    const [variable, setVariable] = useState<string>()
+    const [property, setProperty] = useState<string>()
+    const [fn, setFn] = useState<string | undefined>(props.fnDefault)
+    const [properties, setProperties] = useState<string[]>()
 
-  function buildFnSelect() {
-    if (fn && (props.fnOptions?.length ?? 0 > 1)) {
-      return <FormSelect title={'Function'} options={props.fnOptions ?? []}
-        value={fn}
-        onChangeHandler={e => {
-          let newFN = e.target.value as string;
-          setFn(newFN)
-          if (fn && value) {
-            props.onChange(value + "[" + newFN + "]")
-          }
-        }} />;
-    }
 
-  }
+    useEffect(() => {
+        let nodeProps = props.query.nodes.filter(n => n.varName === variable)
+            .flatMap(n => n.node.properties)
+            .map(p => p.name);
+        let relProps = props.query.relations.filter(n => n.varName === variable)
+            .flatMap(n => n.relation.properties)
+            .map(p => p.name);
+        setProperties(nodeProps.concat(relProps))
 
-  if (fn) return <Grid item xs={12}>
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={6}>
-        <FormSelect title={props.label} options={props.options ?? []}
-          onChangeHandler={e => {
-            let newValue = e.target.value as string;
-            setValue(newValue)
-            if (fn && newValue) {
-              props.onChange(newValue + "[" + fn + "]")
-            } else if (newValue) {
-              props.onChange(newValue)
-            }
 
-          }} />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        {buildFnSelect()}
-      </Grid>
-    </Grid>
-  </Grid>
-  
-  return <Grid item xs={12} md={6}>
-    <FormSelect title={props.label} options={props.options ?? []}
-      onChangeHandler={e => {
-        let newValue = e.target.value as string;
-        setValue(newValue)
-        if (fn && newValue) {
-          props.onChange(newValue + "[" + fn + "]")
-        } else if (newValue) {
-          props.onChange(newValue)
+    }, [variable,property,fn])
+
+    function onChange(variable: string|undefined, property: string|undefined, fn: string|undefined) {
+        if (variable && property && fn) {
+            props.onChange(variable + "." + property + "[" + fn + "]")
+        } else if (variable && property && (props.fnOptions?.length ?? 0 <= 0)) {
+            props.onChange(variable + "." + property)
+        }else{
+            props.onChange(undefined)
+            console.log("incomplete analytic select")
         }
 
-      }} />
-  </Grid>
+    }
+
+    function buildFnSelect() {
+        if (fn && (props.fnOptions?.length ?? 0 > 1)) {
+            return <FormSelect title={'Function'} options={props.fnOptions ?? []}
+                               value={fn}
+                               onChangeHandler={e => {
+                                   let newFN = e.target.value as string;
+                                   setFn(newFN)
+                                   onChange(variable,property,newFN);
+
+                               }}/>;
+        }
+    }
+
+    return <Grid item xs={12}>
+        <Grid container spacing={3}>
+            <Grid item xs={12} md={fn ? 4 : 6}>
+                <FormSelect title={props.label} options={props.query.nodes
+                    .map(n => n.varName).concat(props.query.relations.map(r => r.varName)) ?? []}
+                            onChangeHandler={e => {
+                                let newValue = e.target.value as string;
+                                setVariable(newValue)
+                                onChange(newValue,property,fn);
+                            }}/>
+            </Grid>
+            <Grid item xs={12} md={fn ? 4 : 6}>
+                <FormSelect title={props.label} options={properties ?? []}
+                            onChangeHandler={e => {
+                                let newValue = e.target.value as string;
+                                setProperty(newValue)
+                                onChange(variable,newValue,fn);
+                            }}/>
+            </Grid>
+            <Grid item xs={12} md={fn ? 4 : 6}>
+                {buildFnSelect()}
+            </Grid>
+        </Grid>
+    </Grid>
 }

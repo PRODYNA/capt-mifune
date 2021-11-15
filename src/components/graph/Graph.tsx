@@ -7,30 +7,16 @@ import { RelationEdit } from "./RelationEdit";
 import graphService from "../../api/GraphService";
 import { DomainList } from "../domain/DomainList";
 
-import { D3Helper } from "./D3Helper";
+import { D3Helper, D3Node, D3Relation } from "./D3Helper";
 
-export interface D3Node extends d3.SimulationNodeDatum {
-    kind: string;
-    node: Node;
-}
-
-export interface D3Relation extends d3.SimulationLinkDatum<D3Node> {
-    kind: string;
-    relation: Relation;
-    color?: string;
-    relCount: number;
-    relIndex: number;
-    incomingRelationsCount: number;
-    firstRender?: boolean;
-}
 
 /* Component */
 export const Graph = () => {
     const [selectedDomain, setSelectedDomain] = useState<Domain>();
     const [domains, setDomains] = useState<Domain[]>([]);
-    const [nodes, setNodes] = useState<D3Node[]>([]);
-    const [relations, setRelations] = useState<D3Relation[]>([]);
-    const [selected, setSelected] = useState<D3Node | D3Relation>();
+    const [nodes, setNodes] = useState<D3Node<Node>[]>([]);
+    const [relations, setRelations] = useState<D3Relation<Relation>[]>([]);
+    const [selected, setSelected] = useState<D3Node<Node> | D3Relation<Relation>>();
     const d3Container = useRef(null);
 
     function updateState(graphDelta: GraphDelta) {
@@ -54,7 +40,7 @@ export const Graph = () => {
                     .filter((n) => n.node.id === cn.id)
                     .forEach((n) => (n.node = cn));
             } else {
-                d3Nodes = d3Nodes.concat(wrapNode(cn));
+                d3Nodes = d3Nodes.concat(D3Helper.wrapNode(cn));
             }
         });
         setNodes(d3Nodes);
@@ -70,30 +56,13 @@ export const Graph = () => {
                     .filter((n) => n.relation.id === cr.id)
                     .forEach((n) => (n.relation = cr));
             } else {
-                d3Relations = d3Relations.concat(wrapRelation(cr));
+                d3Relations = d3Relations.concat(D3Helper.wrapRelation(cr));
             }
         });
         setRelations(d3Relations);
     }
 
-    function wrapNode(node: Node): D3Node {
-        return {
-            kind: "node",
-            node: node,
-        };
-    }
 
-    function wrapRelation(rel: Relation): D3Relation {
-        return {
-            kind: "relation",
-            relation: rel,
-            source: rel.sourceId,
-            target: rel.targetId,
-            relCount: 0,
-            incomingRelationsCount: 0,
-            relIndex: 0,
-        };
-    }
 
     function color(id: string): string {
         return nodes.find((n) => n.node.id === id)?.node.color ?? "green";
@@ -101,14 +70,14 @@ export const Graph = () => {
 
     useEffect(() => {
         graphService.graphGet().then((g) => {
-            setNodes(g.nodes.map((n) => wrapNode(n)));
-            setRelations(g.relations.map((n) => wrapRelation(n)));
+            setNodes(g.nodes.map((n) => D3Helper.wrapNode(n)));
+            setRelations(g.relations.map((n) => D3Helper.wrapRelation(n)));
             setDomains(g.domains);
         });
     }, []);
 
     useEffect(() => {
-        function createRelation(source: D3Node, target: D3Node, domain: Domain) {
+        function createRelation(source: D3Node<Node>, target: D3Node<Node>, domain: Domain) {
             let rel: Relation = {
                 id: "",
                 domainIds: [domain.id],
@@ -120,11 +89,11 @@ export const Graph = () => {
                 type: "",
                 color: "red",
             };
-            let d3Relation = wrapRelation(rel);
+            let d3Relation = D3Helper.wrapRelation(rel);
             setSelected(d3Relation);
         }
 
-        function nodeRadius(n: D3Node): number {
+        function nodeRadius(n: D3Node<Node>): number {
             let isSelected =
                 selected && "node" in selected && selected.node.id === n.node.id;
             if (isSelected) {
@@ -135,7 +104,7 @@ export const Graph = () => {
             return 20;
         }
 
-        function relWidth(rel: D3Relation): number {
+        function relWidth(rel: D3Relation<Relation>): number {
             let isSelected =
                 selected &&
                 "relation" in selected &&
@@ -181,7 +150,7 @@ export const Graph = () => {
         ) {
             let selection: d3.Selection<any, any, any, any> | undefined = undefined;
             if (selected && "node" in selected && selected.node.id) {
-                let selectedNode = selected as D3Node;
+                let selectedNode = selected as D3Node<Node>;
                 // @ts-ignore
                 selection = svg
                     .append("g")
@@ -200,7 +169,7 @@ export const Graph = () => {
 
         function drawRelations(
             svg: d3.Selection<null, unknown, null, undefined>,
-            relations: D3Relation[]
+            relations: D3Relation<Relation>[]
         ) {
             let selection = svg.append("g").selectAll("path").data(relations);
             let relation = selection
@@ -273,7 +242,7 @@ export const Graph = () => {
             simulation: d3.Simulation<any, any>,
             relation: any
         ) {
-            const click = (event: any, r: D3Relation) => {
+            const click = (event: any, r: D3Relation<Relation>) => {
                 if (
                     selected &&
                     "relation" in selected &&
@@ -298,7 +267,7 @@ export const Graph = () => {
                 })
                 .on("drag", (e: any, d: any) => {
                     if (selected && "node" in selected && selected.node.id) {
-                        const node: D3Node = selected as D3Node;
+                        const node: D3Node<Node> = selected as D3Node<Node>;
                         const nodeX = node.x ?? 0;
                         const nodeY = node.y ?? 0;
                         d.d = D3Helper.selectionPath(
@@ -318,7 +287,7 @@ export const Graph = () => {
                         return hyp < 20;
                     })[0];
                     if (selected?.kind === "node" && target && selectedDomain) {
-                        const source = selected as D3Node;
+                        const source = selected as D3Node<Node>;
                         createRelation(source, target, selectedDomain);
                     }
                     simulation.restart();
@@ -328,7 +297,7 @@ export const Graph = () => {
             }
         }
 
-        function buildSimulation(relations: D3Relation[], tick: () => void) {
+        function buildSimulation(relations: D3Relation<Relation>[], tick: () => void) {
             return d3
                 .forceSimulation()
                 .nodes(nodes)
@@ -336,7 +305,7 @@ export const Graph = () => {
                 .force(
                     "link",
                     d3
-                        .forceLink<D3Node, D3Relation>(relations)
+                        .forceLink<D3Node<Node>, D3Relation<Relation>>(relations)
                         .id((d) => d.node.id)
                         .distance(100)
                         .strength(0.1)
@@ -371,7 +340,7 @@ export const Graph = () => {
                 pointer-events: none;
             }
           `);
-            var rels: D3Relation[];
+            var rels: D3Relation<Relation>[];
             if (selected && "relation" in selected && selected.relation.id === "") {
                 console.log("add selected to relations");
                 rels = relations.concat(selected);
@@ -463,7 +432,7 @@ export const Graph = () => {
             return (
                 <NodeEdit
                     domains={domains}
-                    node={(selected as D3Node).node}
+                    node={(selected as D3Node<Node>).node}
                     nodes={nodes.map((n) => n.node)}
                     onCreate={(node) => {
                         graphService.nodePost(node).then((graphDelta) => {
@@ -490,7 +459,7 @@ export const Graph = () => {
             return (
                 <RelationEdit
                     domains={domains}
-                    relation={(selected as D3Relation).relation}
+                    relation={(selected as D3Relation<Relation>).relation}
                     nodes={nodes.map((n) => n.node)}
                     onCreate={(rel) => {
                         graphService.relationPost(rel).then((graphDelta) => {
@@ -549,7 +518,7 @@ export const Graph = () => {
                 }}
                 addNode={(domain: Domain) => {
                     setSelected(
-                        wrapNode({
+                        D3Helper.wrapNode({
                             id: "",
                             domainIds: [domain!.id],
                             color: "blue",
