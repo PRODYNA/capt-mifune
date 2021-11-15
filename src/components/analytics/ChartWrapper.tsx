@@ -7,6 +7,7 @@ import { Box, Button, CircularProgress, Grid, makeStyles } from "@material-ui/co
 import { AnalyticSelect } from "./AnalyticSelect";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import FilterListIcon from '@material-ui/icons/FilterList';
+import {Query, QueryBuilder} from "./QueryBuilder";
 
 interface FilterProps {
   key?: string,
@@ -14,14 +15,15 @@ interface FilterProps {
 }
 
 export interface SelectProps {
+  query: Query,
   label: string,
-  onChange: (v: string) => void
+  onChange: (v: string | undefined) => void
   fnOptions?: string[]
   fnDefault?: string
-  options?: string[]
 }
 
 interface ChartWrapperProps<T> {
+  query: Query
   results: string[],
   orders: string[],
   dataPreparation: (data: any[], scale: number) => T | undefined,
@@ -31,11 +33,8 @@ interface ChartWrapperProps<T> {
 
 export const ChartWrapper = (props: ChartWrapperProps<any>) => {
 
-  const [domains, setDomains] = useState<Domain[]>();
   const [loading, setLoading] = useState<boolean>(false);
-  const [domain, setDomain] = useState<Domain>();
   const [data, setData] = useState<any>();
-  const [options, setOptions] = useState<string[]>();
   const [filters, setFilters] = useState<FilterProps[]>([]);
   const [scale, setScale] = useState<number>(1);
 
@@ -50,8 +49,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     return <>
       {filters.map((f, i) => {
         console.log(i)
-        return <AnalyticFilter key={i} options={options}
-          domainId={domain?.id}
+        return <AnalyticFilter  key={i} query={props.query}
           onKeyChange={(k) => {
             setFilters(f =>
               f.map((f, idx) => {
@@ -86,53 +84,19 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     </>;
   }
 
-  useEffect(() => {
-    graphService.domainsGet().then((domains) => setDomains(domains));
-  }, []);
-
-  useEffect(() => {
-    if (domain) {
-      graphService.loadQueryKeys(domain).then((keys) => {
-        keys.unshift("None");
-        setOptions(keys);
-      });
-    }
-  }, [domain]);
 
 
   function loadData() {
-    console.log(domain, props.results, props.orders);
-    if (domain && props.results && props.orders) {
       setLoading(true)
       graphService
-        .data(domain.id, props.results, props.orders, filters.map(f => f.key + ':' + f.value))
+        .query(props.query, props.results, props.orders, filters.map(f => f.key + ':' + f.value))
         .then((data) => {
           setData(props.dataPreparation(data, scale))
           setLoading(false)
         })
         .catch(e => console.error(e));
-    } else {
-      setLoading(false)
-      setData(undefined);
-    }
   }
 
-
-  function getDomainSelect() {
-    const options: string[] = [];
-    options.push("None");
-    domains?.map((domain) => options.push(domain.name));
-    return (
-      <FormSelect
-        title="Domain"
-        options={options}
-        onChangeHandler={(event) => {
-          const result = domains!.find((x) => x.name === event.target.value);
-          setDomain(result);
-        }}
-      />
-    );
-  }
 
 
   function buildChart() {
@@ -157,12 +121,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
           loadData();
         }}>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              {getDomainSelect()}
-            </Grid>
             <Grid item md={6} />
             {props.selects.map(s =>
-              <AnalyticSelect fnOptions={s.fnOptions} fnDefault={s.fnDefault} label={s.label} options={options ?? []}
+              <AnalyticSelect fnOptions={s.fnOptions} fnDefault={s.fnDefault} label={s.label} query={props.query}
                 onChange={value => {
                   setData(undefined)
                   s.onChange(value)
@@ -203,7 +164,6 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
           </Button>
         </form>
       </Box>
-
       {buildChart()}
     </>
 

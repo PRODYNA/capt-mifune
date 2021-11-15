@@ -32,7 +32,7 @@ export interface DomainUpdate {
 export interface Domain {
     id: string;
     name: string;
-    rootNodeId: string;
+    rootNodeId?: string;
     modelValid: boolean;
     mappingValid: boolean;
     file?: string;
@@ -55,7 +55,7 @@ export interface NodeUpdate {
 
 export interface Node {
     id: string;
-    domainIds: string[];
+    domainIds: string[] ;
     label: string;
     color: string;
     properties: Property[];
