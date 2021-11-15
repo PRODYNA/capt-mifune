@@ -24,8 +24,13 @@ export interface D3Relation extends d3.SimulationLinkDatum<D3Node> {
     firstRender?: boolean;
 }
 
+interface IGraph {
+  openSidenav: boolean;
+}
+
 /* Component */
-export const Graph = () => {
+export const Graph = (props: IGraph) => {
+  const { openSidenav} = props;
     const [selectedDomain, setSelectedDomain] = useState<Domain>();
     const [domains, setDomains] = useState<Domain[]>([]);
     const [nodes, setNodes] = useState<D3Node[]>([]);
@@ -570,7 +575,7 @@ export const Graph = () => {
             <div className={classes.overlay}>{editSection()}</div>
             <svg
                 className={classes.svg}
-                width={window.innerWidth}
+                width={window.innerWidth - (openSidenav ? 160 : 59)}
                 height={window.innerHeight}
                 ref={d3Container}
             />
