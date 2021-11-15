@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Data, ResponsiveSankey, SankeyDataLink, SankeyDataNode } from "@nivo/sankey";
 import { ChartWrapper } from "./ChartWrapper";
+import {Query} from "./QueryBuilder";
 
-export const MifuneSankey = () => {
+export const MifuneSankey = (props: {query: Query}) => {
   const [from, setFrom] = useState<string>();
   const [to, setTo] = useState<string>();
   const [count, setCount] = useState<string>();
@@ -47,15 +48,17 @@ export const MifuneSankey = () => {
   }
 
   return (
-    <ChartWrapper results={[from!!, to!!, count!!]} orders={[]} dataPreparation={prepareData}
+    <ChartWrapper query={props.query}  results={[from!!, to!!, count!!]} orders={[]} dataPreparation={prepareData}
       selects={[
-        { label: "From", onChange: setFrom },
-        { label: "To", onChange: setTo },
+        {query: props.query,
+          label: "From", onChange: setFrom },
+        {query: props.query, label: "To", onChange: setTo },
         {
+          query: props.query,
           label: "Value",
           fnDefault: "count",
           fnOptions: ["count", "sum", "avg", "min", "max"],
-          onChange: (v: string) => {
+          onChange: (v) => {
             console.log(v)
             setCount(v);
           }
