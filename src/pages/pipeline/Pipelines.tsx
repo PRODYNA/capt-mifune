@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Domain, GraphStatistics } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import {
-  CircularProgress,
-  Fab,
-  Grid,
+  Box,
+  Chip,
+  Container,
   makeStyles,
   Paper,
   Table,
@@ -13,23 +13,26 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@material-ui/core";
 import { PipelineRow } from "./PipelineRow";
 import DeleteIcon from "@material-ui/icons/Delete";
+import CustomButton from "../../components/Button/CustomButton";
+import { useTheme } from '@material-ui/core/styles';
 
-export const Pipelines = () => {
-  const classes = makeStyles({
-    table: {
-      minWidth: 650,
-    },
-    container: {
-      margin: 15,
-    }
-  })();
-
+const Pipelines = (): JSX.Element => {
   const [domains, setDomains] = useState<Domain[]>();
   const [cleanActive, setCleanActive] = useState<boolean>(false);
   const [statistics, setStatistics] = useState<GraphStatistics>();
+  const tableHeaders = [
+    'Show Details', 'Domain Name', 'Model Valid', 'Mapping Valid', 'Run Import', 'Stop Import', 'Delete Domain', 'Root Nodes', 'ID'
+  ]
+
+  const classes = makeStyles({
+    chip: {
+      marginRight: '1rem'
+    }
+  })();
 
   useEffect(() => {
     graphService.domainsGet().then((domains) => setDomains(domains));
@@ -46,7 +49,6 @@ export const Pipelines = () => {
   }, [cleanActive]);
 
   function clean() {
-    console.log("execute clean")
     let sseClient = graphService.cleanDatabase();
     sseClient.onmessage = function (e) {
       setCleanActive(true);
@@ -61,48 +63,46 @@ export const Pipelines = () => {
     };
   }
 
-  function spinner() {
-    if (cleanActive) {
-      return <CircularProgress />
-    }
-    return <></>
-  }
+  const theme = useTheme()
 
   return (
-    <>
-      <Grid container className={classes.container}>
-        <span>nodes: {statistics?.nodes} relations: {statistics?.relations}</span>
-      </Grid>
-      <Grid container className={classes.container}>
+    <Container>
+      <Box mt={3}>
+        <Box mb={3} display="flex" justifyContent="space-between">
+          <Typography variant="h5">Pipelines</Typography>
+          <Box>
+            <Chip className={classes.chip} label={`nodes: ${statistics?.nodes}`} color="primary" />
+            <Chip className={classes.chip} label={`relations: ${statistics?.relations}`} color="primary" />
+          </Box>
+          <CustomButton
+            title="Clean Database"
+            type="submit"
+            customColor={theme.palette.error.main}
+            onClick={clean}
+            startIcon={<DeleteIcon />}
+          />
+        </Box>
         <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="simple table">
+          <Table aria-label="simple table">
             <TableHead>
               <TableRow key="table-header">
-                <TableCell>Name</TableCell>
-                <TableCell>Model Valid</TableCell>
-                <TableCell>Mapping Valid</TableCell>
-                <TableCell>Run Import</TableCell>
-                <TableCell>Stop Import</TableCell>
-                <TableCell>Delete Domain</TableCell>
-                <TableCell>Root Nodes</TableCell>
-                <TableCell align="right">ID</TableCell>
+                {tableHeaders.map((header: string): JSX.Element =>
+                  <TableCell key={header}>
+                    <Typography variant="body2">{header}</Typography>
+                  </TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
               {domains?.map((row) => (
-                <PipelineRow domain={row} cleanActive={cleanActive} />
+                <PipelineRow key={row.id} domain={row} cleanActive={cleanActive} />
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-      </Grid>
-      <Grid item className={classes.container}>
-        <Fab color={"primary"} variant={"extended"} onClick={() => clean()}>
-          <DeleteIcon />
-          {spinner()}
-          Clean Database
-        </Fab>
-      </Grid>
-    </>
+      </Box>
+    </Container>
   );
 };
+
+export default Pipelines;

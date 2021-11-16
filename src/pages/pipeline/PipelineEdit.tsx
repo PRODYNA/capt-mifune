@@ -11,28 +11,26 @@ const rest = HttpService.getAxiosClient();
 
 interface DomainEditProps {
   domain: Domain;
-  onSubmit: (domain: Domain) => Promise<any>;
 }
-export const PipelineEdit = (props: DomainEditProps) => {
-  const history = useHistory();
 
-  const [value, setValue] = useState<Domain>(props.domain);
+const PipelineEdit = (props: DomainEditProps) => {
+  const { domain } = props
+  const history = useHistory();
+  const [value, setValue] = useState<Domain>(domain);
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
     rest.get<Source[]>("/sources").then((r) => {
       setSources(r.data);
     });
-  }, [props.domain]);
 
-  useEffect(() => {
     graphService.loadDefaultMappingConfig(value).then((r) => {
       setValue({
         ...value,
         columnMapping: r.data,
       });
     });
-  }, [props.domain]);
+  }, [domain]);
 
   const getMenuItems = () => {
     if (sources) {
@@ -85,12 +83,12 @@ export const PipelineEdit = (props: DomainEditProps) => {
   const getReactNodes = (values: string[]) => {
     return getColumnMappingKeys().map((key) => {
       return (
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <FormSelect
             key={key}
             title={key}
             options={values}
-            value={value.columnMapping[key]}
+            value={value.columnMapping[key] ?? ''}
             onChangeHandler={onNodeChangeEventHandler}
           />
         </Grid>
@@ -107,8 +105,7 @@ export const PipelineEdit = (props: DomainEditProps) => {
     })
     .forEach((s) => options.push(s));
   childrens.unshift(
-    <Grid item xs={12} md={6}>
-
+    <Grid item xs={12} md={4}>
       <FormSelect
         key="FileSelection"
         title="Select file to map"
@@ -119,32 +116,22 @@ export const PipelineEdit = (props: DomainEditProps) => {
     </Grid>
   );
 
-  childrens.push(
-    <FormActions
-      saveText="Save"
-      cancelText="Cancel"
-      onCancelEvent={() => history.push("/pipelines")}
-    />
-  );
-
-  console.log(childrens)
-
   return (
-    <>
-      {/*<span>{JSON.stringify(getMenuItems())}</span>*/}
-      <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        console.log("domain edit " + value.name);
-        props.onSubmit(value).then(() => {
-          history.goBack();
-        });
-        event.preventDefault();
-      }}>
-        <Grid container spacing={3}>
-          {childrens.map((child) => {
-            return child;
-          })}
-        </Grid>
-      </form>
-    </>
+    <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
+      console.log("domain edit " + value.name);
+      // graphService.domainPut(value.id, value)
+      event.preventDefault();
+    }}>
+      <Grid container spacing={3}>
+        {childrens.map((child) => child)}
+      </Grid>
+      <FormActions
+        saveText="Save"
+        cancelText="Cancel"
+        onCancelEvent={() => history.push("/pipelines")}
+      />
+    </form>
   );
 };
+
+export default PipelineEdit;
