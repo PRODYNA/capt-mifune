@@ -103,3 +103,7 @@ export interface Source {
     name: string;
     header: string[];
 }
+export interface Filter {
+    property: string;
+    value: any;
+}

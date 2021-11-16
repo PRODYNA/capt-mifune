@@ -1,6 +1,6 @@
 import { AnalyticFilter } from "./AnalyticFilter";
 import React, { useEffect, useState } from "react";
-import { Domain } from "../../api/model/Model";
+import {Domain, Filter} from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import FormSelect from "../form/FormSelect";
 import { Box, Button, CircularProgress, Grid, makeStyles } from "@material-ui/core";
@@ -9,10 +9,6 @@ import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import FilterListIcon from '@material-ui/icons/FilterList';
 import {Query, QueryBuilder} from "./QueryBuilder";
 
-interface FilterProps {
-  key?: string,
-  value?: string
-}
 
 export interface SelectProps {
   query: Query,
@@ -35,7 +31,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>();
-  const [filters, setFilters] = useState<FilterProps[]>([]);
+  const [filters, setFilters] = useState<Filter[]>([]);
   const [scale, setScale] = useState<number>(1);
 
   const useStyle = makeStyles({
@@ -54,7 +50,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
             setFilters(f =>
               f.map((f, idx) => {
                 if (idx === i) {
-                  f.key = k;
+                  f.property = k ?? '';
                 }
                 return f;
               })
@@ -89,7 +85,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
   function loadData() {
       setLoading(true)
       graphService
-        .query(props.query, props.results, props.orders, filters.map(f => f.key + ':' + f.value))
+        .query(props.query, props.results, props.orders, filters)
         .then((data) => {
           setData(props.dataPreparation(data, scale))
           setLoading(false)
@@ -136,7 +132,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
               variant="contained"
               color="secondary"
               onClick={() => {
-                setFilters(f => f.concat({}))
+                setFilters(f => f.concat({property:'',value: undefined}))
               }}>
               add filter
             </Button>
