@@ -113,19 +113,16 @@ export class D3Helper {
             curveCenterX = Math.sin(angle + (Math.PI / 2)) * curveDistance
             curveCenterY = Math.cos(angle + (Math.PI / 2)) * curveDistance
         }
-        // return `
-        //              M ${sx} ${sy}
-        //              Q
-        //              ${((sx + tx) / 2) + (curveCenterX) - (spacerX)}
-        //              ${((sy + ty) / 2) + (curveCenterY) - (spacerY)}
-        //              ${((sx + tx) / 2) + (curveCenterX)}
-        //              ${((sy + ty) / 2) + (curveCenterY)}
-        //              ${((sx + tx) / 2) + (curveCenterX) + (spacerX)}
-        //              ${((sy + ty) / 2) + (curveCenterY) + (spacerY)}
-        //              ${tx} ${ty}
         return `
-                     M ${sx} ${sy}                                                   
-                     ${tx} ${ty}  
+                     M ${sx} ${sy}
+                     Q
+                     ${((sx + tx) / 2) + (curveCenterX) - (spacerX)}
+                     ${((sy + ty) / 2) + (curveCenterY) - (spacerY)}
+                     ${((sx + tx) / 2) + (curveCenterX)}
+                     ${((sy + ty) / 2) + (curveCenterY)}
+                     ${((sx + tx) / 2) + (curveCenterX) + (spacerX)}
+                     ${((sy + ty) / 2) + (curveCenterY) + (spacerY)}
+                     ${tx} ${ty}
                   `
     }
 

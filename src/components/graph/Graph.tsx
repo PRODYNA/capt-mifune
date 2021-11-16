@@ -10,19 +10,6 @@ import { D3Helper, D3Node, D3Relation } from "./D3Helper";
 import { drawerWidth, drawerWidthOpen } from "../Navigation/SideNavigation";
 import CreateDomain from "../domain/CreateDomain";
 
-export interface D3Node extends d3.SimulationNodeDatum {
-  kind: string;
-  node: Node;
-}
-export interface D3Relation extends d3.SimulationLinkDatum<D3Node> {
-  kind: string;
-  relation: Relation;
-  color?: string;
-  relCount: number;
-  relIndex: number;
-  incomingRelationsCount: number;
-  firstRender?: boolean;
-}
 interface IGraph {
   openSidenav: boolean;
 }
