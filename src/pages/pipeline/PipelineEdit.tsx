@@ -119,7 +119,7 @@ const PipelineEdit = (props: DomainEditProps) => {
   return (
     <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
       console.log("domain edit " + value.name);
-      // graphService.domainPut(value.id, value)
+      graphService.domainPut(value.id, value)
       event.preventDefault();
     }}>
       <Grid container spacing={3}>
