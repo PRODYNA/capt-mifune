@@ -1,13 +1,12 @@
 import { AnalyticFilter } from "./AnalyticFilter";
-import React, { useEffect, useState } from "react";
-import {Domain, Filter} from "../../api/model/Model";
+import React, { useState } from "react";
+import { Filter} from "../../api/model/Model";
 import graphService from "../../api/GraphService";
-import FormSelect from "../form/FormSelect";
 import { Box, Button, CircularProgress, Grid, makeStyles } from "@material-ui/core";
 import { AnalyticSelect } from "./AnalyticSelect";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import FilterListIcon from '@material-ui/icons/FilterList';
-import {Query, QueryBuilder} from "./QueryBuilder";
+import {Query} from "./QueryBuilder";
 
 
 export interface SelectProps {

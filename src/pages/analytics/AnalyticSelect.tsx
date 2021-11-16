@@ -1,4 +1,4 @@
-import FormSelect from "../form/FormSelect";
+import FormSelect from "../../components/Form/FormSelect";
 import React, {useEffect, useState} from "react";
 import {SelectProps} from "./ChartWrapper";
 import {Grid} from "@material-ui/core";
