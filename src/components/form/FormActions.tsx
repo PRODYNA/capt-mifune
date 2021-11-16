@@ -27,7 +27,7 @@ const FormActions: React.FunctionComponent<IFormActions> = ({
       <CustomButton
         type="submit"
         onClick={onCancelHandler}
-        customColor={theme.palette.error.main}
+        customColor={theme.palette.secondary.main}
         startIcon={<ClearOutlinedIcon/>}
         style={{ marginRight: '1rem' }}
         title={cancelText}
