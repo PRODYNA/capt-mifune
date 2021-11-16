@@ -2,8 +2,8 @@ import React, { FormEvent, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Domain, Source } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
-import FormSelect from "../form/FormSelect";
-import SaveAndCancel from "../form/SavenAndCancel";
+import FormSelect from "../../components/Form/FormSelect";
+import FormActions from "../../components/Form/FormActions";
 import HttpService from "../../services/HttpService";
 import { Grid } from "@material-ui/core";
 
@@ -120,7 +120,7 @@ export const PipelineEdit = (props: DomainEditProps) => {
   );
 
   childrens.push(
-    <SaveAndCancel
+    <FormActions
       saveText="Save"
       cancelText="Cancel"
       onCancelEvent={() => history.push("/pipelines")}

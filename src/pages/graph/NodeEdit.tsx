@@ -17,7 +17,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import CloseIcon from "@material-ui/icons/Close";
 import AddIcon from "@material-ui/icons/Add";
 import { DomainSelect } from "./DomainSelect";
-import { ColorPicker } from "../color/ColorPicker";
+import { ColorPicker } from "../../components/ColorPicker/ColorPicker";
 
 interface NodeEditProps {
     node: Node;

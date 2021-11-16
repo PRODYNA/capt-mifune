@@ -1,13 +1,13 @@
 import { Button, Grid } from "@material-ui/core";
 import * as React from "react";
 
-interface ISaveAndCancel {
+interface IFormActions {
   onCancelEvent: (event: React.MouseEvent<HTMLElement>) => void;
   saveText: string;
   cancelText: string;
 }
 
-const SaveAndCancel: React.FunctionComponent<ISaveAndCancel> = ({
+const FormActions: React.FunctionComponent<IFormActions> = ({
   onCancelEvent,
   saveText,
   cancelText,
@@ -30,4 +30,4 @@ const SaveAndCancel: React.FunctionComponent<ISaveAndCancel> = ({
   );
 };
 
-export default SaveAndCancel;
+export default FormActions;
