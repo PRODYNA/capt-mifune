@@ -32,7 +32,6 @@ export interface QueryRelation {
     selected: boolean,
     sourceId: string,
     targetId: string
-
 }
 
 export const QueryBuilder = (props: QueryBuilderProps) => {

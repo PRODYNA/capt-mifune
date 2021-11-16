@@ -2,7 +2,7 @@ import HttpService from "../services/HttpService";
 import {
     Domain,
     DomainCreate,
-    DomainUpdate,
+    DomainUpdate, Filter,
     Graph,
     GraphDelta,
     Node,
@@ -41,7 +41,7 @@ export class GraphService {
         query: Query,
         results: String[],
         orders: String[] = [],
-        filters: String[] = []
+        filters: Filter[] = []
     ): Promise<any[]> {
         return rest
             .post<any[]>("data" , {
