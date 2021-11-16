@@ -27,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       '&.closed': {
         '& .MuiPaper-root': {
-          transition: 'all ease-in-out 0.4s'
+          transition: 'all ease-in-out 0.4s',
         },
         '& + .MuiContainer-root': {
           marginLeft: drawerWidth,
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
       '&.open': {
         '& .MuiPaper-root': {
           transition: 'all ease-in-out 0.4s',
-          width: drawerWidthOpen,
+          width: drawerWidthOpen
         },
         '& + .MuiContainer-root': {
           marginLeft: drawerWidthOpen,
@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
     toggleIcon: {
       position: 'absolute',
       bottom: '2rem',
-      left: '1rem'
+      right: '1rem'
     },
     navTitle: {
       fontWeight: 600,
