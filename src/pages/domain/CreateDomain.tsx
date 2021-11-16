@@ -12,6 +12,8 @@ export const useStyles = makeStyles(() =>
       transform: 'translateX(-50%)',
       left: '50%',
       boxShadow: '0 0 0 0 rgba(142, 68, 173, 1)',
+    },
+    animatedBtn: {
       animation: '$pulse-purple 2s infinite',
     },
     '@keyframes pulse-purple': {
@@ -43,7 +45,7 @@ const CreateDomain = (props: ICreateDomain): JSX.Element => {
 
   return (
     <Tooltip title="Create new Domain">
-      <Fab size="large" color="primary" className={classes.createDomainBtn}
+      <Fab size="large" color="primary" className={`${classes.createDomainBtn} ${domains.length === 0 ? classes.animatedBtn : ''}`}
         onClick={(e) =>
           graphService
             .domainPost({ name: "domain_" + domains.length })
