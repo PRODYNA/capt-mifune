@@ -1,4 +1,4 @@
-import FormSelect from "../form/FormSelect";
+import FormSelect from "../../components/Form/FormSelect";
 import React, {useEffect, useState} from "react";
 import graphService from "../../api/GraphService";
 import {Grid, IconButton} from "@material-ui/core";

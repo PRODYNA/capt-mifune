@@ -7,7 +7,7 @@ import { RelationEdit } from "./RelationEdit";
 import graphService from "../../api/GraphService";
 import { DomainList } from "../domain/DomainList";
 import { D3Helper, D3Node, D3Relation } from "./D3Helper";
-import { DRAWER_WIDTH, DRAWER_WIDTH_OPEN } from "../Navigation/SideNavigation";
+import { DRAWER_WIDTH, DRAWER_WIDTH_OPEN } from "../../components/Navigation/SideNavigation";
 import CreateDomain from "../domain/CreateDomain";
 
 interface IGraph {

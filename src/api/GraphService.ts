@@ -16,7 +16,7 @@ import {AxiosResponse} from "axios";
 import {EventSourcePolyfill} from "ng-event-source";
 import UserService from "../services/UserService";
 import {ENV} from "../env/Environments";
-import {Query} from "../components/analytics/QueryBuilder";
+import {Query} from "../pages/analytics/QueryBuilder";
 
 const rest = HttpService.getAxiosClient();
 

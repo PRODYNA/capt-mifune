@@ -1,4 +1,3 @@
-import {NodeSelect} from "../domain/NodeSelect";
 import React, {useEffect, useRef, useState} from "react";
 import graphService from "../../api/GraphService";
 import {Graph, Node, Relation} from "../../api/model/Model";
