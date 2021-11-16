@@ -2,7 +2,7 @@ import HttpService from "../services/HttpService";
 import {
     Domain,
     DomainCreate,
-    DomainUpdate,
+    DomainUpdate, Filter,
     Graph,
     GraphDelta,
     Node,
@@ -12,10 +12,11 @@ import {
     RelationCreate,
     RelationUpdate,
 } from "./model/Model";
-import { AxiosResponse } from "axios";
-import { EventSourcePolyfill } from "ng-event-source";
+import {AxiosResponse} from "axios";
+import {EventSourcePolyfill} from "ng-event-source";
 import UserService from "../services/UserService";
-import { ENV } from "../env/Environments";
+import {ENV} from "../env/Environments";
+import {Query} from "../components/analytics/QueryBuilder";
 
 const rest = HttpService.getAxiosClient();
 
@@ -29,7 +30,40 @@ export class GraphService {
     ): Promise<any[]> {
         return rest
             .get<any[]>("data/domain/" + domainId, {
-                params: { results: results, orders: orders, filters: filters },
+                params: {results: results, orders: orders, filters: filters},
+            })
+            .then((res) => {
+                return res.data;
+            });
+    }
+
+    query(
+        query: Query,
+        results: String[],
+        orders: String[] = [],
+        filters: Filter[] = []
+    ): Promise<any[]> {
+        return rest
+            .post<any[]>("data" , {
+                nodes: query.nodes.map(n => {
+                    return {
+                        id: n.id,
+                        nodeId: n.node.id,
+                        varName: n.varName
+                    }
+
+                }),
+                relations: query.relations.map(r => {return {
+                    id: r.id,
+                    varName: r.varName,
+                    relationId: r.relation.id,
+                    sourceId: r.sourceId,
+                    targetId: r.targetId
+
+                }}),
+                results: results,
+                orders: orders,
+                filters: filters
             })
             .then((res) => {
                 return res.data;
@@ -70,8 +104,8 @@ export class GraphService {
     graphStats(): EventSourcePolyfill {
         return new EventSourcePolyfill(
             localStorage.getItem(ENV.API_SERVER) + "graph/stats", {
-            headers: this.header(),
-        }
+                headers: this.header(),
+            }
         );
     }
 
@@ -210,6 +244,12 @@ export class GraphService {
 
     persistGraph(): Promise<any> {
         return rest.post<GraphDelta>("graph").then((r) => r.data);
+    }
+
+
+    possibleRelations(graph: Graph, nodeId: string): Relation[] {
+        return graph.relations.filter(r => r.sourceId === nodeId || r.targetId === nodeId)
+
     }
 }
 
