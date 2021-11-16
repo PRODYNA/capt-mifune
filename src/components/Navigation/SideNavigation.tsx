@@ -13,14 +13,14 @@ import UserService from '../../services/UserService';
 import { fontWhite } from '../Theme/CustomColors';
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes';
 
-export const drawerWidth = 60;
-export const drawerWidthOpen = 160;
+export const DRAWER_WIDTH = 60;
+export const DRAWER_WIDTH_OPEN = 160;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       '& .MuiPaper-root': {
-        width: drawerWidth,
+        width: DRAWER_WIDTH,
         backgroundColor: theme.palette.primary.dark,
         color: fontWhite,
         overflow: "hidden"
@@ -29,20 +29,20 @@ const useStyles = makeStyles((theme: Theme) =>
         '& .MuiPaper-root': {
           transition: 'all ease-in-out 0.4s',
         },
-        '& + .MuiContainer-root': {
-          marginLeft: drawerWidth,
-          width: `calc(100% - ${drawerWidth}px)`,
+        '& + .MuiBox-root': {
+          marginLeft: DRAWER_WIDTH,
+          width: `calc(100% - ${DRAWER_WIDTH}px)`,
           transition: 'all ease-in-out 0.4s'
         }
       },
       '&.open': {
         '& .MuiPaper-root': {
           transition: 'all ease-in-out 0.4s',
-          width: drawerWidthOpen
+          width: DRAWER_WIDTH_OPEN
         },
-        '& + .MuiContainer-root': {
-          marginLeft: drawerWidthOpen,
-          width: `calc(100% - ${drawerWidthOpen}px)`,
+        '& + .MuiBox-root': {
+          marginLeft: DRAWER_WIDTH_OPEN,
+          width: `calc(100% - ${DRAWER_WIDTH_OPEN}px)`,
           transition: 'all ease-in-out 0.4s'
         }
       },

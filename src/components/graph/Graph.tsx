@@ -7,7 +7,7 @@ import { RelationEdit } from "./RelationEdit";
 import graphService from "../../api/GraphService";
 import { DomainList } from "../domain/DomainList";
 import { D3Helper } from "./D3Helper";
-import { drawerWidth, drawerWidthOpen } from "../Navigation/SideNavigation";
+import { DRAWER_WIDTH, DRAWER_WIDTH_OPEN } from "../Navigation/SideNavigation";
 import CreateDomain from "../domain/CreateDomain";
 export interface D3Node extends d3.SimulationNodeDatum {
   kind: string;
@@ -572,7 +572,7 @@ export const Graph = (props: IGraph) => {
       <div className={classes.overlay}>{editSection()}</div>
       <svg
         className={classes.svg}
-        width={window.innerWidth - (openSidenav ? drawerWidthOpen : drawerWidth)}
+        width={window.innerWidth - (openSidenav ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH)}
         height={window.innerHeight}
         ref={d3Container}
       />
