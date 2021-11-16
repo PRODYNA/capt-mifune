@@ -4,7 +4,7 @@ import React from "react";
 
 export interface NodeSelectProps {
   nodes: Node[];
-  nodeId: string;
+  nodeId?: string;
   updateNode: (node: Node) => void;
   className?: string;
 }

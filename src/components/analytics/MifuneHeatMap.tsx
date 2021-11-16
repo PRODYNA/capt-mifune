@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { ResponsiveHeatMap } from "@nivo/heatmap";
 import { ChartWrapper } from "./ChartWrapper";
 import { Slider } from "@material-ui/core";
+import {Query} from "./QueryBuilder";
 
-export const MifiuneHeatMap = () => {
+export const MifiuneHeatMap = (props:{query: Query}) => {
   const [labelX, setLabelX] = useState<string>();
   const [labelY, setLabelY] = useState<string>();
   const [count, setCount] = useState<string>();
@@ -103,15 +104,17 @@ export const MifiuneHeatMap = () => {
 
 
   return (
-    <ChartWrapper results={[labelX!!, labelY!!, count!!]} orders={[labelX!!]} dataPreparation={dataPreparation}
+    <ChartWrapper query={props.query} results={[labelX!!, labelY!!, count!!]} orders={[labelX!!]} dataPreparation={dataPreparation}
       selects={[
-        { label: "X", onChange: setLabelX },
-        { label: "Y", onChange: setLabelY },
+        {query: props.query,
+          label: "X", onChange: setLabelX },
+        { query: props.query,label: "Y", onChange: setLabelY },
         {
+          query: props.query,
           label: "Value",
           fnDefault: "count",
           fnOptions: ["count", "sum", "avg", "min", "max"],
-          onChange: (v: string) => {
+          onChange: (v) => {
             console.log(v)
             setCount(v);
           }
