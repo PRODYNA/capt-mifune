@@ -34,11 +34,14 @@ import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.Query;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+
+import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
 
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,37 +49,43 @@ import org.neo4j.driver.Driver;
 @Path("/data")
 public class DataResource {
 
-  @Inject GraphService graphService;
+    @Inject
+    protected Logger log;
 
-  @Inject protected Driver driver;
+    @Inject
+    protected GraphService graphService;
 
-  @POST
-  public Multi<Map<String, Object>> query(Query query) {
+    @Inject
+    protected Driver driver;
 
-    //
-    var graphModel = new GraphModel(graphService.graph());
-    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
-    var cypher = cypherQueryBuilder.cypher();
-    System.out.println(cypher);
-    var session = driver.rxSession();
-    return Multi.createFrom()
-        .publisher(session.run(cypher, cypherQueryBuilder.getParameter()).records())
-        .map(cypherQueryBuilder::buildResult)
-        .onCompletion()
-        .invoke(session::close);
-  }
+    @POST
+    public Multi<Map<String, Object>> query(Query query) {
 
-  @GET
-  @Path("/domain/{domainId}/keys")
-  public Uni<List<String>> createJsonModel(@PathParam("domainId") UUID id) {
-    ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-    var result =
-        paths.stream()
-            .map(s -> s.replaceAll("\\[", ""))
-            .map(s -> s.replaceAll("]", ""))
-            .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
-            .collect(Collectors.toList());
-    return Uni.createFrom().item(result);
-  }
+        //
+        var graphModel = new GraphModel(graphService.graph());
+        var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
+        var cypher = cypherQueryBuilder.cypher();
+        log.info("run cypher");
+        log.info(cypher);
+        var session = driver.rxSession();
+        return Multi.createFrom()
+                .publisher(session.run(cypher, cypherQueryBuilder.getParameter()).records())
+                .map(cypherQueryBuilder::buildResult)
+                .onCompletion()
+                .invoke(session::close);
+    }
+
+    @GET
+    @Path("/domain/{domainId}/keys")
+    public Uni<List<String>> createJsonModel(@PathParam("domainId") UUID id) {
+        ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
+        List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+        var result =
+                paths.stream()
+                        .map(s -> s.replaceAll("\\[", ""))
+                        .map(s -> s.replaceAll("]", ""))
+                        .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
+                        .collect(Collectors.toList());
+        return Uni.createFrom().item(result);
+    }
 }
