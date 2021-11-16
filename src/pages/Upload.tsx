@@ -43,7 +43,7 @@ const FileUpload = () => {
           event.preventDefault();
           if (file) {
             const fileSize = (file.file.size / (1024 * 1024)).toFixed(2)
-            if (fileSize < '1') {
+            if (fileSize < '10') {
               const data = new FormData();
               data.append("name", file.file.name);
               data.append("file", file.file);
