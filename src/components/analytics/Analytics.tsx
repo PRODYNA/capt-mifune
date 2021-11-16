@@ -1,16 +1,18 @@
-import React, { useState } from "react";
-import { Fab, makeStyles } from "@material-ui/core";
-import { MifuneBarChart } from "./MifuneBarChart";
-import { MifuneSankey } from "./MifuneSankey";
-import { MifiuneHeatMap } from "./MifuneHeatMap";
+import React, {useState} from "react";
+import {Fab, makeStyles} from "@material-ui/core";
+import {MifuneBarChart} from "./MifuneBarChart";
+import {MifuneSankey} from "./MifuneSankey";
+import {MifiuneHeatMap} from "./MifuneHeatMap";
 import FireplaceIcon from '@material-ui/icons/Fireplace';
 import BarChartIcon from '@material-ui/icons/BarChart';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
+import {Query, QueryBuilder, QueryNode, QueryRelation} from "./QueryBuilder";
 
 
 export const Analytics = () => {
 
     const [chart, setChart] = useState<string>('BarChart');
+    const [query, setQuery] = useState<Query>({nodes: [], relations: []});
     const useStyle = makeStyles({
 
         box: {
@@ -26,11 +28,11 @@ export const Analytics = () => {
 
     function getChart() {
         if (chart === 'BarChart') {
-            return <MifuneBarChart />
-        } else if (chart === 'Sankey') {
-            return <MifuneSankey />
-        } else if (chart === 'HeatMap') {
-            return <MifiuneHeatMap />
+            return <MifuneBarChart query={query}/>
+            } else if (chart === 'Sankey') {
+                return <MifuneSankey query={query} />
+            } else if (chart === 'HeatMap') {
+                return <MifiuneHeatMap query={query} />
         } else {
             return <></>
         }
@@ -41,13 +43,13 @@ export const Analytics = () => {
     }) {
         return <div className={classes.box}>
             <Fab className={classes.button} title={'BarChart'} onClick={() => setChart('BarChart')}>
-                <BarChartIcon />
+                <BarChartIcon/>
             </Fab>
             <Fab className={classes.button} title={'HeatMap'} onClick={() => setChart('HeatMap')}>
-                <FireplaceIcon />
+                <FireplaceIcon/>
             </Fab>
             <Fab className={classes.button} title={'Sankey'} onClick={() => setChart('Sankey')}>
-                <ShuffleIcon />
+                <ShuffleIcon/>
             </Fab>
         </div>
     }
@@ -57,6 +59,7 @@ export const Analytics = () => {
 
         <div className={classes.box}>
             <h1>Analytics</h1>
+            <QueryBuilder onChange={q => setQuery(q)}/>
             <div>
                 {select(l => {
                     setChart(l)

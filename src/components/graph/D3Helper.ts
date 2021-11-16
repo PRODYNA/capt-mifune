@@ -1,6 +1,41 @@
-import { D3Node, D3Relation } from "./Graph";
+import * as d3 from "d3";
+
+
+export interface D3Node<T> extends d3.SimulationNodeDatum {
+    kind: string;
+    node: T;
+}
+
+export interface D3Relation<T> extends d3.SimulationLinkDatum<D3Node<any>> {
+    kind: string;
+    relation: T;
+    color?: string;
+    relCount: number;
+    relIndex: number;
+    incomingRelationsCount: number;
+    firstRender?: boolean;
+}
 
 export class D3Helper {
+
+     static   wrapNode<T>(node: T): D3Node<T> {
+        return {
+            kind: "node",
+            node: node,
+        };
+    }
+
+    static wrapRelation<T extends {sourceId: string, targetId: string}>(rel: T): D3Relation<T> {
+        return {
+            kind: "relation",
+            relation: rel,
+            source: rel.sourceId,
+            target: rel.targetId,
+            relCount: 1,
+            incomingRelationsCount: 0,
+            relIndex: 0,
+        };
+    }
 
     static pointDistance = (p1: { x: number, y: number }, p2: { x: number, y: number }): number => {
         let a = Math.pow((p1.x - p2.x), 2.)
@@ -30,18 +65,18 @@ export class D3Helper {
         }
     }
 
-    static buildRelationPath = (rel: D3Relation) => {
-        var source: D3Node;
-        var target: D3Node;
+    static buildRelationPath = (rel: D3Relation<any>) => {
+        var source: D3Node<any>;
+        var target: D3Node<any>;
         let allRelCount = rel.relCount + rel.incomingRelationsCount - 1;
         let nodeIndex = (rel.relIndex);
         let order = (allRelCount / 2) - nodeIndex
-        if (((rel.source as D3Node).x ?? 0.) <= ((rel.target as D3Node).x ?? 0.)) {
-            source = rel.source as D3Node;
-            target = rel.target as D3Node;
+        if (((rel.source as D3Node<any>).x ?? 0.) <= ((rel.target as D3Node<any>).x ?? 0.)) {
+            source = rel.source as D3Node<any>;
+            target = rel.target as D3Node<any>;
         } else {
-            source = rel.target as D3Node;
-            target = rel.source as D3Node;
+            source = rel.target as D3Node<any>;
+            target = rel.source as D3Node<any>;
             order = order * -1;
         }
         let sx = source.x ?? 0.
@@ -70,7 +105,7 @@ export class D3Helper {
         let curveCenterX = 0
         let curveCenterY = -(curveDistance + space)
 
-        const distance = (D3Helper.pointDistance({ x: sx, y: sy }, { x: tx, y: ty }) / 3)
+        const distance = (D3Helper.pointDistance({x: sx, y: sy}, {x: tx, y: ty}) / 3)
         if (Math.abs(distanceX) > 1 || Math.abs(distanceY) > 1) {
             angle = Math.atan(distanceX / distanceY)
             spacerX = Math.sin(angle) * (distance / 3) * correct
@@ -79,15 +114,15 @@ export class D3Helper {
             curveCenterY = Math.cos(angle + (Math.PI / 2)) * curveDistance
         }
         return `
-                     M ${sx} ${sy} 
+                     M ${sx} ${sy}
                      Q
-                     ${((sx + tx) / 2) + (curveCenterX) - (spacerX)} 
-                     ${((sy + ty) / 2) + (curveCenterY) - (spacerY)}                                   
-                     ${((sx + tx) / 2) + (curveCenterX)} 
+                     ${((sx + tx) / 2) + (curveCenterX) - (spacerX)}
+                     ${((sy + ty) / 2) + (curveCenterY) - (spacerY)}
+                     ${((sx + tx) / 2) + (curveCenterX)}
                      ${((sy + ty) / 2) + (curveCenterY)}
-                     ${((sx + tx) / 2) + (curveCenterX) + (spacerX)} 
-                     ${((sy + ty) / 2) + (curveCenterY) + (spacerY)}                                                   
-                     ${tx} ${ty}  
+                     ${((sx + tx) / 2) + (curveCenterX) + (spacerX)}
+                     ${((sy + ty) / 2) + (curveCenterY) + (spacerY)}
+                     ${tx} ${ty}
                   `
     }
 
