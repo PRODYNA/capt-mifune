@@ -19,7 +19,8 @@ const useStyle = makeStyles({
     borderBottom: "1px solid gray",
     borderTop: "1px solid gray",
     padding: '0.5rem 0',
-    minWidth: 500
+    maxWidth: 500,
+    width: '100%'
   }
 });
 
