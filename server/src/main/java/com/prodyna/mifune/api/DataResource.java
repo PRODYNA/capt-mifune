@@ -31,44 +31,43 @@ import com.prodyna.mifune.core.GraphService;
 import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.core.schema.CypherQueryBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
+import com.prodyna.mifune.domain.Query;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.jboss.resteasy.reactive.RestQuery;
+import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.async.AsyncSession;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/data")
 public class DataResource {
 
-  @Inject GraphService graphService;
+  @Inject protected Logger log;
+
+  @Inject protected GraphService graphService;
 
   @Inject protected Driver driver;
 
-  @GET
-  @Path("/domain/{domainId}")
-  public CompletionStage<Response> query(
-      @PathParam("domainId") UUID domainId,
-      @RestQuery("results[]") List<String> results,
-      @RestQuery("orders[]") List<String> orders,
-      @RestQuery("filters[]") List<String> filters) {
+  @POST
+  public Multi<Map<String, Object>> query(Query query) {
+
+    //
     var graphModel = new GraphModel(graphService.graph());
-    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, domainId, results, orders, filters);
-    AsyncSession session = driver.asyncSession();
-    var statement = cypherQueryBuilder.getCypher();
-    return session
-        .runAsync(statement.cypher(), statement.parameter())
-        .thenCompose(cursor -> cursor.listAsync(cypherQueryBuilder::buildResult))
-        .thenCompose(fruits -> session.closeAsync().thenApply(signal -> fruits))
-        .thenApply(Response::ok)
-        .thenApply(Response.ResponseBuilder::build);
+    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
+    var cypher = cypherQueryBuilder.cypher();
+    log.info("run cypher");
+    log.info(cypher);
+    var session = driver.rxSession();
+    return Multi.createFrom()
+        .publisher(session.run(cypher, cypherQueryBuilder.getParameter()).records())
+        .map(cypherQueryBuilder::buildResult)
+        .onCompletion()
+        .invoke(session::close);
   }
 
   @GET

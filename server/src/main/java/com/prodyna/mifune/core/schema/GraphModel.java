@@ -28,10 +28,8 @@ package com.prodyna.mifune.core.schema;
 
 import com.prodyna.mifune.domain.Domain;
 import com.prodyna.mifune.domain.Graph;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.ws.rs.NotFoundException;
 
 public class GraphModel {
@@ -58,6 +56,7 @@ public class GraphModel {
             r -> {
               var relationModel = new RelationModel();
               var fromNode = nodes.get(r.getSourceId());
+              relationModel.setId(r.getId());
               relationModel.setFrom(fromNode);
               relationModel.setTo(nodes.get(r.getTargetId()));
               relationModel.setPrimary(r.isPrimary());
@@ -67,6 +66,13 @@ public class GraphModel {
               relationModel.setDomainIds(r.getDomainIds());
               fromNode.getRelations().add(relationModel);
             });
+  }
+
+  public Set<RelationModel> incommingRelations(UUID nodeId) {
+    return nodes.values().stream()
+        .flatMap(n -> n.getRelations().stream())
+        .filter(r -> r.getTo().getId().equals(nodeId))
+        .collect(Collectors.toSet());
   }
 
   public NodeModel rootNode(UUID domainId) {
