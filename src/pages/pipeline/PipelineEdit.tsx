@@ -74,15 +74,11 @@ const PipelineEdit = (props: DomainEditProps) => {
     }
   };
 
-  const onFileChangeEventHandler = (
-    event: React.ChangeEvent<HTMLFormElement>
-  ) => {
+  const onFileChangeEventHandler = (event: React.ChangeEvent<HTMLFormElement>): void =>
     setValue({ ...value, file: event.target.value });
-  };
 
   const getReactNodes = (values: string[]) => {
-    return getColumnMappingKeys().map((key) => {
-      return (
+    return getColumnMappingKeys().map((key) => (
         <Grid item xs={12} md={4}>
           <FormSelect
             key={key}
@@ -92,18 +88,14 @@ const PipelineEdit = (props: DomainEditProps) => {
             onChangeHandler={onNodeChangeEventHandler}
           />
         </Grid>
-      );
-    });
+      )
+    );
   };
   const values = getMenuItems();
 
   const childrens: React.ReactNode[] = getReactNodes(values);
   let options = [""];
-  sources
-    .map((source) => {
-      return source.name;
-    })
-    .forEach((s) => options.push(s));
+  sources.map((source) => source.name).forEach((s) => options.push(s));
   childrens.unshift(
     <Grid item xs={12} md={4}>
       <FormSelect
