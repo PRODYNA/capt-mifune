@@ -185,7 +185,6 @@ public class CypherQueryBuilder {
   private String addFilterStatement() {
     var whereClauses = new ArrayList<String>();
     this.query.filters().stream()
-
         .collect(Collectors.toMap(Filter::property, Filter::value))
         .forEach(
             (key, value) -> {
