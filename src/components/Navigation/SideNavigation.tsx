@@ -81,8 +81,8 @@ const Sidenavigation = (): JSX.Element => {
   const navItems: INavItems[] = [
     { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
     { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
-    { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
     { title: 'Pipelines', icon: <RotateRightIcon />, path: PIPELINES },
+    { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
     {
       title: 'Save', icon: <SaveIcon />,
       onClick: () => graphService.persistGraph().then((e) => console.log(e))
