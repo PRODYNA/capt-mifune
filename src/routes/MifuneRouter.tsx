@@ -16,9 +16,9 @@ const MifuneRouter = (): JSX.Element => {
   const [openSidenav, setOpenSidenav] = useState(false);
 
   return (
-    <>
-      <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
-      <SnackbarProvider>
+    <SnackbarProvider>
+      <>
+        <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
         <Box position="relative" height="100vh">
           <Switch>
             <Route path={ROOT_PATH} exact>
@@ -48,8 +48,8 @@ const MifuneRouter = (): JSX.Element => {
             </Route>
           </Switch>
         </Box>
-      </SnackbarProvider>
-    </>
+      </>
+    </SnackbarProvider>
   )
 }
 
