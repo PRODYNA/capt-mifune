@@ -32,16 +32,15 @@ import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.core.schema.CypherQueryBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.Query;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.async.AsyncSession;
+import org.neo4j.driver.reactive.RxResult;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -53,42 +52,20 @@ public class DataResource {
   @Inject protected Driver driver;
 
   @POST
-
-  public Uni<Object> query(
-     Query query) {
+  public Multi<Map<String, Object>> query(Query query) {
 
 
 
-//
+    //
     var graphModel = new GraphModel(graphService.graph());
     var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
     var cypher = cypherQueryBuilder.cypher();
     System.out.println(cypher);
-    AsyncSession session = driver.asyncSession();
-    CompletionStage<Object> completionStage = session
-            .runAsync(cypher,cypherQueryBuilder.getParameter())
-            .thenCompose(cursor -> cursor.listAsync(cypherQueryBuilder::buildResult))
-            .thenCompose(result -> session.closeAsync().thenApply(signal -> result));
-    return Uni.createFrom().completionStage(completionStage);
+    var session = driver.rxSession();
+    return Multi.createFrom().publisher(session.run(cypher,cypherQueryBuilder.getParameter()).records())
+            .map(cypherQueryBuilder::buildResult)
+            .onCompletion().invoke(session::close);
   }
-//  @GET
-//  @Path("/domain/{domainId}")
-//  public CompletionStage<Response> query(
-//      @PathParam("domainId") UUID domainId,
-//      @RestQuery("results[]") List<String> results,
-//      @RestQuery("orders[]") List<String> orders,
-//      @RestQuery("filters[]") List<String> filters) {
-//    var graphModel = new GraphModel(graphService.graph());
-//    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, domainId, results, orders, filters);
-//    AsyncSession session = driver.asyncSession();
-//    var statement = cypherQueryBuilder.getCypher();
-//    return session
-//        .runAsync(statement.cypher(), statement.parameter())
-//        .thenCompose(cursor -> cursor.listAsync(cypherQueryBuilder::buildResult))
-//        .thenCompose(fruits -> session.closeAsync().thenApply(signal -> fruits))
-//        .thenApply(Response::ok)
-//        .thenApply(Response.ResponseBuilder::build);
-//  }
 
   @GET
   @Path("/domain/{domainId}/keys")
