@@ -12,7 +12,7 @@
         "person.hasPosition[].position.name": "position"
       },
       "modelValid": true,
-      "mappingValid": true
+      "mappingValid": false
     },
     {
       "id": "f6214d95-223a-4cb3-a8f5-49df60bae4cb",

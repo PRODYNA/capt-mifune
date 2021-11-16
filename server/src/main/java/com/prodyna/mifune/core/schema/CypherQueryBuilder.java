@@ -28,6 +28,9 @@ package com.prodyna.mifune.core.schema;
 
 import static java.util.function.Predicate.not;
 
+import com.prodyna.mifune.domain.Filter;
+import com.prodyna.mifune.domain.Query;
+import com.prodyna.mifune.domain.QueryNode;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -36,55 +39,117 @@ import org.neo4j.driver.internal.types.TypeConstructor;
 
 public class CypherQueryBuilder {
 
-  private final List<String> statements = new ArrayList<>();
+  private final GraphModel graphModel;
   private final Map<String, String> vars = new TreeMap<>();
   private final AtomicInteger counter = new AtomicInteger();
-  private final UUID domainId;
-  private final Set<String> baseResults;
-  private final List<String> orders;
-  private final List<String> results;
-  private final Map<String, String> filters;
+  private final HashMap<String, Object> parameter = new HashMap<>();
+  private final Query query;
 
-  public CypherQueryBuilder(
-      GraphModel graphModel,
-      UUID domainId,
-      List<String> results,
-      List<String> orders,
-      List<String> filters) {
-    this.domainId = domainId;
-    this.results = results;
-    this.baseResults = results.stream().map(this::baseName).collect(Collectors.toSet());
-    this.orders = orders;
-    this.filters =
-        filters.stream()
-            .map(s -> s.split(":"))
-            .collect(Collectors.toMap(strings -> strings[0], strings -> strings[1]));
-
-    var rootNode = graphModel.rootNode(domainId);
-    var varPath = new ArrayList<String>();
-    var nodeVar = generateVar(List.of(rootNode.varName()));
-    buildSubContext(varPath, rootNode, nodeVar, true);
+  public HashMap<String, Object> getParameter() {
+    return parameter;
   }
 
-  public QueryStatement getCypher() {
-    var parameter = new HashMap<String, Object>();
-    var statements = new ArrayList<>(this.statements);
-    var resultEntities =
-        this.vars.keySet().stream()
-            .filter(k -> this.baseResults.contains(this.vars.get(k)))
-            .collect(Collectors.toSet());
-
-    addFilterStatement(parameter, statements);
-    statements.add("with distinct %s".formatted(String.join(",", resultEntities)));
-    buildResult(statements);
-    buildOrder(statements);
-
-    return new QueryStatement(String.join("\n", statements), parameter);
+  public CypherQueryBuilder(GraphModel graphModel, Query query) {
+    this.graphModel = graphModel;
+    this.query = query;
   }
 
-  private void buildResult(ArrayList<String> statements) {
+  public String cypher() {
+    var queryNodeId = query.nodes().get(0).id();
+    var cypher = new StringBuilder();
+    buildNodeMatch(queryNodeId, cypher, new HashSet<UUID>());
+    cypher.append(addFilterStatement());
+    cypher.append("\n");
+    cypher.append("with distinct %s".formatted(String.join(",", this.vars.keySet())));
+    cypher.append("\n");
+    cypher.append(buildResult());
+    cypher.append("\n");
+    cypher.append(buildOrder());
+    return cypher.toString();
+  }
+
+  private void buildNodeMatch(UUID queryNodeId, StringBuilder cypher, Set<UUID> processedIds) {
+    var queryNode = queryNode(queryNodeId);
+    var nodeVar = generateVar(queryNode.varName());
+    var nodeModel = this.graphModel.nodes.get(queryNode.nodeId());
+
+    if (!processedIds.contains(queryNodeId)) {
+      processedIds.add(queryNodeId);
+      cypher.append("match(%s:%s)\n".formatted(nodeVar, nodeModel.getLabel()));
+    }
+
+    buildOutgoingRelationMatch(cypher, processedIds, nodeVar, nodeModel.getRelations());
+    buildIncomingRelationMatch(
+        cypher, processedIds, nodeVar, graphModel.incommingRelations(nodeModel.getId()));
+  }
+
+  private void buildOutgoingRelationMatch(
+      StringBuilder cypher, Set<UUID> processedIds, String nodeVar, Set<RelationModel> relations) {
+    relations.stream()
+        .filter(r -> query.relations().stream().anyMatch(qr -> qr.relationId().equals(r.getId())))
+        .forEach(
+            r -> {
+              query.relations().stream()
+                  .filter(qr -> qr.relationId().equals(r.getId()))
+                  .filter(qr -> !processedIds.contains(qr.id()))
+                  .forEach(
+                      qr -> {
+                        var targetNode = queryNode(qr.targetId());
+                        processedIds.add(qr.id());
+                        cypher.append(
+                            """
+                                                match(%s)-[%s:%s]->(%s:%s)
+                                                """
+                                .formatted(
+                                    nodeVar,
+                                    generateVar(r.varName()),
+                                    r.getType(),
+                                    generateVar(targetNode.varName()),
+                                    graphModel.nodes.get(targetNode.nodeId()).getLabel()));
+
+                        processedIds.add(targetNode.id());
+                        buildNodeMatch(targetNode.id(), cypher, processedIds);
+                      });
+            });
+  }
+
+  private void buildIncomingRelationMatch(
+      StringBuilder cypher, Set<UUID> processedIds, String nodeVar, Set<RelationModel> relations) {
+    relations.stream()
+        .filter(r -> query.relations().stream().anyMatch(qr -> qr.relationId().equals(r.getId())))
+        .forEach(
+            r -> {
+              query.relations().stream()
+                  .filter(qr -> qr.relationId().equals(r.getId()))
+                  .filter(qr -> !processedIds.contains(qr.id()))
+                  .forEach(
+                      qr -> {
+                        var sourceNode = queryNode(qr.sourceId());
+                        processedIds.add(qr.id());
+                        cypher.append(
+                            """
+                                                match(%s)<-[%s:%s]-(%s:%s)
+                                                """
+                                .formatted(
+                                    nodeVar,
+                                    generateVar(r.varName()),
+                                    r.getType(),
+                                    generateVar(sourceNode.varName()),
+                                    graphModel.nodes.get(sourceNode.nodeId()).getLabel()));
+
+                        processedIds.add(sourceNode.id());
+                        buildNodeMatch(sourceNode.id(), cypher, processedIds);
+                      });
+            });
+  }
+
+  private QueryNode queryNode(UUID queryNodeId) {
+    return query.nodes().stream().filter(n -> n.id().equals(queryNodeId)).findFirst().orElseThrow();
+  }
+
+  private String buildResult() {
     var returnStatement =
-        this.results.stream()
+        this.query.results().stream()
             .map(
                 r -> {
                   var baseName = baseName(r);
@@ -102,33 +167,36 @@ public class CypherQueryBuilder {
                 })
             .collect(Collectors.joining(","));
 
-    statements.add("return %s".formatted(returnStatement));
+    return "return %s".formatted(returnStatement);
   }
 
-  private void buildOrder(ArrayList<String> statements) {
+  private String buildOrder() {
     var orders =
-        Optional.ofNullable(this.orders).stream()
+        Optional.ofNullable(this.query.orders()).stream()
             .flatMap(Collection::stream)
             .map(getVarMap()::get)
             .collect(Collectors.joining(","));
-    Optional.of(orders)
+    return Optional.of(orders)
         .filter(not(String::isBlank))
-        .ifPresent(o -> statements.add("order by %s".formatted(o)));
+        .map("order by %s"::formatted)
+        .orElse("");
   }
 
-  private void addFilterStatement(HashMap<String, Object> parameter, ArrayList<String> statements) {
+  private String addFilterStatement() {
     var whereClauses = new ArrayList<String>();
-    filters.forEach(
-        (key, value) -> {
-          var varName = "var_" + counter.incrementAndGet();
-          whereClauses.add(
-              "%s.%s = $%s".formatted(getVarMap().get(baseName(key)), propName(key), varName));
-          parameter.put(varName, value);
-        });
-    Optional.of(whereClauses)
+    this.query.filters().stream()
+        .collect(Collectors.toMap(Filter::property, Filter::value))
+        .forEach(
+            (key, value) -> {
+              var varName = "var_" + counter.incrementAndGet();
+              whereClauses.add(
+                  "%s.%s = $%s".formatted(getVarMap().get(baseName(key)), propName(key), varName));
+              parameter.put(varName, value);
+            });
+    return Optional.of(whereClauses)
         .filter(not(Collection::isEmpty))
         .map(c -> "with * where %s".formatted(String.join(" and ", c)))
-        .ifPresent(statements::add);
+        .orElse("");
   }
 
   private String baseName(String jsonPropertyPath) {
@@ -154,35 +222,39 @@ public class CypherQueryBuilder {
 
   public Map<String, Object> buildResult(Record record) {
     var row = new HashMap<String, Object>();
-    results.forEach(
-        r -> {
-          var value = record.get(getVarMap().get(r));
-          functionName(r)
-              .ifPresentOrElse(
-                  fn -> {
-                    var rec =
-                        switch (fn) {
-                          case "count" -> value.asLong(0);
-                          case "sum", "avg", "min", "max" -> value.asDouble(0);
-                          default -> throw new UnsupportedOperationException("function not mapped");
-                        };
-                    row.put(r, rec);
-                  },
-                  () -> {
-                    var type = TypeConstructor.valueOf(value.type().name());
-                    row.put(
-                        r,
-                        switch (type) {
-                          case NULL -> null;
-                          case INTEGER -> value.asInt();
-                          case STRING -> value.asString(null);
-                          case NUMBER -> value.asDouble();
-                          case BOOLEAN -> value.asBoolean();
-                          default -> throw new UnsupportedOperationException(
-                              "Unknow type convertion: " + value.type().name());
-                        });
-                  });
-        });
+    query
+        .results()
+        .forEach(
+            r -> {
+              var value = record.get(getVarMap().get(r));
+              functionName(r)
+                  .ifPresentOrElse(
+                      fn -> {
+                        var rec =
+                            switch (fn) {
+                              case "count" -> value.asLong(0);
+                              case "sum", "avg", "min", "max" -> value.asDouble(0);
+                              default -> throw new UnsupportedOperationException(
+                                  "function not mapped");
+                            };
+                        row.put(r, rec);
+                      },
+                      () -> {
+                        var type = TypeConstructor.valueOf(value.type().name());
+                        row.put(
+                            r,
+                            switch (type) {
+                              case NULL -> null;
+                              case INTEGER -> value.asInt();
+                              case STRING -> value.asString(null);
+                              case NUMBER -> value.asDouble();
+                              case BOOLEAN -> value.asBoolean();
+                              case FLOAT -> value.asFloat();
+                              default -> throw new UnsupportedOperationException(
+                                  "Unknow type convertion: " + value.type().name());
+                            });
+                      });
+            });
     return row;
   }
 
@@ -197,39 +269,15 @@ public class CypherQueryBuilder {
   }
 
   public String generateVar(String path) {
+    if (vars.containsValue(path)) {
+      return vars.entrySet().stream()
+          .filter(e -> e.getValue().equals(path))
+          .map(Map.Entry::getKey)
+          .findFirst()
+          .orElseThrow();
+    }
     var varName = "var_" + counter.incrementAndGet();
     vars.put(varName, path);
     return varName;
-  }
-
-  private void buildSubContext(
-      List<String> varPath, NodeModel node, String nodeVar, boolean buildMatch) {
-    var contextVarPath = new ArrayList<>(varPath);
-    if (buildMatch) {
-      contextVarPath.add(node.varName());
-      statements.add("optional match(%s:%s%s)".formatted(nodeVar, node.getLabel(), ""));
-    }
-
-    node.getRelations().stream()
-        .filter(r -> r.getDomainIds().contains(domainId))
-        .filter(r -> r.getTo().getDomainIds().contains(domainId))
-        .filter(r -> !varPath.contains(r.getTo().varName()))
-        .forEach(r -> buildSingleRelation(contextVarPath, nodeVar, r));
-  }
-
-  private void buildSingleRelation(List<String> varPath, String nodeVar, RelationModel r) {
-
-    var newPath = new ArrayList<>(varPath);
-    newPath.add(r.varName());
-    var relationVarName = generateVar(newPath);
-    newPath.add(r.getTo().varName());
-    var targetNodeVarName = generateVar(newPath);
-    var targetNode = r.getTo();
-
-    statements.add(
-        "optional match (%s)-[%s:%s]->(%s:%s)	"
-            .formatted(
-                nodeVar, relationVarName, r.getType(), targetNodeVarName, targetNode.getLabel()));
-    buildSubContext(newPath, targetNode, targetNodeVarName, false);
   }
 }

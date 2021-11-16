@@ -33,12 +33,21 @@ import java.util.stream.Collectors;
 public class RelationModel {
 
   private Set<UUID> domainIds = new HashSet<>();
+  private UUID id;
   private String type;
   private boolean multiple;
   private NodeModel from;
   private NodeModel to;
   private boolean primary;
   private List<Property> properties;
+
+  public UUID getId() {
+    return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
 
   public Set<UUID> getDomainIds() {
     return domainIds;
