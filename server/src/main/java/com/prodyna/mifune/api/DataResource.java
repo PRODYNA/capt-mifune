@@ -40,7 +40,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.reactive.RxResult;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,17 +53,17 @@ public class DataResource {
   @POST
   public Multi<Map<String, Object>> query(Query query) {
 
-
-
     //
     var graphModel = new GraphModel(graphService.graph());
     var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
     var cypher = cypherQueryBuilder.cypher();
     System.out.println(cypher);
     var session = driver.rxSession();
-    return Multi.createFrom().publisher(session.run(cypher,cypherQueryBuilder.getParameter()).records())
-            .map(cypherQueryBuilder::buildResult)
-            .onCompletion().invoke(session::close);
+    return Multi.createFrom()
+        .publisher(session.run(cypher, cypherQueryBuilder.getParameter()).records())
+        .map(cypherQueryBuilder::buildResult)
+        .onCompletion()
+        .invoke(session::close);
   }
 
   @GET
