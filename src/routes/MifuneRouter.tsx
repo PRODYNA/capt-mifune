@@ -1,5 +1,5 @@
-import React from 'react'
-import { Container, Box } from '@material-ui/core'
+import React, { useState } from 'react'
+import { Box, Container } from '@material-ui/core'
 import { Switch, Route } from 'react-router-dom'
 import { Analytics } from '../components/analytics/Analytics'
 import { Graph } from '../components/graph/Graph'
@@ -13,16 +13,18 @@ import ErrorBoundary from '../components/Error/ErrorBoundaries'
 
 
 const MifuneRouter = (): JSX.Element => {
+  const [openSidenav, setOpenSidenav] = useState(false);
+
   return (
     <>
-      <Sidenavigation />
+      <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
       <SnackbarProvider>
         <Container>
-          <Box ml={5}>
+          <Box position="relative" height="100vh">
             <Switch>
               <Route path={ROOT_PATH} exact>
                 <ErrorBoundary>
-                  <Graph />
+                  <Graph openSidenav={openSidenav} />
                 </ErrorBoundary>
               </Route>
               <Route path={ANALYTCIS}>
