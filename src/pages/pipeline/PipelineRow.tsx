@@ -3,79 +3,66 @@ import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import WarningIcon from "@material-ui/icons/Warning";
-import DoneOutlineIcon from "@material-ui/icons/DoneOutline";
+import DoneIcon from "@material-ui/icons/Done";
 import { IconButton, TableCell, TableRow } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
 import StopIcon from "@material-ui/icons/Stop";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { useTheme } from '@material-ui/core/styles';
 
 export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
-    const history = useHistory();
+  const { domain, cleanActive } = props
+  const history = useHistory();
+  const [message, setMessage] = useState<String>();
+  const theme = useTheme()
 
+  useEffect(() => {
+    let sseClient = graphService.importSource(domain.id);
+    sseClient.onmessage = function (e) {
+      setMessage(e.data);
+    };
 
-    const [message, setMessage] = useState<String>();
+    return function cleanUp() {
+      sseClient.close();
+    };
+  }, [domain.id, cleanActive]);
 
-    useEffect(() => {
-        let sseClient = graphService.importSource(props.domain.id);
-        sseClient.onmessage = function(e) {
-            setMessage(e.data);
-        };
+  const valid = (valid: boolean): JSX.Element => {
+    if (valid) return (<DoneIcon htmlColor={theme.palette.success.main} />)
+    else return (<WarningIcon htmlColor={theme.palette.warning.main} />)
+  }
 
-        return function cleanUp() {
-            sseClient.close();
-        };
-    }, [ props.domain.id, props.cleanActive]);
-
-    function valid(valid: boolean) {
-        if (valid) {
-            return <DoneOutlineIcon color={"primary"} />;
-        } else {
-            return <WarningIcon color={"error"}/>;
-        }
-    }
-
-    return (
-        <TableRow
-            key={props.domain.id}
-            onClick={() => history.push("/pipeline/" + props.domain.id)}
-        >
-            <TableCell component="th" scope="row">
-                {props.domain.name}
-            </TableCell>
-            <TableCell align="left">{valid(props.domain.modelValid)}</TableCell>
-            <TableCell align="left">{valid(props.domain.mappingValid)}</TableCell>
-            <TableCell align="left">
-                <IconButton color={"primary"} disabled={props.cleanActive}
-                    onClick={(e) => {
-                        graphService.domainRunImport(props.domain.id);
-                        e.stopPropagation();
-                    }}
-                >
-                    <PlayArrowIcon />
-                </IconButton>
-            </TableCell>
-            <TableCell align="left">
-                <IconButton color={"primary"}
-                    onClick={(e) => {
-                        graphService.domainStopImport(props.domain.id);
-                        e.stopPropagation();
-                    }}
-                >
-                    <StopIcon />
-                </IconButton>
-            </TableCell>
-            <TableCell align="left">
-                <IconButton  color={"secondary"}
-                    onClick={(e) => {
-                        graphService.domainClear(props.domain.id);
-                        e.stopPropagation();
-                    }}
-                >
-                    <DeleteIcon />
-                </IconButton>
-            </TableCell>
-            <TableCell align="left">{message}</TableCell>
-            <TableCell align="right">{props.domain.id}</TableCell>
-        </TableRow>
-    );
+  return (
+    <TableRow key={domain.id}>
+      <TableCell align="left" onClick={() => history.push("/pipeline/" + domain.id)}>
+        <IconButton>
+          <VisibilityIcon htmlColor={theme.palette.grey[700]} />
+        </IconButton>
+      </TableCell>
+      <TableCell align="left">{domain.name}</TableCell>
+      <TableCell align="center">{valid(domain.modelValid)}</TableCell>
+      <TableCell align="center">{valid(domain.mappingValid)}</TableCell>
+      <TableCell align="center">
+        <IconButton disabled={cleanActive}
+          onClick={() => graphService.domainRunImport(domain.id)}>
+          <PlayArrowIcon htmlColor={theme.palette.primary.main} />
+        </IconButton>
+      </TableCell>
+      <TableCell align="center">
+        <IconButton
+          onClick={() => graphService.domainStopImport(domain.id)}>
+          <StopIcon htmlColor={theme.palette.info.main} />
+        </IconButton>
+      </TableCell>
+      <TableCell align="center">
+        <IconButton
+          onClick={() => graphService.domainClear(domain.id)}>
+          <DeleteIcon htmlColor={theme.palette.error.main} />
+        </IconButton>
+      </TableCell>
+      <TableCell align="left">{message}</TableCell>
+      <TableCell align="left">{domain.id}</TableCell>
+    </TableRow>
+  );
 };
