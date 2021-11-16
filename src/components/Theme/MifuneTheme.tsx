@@ -32,6 +32,16 @@ const theme = createTheme({
         },
       },
     },
+    MuiButton: {
+      root: {
+        borderRadius: 0
+      }
+    },
+    MuiPaper: {
+      root: {
+        borderRadius: 0
+      }
+    }
   },
 })
 interface MifuneThemeProps {
