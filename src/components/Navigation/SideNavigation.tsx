@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 import { List, ListItem, ListItemIcon, ListItemText, Theme, createStyles, Drawer, makeStyles, Typography } from '@material-ui/core'
 import BubbleChartIcon from "@material-ui/icons/BubbleChart";
 import CloudUpload from "@material-ui/icons/CloudUpload";
@@ -13,7 +13,8 @@ import UserService from '../../services/UserService';
 import { fontWhite } from '../Theme/CustomColors';
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes';
 
-const drawerWidth = 60;
+export const drawerWidth = 60;
+export const drawerWidthOpen = 160;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -26,20 +27,22 @@ const useStyles = makeStyles((theme: Theme) =>
       },
       '&.closed': {
         '& .MuiPaper-root': {
-          transition: 'all ease-in-out 0.4s'
+          transition: 'all ease-in-out 0.4s',
         },
         '& + .MuiContainer-root': {
-          marginLeft: 0,
+          marginLeft: drawerWidth,
+          width: `calc(100% - ${drawerWidth}px)`,
           transition: 'all ease-in-out 0.4s'
         }
       },
       '&.open': {
         '& .MuiPaper-root': {
           transition: 'all ease-in-out 0.4s',
-          width: '160px',
+          width: drawerWidthOpen
         },
         '& + .MuiContainer-root': {
-          marginLeft: '100px',
+          marginLeft: drawerWidthOpen,
+          width: `calc(100% - ${drawerWidthOpen}px)`,
           transition: 'all ease-in-out 0.4s'
         }
       },
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
     toggleIcon: {
       position: 'absolute',
       bottom: '2rem',
-      left: '1rem'
+      right: '1rem'
     },
     navTitle: {
       fontWeight: 600,
@@ -65,6 +68,10 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+interface ISidenav {
+  openSidenav: boolean,
+  setOpenSidenav: Dispatch<SetStateAction<boolean>>
+}
 interface INavItems {
   title: string;
   icon: JSX.Element;
@@ -72,17 +79,16 @@ interface INavItems {
   onClick?: () => void;
 }
 
-const Sidenavigation = (): JSX.Element => {
+const Sidenavigation = (props: ISidenav): JSX.Element => {
+  const { openSidenav, setOpenSidenav} = props
   const history = useHistory();
   const { pathname } = useLocation();
-
   const classes = useStyles();
-  const [open, setOpen] = useState(false);
   const navItems: INavItems[] = [
     { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
     { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
-    { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
     { title: 'Pipelines', icon: <RotateRightIcon />, path: PIPELINES },
+    { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
     {
       title: 'Save', icon: <SaveIcon />,
       onClick: () => graphService.persistGraph().then((e) => console.log(e))
@@ -106,7 +112,7 @@ const Sidenavigation = (): JSX.Element => {
   if (UserService.loginRequired()) navItems.push(logoutItem)
 
   return (
-    <Drawer variant="permanent" open={open} className={`${classes.root} ${open ? 'open' : 'closed'}`}>
+    <Drawer variant="permanent" open={openSidenav} className={`${classes.root} ${openSidenav ? 'open' : 'closed'}`}>
       <Typography color="inherit" variant="caption" className={classes.navTitle}>Mifune</Typography>
       <List>
         {navItems.map((item, index): JSX.Element => (
@@ -126,7 +132,7 @@ const Sidenavigation = (): JSX.Element => {
           </ListItem>
         ))}
       </List>
-      <ChevronRightIcon className={classes.toggleIcon} onClick={() => setOpen(!open)} />
+      <ChevronRightIcon className={classes.toggleIcon} onClick={() => setOpenSidenav(!openSidenav)} />
     </Drawer>
   )
 }
