@@ -20,14 +20,16 @@ import PipelineRow from "./PipelineRow";
 import DeleteIcon from "@material-ui/icons/Delete";
 import CustomButton from "../../components/Button/CustomButton";
 import { useTheme } from '@material-ui/core/styles';
+import CustomDialog from "../../components/Dialog/CustomDialog";
 
 const Pipelines = (): JSX.Element => {
   const [domains, setDomains] = useState<Domain[]>();
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [cleanActive, setCleanActive] = useState<boolean>(false);
   const [showProgress, setShowProgress] = useState<boolean>(false);
   const [statistics, setStatistics] = useState<GraphStatistics>();
   const tableHeaders = [
-    'Show Details', 'Domain Name', 'Model Valid', 'Mapping Valid', 'Run Import', 'Stop Import', 'Delete Domain', 'Root Nodes', 'ID'
+    'Show Details', 'Domain Name', 'Model Valid', 'Mapping Valid', 'Run Import', 'Stop Import', 'Clear Domain', 'Root Nodes', 'ID'
   ]
 
   const classes = makeStyles({
@@ -77,10 +79,10 @@ const Pipelines = (): JSX.Element => {
             <Chip className={classes.chip} label={`relations: ${statistics?.relations}`} color="primary" />
           </Box>
           <CustomButton
-            title="Clean Database"
+            title="Reset Database"
             type="submit"
             customColor={theme.palette.error.main}
-            onClick={clean}
+            onClick={(): void => setShowModal(true)}
             startIcon={<DeleteIcon />}
           />
         </Box>
@@ -104,6 +106,15 @@ const Pipelines = (): JSX.Element => {
           </Table>
         </TableContainer>
       </Box>
+      <CustomDialog
+        open={showModal}
+        setOpen={setShowModal}
+        title="Reset Database"
+        submitBtnText="Yes, Reset"
+        submitBtnColor={theme.palette.error.main}
+        handleSubmit={clean}>
+        <Typography variant="body1">Sure, you want to reset the database?</Typography>
+      </CustomDialog>
     </Container>
   );
 };
