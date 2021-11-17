@@ -31,7 +31,7 @@ interface ChartWrapperProps<T> {
   chart: (data: T) => React.ReactNode
 }
 
-export const ChartWrapper = (props: ChartWrapperProps<any>) => {
+export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<any>()
   const [filters, setFilters] = useState<Filter[]>([])
@@ -44,7 +44,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
   })
   const classes = useStyle()
 
-  function filterElements() {
+  function filterElements(): JSX.Element {
     return (
       <>
         {filters.map((f, i) => {
@@ -86,7 +86,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
     )
   }
 
-  function loadData() {
+  function loadData(): void {
     setLoading(true)
     graphService
       .query(props.query, props.results, props.orders, filters)
@@ -97,7 +97,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
       .catch((e) => console.error(e))
   }
 
-  function buildChart() {
+  function buildChart(): JSX.Element {
     if (loading) {
       return (
         <div className={classes.infoBox}>

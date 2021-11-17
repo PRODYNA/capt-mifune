@@ -8,14 +8,14 @@ interface ColorPickerProps {
   className?: string
 }
 
-export const ColorPicker = (props: ColorPickerProps) => {
+export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const [show, setShow] = useState(false)
 
-  function handleClick() {
+  function handleClick(): void {
     setShow(!show)
   }
 
-  function handleClose() {
+  function handleClose(): void {
     setShow(false)
   }
 

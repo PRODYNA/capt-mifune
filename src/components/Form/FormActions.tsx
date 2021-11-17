@@ -18,7 +18,7 @@ const FormActions: React.FunctionComponent<IFormActions> = ({
 }) => {
   const theme = useTheme()
 
-  const onCancelHandler = (event: React.MouseEvent<HTMLElement>) => {
+  const onCancelHandler = (event: React.MouseEvent<HTMLElement>): void => {
     onCancelEvent(event)
   }
 

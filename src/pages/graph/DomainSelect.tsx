@@ -31,7 +31,7 @@ const MenuProps = {
   },
 }
 
-export const DomainSelect = (props: DomainSelectProps) => {
+export const DomainSelect = (props: DomainSelectProps): JSX.Element => {
   const classes = useStyle()
 
   return (

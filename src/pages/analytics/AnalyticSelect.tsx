@@ -3,7 +3,7 @@ import { Grid } from '@material-ui/core'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 
-export const AnalyticSelect = (props: SelectProps) => {
+export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const [variable, setVariable] = useState<string>()
   const [property, setProperty] = useState<string>()
   const [fn, setFn] = useState<string | undefined>(props.fnDefault)
@@ -25,7 +25,7 @@ export const AnalyticSelect = (props: SelectProps) => {
     variable: string | undefined,
     property: string | undefined,
     fn: string | undefined
-  ) {
+  ): void {
     if (variable && property && fn) {
       props.onChange(`${variable}.${property}[${fn}]`)
     } else if (variable && property && (props.fnOptions?.length ?? 0 <= 0)) {
@@ -36,7 +36,7 @@ export const AnalyticSelect = (props: SelectProps) => {
     }
   }
 
-  function buildFnSelect() {
+  function buildFnSelect(): void {
     if (fn && (props.fnOptions?.length ?? 0 > 1)) {
       return (
         <FormSelect

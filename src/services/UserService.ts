@@ -8,7 +8,7 @@ const _kc = new (Keycloak as any)('keycloak.json')
  *
  * @param onAuthenticatedCallback
  */
-const initKeycloak = (onAuthenticatedCallback: () => void) => {
+const initKeycloak = (onAuthenticatedCallback: () => void): void => {
   _kc
     .init({
       onLoad: 'login-required',
@@ -22,9 +22,9 @@ const doLogin = _kc.login
 
 const doLogout = _kc.logout
 
-const getToken = () => _kc.token
+const getToken = (): string => _kc.token
 
-const isLoggedIn = () => !!_kc.token
+const isLoggedIn = (): boolean => !!_kc.token
 
 const updateToken = (successCallback: () => Promise<AxiosRequestConfig>) =>
   _kc.updateToken(5).then(successCallback).catch(doLogin)

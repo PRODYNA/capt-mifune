@@ -18,7 +18,7 @@ interface IGraph {
 }
 
 /* Component */
-export const Graph = (props: IGraph) => {
+export const Graph = (props: IGraph): JSX.Element => {
   const { openSidenav } = props
   const [selectedDomain, setSelectedDomain] = useState<Domain>()
   const [domains, setDomains] = useState<Domain[]>([])
@@ -29,7 +29,7 @@ export const Graph = (props: IGraph) => {
   >()
   const d3Container = useRef(null)
 
-  function updateState(graphDelta: GraphDelta) {
+  function updateState(graphDelta: GraphDelta): void {
     setDomains(
       domains
         .filter(
@@ -44,7 +44,7 @@ export const Graph = (props: IGraph) => {
     updateRelations(graphDelta)
   }
 
-  function updateNodes(graphDelta: GraphDelta) {
+  function updateNodes(graphDelta: GraphDelta): void {
     let d3Nodes = nodes.filter(
       (n) => !graphDelta.removedNodes.some((id) => id === n.node.id)
     )
@@ -58,7 +58,7 @@ export const Graph = (props: IGraph) => {
     setNodes(d3Nodes)
   }
 
-  function updateRelations(graphDelta: GraphDelta) {
+  function updateRelations(graphDelta: GraphDelta): void {
     let d3Relations = relations.filter(
       (r) => !graphDelta.removedRelations.some((id) => id === r.relation.id)
     )
@@ -91,7 +91,7 @@ export const Graph = (props: IGraph) => {
       source: D3Node<Node>,
       target: D3Node<Node>,
       domain: Domain
-    ) {
+    ): void {
       const rel: Relation = {
         id: '',
         domainIds: [domain.id],
