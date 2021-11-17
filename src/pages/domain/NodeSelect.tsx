@@ -21,7 +21,7 @@ const MenuProps = {
   },
 }
 
-export const NodeSelect = (props: NodeSelectProps) => {
+export const NodeSelect = (props: NodeSelectProps): JSX.Element => {
   return (
     <Select
       className={props.className}

@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import UserService from './UserService'
 import { ENV } from '../env/Environments'
 
@@ -7,7 +7,7 @@ const _axios = axios.create({
   timeout: 25000,
 })
 
-const configure = () => {
+const configure = (): void => {
   _axios.interceptors.request.use((config: AxiosRequestConfig) => {
     if (UserService.isLoggedIn()) {
       const successCallback = (): Promise<AxiosRequestConfig> => {
@@ -19,7 +19,7 @@ const configure = () => {
   })
 }
 
-const getAxiosClient = () => _axios
+const getAxiosClient = (): AxiosInstance => _axios
 
 const HttpService = {
   configure,

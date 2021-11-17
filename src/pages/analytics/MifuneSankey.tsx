@@ -8,7 +8,7 @@ import {
 import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
-export const MifuneSankey = (props: { query: Query }) => {
+export const MifuneSankey = (props: { query: Query }): JSX.Element => {
   const [from, setFrom] = useState<string>()
   const [to, setTo] = useState<string>()
   const [count, setCount] = useState<string>()
@@ -42,7 +42,7 @@ export const MifuneSankey = (props: { query: Query }) => {
     return undefined
   }
 
-  function buildChart(data: any) {
+  function buildChart(data: any): JSX.Element {
     return (
       <div style={{ height: window.innerHeight }}>
         <ResponsiveSankey

@@ -13,7 +13,7 @@ interface DomainEditProps {
   domain: Domain
 }
 
-const PipelineEdit = (props: DomainEditProps) => {
+const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const { domain } = props
   const history = useHistory()
   const [mapping, setMapping] = useState<any>(domain.columnMapping ?? {})
@@ -30,7 +30,7 @@ const PipelineEdit = (props: DomainEditProps) => {
     })
   }, [domain])
 
-  const getMenuItems = () => {
+  const getMenuItems = (): string[] => {
     if (sources) {
       const data = sources.filter((s) => s.name === file)[0]
       if (data) {
@@ -49,7 +49,7 @@ const PipelineEdit = (props: DomainEditProps) => {
    * Gets all keys of the actual column Mapping
    * @returns keys
    */
-  const getColumnMappingKeys = () => {
+  const getColumnMappingKeys = (): string[] => {
     const keys: string[] = []
     if (mapping) {
       for (const [key, v] of Object.entries(mapping)) {
@@ -59,7 +59,7 @@ const PipelineEdit = (props: DomainEditProps) => {
     return keys
   }
 
-  const updateMappingKey = (key: string, mappingValue: string) => {
+  const updateMappingKey = (key: string, mappingValue: string): void => {
     if (mapping) {
       setMapping({ ...mapping, [key]: mappingValue })
     }
@@ -67,11 +67,11 @@ const PipelineEdit = (props: DomainEditProps) => {
 
   const onFileChangeEventHandler = (
     event: React.ChangeEvent<HTMLFormElement>
-  ) => {
+  ): void => {
     setFile(event.target.value)
   }
 
-  const getReactNodes = (values: string[]) => {
+  const getReactNodes = (values: string[]): JSX.Element[] => {
     return getColumnMappingKeys().map((key) => (
       <Grid item xs={12} md={4}>
         <FormSelect

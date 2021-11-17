@@ -22,19 +22,19 @@ interface PropertyEditProps {
   onDelete: (idx: number) => void
 }
 
-export const PropertyEdit = (props: PropertyEditProps) => {
+export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
   const [model, setModel] = useState(props.property)
 
   useEffect(() => {
     setModel(props.property)
   }, [props])
 
-  const updateType = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const updateType = (event: React.ChangeEvent<{ value: unknown }>): void => {
     const value = event.target.value as string
     props.onSubmit(props.idx, { ...model, type: value })
   }
 
-  const updateName = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const updateName = (event: React.ChangeEvent<{ value: unknown }>): void => {
     const value = event.target.value as string
     props.onSubmit(props.idx, { ...model, name: value })
   }
@@ -42,7 +42,7 @@ export const PropertyEdit = (props: PropertyEditProps) => {
   const updatePrimary = (
     event: React.ChangeEvent<{ value: unknown }>,
     checked: boolean
-  ) => {
+  ): void => {
     const value = checked
     props.onSubmit(props.idx, { ...model, primary: value })
   }

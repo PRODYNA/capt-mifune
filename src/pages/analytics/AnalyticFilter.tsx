@@ -13,7 +13,7 @@ interface AnalyticFilterProps {
   onDelete: () => void
 }
 
-export const AnalyticFilter = (props: AnalyticFilterProps) => {
+export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const [filter, setFilter] = useState<string>()
   const [value, setValue] = useState<string>()
   const [values, setValues] = useState<string[]>()

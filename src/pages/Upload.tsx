@@ -19,7 +19,7 @@ const useStyle = makeStyles({
   },
 })
 
-const FileUpload = () => {
+const FileUpload = (): JSX.Element => {
   const classes = useStyle()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(

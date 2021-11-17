@@ -3,11 +3,11 @@ import { ResponsiveBar } from '@nivo/bar'
 import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
-export const MifuneBarChart = (props: { query: Query }) => {
+export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
   const [label, setLabel] = useState<string>()
   const [count, setCount] = useState<string>()
 
-  function buildChart(data: any[]) {
+  function buildChart(data: any[]): JSX.Element {
     if (!(count && label && data) || data.length < 1) {
       return undefined
     }

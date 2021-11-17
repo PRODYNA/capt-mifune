@@ -8,7 +8,7 @@ import { MifuneSankey } from './MifuneSankey'
 import { MifiuneHeatMap } from './MifuneHeatMap'
 import { Query, QueryBuilder, QueryNode, QueryRelation } from './QueryBuilder'
 
-export const Analytics = () => {
+export const Analytics = (): JSX.Element => {
   const [chart, setChart] = useState<string>('BarChart')
   const [query, setQuery] = useState<Query>({ nodes: [], relations: [] })
   const useStyle = makeStyles({
@@ -23,7 +23,7 @@ export const Analytics = () => {
   })
   const classes = useStyle()
 
-  function getChart() {
+  function getChart(): JSX.Element {
     if (chart === 'BarChart') {
       return <MifuneBarChart query={query} />
     }
@@ -36,7 +36,7 @@ export const Analytics = () => {
     return <></>
   }
 
-  function select(onSelect = (value: string) => {}) {
+  function select(onSelect = (value: string) => {}): JSX.Element {
     return (
       <div className={classes.box}>
         <Fab
