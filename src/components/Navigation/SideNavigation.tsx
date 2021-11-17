@@ -139,7 +139,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
       </Typography>
       <List>
         {navItems.map(
-          (item, index): JSX.Element => (
+          (item): JSX.Element => (
             <ListItem
               button
               key={item.title}
