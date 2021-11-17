@@ -105,8 +105,8 @@ public class CypherUpdateBuilder {
       var newPath = new ArrayList<>(varPath);
       newPath.add(r.varName());
       toNode.getProperties().stream()
-          .filter(Property::isPrimary)
-          .map(Property::getName)
+          .filter(Property::primary)
+          .map(Property::name)
           .map(n -> String.join(".", newPath) + "." + toNode.varName() + "." + n)
           .forEach(subContext::addExistCheck);
 
@@ -126,7 +126,7 @@ public class CypherUpdateBuilder {
     }
     Optional.ofNullable(r.getProperties()).stream()
         .flatMap(Collection::stream)
-        .filter(not(Property::isPrimary))
+        .filter(not(Property::primary))
         .forEach(
             p -> {
               var path = new ArrayList<>(varPath);
@@ -135,11 +135,11 @@ public class CypherUpdateBuilder {
                   "set %s.%s = coalesce(%s.%s, %s.%s)"
                       .formatted(
                           r.varName(),
-                          p.getName(),
+                          p.name(),
                           String.join(".", path),
-                          p.getName(),
+                          p.name(),
                           r.varName(),
-                          p.getName()));
+                          p.name()));
             });
     subContext.addStatement("with *");
   }
@@ -194,18 +194,18 @@ public class CypherUpdateBuilder {
     }
     Optional.ofNullable(r.getProperties()).stream()
         .flatMap(Collection::stream)
-        .filter(not(Property::isPrimary))
+        .filter(not(Property::primary))
         .forEach(
             p ->
                 subContext.addStatement(
                     "set %s.%s = coalesce(%s.%s, %s.%s)"
                         .formatted(
                             r.varName(),
-                            p.getName(),
+                            p.name(),
                             String.join(".", contextVarPath),
-                            p.getName(),
+                            p.name(),
                             r.varName(),
-                            p.getName())));
+                            p.name())));
     subContext.addStatement("with *");
   }
 
@@ -251,18 +251,18 @@ public class CypherUpdateBuilder {
                     .formatted(
                         nodeVar, node.getLabel(), primaryKeys(varPath, node.getProperties()))));
     node.getProperties().stream()
-        .filter(not(Property::isPrimary))
+        .filter(not(Property::primary))
         .forEach(
             p ->
                 cypherContext.addStatement(
                     "set %s.%s = coalesce(%s.%s, %s.%s)"
                         .formatted(
                             nodeVar,
-                            p.getName(),
+                            p.name(),
                             String.join(".", varPath),
-                            p.getName(),
+                            p.name(),
                             nodeVar,
-                            p.getName())));
+                            p.name())));
     if (cypherContext.root() && buildDomainLink) {
       cypherContext.addStatement(
           """
@@ -280,16 +280,14 @@ public class CypherUpdateBuilder {
     var primaryKeys =
         Optional.ofNullable(properties).stream()
             .flatMap(Collection::stream)
-            .filter(Property::isPrimary)
+            .filter(Property::primary)
             .collect(Collectors.toList());
     if (primaryKeys.isEmpty()) {
       return "";
     }
 
     return primaryKeys.stream()
-        .map(
-            property ->
-                property.getName() + ":" + String.join(".", varPath) + "." + property.getName())
+        .map(property -> property.name() + ":" + String.join(".", varPath) + "." + property.name())
         .collect(Collectors.joining(",", " {", "}"));
   }
 }
