@@ -55,7 +55,7 @@ const Pipelines = (): JSX.Element => {
   })()
 
   useEffect(() => {
-    graphService.domainsGet().then((domains) => setDomains(domains))
+    graphService.domainsGet().then((d) => setDomains(d))
   }, [])
 
   useEffect(() => {
