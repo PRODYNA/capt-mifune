@@ -5,6 +5,7 @@ import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
 export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
+  const { query } = props
   const [labelX, setLabelX] = useState<string>()
   const [labelY, setLabelY] = useState<string>()
   const [count, setCount] = useState<string>()
@@ -109,15 +110,15 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
 
   return (
     <ChartWrapper
-      query={props.query}
+      query={query}
       results={[labelX!, labelY!, count!]}
       orders={[labelX!]}
       dataPreparation={dataPreparation}
       selects={[
-        { query: props.query, label: 'X', onChange: setLabelX },
-        { query: props.query, label: 'Y', onChange: setLabelY },
+        { query, label: 'X', onChange: setLabelX },
+        { query, label: 'Y', onChange: setLabelY },
         {
-          query: props.query,
+          query,
           label: 'Value',
           fnDefault: 'count',
           fnOptions: ['count', 'sum', 'avg', 'min', 'max'],

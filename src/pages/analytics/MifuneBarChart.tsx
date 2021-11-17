@@ -4,6 +4,7 @@ import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
 export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
+  const { query } = props
   const [label, setLabel] = useState<string>()
   const [count, setCount] = useState<string>()
 
@@ -58,7 +59,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
   return (
     <>
       <ChartWrapper
-        query={props.query}
+        query={query}
         results={[label ?? '', count ?? '']}
         orders={[count ?? '']}
         dataPreparation={(data, scale) =>
@@ -71,7 +72,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
         }
         selects={[
           {
-            query: props.query,
+            query,
             label: 'Label',
             onChange: (v) => {
               console.log(`update label:${v}`)
@@ -79,7 +80,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
             },
           },
           {
-            query: props.query,
+            query,
             label: 'Value',
             fnDefault: 'count',
             fnOptions: ['count', 'sum', 'avg', 'min', 'max'],

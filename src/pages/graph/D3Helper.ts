@@ -51,7 +51,7 @@ export class D3Helper {
     sourceY: number,
     targetX: number,
     targetY: number
-  ) => {
+  ): string => {
     if (sourceX === targetX && sourceY === targetY) {
       const r = 40
       return `
@@ -71,7 +71,7 @@ export class D3Helper {
             `
   }
 
-  static buildRelationPath = (rel: D3Relation<any>) => {
+  static buildRelationPath = (rel: D3Relation<any>): string => {
     let source: D3Node<any>
     let target: D3Node<any>
     const allRelCount = rel.relCount + rel.incomingRelationsCount - 1

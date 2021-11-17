@@ -9,6 +9,7 @@ import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
 export const MifuneSankey = (props: { query: Query }): JSX.Element => {
+  const { query } = props
   const [from, setFrom] = useState<string>()
   const [to, setTo] = useState<string>()
   const [count, setCount] = useState<string>()
@@ -57,15 +58,15 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
 
   return (
     <ChartWrapper
-      query={props.query}
+      query={query}
       results={[from!, to!, count!]}
       orders={[]}
       dataPreparation={prepareData}
       selects={[
-        { query: props.query, label: 'From', onChange: setFrom },
-        { query: props.query, label: 'To', onChange: setTo },
+        { query, label: 'From', onChange: setFrom },
+        { query, label: 'To', onChange: setTo },
         {
-          query: props.query,
+          query,
           label: 'Value',
           fnDefault: 'count',
           fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
