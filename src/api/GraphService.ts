@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import { AxiosResponse } from 'axios'
 import { EventSourcePolyfill } from 'ng-event-source'
 import HttpService from '../services/HttpService'
@@ -70,7 +71,7 @@ export class GraphService {
       })
   }
 
-  private header() {
+  private header(): Record<string, unknown> {
     let headers = {}
     if (localStorage.getItem('LOGIN_REQUIRED')?.toUpperCase() === 'TRUE') {
       headers = {

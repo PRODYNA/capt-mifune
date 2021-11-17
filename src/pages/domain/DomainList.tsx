@@ -1,5 +1,5 @@
 import React from 'react'
-import { createStyles, makeStyles, Theme } from '@material-ui/core'
+import { createStyles, makeStyles } from '@material-ui/core'
 import { Domain, GraphDelta, Node } from '../../api/model/Model'
 import { DomainListEntry } from './DomainListEntry'
 
@@ -7,14 +7,13 @@ interface DomainListProps {
   domains: Domain[]
   nodes: Node[]
   selectedDomain?: Domain
-  onCreate: (d: Domain) => void
   onSubmit: (d: Domain) => void
   onSelect: (d: Domain) => void
   onDelete: (d: GraphDelta) => void
   addNode: (d: Domain) => void
 }
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       position: 'absolute',

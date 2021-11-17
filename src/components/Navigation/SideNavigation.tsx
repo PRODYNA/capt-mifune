@@ -145,7 +145,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
               key={item.title}
               onClick={() => {
                 if (item.path) history.push(item.path)
-                else item.onClick && item.onClick()
+                if (item.onClick) item.onClick()
               }}
               className={classes.listItem}
               selected={(item.path && pathname === item.path) || false}
