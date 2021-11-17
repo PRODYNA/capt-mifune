@@ -1,14 +1,14 @@
-import React from "react";
-import { Box } from "@material-ui/core";
-import CustomButton from "../Button/CustomButton";
-import { useTheme } from "@material-ui/core/styles";
-import SaveIcon from '@material-ui/icons/Save';
-import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
+import React from 'react'
+import { Box } from '@material-ui/core'
+import { useTheme } from '@material-ui/core/styles'
+import SaveIcon from '@material-ui/icons/Save'
+import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined'
+import CustomButton from '../Button/CustomButton'
 
 interface IFormActions {
-  onCancelEvent: (event: React.MouseEvent<HTMLElement>) => void;
-  saveText: string;
-  cancelText: string;
+  onCancelEvent: (event: React.MouseEvent<HTMLElement>) => void
+  saveText: string
+  cancelText: string
 }
 
 const FormActions: React.FunctionComponent<IFormActions> = ({
@@ -16,11 +16,11 @@ const FormActions: React.FunctionComponent<IFormActions> = ({
   saveText,
   cancelText,
 }) => {
-  const theme = useTheme();
+  const theme = useTheme()
 
   const onCancelHandler = (event: React.MouseEvent<HTMLElement>) => {
-    onCancelEvent(event);
-  };
+    onCancelEvent(event)
+  }
 
   return (
     <Box width="100%" mt={5}>
@@ -28,18 +28,18 @@ const FormActions: React.FunctionComponent<IFormActions> = ({
         type="submit"
         onClick={onCancelHandler}
         customColor={theme.palette.secondary.main}
-        startIcon={<ClearOutlinedIcon/>}
+        startIcon={<ClearOutlinedIcon />}
         style={{ marginRight: '1rem' }}
         title={cancelText}
       />
       <CustomButton
         type="submit"
         customColor={theme.palette.success.main}
-        startIcon={<SaveIcon/>}
+        startIcon={<SaveIcon />}
         title={saveText}
       />
     </Box>
-  );
-};
+  )
+}
 
-export default FormActions;
+export default FormActions
