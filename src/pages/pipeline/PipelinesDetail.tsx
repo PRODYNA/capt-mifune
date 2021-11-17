@@ -10,7 +10,7 @@ const PipelinesDetail = (): JSX.Element => {
   const { id } = useParams<any>()
 
   useEffect(() => {
-    graphService.domainGet(id).then((domain) => setDomain(domain))
+    graphService.domainGet(id).then((d) => setDomain(d))
   }, [])
 
   return (
