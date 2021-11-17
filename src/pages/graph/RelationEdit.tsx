@@ -122,7 +122,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
       <>
         <h3>Properties</h3>
         {value.properties?.map((p, idx) => (
-          <div key={idx}>
+          <div key={p.name}>
             <PropertyEdit
               idx={idx}
               property={p}
