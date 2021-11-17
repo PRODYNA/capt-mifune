@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
+import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
 import { Domain, GraphDelta, Node, Relation } from '../../api/model/Model'
 import { useStyles } from './FromStyle'
@@ -29,22 +30,7 @@ export const Graph = (props: IGraph): JSX.Element => {
   >()
   const d3Container = useRef(null)
 
-  function updateState(graphDelta: GraphDelta): void {
-    setDomains(
-      domains
-        .filter(
-          (d) =>
-            !graphDelta.removedDomains
-              .concat(graphDelta.changedDomains.map((d) => d.id))
-              .some((id) => id === d.id)
-        )
-        .concat(graphDelta.changedDomains)
-    )
-    updateNodes(graphDelta)
-    updateRelations(graphDelta)
-  }
-
-  function updateNodes(graphDelta: GraphDelta): void {
+  const updateNodes = (graphDelta: GraphDelta): void => {
     let d3Nodes = nodes.filter(
       (n) => !graphDelta.removedNodes.some((id) => id === n.node.id)
     )
@@ -58,7 +44,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     setNodes(d3Nodes)
   }
 
-  function updateRelations(graphDelta: GraphDelta): void {
+  const updateRelations = (graphDelta: GraphDelta): void => {
     let d3Relations = relations.filter(
       (r) => !graphDelta.removedRelations.some((id) => id === r.relation.id)
     )
@@ -74,7 +60,22 @@ export const Graph = (props: IGraph): JSX.Element => {
     setRelations(d3Relations)
   }
 
-  function color(id: string): string {
+  const updateState = (graphDelta: GraphDelta): void => {
+    setDomains(
+      domains
+        .filter(
+          (d) =>
+            !graphDelta.removedDomains
+              .concat(graphDelta.changedDomains.map((d) => d.id))
+              .some((id) => id === d.id)
+        )
+        .concat(graphDelta.changedDomains)
+    )
+    updateNodes(graphDelta)
+    updateRelations(graphDelta)
+  }
+
+  const color = (id: string): string => {
     return nodes.find((n) => n.node.id === id)?.node.color ?? 'green'
   }
 
@@ -133,7 +134,14 @@ export const Graph = (props: IGraph): JSX.Element => {
       return 6
     }
 
-    function drawNodes(svg: d3.Selection<null, unknown, null, undefined>) {
+    const drawNodes = (
+      svg: d3.Selection<null, unknown, null, undefined>
+    ): Selection<
+      BaseType | SVGCircleElement,
+      D3Node<Node>,
+      SVGGElement,
+      unknown
+    > => {
       return svg
         .append('g')
         .attr('stroke', '#fff')
@@ -146,7 +154,14 @@ export const Graph = (props: IGraph): JSX.Element => {
         .classed('node', true)
     }
 
-    function drawNodeLabel(svg: d3.Selection<null, unknown, null, undefined>) {
+    const drawNodeLabel = (
+      svg: d3.Selection<null, unknown, null, undefined>
+    ): Selection<
+      BaseType | SVGTextElement,
+      D3Node<Node>,
+      SVGGElement,
+      unknown
+    > => {
       return svg
         .append('g')
         .selectAll('text')
@@ -159,14 +174,14 @@ export const Graph = (props: IGraph): JSX.Element => {
         .attr('background-color', (n) => n.node.color)
     }
 
-    function drawSelectionIndicator(
+    const drawSelectionIndicator = (
       svg: d3.Selection<null, unknown, null, undefined>
-    ) {
-      let selection: d3.Selection<any, any, any, any> | undefined
+    ):
+      | Selection<BaseType | SVGPathElement, D3Node<Node>, SVGGElement, unknown>
+      | undefined => {
       if (selected && 'node' in selected && selected.node.id) {
         const selectedNode = selected as D3Node<Node>
-        // @ts-ignore
-        selection = svg
+        return svg
           .append('g')
           .selectAll('path')
           .data([selectedNode])
@@ -178,13 +193,18 @@ export const Graph = (props: IGraph): JSX.Element => {
           .attr('stroke-width', 20)
           .classed('path', true)
       }
-      return selection
+      return undefined
     }
 
-    function drawRelations(
+    const drawRelations = (
       svg: d3.Selection<null, unknown, null, undefined>,
       relations: D3Relation<Relation>[]
-    ) {
+    ): d3.Selection<
+      d3.BaseType | SVGPathElement,
+      D3Relation<Relation>,
+      SVGGElement,
+      unknown
+    > => {
       const selection = svg.append('g').selectAll('path').data(relations)
       const relation = selection
         .join('path')
@@ -204,7 +224,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         .attr('stroke-width', (rel) => relWidth(rel))
         .classed('path', true)
 
-      // @ts-ignore
       selection
         .join('text')
         .attr('dominant-baseline', 'middle')
@@ -223,18 +242,21 @@ export const Graph = (props: IGraph): JSX.Element => {
       return relation
     }
 
-    function nodeMouseEvents(simulation: d3.Simulation<any, any>, node: any) {
-      const dragstart = (event: any, d: any) => {}
-      const dragged = (event: any, d: any) => {
+    const nodeMouseEvents = (
+      simulation: d3.Simulation<any, any>,
+      node: any
+    ): void => {
+      const dragstart = (event: any, d: any): void => {}
+      const dragged = (event: any, d: any): void => {
         d.fx = event.x
         d.fy = event.y
         simulation.alphaTarget(0.3).restart()
       }
-      const dragend = (event: any, d: any) => {
+      const dragend = (event: any, d: any): void => {
         simulation.stop()
       }
 
-      const click = (event: any, d: any) => {
+      const click = (event: any, d: any): void => {
         if (selected && 'node' in selected && selected.node.id === d.id) {
           delete d.fx
           delete d.fy
@@ -252,10 +274,10 @@ export const Graph = (props: IGraph): JSX.Element => {
       node.call(drag).on('click', click)
     }
 
-    function relationMouseEvents(
+    const relationMouseEvents = (
       simulation: d3.Simulation<any, any>,
       relation: any
-    ) {
+    ): void => {
       const click = (event: any, r: D3Relation<Relation>) => {
         if (
           selected &&
@@ -270,10 +292,10 @@ export const Graph = (props: IGraph): JSX.Element => {
       relation.on('click', click)
     }
 
-    function relationDrawEvents(
+    const relationDrawEvents = (
       simulation: d3.Simulation<any, any>,
       selection: any
-    ) {
+    ): void => {
       const selectionDrag = d3
         .drag()
         .on('start', (e, d: any) => {
@@ -291,7 +313,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         .on('end', (e, d: any) => {
           delete d.d
           const target = nodes.filter((n) => {
-            // @ts-ignore
             const hyp = D3Helper.pointDistance(n, e)
             return hyp < 20
           })[0]
@@ -306,10 +327,10 @@ export const Graph = (props: IGraph): JSX.Element => {
       }
     }
 
-    function buildSimulation(
+    const buildSimulation = (
       relations: D3Relation<Relation>[],
       tick: () => void
-    ) {
+    ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
       return d3
         .forceSimulation()
         .nodes(nodes)
@@ -394,36 +415,25 @@ export const Graph = (props: IGraph): JSX.Element => {
 
       const tick = () => {
         if (selection && selected) {
-          // @ts-ignore
-          selection
-            // @ts-ignore
-            .attr('d', (d) => {
-              if (d.d) {
-                // @ts-ignore
-                return d.d
-              }
-              return D3Helper.selectionPath(
-                // @ts-ignore
-                selected.x,
-                // @ts-ignore
-                selected.y,
-                // @ts-ignore
-                selected.x,
-                // @ts-ignore
-                selected.y
-              )
-            })
+          selection.attr('d', (d) => {
+            if (d.d) {
+              return d.d
+            }
+            return D3Helper.selectionPath(
+              selected.x,
+              selected.y,
+              selected.x,
+              selected.y
+            )
+          })
         }
 
-        // @ts-ignore
         node.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
-        // @ts-ignore
         text.attr('x', (d) => d.x).attr('y', (d) => d.y)
-        relation
-          // @ts-ignorex
-          .attr('d', (rel) => {
-            return D3Helper.buildRelationPath(rel)
-          })
+
+        relation.attr('d', (rel) => {
+          return D3Helper.buildRelationPath(rel)
+        })
       }
 
       const simulation = buildSimulation(rels, tick)
@@ -433,7 +443,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
   }, [selectedDomain, domains, selected, nodes, relations, color])
 
-  function editSection() {
+  const editSection = (): JSX.Element => {
     if (selected?.kind === 'node') {
       return (
         <NodeEdit
@@ -494,11 +504,12 @@ export const Graph = (props: IGraph): JSX.Element => {
         />
       )
     }
+    return <></>
   }
 
   const classes = useStyles()
 
-  function domainList() {
+  const domainList = (): JSX.Element => {
     return (
       <DomainList
         domains={domains}

@@ -10,7 +10,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
 
   function buildChart(data: any[]): JSX.Element {
     if (!(count && label && data) || data.length < 1) {
-      return undefined
+      return <></>
     }
     return (
       <div style={{ height: 200 + data.length * 25 }}>
@@ -66,8 +66,9 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
           data
             .filter((d) => d[label!])
             .map((d) => {
-              d[count!] = (parseFloat(d[count!]) / scale).toFixed(2)
-              return d
+              const item = d
+              item[count!] = (parseFloat(item[count!]) / scale).toFixed(2)
+              return item
             })
         }
         selects={[
