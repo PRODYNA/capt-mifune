@@ -4,8 +4,8 @@ import { Switch, Route } from 'react-router-dom'
 import { Analytics } from '../pages/analytics/Analytics'
 import { Graph } from '../pages/graph/Graph'
 import Sidenavigation from '../components/Navigation/SideNavigation'
-import { Pipelines } from '../pages/pipeline/Pipelines'
-import { PipelinesDetail } from '../pages/pipeline/PipelinesDetail'
+import Pipelines from '../pages/pipeline/Pipelines'
+import PipelinesDetail from '../pages/pipeline/PipelinesDetail'
 import SnackbarProvider from '../context/Snackbar'
 import Upload from '../pages/Upload'
 import { ANALYTCIS, PIPELINE, PIPELINES, ROOT_PATH, UPLOAD } from './routes'
@@ -16,9 +16,9 @@ const MifuneRouter = (): JSX.Element => {
   const [openSidenav, setOpenSidenav] = useState(false);
 
   return (
-    <>
-      <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
-      <SnackbarProvider>
+    <SnackbarProvider>
+      <>
+        <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
         <Box position="relative" height="100vh">
           <Switch>
             <Route path={ROOT_PATH} exact>
@@ -36,21 +36,20 @@ const MifuneRouter = (): JSX.Element => {
                 <Upload />
               </ErrorBoundary>
             </Route>
+            <Route path={`${PIPELINE}/:id`}>
+              <ErrorBoundary>
+                <PipelinesDetail />
+              </ErrorBoundary>
+            </Route>
             <Route path={PIPELINES} exact>
               <ErrorBoundary>
                 <Pipelines />
               </ErrorBoundary>
             </Route>
-            <Route path={`${PIPELINE}/:id`}>
-              <ErrorBoundary>
-                <PipelinesDetail />
-              </ErrorBoundary>
-
-            </Route>
           </Switch>
         </Box>
-      </SnackbarProvider>
-    </>
+      </>
+    </SnackbarProvider>
   )
 }
 
