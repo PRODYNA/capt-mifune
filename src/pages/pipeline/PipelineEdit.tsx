@@ -11,26 +11,25 @@ const rest = HttpService.getAxiosClient();
 
 interface DomainEditProps {
   domain: Domain;
-  onSubmit: (domain: Domain) => Promise<any>;
 }
-export const PipelineEdit = (props: DomainEditProps) => {
-  const history = useHistory();
 
-  const [mapping, setMapping] = useState<any>(props.domain.columnMapping??{});
-  const [file, setFile] = useState<string|undefined>(props.domain.file);
+const PipelineEdit = (props: DomainEditProps) => {
+  const { domain } = props
+  const history = useHistory();
+  const [mapping, setMapping] = useState<any>(domain.columnMapping??{});
+  const [file, setFile] = useState<string|undefined>(domain.file);
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
     rest.get<Source[]>("/sources").then((r) => {
       setSources(r.data);
     });
-  }, [props.domain]);
 
-  useEffect(() => {
     graphService.loadDefaultMappingConfig(props.domain).then((r) => {
       setMapping(r.data ?? {});
     });
-  }, [props.domain]);
+    
+  }, [domain]);
 
   const getMenuItems = () => {
     if (sources) {
@@ -78,9 +77,8 @@ export const PipelineEdit = (props: DomainEditProps) => {
   };
 
   const getReactNodes = (values: string[]) => {
-    return getColumnMappingKeys().map((key) => {
-      return (
-        <Grid key={key} item xs={12} md={6}>
+    return getColumnMappingKeys().map((key) => (
+        <Grid item xs={12} md={4}>
           <FormSelect
             key={key}
             title={key}
@@ -89,21 +87,16 @@ export const PipelineEdit = (props: DomainEditProps) => {
             onChangeHandler={e => updateMappingKey(key, e.target.value as string)}
           />
         </Grid>
-      );
-    });
+      )
+    );
   };
   const values = getMenuItems();
 
   const childrens: React.ReactNode[] = getReactNodes(values);
   let options = [""];
-  sources
-    .map((source) => {
-      return source.name;
-    })
-    .forEach((s) => options.push(s));
+  sources.map((source) => source.name).forEach((s) => options.push(s));
   childrens.unshift(
-    <Grid item xs={12} md={6}>
-
+    <Grid item xs={12} md={4}>
       <FormSelect
         key="FileSelection"
         title="Select file to map"
@@ -114,32 +107,22 @@ export const PipelineEdit = (props: DomainEditProps) => {
     </Grid>
   );
 
-  childrens.push(
-    <FormActions
-      saveText="Save"
-      cancelText="Cancel"
-      onCancelEvent={() => history.push("/pipelines")}
-    />
-  );
-
-  console.log(childrens)
-
   return (
-    <>
-      <span>{JSON.stringify(mapping)}</span>
-      <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        console.log("domain edit " + file);
-        props.onSubmit({...props.domain, file: file,columnMapping: mapping}).then(() => {
-          history.goBack();
-        });
-        event.preventDefault();
-      }}>
-        <Grid container spacing={3}>
-          {childrens.map((child) => {
-            return child;
-          })}
-        </Grid>
-      </form>
-    </>
+    <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
+      console.log("domain edit " + domain.name);
+      graphService.domainPut(domain.id, {...domain, file: file,columnMapping: mapping}).then(() => history.goBack());
+      event.preventDefault();
+    }}>
+      <Grid container spacing={3}>
+        {childrens.map((child) => child)}
+      </Grid>
+      <FormActions
+        saveText="Save"
+        cancelText="Cancel"
+        onCancelEvent={() => history.push("/pipelines")}
+      />
+    </form>
   );
 };
+
+export default PipelineEdit;
