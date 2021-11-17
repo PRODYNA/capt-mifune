@@ -32,7 +32,7 @@ interface RelationEditProps {
 export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   const { relation, nodes, domains, onClose, onCreate, onDelete, onSubmit } =
     props
-  const ID = function (): string {
+  const ID = (): string => {
     return `_${Math.random().toString(36).substr(2, 9)}`
   }
 
@@ -117,7 +117,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
     setValue(relation)
   }, [props])
 
-  function properties(): JSX.Element {
+  const properties = (): JSX.Element => {
     return (
       <>
         <h3>Properties</h3>

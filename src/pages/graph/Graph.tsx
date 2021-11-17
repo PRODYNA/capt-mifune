@@ -88,11 +88,11 @@ export const Graph = (props: IGraph): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    function createRelation(
+    const createRelation = (
       source: D3Node<Node>,
       target: D3Node<Node>,
       domain: Domain
-    ): void {
+    ): void => {
       const rel: Relation = {
         id: '',
         domainIds: [domain.id],
@@ -108,7 +108,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       setSelected(d3Relation)
     }
 
-    function nodeRadius(n: D3Node<Node>): number {
+    const nodeRadius = (n: D3Node<Node>): number => {
       const isSelected =
         selected && 'node' in selected && selected.node.id === n.node.id
       if (isSelected) {
@@ -120,7 +120,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       return 20
     }
 
-    function relWidth(rel: D3Relation<Relation>): number {
+    const relWidth = (rel: D3Relation<Relation>): number => {
       const isSelected =
         selected &&
         'relation' in selected &&

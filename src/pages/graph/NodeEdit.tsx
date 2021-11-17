@@ -78,7 +78,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
     setValue((node) => ({ ...node, root: value }))
   }
 
-  function addProperty(): void {
+  const addProperty = (): void => {
     setValue((value) => ({
       ...value,
       properties: (value.properties ?? []).concat({
@@ -89,7 +89,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
     }))
   }
 
-  function deleteProperty(idx: number): void {
+  const deleteProperty = (idx: number): void => {
     const props = value.properties
     splice(idx, 1)
     setValue((value) => ({
@@ -109,7 +109,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
     })
   }
 
-  function properties(): JSX.Element {
+  const properties = (): JSX.Element => {
     return (
       <>
         <h3>Properties</h3>
