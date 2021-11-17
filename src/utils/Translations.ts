@@ -5,5 +5,5 @@ export const Translations = {
   UPLOAD_SUCCESS: 'Upload worked!',
   IMPORT_RUN: 'Import started',
   IMPORT_STOPPED: 'Import stopped',
-  DOMAIN_DELETE: 'Domain deleted',
+  DOMAIN_CLEAR: 'Domain cleared',
 }
