@@ -57,7 +57,7 @@ public class CypherQueryBuilder {
   public String cypher() {
     var queryNodeId = query.nodes().get(0).id();
     var cypher = new StringBuilder();
-    buildNodeMatch(queryNodeId, cypher, new HashSet<UUID>());
+    buildNodeMatch(queryNodeId, cypher, new HashSet<>());
     cypher.append(addFilterStatement());
     cypher.append("\n");
     cypher.append("with distinct %s".formatted(String.join(",", this.vars.keySet())));
@@ -88,29 +88,28 @@ public class CypherQueryBuilder {
     relations.stream()
         .filter(r -> query.relations().stream().anyMatch(qr -> qr.relationId().equals(r.getId())))
         .forEach(
-            r -> {
-              query.relations().stream()
-                  .filter(qr -> qr.relationId().equals(r.getId()))
-                  .filter(qr -> !processedIds.contains(qr.id()))
-                  .forEach(
-                      qr -> {
-                        var targetNode = queryNode(qr.targetId());
-                        processedIds.add(qr.id());
-                        cypher.append(
-                            """
-                                                match(%s)-[%s:%s]->(%s:%s)
-                                                """
-                                .formatted(
-                                    nodeVar,
-                                    generateVar(r.varName()),
-                                    r.getType(),
-                                    generateVar(targetNode.varName()),
-                                    graphModel.nodes.get(targetNode.nodeId()).getLabel()));
+            r ->
+                query.relations().stream()
+                    .filter(qr -> qr.relationId().equals(r.getId()))
+                    .filter(qr -> !processedIds.contains(qr.id()))
+                    .forEach(
+                        qr -> {
+                          var targetNode = queryNode(qr.targetId());
+                          processedIds.add(qr.id());
+                          cypher.append(
+                              """
+                                              match(%s)-[%s:%s]->(%s:%s)
+                                              """
+                                  .formatted(
+                                      nodeVar,
+                                      generateVar(r.varName()),
+                                      r.getType(),
+                                      generateVar(targetNode.varName()),
+                                      graphModel.nodes.get(targetNode.nodeId()).getLabel()));
 
-                        processedIds.add(targetNode.id());
-                        buildNodeMatch(targetNode.id(), cypher, processedIds);
-                      });
-            });
+                          processedIds.add(targetNode.id());
+                          buildNodeMatch(targetNode.id(), cypher, processedIds);
+                        }));
   }
 
   private void buildIncomingRelationMatch(
@@ -118,29 +117,28 @@ public class CypherQueryBuilder {
     relations.stream()
         .filter(r -> query.relations().stream().anyMatch(qr -> qr.relationId().equals(r.getId())))
         .forEach(
-            r -> {
-              query.relations().stream()
-                  .filter(qr -> qr.relationId().equals(r.getId()))
-                  .filter(qr -> !processedIds.contains(qr.id()))
-                  .forEach(
-                      qr -> {
-                        var sourceNode = queryNode(qr.sourceId());
-                        processedIds.add(qr.id());
-                        cypher.append(
-                            """
-                                                match(%s)<-[%s:%s]-(%s:%s)
-                                                """
-                                .formatted(
-                                    nodeVar,
-                                    generateVar(r.varName()),
-                                    r.getType(),
-                                    generateVar(sourceNode.varName()),
-                                    graphModel.nodes.get(sourceNode.nodeId()).getLabel()));
+            r ->
+                query.relations().stream()
+                    .filter(qr -> qr.relationId().equals(r.getId()))
+                    .filter(qr -> !processedIds.contains(qr.id()))
+                    .forEach(
+                        qr -> {
+                          var sourceNode = queryNode(qr.sourceId());
+                          processedIds.add(qr.id());
+                          cypher.append(
+                              """
+                                              match(%s)<-[%s:%s]-(%s:%s)
+                                              """
+                                  .formatted(
+                                      nodeVar,
+                                      generateVar(r.varName()),
+                                      r.getType(),
+                                      generateVar(sourceNode.varName()),
+                                      graphModel.nodes.get(sourceNode.nodeId()).getLabel()));
 
-                        processedIds.add(sourceNode.id());
-                        buildNodeMatch(sourceNode.id(), cypher, processedIds);
-                      });
-            });
+                          processedIds.add(sourceNode.id());
+                          buildNodeMatch(sourceNode.id(), cypher, processedIds);
+                        }));
   }
 
   private QueryNode queryNode(UUID queryNodeId) {
@@ -262,10 +260,6 @@ public class CypherQueryBuilder {
     var tmp = new HashMap<String, String>();
     vars.forEach((k, v) -> tmp.put(v, k));
     return tmp;
-  }
-
-  public String generateVar(List<String> path) {
-    return generateVar(String.join(".", path));
   }
 
   public String generateVar(String path) {

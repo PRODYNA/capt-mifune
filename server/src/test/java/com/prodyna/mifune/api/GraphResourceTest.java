@@ -201,15 +201,6 @@ class GraphResourceTest {
   }
 
   @Test
-  void loadGraph() {}
-
-  @Test
-  void createJsonModel() {}
-
-  @Test
-  void runImport() {}
-
-  @Test
   void testMapping() {
     Domain sampleDomain = createSampleDomain();
     Property name = new Property();
@@ -220,7 +211,7 @@ class GraphResourceTest {
     other.setName("other");
     other.setType("string");
     other.setPrimary(false);
-    List<Property> props = new ArrayList<Property>();
+    List<Property> props = new ArrayList<>();
 
     props.add(other);
     props.add(name);
@@ -321,21 +312,19 @@ class GraphResourceTest {
     var relationCreate =
         new RelationCreate(type, personNode.getId(), carNode.getId(), personNode.getDomainIds());
 
-    var relation =
-        given()
-            .when()
-            .body(relationCreate)
-            .contentType(ContentType.JSON)
-            .post("/graph/relation")
-            .then()
-            .statusCode(200)
-            .body("changedRelations", hasSize(1))
-            .body("changedRelations[0].type", equalTo(type))
-            .extract()
-            .as(GraphDelta.class)
-            .getChangedRelations()
-            .iterator()
-            .next();
-    return relation;
+    return given()
+        .when()
+        .body(relationCreate)
+        .contentType(ContentType.JSON)
+        .post("/graph/relation")
+        .then()
+        .statusCode(200)
+        .body("changedRelations", hasSize(1))
+        .body("changedRelations[0].type", equalTo(type))
+        .extract()
+        .as(GraphDelta.class)
+        .getChangedRelations()
+        .iterator()
+        .next();
   }
 }

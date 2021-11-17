@@ -137,12 +137,12 @@ public class GraphService {
 
   private Set<UUID> validate(UUID startNode, Set<UUID> allNodes, Set<Relation> allRelations) {
     if (allRelations.size() <= 0) {
-      Set<UUID> result = new HashSet<UUID>();
+      Set<UUID> result = new HashSet<>();
       result.add(startNode);
       return result;
     }
 
-    Set<UUID> copyAllNodes = new HashSet<UUID>(allNodes);
+    Set<UUID> copyAllNodes = new HashSet<>(allNodes);
 
     Set<Relation> usedRelations =
         allRelations.stream()
@@ -152,7 +152,7 @@ public class GraphService {
         usedRelations.stream().map(Relation::getTargetId).collect(Collectors.toSet());
     allRelations.removeIf(usedRelations::contains);
     copyAllNodes.remove(startNode);
-    Set<UUID> subGraph = new HashSet<UUID>(reachableNodes);
+    Set<UUID> subGraph = new HashSet<>(reachableNodes);
     for (UUID node : reachableNodes) {
       subGraph.addAll(validate(node, copyAllNodes, allRelations));
     }
@@ -228,7 +228,7 @@ public class GraphService {
 
   /**
    * This method generates a Graph Delta, to tell the Frontend which nodes are to be deleted. In
-   * addition it calls the Deletion Service, to delete the nodes, related to the deleted domain
+   * addition, it calls the Deletion Service, to delete the nodes, related to the deleted domain
    * inside Neo4J.
    *
    * @param id of the domain to be deleted
@@ -329,7 +329,7 @@ public class GraphService {
   }
 
   public GraphDelta updateNode(UUID id, NodeUpdate model) {
-    var changedDomains = new HashSet<UUID>(model.domainIds());
+    var changedDomains = new HashSet<>(model.domainIds());
     var graphDelta = new GraphDelta();
     checkDomainIds(model.domainIds());
     var node = nodeById(id);
@@ -443,7 +443,7 @@ public class GraphService {
   }
 
   public GraphDelta updateRelation(UUID id, RelationUpdate model) {
-    var changeDomainIds = new HashSet<UUID>(model.domainIds());
+    var changeDomainIds = new HashSet<>(model.domainIds());
     checkDomainIds(model.domainIds());
     var graphDelta = new GraphDelta();
     var relation = relationById(id);
@@ -478,8 +478,7 @@ public class GraphService {
 
   public ObjectNode buildDomainJsonModel(UUID id) {
     var graphModel = new GraphModel(graph);
-    var json = new GraphJsonBuilder(graphModel, id, false).getJson();
-    return json;
+    return new GraphJsonBuilder(graphModel, id, false).getJson();
   }
 
   public void reset() {
