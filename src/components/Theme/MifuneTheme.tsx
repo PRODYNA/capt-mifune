@@ -2,12 +2,20 @@ import React from 'react'
 import { createTheme, CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core/styles'
 import { Shadows } from '@material-ui/core/styles/shadows'
-import { fontWhite, primaryDark, primaryLight, primaryMain, secondaryDark, secondaryLight, secondaryMain } from './CustomColors'
+import {
+  fontWhite,
+  primaryDark,
+  primaryLight,
+  primaryMain,
+  secondaryDark,
+  secondaryLight,
+  secondaryMain,
+} from './CustomColors'
 
 const theme = createTheme({
   typography: {
     htmlFontSize: 16,
-    fontFamily: 'Roboto'
+    fontFamily: 'Roboto',
   },
   palette: {
     primary: {
@@ -34,14 +42,14 @@ const theme = createTheme({
     },
     MuiButton: {
       root: {
-        borderRadius: 0
-      }
+        borderRadius: 0,
+      },
     },
     MuiPaper: {
       root: {
-        borderRadius: 0
-      }
-    }
+        borderRadius: 0,
+      },
+    },
   },
 })
 interface MifuneThemeProps {

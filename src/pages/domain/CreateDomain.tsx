@@ -1,8 +1,8 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import { Tooltip, Fab, createStyles, makeStyles } from '@material-ui/core';
-import graphService from '../../api/GraphService';
-import AddIcon from "@material-ui/icons/Add";
-import { Domain } from '../../api/model/Model';
+import { Tooltip, Fab, createStyles, makeStyles } from '@material-ui/core'
+import AddIcon from '@material-ui/icons/Add'
+import graphService from '../../api/GraphService'
+import { Domain } from '../../api/model/Model'
 
 export const useStyles = makeStyles(() =>
   createStyles({
@@ -28,30 +28,35 @@ export const useStyles = makeStyles(() =>
       '100% ': {
         transform: 'scale(0.95)',
         boxShadow: '0 0 0 0 rgba(142, 68, 173, 0)',
-      }
+      },
     },
-  }),
-);
+  })
+)
 
 interface ICreateDomain {
-  domains: Domain[];
-  setDomains: Dispatch<SetStateAction<Domain[]>>;
-  setSelectedDomain: Dispatch<SetStateAction<Domain | undefined>>;
+  domains: Domain[]
+  setDomains: Dispatch<SetStateAction<Domain[]>>
+  setSelectedDomain: Dispatch<SetStateAction<Domain | undefined>>
 }
 
 const CreateDomain = (props: ICreateDomain): JSX.Element => {
-  const {domains, setDomains, setSelectedDomain} = props
-  const classes = useStyles();
+  const { domains, setDomains, setSelectedDomain } = props
+  const classes = useStyles()
 
   return (
     <Tooltip title="Create new Domain">
-      <Fab size="large" color="primary" className={`${classes.createDomainBtn} ${domains.length === 0 ? classes.animatedBtn : ''}`}
+      <Fab
+        size="large"
+        color="primary"
+        className={`${classes.createDomainBtn} ${
+          domains.length === 0 ? classes.animatedBtn : ''
+        }`}
         onClick={(e) =>
           graphService
-            .domainPost({ name: "domain_" + domains.length })
+            .domainPost({ name: `domain_${domains.length}` })
             .then((domain) => {
-              setDomains(domains.concat(domain));
-              setSelectedDomain(domain);
+              setDomains(domains.concat(domain))
+              setSelectedDomain(domain)
             })
         }
       >
@@ -61,4 +66,4 @@ const CreateDomain = (props: ICreateDomain): JSX.Element => {
   )
 }
 
-export default CreateDomain;
+export default CreateDomain
