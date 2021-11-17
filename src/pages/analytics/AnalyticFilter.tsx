@@ -22,12 +22,12 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   useEffect(() => {
     if (filter) {
       graphService.query(query, [filter], [filter]).then((d) => {
-        const values = d
-          .map((d) => d[filter])
+        const tmpValues = d
+          .map((x) => x[filter])
           .filter((v, i, s) => s.indexOf(v) === i)
-        values.unshift('None')
-        setValues(values)
-        setValue(values[0])
+        tmpValues.unshift('None')
+        setValues(tmpValues)
+        setValue(tmpValues[0])
       })
     }
   }, [filter])
@@ -38,12 +38,11 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         <AnalyticSelect
           label="Property"
           query={query}
-          onChange={(value) => {
-            const filter = value
-            setFilter(filter)
+          onChange={(newFilter) => {
+            setFilter(newFilter)
             setValue(undefined)
             setValues([])
-            onKeyChange(filter)
+            onKeyChange(newFilter)
             onValueChange(undefined)
           }}
         />
@@ -54,9 +53,8 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           options={values ?? []}
           value={value}
           onChangeHandler={(event) => {
-            const { value } = event.target
-            setValue(value)
-            onValueChange(value)
+            setValue(event.target.value)
+            onValueChange(event.target.value)
           }}
         />
       </Grid>

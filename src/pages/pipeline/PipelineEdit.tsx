@@ -25,7 +25,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
       setSources(r.data)
     })
 
-    graphService.loadDefaultMappingConfig(props.domain).then((r) => {
+    graphService.loadDefaultMappingConfig(domain).then((r) => {
       setMapping(r.data ?? {})
     })
   }, [domain])
@@ -52,9 +52,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const getColumnMappingKeys = (): string[] => {
     const keys: string[] = []
     if (mapping) {
-      for (const [key, v] of Object.entries(mapping)) {
-        keys.push(key)
-      }
+      Object.keys(mapping).forEach((k) => keys.push(k))
     }
     return keys
   }

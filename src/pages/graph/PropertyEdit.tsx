@@ -24,28 +24,31 @@ interface PropertyEditProps {
 
 export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
   const { property, idx, onDelete, onSubmit } = props
-  const [model, setModel] = useState(property)
+  const [value, setValue] = useState<Property>(property)
 
   useEffect(() => {
-    setModel(property)
-  }, [props])
-
-  const updateType = (event: React.ChangeEvent<{ value: unknown }>): void => {
-    const value = event.target.value as string
-    onSubmit(idx, { ...model, type: value })
-  }
+    setValue(property)
+  }, [property])
 
   const updateName = (event: React.ChangeEvent<{ value: unknown }>): void => {
-    const value = event.target.value as string
-    onSubmit(idx, { ...model, name: value })
+    const newValue = { ...value, name: event.target.value as string }
+    setValue(newValue)
+    onSubmit(idx, newValue)
+  }
+
+  const updateType = (event: React.ChangeEvent<{ value: unknown }>): void => {
+    const newValue = { ...value, type: event.target.value as string }
+    setValue(newValue)
+    onSubmit(idx, newValue)
   }
 
   const updatePrimary = (
     event: React.ChangeEvent<{ value: unknown }>,
     checked: boolean
   ): void => {
-    const value = checked
-    onSubmit(idx, { ...model, primary: value })
+    const newValue = { ...value, primary: checked }
+    setValue(newValue)
+    onSubmit(idx, newValue)
   }
 
   const useStyles = makeStyles((theme: Theme) =>
@@ -72,7 +75,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           control={
             <TextField
               id="node-name"
-              value={model.name}
+              value={value.name}
               label="Name"
               onChange={updateName}
             />
@@ -85,7 +88,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           control={
             <Select
               id="demo-simple-select"
-              value={model.type}
+              value={value.type}
               onChange={updateType}
             >
               {['string', 'int', 'double', 'long'].map((t) => (
@@ -102,7 +105,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           label="Primary"
           control={
             <Checkbox
-              checked={model.primary}
+              checked={value.primary}
               onChange={updatePrimary}
               name="primary"
             />
