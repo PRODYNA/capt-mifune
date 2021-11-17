@@ -43,8 +43,8 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
     }
   }, [domain.id, cleanActive])
 
-  const valid = (valid: boolean): JSX.Element => {
-    if (valid) return <DoneIcon htmlColor={theme.palette.success.main} />
+  const valid = (isValid: boolean): JSX.Element => {
+    if (isValid) return <DoneIcon htmlColor={theme.palette.success.main} />
     return <WarningIcon htmlColor={theme.palette.warning.main} />
   }
 
