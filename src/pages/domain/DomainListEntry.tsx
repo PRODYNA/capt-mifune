@@ -65,7 +65,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   const [name, setName] = useState(props.domain.name)
   const [rootNodeId, setRootNodeId] = useState(props.domain.rootNodeId)
 
-  function executeUpdate(): void {
+  const executeUpdate = (): void => {
     graphService
       .domainPut(props.domain.id, {
         ...props.domain,
@@ -75,38 +75,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
       .then((d) => props.onUpdate(d))
   }
 
-  function buildEntry(): JSX.Element {
-    return (
-      <div
-        className={classes.root}
-        onClick={(event) => {
-          console.log('click')
-          props.onSelect(props.domain)
-          event.stopPropagation()
-        }}
-      >
-        {buildBadge()}
-
-        <div className={classes.flexBox}>
-          <IconButton
-            title="create node"
-            size="small"
-            color="primary"
-            onClick={(e) => {
-              props.addNode(props.domain)
-              e.stopPropagation()
-            }}
-          >
-            <AddIcon />
-          </IconButton>
-          <span>{props.domain.name}</span>
-        </div>
-        {buildActive()}
-      </div>
-    )
-  }
-
-  function buildBadge(): JSX.Element {
+  const buildBadge = (): JSX.Element => {
     if (props.domain.modelValid) {
       return (
         <Chip
@@ -123,7 +92,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     )
   }
 
-  function buildActive(): JSX.Element {
+  const buildActive = (): JSX.Element | JSX.Element[] => {
     if (!props.active) {
       return <></>
     }
@@ -176,6 +145,37 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         </IconButton>
       </div>,
     ]
+  }
+
+  function buildEntry(): JSX.Element {
+    return (
+      <div
+        className={classes.root}
+        onClick={(event) => {
+          console.log('click')
+          props.onSelect(props.domain)
+          event.stopPropagation()
+        }}
+      >
+        {buildBadge()}
+
+        <div className={classes.flexBox}>
+          <IconButton
+            title="create node"
+            size="small"
+            color="primary"
+            onClick={(e) => {
+              props.addNode(props.domain)
+              e.stopPropagation()
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+          <span>{props.domain.name}</span>
+        </div>
+        {buildActive()}
+      </div>
+    )
   }
 
   return buildEntry()
