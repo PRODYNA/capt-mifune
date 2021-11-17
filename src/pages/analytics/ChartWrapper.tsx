@@ -28,7 +28,7 @@ interface ChartWrapperProps<T> {
   orders: string[]
   dataPreparation: (data: any[], scale: number) => T | undefined
   selects: SelectProps[]
-  chart: (data: T) => React.ReactNode
+  chart: (data: T) => JSX.Element
 }
 
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
@@ -49,36 +49,24 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
     return (
       <>
         {filters.map((f, i) => {
-          console.log(i)
           return (
             <AnalyticFilter
-              key={i}
+              key={f.property}
               query={query}
               onKeyChange={(k) => {
-                setFilters((f) =>
-                  f.map((f, idx) => {
-                    if (idx === i) {
-                      f.property = k ?? ''
-                    }
-                    return f
-                  })
-                )
+                setFilters(() => {
+                  filters[i].property = k ?? ''
+                  return filters
+                })
               }}
               onValueChange={(k) => {
-                console.log(`value change:${k}`)
-                setFilters((f) =>
-                  f.map((f, idx) => {
-                    if (idx === i) {
-                      f.value = k
-                    }
-                    return f
-                  })
-                )
+                setFilters(() => {
+                  filters[i].value = k ?? ''
+                  return filters
+                })
               }}
               onDelete={() => {
-                console.log(i)
-                console.log(JSON.stringify(filters))
-                setFilters((f) => f.filter((item, j) => i !== j))
+                setFilters(filters.filter((item, j) => i !== j))
               }}
             />
           )
@@ -91,8 +79,8 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
     setLoading(true)
     graphService
       .query(query, results, orders, filters)
-      .then((data) => {
-        setData(dataPreparation(data, scale))
+      .then((newData) => {
+        setData(dataPreparation(newData, scale))
         setLoading(false)
       })
       .catch((e) => console.error(e))

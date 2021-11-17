@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 
 export interface D3Node<T> extends d3.SimulationNodeDatum {
+  d?: string
   kind: string
   node: T
 }

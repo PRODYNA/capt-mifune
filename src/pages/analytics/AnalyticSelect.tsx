@@ -4,7 +4,7 @@ import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
-  const { query, label, fnOptions, fnDefault } = props
+  const { query, label, fnOptions, fnDefault, onChange } = props
   const [variable, setVariable] = useState<string>()
   const [property, setProperty] = useState<string>()
   const [fn, setFn] = useState<string | undefined>(fnDefault)
@@ -22,17 +22,17 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     setProperties(nodeProps.concat(relProps))
   }, [variable, property, fn])
 
-  const onChange = (
-    variable: string | undefined,
-    property: string | undefined,
-    fn: string | undefined
+  const fireUpdate = (
+    newVar: string | undefined,
+    newProp: string | undefined,
+    newFn: string | undefined
   ): void => {
-    if (variable && property && fn) {
-      props.onChange(`${variable}.${property}[${fn}]`)
-    } else if (variable && property && (fnOptions?.length ?? 0 <= 0)) {
-      props.onChange(`${variable}.${property}`)
+    if (newVar && newProp && newFn) {
+      onChange(`${newVar}.${newProp}[${newFn}]`)
+    } else if (fnOptions?.length && fnOptions?.length <= 0) {
+      onChange(`${newVar}.${newProp}`)
     } else {
-      props.onChange(undefined)
+      onChange(undefined)
       console.log('incomplete analytic select')
     }
   }
@@ -47,7 +47,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
           onChangeHandler={(e) => {
             const newFN = e.target.value as string
             setFn(newFN)
-            onChange(variable, property, newFN)
+            fireUpdate(variable, property, newFN)
           }}
         />
       )
@@ -69,7 +69,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
             onChangeHandler={(e) => {
               const newValue = e.target.value as string
               setVariable(newValue)
-              onChange(newValue, property, fn)
+              fireUpdate(newValue, property, fn)
             }}
           />
         </Grid>
@@ -80,7 +80,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
             onChangeHandler={(e) => {
               const newValue = e.target.value as string
               setProperty(newValue)
-              onChange(variable, newValue, fn)
+              fireUpdate(variable, newValue, fn)
             }}
           />
         </Grid>

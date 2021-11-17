@@ -15,29 +15,32 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
   const [heatMax, setHeatMax] = useState<number>()
 
   const dataPreparation = (data: any[], scale: number): any[] | undefined => {
+    if (!labelX || !labelY || !count) {
+      return undefined
+    }
     const resultMap = new Map(
       data
-        .filter((d) => d[labelX!])
+        .filter((d) => d[labelX])
         .map((d) => {
           const map = new Map()
-          map.set(labelX!, d[labelX!])
-          return [d[labelX!], map]
+          map.set(labelX, d[labelX])
+          return [d[labelX], map]
         })
     )
-    let min = Number.MAX_VALUE
-    let max = Number.MIN_VALUE
-    let keys: string[] = []
+    let tempMin = Number.MAX_VALUE
+    let tempMax = Number.MIN_VALUE
+    let tempKeys: string[] = []
     data.forEach((d) => {
       resultMap
-        .get(d[labelX!])
-        ?.set(d[labelY!], (parseFloat(d[count!]) / scale).toFixed(2))
-      keys.push(d[labelY!])
-      if (d[count!]) {
-        if (d[count!] < min) {
-          min = d[count!]
+        .get(d[labelX])
+        ?.set(d[labelY], (parseFloat(d[count]) / scale).toFixed(2))
+      tempKeys.push(d[labelY])
+      if (d[count]) {
+        if (d[count] < tempMin) {
+          tempMin = d[count]
         }
-        if (d[count!] > max) {
-          max = d[count!]
+        if (d[count] > tempMax) {
+          tempMax = d[count]
         }
       }
     })
@@ -45,21 +48,21 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
     resultMap.forEach((v) => {
       result.push(Object.fromEntries(v))
     })
-    keys = keys
+    tempKeys = tempKeys
       .filter((v, i, s) => s.indexOf(v) === i)
       .sort((one, two) => (one < two ? -1 : 1))
 
-    min /= scale
-    max /= scale
+    tempMin /= scale
+    tempMax /= scale
 
-    setMin(min)
-    setMax(max)
-    setHeatMax(min + (max - min) / 2)
-    if (result.length < 1 || keys.length < 1) {
+    setMin(tempMin)
+    setMax(tempMax)
+    setHeatMax(tempMin + (tempMax - tempMin) / 2)
+    if (result.length < 1 || tempKeys.length < 1) {
       setKeys(undefined)
       return undefined
     }
-    setKeys(keys)
+    setKeys(tempKeys)
     return result
   }
 
@@ -73,6 +76,7 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
       labelY &&
       count
     ) {
+      console.log('build chart')
     } else {
       return <h1>Ups</h1>
     }
@@ -107,12 +111,15 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
       </div>
     )
   }
+  if (!labelY || !labelX || !count) {
+    return <></>
+  }
 
   return (
     <ChartWrapper
       query={query}
-      results={[labelX!, labelY!, count!]}
-      orders={[labelX!]}
+      results={[labelX, labelY, count]}
+      orders={[labelX]}
       dataPreparation={dataPreparation}
       selects={[
         { query, label: 'X', onChange: setLabelX },
@@ -123,7 +130,6 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
           fnDefault: 'count',
           fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
           onChange: (v) => {
-            console.log(v)
             setCount(v)
           },
         },

@@ -33,6 +33,7 @@ export interface QueryRelation {
 }
 
 export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
+  const { onChange } = props
   const width = 800
   const height = 600
 
@@ -50,7 +51,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   const [nodes, setNodes] = useState<D3Node<QueryNode>[]>([])
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
-  const [startNode, setStartNode] = useState<Node>()
   const d3Container = useRef(null)
 
   const color = (id: string): string => {
@@ -65,7 +65,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const possibleRelations: QueryRelation[] = graphService
       .possibleRelations(graph!, d.node.node.id)
       .map((r) => {
-        setVarCounter(varCounter++)
+        setVarCounter((vc) => vc + 1)
         return {
           id: v4(),
           varName: `${r.type}_${varCounter}`,
@@ -87,13 +87,19 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       ) {
         r.sourceId = id
         r.targetId = d.node.id
-        node = graph!.nodes.filter((n) => n.id === r.relation.sourceId)[0]
+        const [n] = graph!.nodes.filter(
+          (tempNode) => tempNode.id === r.relation.sourceId
+        )
+        node = n
       } else if (r.relation.sourceId === d.node.node.id) {
         r.sourceId = d.node.id
         r.targetId = id
-        node = graph!.nodes.filter((n) => n.id === r.relation.targetId)[0]
+        const [n] = graph!.nodes.filter(
+          (tempNode) => tempNode.id === r.relation.targetId
+        )
+        node = n
       }
-      setVarCounter(varCounter++)
+      setVarCounter((vc) => vc + 1)
       if (node) {
         const qNode: QueryNode = {
           id,
@@ -124,10 +130,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     if (!d3Container.current) {
       return
     }
-    const svg = d3.select(d3Container.current)
-    svg.selectAll('*').remove()
+    const svgSelect = d3.select(d3Container.current)
+    svgSelect.selectAll('*').remove()
 
-    svg.append('style').text(`
+    svgSelect.append('style').text(`
             .relation-label { 
                 font: bold 13px sans-serif; 
                 fill: white; 
@@ -144,27 +150,27 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
             }
           `)
 
-    svg.attr('viewBox', `${-width / 2},${-height / 2},${width},${height}`)
+    svgSelect.attr('viewBox', `${-width / 2},${-height / 2},${width},${height}`)
 
     if (nodes && nodes?.length <= 0) {
       console.error('no nodes exist')
     }
 
     const drawNodes = (
-      svg: d3.Selection<null, unknown, null, undefined>,
-      nodes: D3Node<QueryNode>[]
+      svgSection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
+      queryNodes: D3Node<QueryNode>[]
     ): Selection<
       BaseType | SVGTextElement,
       D3Node<QueryNode>,
       SVGGElement,
       unknown
     > => {
-      return svg
+      return svgSection
         .append('g')
         .attr('stroke', '#fff')
         .attr('stroke-width', 1.5)
         .selectAll('circle')
-        .data(nodes || [])
+        .data(queryNodes || [])
         .join('circle')
         .attr('r', (n) => (startNodeId === n.node.id ? 50 : 30))
         .attr('fill', (n) => (n.node.selected ? n.node.node.color : 'gray'))
@@ -173,18 +179,18 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     }
 
     const drawNodeLabel = (
-      svg: d3.Selection<null, unknown, null, undefined>,
-      data: D3Node<QueryNode>[]
+      svgSection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
+      queryNodes: D3Node<QueryNode>[]
     ): Selection<
       BaseType | SVGTextElement,
       D3Node<QueryNode>,
       SVGGElement,
       unknown
     > => {
-      return svg
+      return svgSection
         .append('g')
         .selectAll('text')
-        .data(data)
+        .data(queryNodes)
         .join('text')
         .text((d) => d.node.varName)
         .attr('dominant-baseline', 'middle')
@@ -194,8 +200,8 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     }
 
     const drawRelations = (
-      svg: d3.Selection<null, unknown, null, undefined>,
-      relations: D3Relation<QueryRelation>[]
+      svgSection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
+      queryRelations: D3Relation<QueryRelation>[]
     ): d3.Selection<
       d3.BaseType | SVGPathElement,
       D3Relation<QueryRelation>,
@@ -216,7 +222,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       //         .attr("stop-opacity",'20%');
       // })
 
-      const selection = svg.append('g').selectAll('path').data(relations)
+      const selection = svgSection
+        .append('g')
+        .selectAll('path')
+        .data(queryRelations)
       const relation = selection
         .join('path')
         .attr('id', (d) => d.relation.id)
@@ -245,26 +254,30 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       node: any
     ): void => {
       const dragstart = (event: any, d: any): void => {}
-      const dragged = (event: any, d: any): void => {
-        d.fx = event.x
-        d.fy = event.y
+      const dragged = (event: any, element: any): void => {
+        // eslint-disable-next-line no-param-reassign
+        element.fx = event.x
+        // eslint-disable-next-line no-param-reassign
+        element.fy = event.y
         simulation.alphaTarget(0.3).restart()
       }
       const dragend = (event: any, d: any): void => {
         simulation.stop()
       }
 
-      const click = (event: any, d: D3Node<QueryNode>): void => {
-        if (d.node.selected) {
+      const click = (event: any, d3Node: D3Node<QueryNode>): void => {
+        if (d3Node.node.selected) {
           setSelectActive(true)
-          addPossibleRelations(d)
+          addPossibleRelations(d3Node)
         } else {
-          d.node.selected = true
+          // eslint-disable-next-line no-param-reassign
+          d3Node.node.selected = true
           setSelectActive(false)
           const activeNodes = nodes.filter((n) => n.node.selected)
           setNodes(activeNodes)
           const activeRealtions = relations
             .map((r) => {
+              // eslint-disable-next-line no-param-reassign
               r.relation.selected = true
               return r
             })
@@ -275,7 +288,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
             )
           setRelations(activeRealtions)
 
-          props.onChange({
+          onChange({
             nodes: activeNodes.map((n) => n.node),
             relations: activeRealtions.map((r) => r.relation),
           })
@@ -316,15 +329,13 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         .on('tick', tick)
     }
 
-    const relation = drawRelations(svg, relations)
-    const node = drawNodes(svg, nodes)
-    const labels = drawNodeLabel(svg, nodes)
+    const relation = drawRelations(svgSelect, relations)
+    const node = drawNodes(svgSelect, nodes)
+    const labels = drawNodeLabel(svgSelect, nodes)
 
     const tick = (): void => {
-      node.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
-      labels.attr('x', (d) => d.x).attr('y', (d) => d.y)
-      // additionalNode.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-      // additionalLabels.attr("x", (d) => d.x).attr("y", (d) => d.y);
+      node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
+      labels.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
       relation.attr('d', (rel) => {
         return D3Helper.buildRelationPath(rel)
       })
@@ -332,9 +343,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
     const simulation = buildSimulation(tick)
     nodeMouseEvents(simulation, node)
-    // relationDrawEvents(simulation, selection);
-    // relationMouseEvents(simulation, relation);
-    // }
   }, [nodes, relations, selectActive])
 
   const addNode = (node: Node): void => {
@@ -351,7 +359,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     newNode.y = 100
 
     setStartNodeId(qNode.id)
-    setNodes((n) => [newNode])
+    setNodes([newNode])
     setRelations([])
     setVarCounter(0)
   }
@@ -359,7 +367,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   return (
     <>
       <h1>Query Builder</h1>
-      {/* <span>{JSON.stringify(additionalNodes)}</span> */}
       {graph?.nodes.map((n) => (
         <Button
           onClick={(e) => {

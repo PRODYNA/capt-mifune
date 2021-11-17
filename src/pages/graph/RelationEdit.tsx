@@ -21,7 +21,6 @@ import { DomainSelect } from './DomainSelect'
 
 interface RelationEditProps {
   relation: Relation
-  nodes: Node[]
   domains: Domain[]
   onCreate: (model: Relation) => void
   onSubmit: (model: Relation) => void
@@ -30,13 +29,34 @@ interface RelationEditProps {
 }
 
 export const RelationEdit = (props: RelationEditProps): JSX.Element => {
-  const { relation, nodes, domains, onClose, onCreate, onDelete, onSubmit } =
-    props
-  const ID = (): string => {
-    return `_${Math.random().toString(36).substr(2, 9)}`
-  }
-
+  const { relation, domains, onClose, onCreate, onDelete, onSubmit } = props
   const [value, setValue] = useState(relation)
+
+  const useStyles = makeStyles({
+    root: {
+      display: 'flex',
+      maxHeight: '95vh',
+      flex: 'auto',
+      flexDirection: 'column',
+      maxWidth: 350,
+    },
+    header: {
+      flexGrow: 0,
+    },
+    content: {
+      overflowY: 'auto',
+      alignItems: 'stretch',
+      flexGrow: 1,
+    },
+    footer: {
+      flexGrow: 0,
+    },
+    label: {
+      width: '100%',
+      marginLeft: 10,
+    },
+  })
+  const classes = useStyles()
 
   const handleSubmit = (event: any): void => {
     if (value.id === '') {
@@ -47,10 +67,18 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
     event.preventDefault()
   }
 
+  const updateType = (event: any): void => {
+    setValue((oldNode) => ({ ...oldNode, type: event.target.value }))
+  }
+
+  const updateDomain = (domainIds: string[]): void => {
+    setValue((oldRel) => ({ ...oldRel, domainIds }))
+  }
+
   const addProperty = (): void => {
-    setValue((value) => ({
-      ...value,
-      properties: (value.properties ?? []).concat({
+    setValue((oldValue) => ({
+      ...oldValue,
+      properties: (oldValue.properties ?? []).concat({
         type: 'string',
         name: '',
         primary: false,
@@ -59,58 +87,18 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   }
 
   const deleteProperty = (idx: number): void => {
-    const props = value.properties
-    splice(idx, 1)
-    setValue((value) => ({
-      ...value,
-      properties: props,
+    const valueProps = value.properties
+    valueProps.splice(idx, 1)
+    setValue((oldNode) => ({
+      ...oldNode,
+      properties: valueProps,
     }))
   }
 
   const updateProperty = (idx: number, model: Property): void => {
-    setValue((value) => {
-      const { properties } = value
-      properties[idx] = model
-      return {
-        ...value,
-        properties,
-      }
-    })
-  }
-
-  const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-      root: {
-        display: 'flex',
-        maxHeight: '95vh',
-        flex: 'auto',
-        flexDirection: 'column',
-        maxWidth: 350,
-      },
-      header: {
-        flexGrow: 0,
-      },
-      content: {
-        overflowY: 'auto',
-        alignItems: 'stretch',
-        flexGrow: 1,
-      },
-      footer: {
-        flexGrow: 0,
-      },
-      label: {
-        width: '100%',
-        marginLeft: 10,
-      },
-    })
-  )
-
-  const classes = useStyles()
-
-  const typeInput = useRef(null)
-
-  const updateDomain = (domainIds: string[]): void => {
-    setValue((rel) => ({ ...rel, domainIds }))
+    const valueProps = value.properties
+    valueProps[idx] = model
+    setValue(() => ({ ...value, properties: valueProps }))
   }
 
   useEffect(() => {
@@ -122,7 +110,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
       <>
         <h3>Properties</h3>
         {value.properties?.map((p, idx) => (
-          <div key={p.name}>
+          <div>
             <PropertyEdit
               idx={idx}
               property={p}
@@ -153,12 +141,9 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
             control={
               <TextField
                 id="node-color"
-                inputRef={typeInput}
                 value={value.type}
                 label="Type"
-                onChange={(event: any) => {
-                  setValue({ ...value, type: event.target.value })
-                }}
+                onChange={updateType}
               />
             }
           />
