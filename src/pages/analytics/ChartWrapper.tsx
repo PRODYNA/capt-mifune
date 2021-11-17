@@ -45,7 +45,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   })
   const classes = useStyle()
 
-  function filterElements(): JSX.Element {
+  const filterElements = (): JSX.Element => {
     return (
       <>
         {filters.map((f, i) => {
@@ -87,7 +87,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
     )
   }
 
-  function loadData(): void {
+  const loadData = (): void => {
     setLoading(true)
     graphService
       .query(query, results, orders, filters)
@@ -98,7 +98,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
       .catch((e) => console.error(e))
   }
 
-  function buildChart(): JSX.Element {
+  const buildChart = (): JSX.Element => {
     if (loading) {
       return (
         <div className={classes.infoBox}>

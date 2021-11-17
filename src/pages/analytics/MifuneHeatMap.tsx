@@ -14,7 +14,7 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
   const [max, setMax] = useState<number>(Number.MIN_VALUE)
   const [heatMax, setHeatMax] = useState<number>()
 
-  function dataPreparation(data: any[], scale: number): any[] | undefined {
+  const dataPreparation = (data: any[], scale: number): any[] | undefined => {
     const resultMap = new Map(
       data
         .filter((d) => d[labelX!])
@@ -63,7 +63,7 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
     return result
   }
 
-  function buildChart(data: any[]): JSX.Element {
+  const buildChart = (data: any[]): JSX.Element => {
     if (
       data &&
       data.length > 0 &&
