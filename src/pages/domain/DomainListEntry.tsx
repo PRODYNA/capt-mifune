@@ -147,7 +147,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     ]
   }
 
-  function buildEntry(): JSX.Element {
+  const buildEntry = (): JSX.Element => {
     return (
       <div
         className={classes.root}

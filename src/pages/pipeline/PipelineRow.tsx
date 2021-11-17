@@ -34,7 +34,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
 
   useEffect(() => {
     const sseClient = graphService.importSource(domain.id)
-    sseClient.onmessage = function (e) {
+    sseClient.onmessage = (e) => {
       setMessage(e.data)
     }
 

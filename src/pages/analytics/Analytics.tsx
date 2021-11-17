@@ -23,7 +23,7 @@ export const Analytics = (): JSX.Element => {
   })
   const classes = useStyle()
 
-  function getChart(): JSX.Element {
+  const getChart = (): JSX.Element => {
     if (chart === 'BarChart') {
       return <MifuneBarChart query={query} />
     }
@@ -36,7 +36,7 @@ export const Analytics = (): JSX.Element => {
     return <></>
   }
 
-  function select(onSelect = (value: string) => {}): JSX.Element {
+  const select = (onSelect = (value: string) => {}): JSX.Element => {
     return (
       <div className={classes.box}>
         <Fab

@@ -14,7 +14,7 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
   const [to, setTo] = useState<string>()
   const [count, setCount] = useState<string>()
 
-  function prepareData(data: any[], scale: number): Data | undefined {
+  const prepareData = (data: any[], scale: number): Data | undefined => {
     if (data && from && to && count) {
       const nodes: SankeyDataNode[] = data
         .map((d) => d[from])
@@ -43,7 +43,7 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
     return undefined
   }
 
-  function buildChart(data: any): JSX.Element {
+  const buildChart = (data: any): JSX.Element => {
     return (
       <div style={{ height: window.innerHeight }}>
         <ResponsiveSankey

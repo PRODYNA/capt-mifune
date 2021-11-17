@@ -60,7 +60,7 @@ const Pipelines = (): JSX.Element => {
 
   useEffect(() => {
     const sseClient = graphService.graphStats()
-    sseClient.onmessage = function (e) {
+    sseClient.onmessage = (e) => {
       setStatistics(JSON.parse(e.data))
     }
     return function cleanUp() {
@@ -70,10 +70,10 @@ const Pipelines = (): JSX.Element => {
 
   function clean(): void {
     const sseClient = graphService.cleanDatabase()
-    sseClient.onmessage = function (e) {
+    sseClient.onmessage = (e) => {
       setCleanActive(true)
     }
-    sseClient.onerror = function () {
+    sseClient.onerror = () => {
       setCleanActive(false)
       sseClient.close()
     }

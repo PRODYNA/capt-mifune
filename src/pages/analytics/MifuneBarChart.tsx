@@ -8,7 +8,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
   const [label, setLabel] = useState<string>()
   const [count, setCount] = useState<string>()
 
-  function buildChart(data: any[]): JSX.Element {
+  const buildChart = (data: any[]): JSX.Element => {
     if (!(count && label && data) || data.length < 1) {
       return <></>
     }

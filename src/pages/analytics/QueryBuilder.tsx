@@ -53,7 +53,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [startNode, setStartNode] = useState<Node>()
   const d3Container = useRef(null)
 
-  function color(id: string): string {
+  const color = (id: string): string => {
     return nodes.find((n) => n.node.node.id === id)?.node.node.color ?? 'green'
   }
 
@@ -61,7 +61,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     graphService.graphGet().then((g) => setGraph(g))
   }, [])
 
-  function addPossibleRelations(d: D3Node<QueryNode>): void {
+  const addPossibleRelations = (d: D3Node<QueryNode>): void => {
     const possibleRelations: QueryRelation[] = graphService
       .possibleRelations(graph!, d.node.node.id)
       .map((r) => {
@@ -150,7 +150,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       console.error('no nodes exist')
     }
 
-    function drawNodes(
+    const drawNodes = (
       svg: d3.Selection<null, unknown, null, undefined>,
       nodes: D3Node<QueryNode>[]
     ): Selection<
@@ -158,7 +158,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       D3Node<QueryNode>,
       SVGGElement,
       unknown
-    > {
+    > => {
       return svg
         .append('g')
         .attr('stroke', '#fff')
@@ -172,7 +172,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         .classed('node', true)
     }
 
-    function drawNodeLabel(
+    const drawNodeLabel = (
       svg: d3.Selection<null, unknown, null, undefined>,
       data: D3Node<QueryNode>[]
     ): Selection<
@@ -180,7 +180,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       D3Node<QueryNode>,
       SVGGElement,
       unknown
-    > {
+    > => {
       return svg
         .append('g')
         .selectAll('text')
@@ -193,7 +193,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         .attr('background-color', (n) => n.node.node.color)
     }
 
-    function drawRelations(
+    const drawRelations = (
       svg: d3.Selection<null, unknown, null, undefined>,
       relations: D3Relation<QueryRelation>[]
     ): d3.Selection<
@@ -201,7 +201,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       D3Relation<QueryRelation>,
       SVGGElement,
       unknown
-    > {
+    > => {
       //
       // relations.forEach( r => {
       //     var linearGradient = svg.append("defs")
@@ -240,10 +240,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       return relation
     }
 
-    function nodeMouseEvents(
+    const nodeMouseEvents = (
       simulation: d3.Simulation<any, any>,
       node: any
-    ): void {
+    ): void => {
       const dragstart = (event: any, d: any): void => {}
       const dragged = (event: any, d: any): void => {
         d.fx = event.x

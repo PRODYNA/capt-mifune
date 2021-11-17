@@ -22,11 +22,11 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     setProperties(nodeProps.concat(relProps))
   }, [variable, property, fn])
 
-  function onChange(
+  const onChange = (
     variable: string | undefined,
     property: string | undefined,
     fn: string | undefined
-  ): void {
+  ): void => {
     if (variable && property && fn) {
       props.onChange(`${variable}.${property}[${fn}]`)
     } else if (variable && property && (fnOptions?.length ?? 0 <= 0)) {
@@ -37,7 +37,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     }
   }
 
-  function buildFnSelect(): JSX.Element {
+  const buildFnSelect = (): JSX.Element => {
     if (fn && (fnOptions?.length ?? 0 > 1)) {
       return (
         <FormSelect
