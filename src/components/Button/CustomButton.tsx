@@ -1,14 +1,20 @@
-import { Button, ButtonProps, createStyles, makeStyles, Theme } from '@material-ui/core'
+import {
+  Button,
+  ButtonProps,
+  createStyles,
+  makeStyles,
+  Theme,
+} from '@material-ui/core'
 import React from 'react'
-import { fontWhite } from '../Theme/CustomColors';
+import { fontWhite } from '../Theme/CustomColors'
 
 type ICustomButton = ButtonProps & {
-  title: string;
-  customColor?: string;
+  title: string
+  customColor?: string
 }
 
 interface StylesProps {
-  customColor: string;
+  customColor: string
 }
 
 const useStyles = makeStyles<Theme, StylesProps>(() =>
@@ -39,24 +45,26 @@ const useStyles = makeStyles<Theme, StylesProps>(() =>
       },
     },
   })
-);
-
-
+)
 
 const CustomButton = (props: ICustomButton): JSX.Element => {
-  const { title, customColor, ...rest } = props
+  const { title, customColor, color, ...rest } = props
   const styleProps: StylesProps = {
-    customColor: customColor || props.color || 'primary',
-  };
-  const classes = useStyles(styleProps);
+    customColor: customColor || color || 'primary',
+  }
+  const classes = useStyles(styleProps)
 
-  return <Button
-    variant="contained"
-    size="medium"
-    disableElevation
-    className={classes.root}
-    {...rest}>{title}
-  </Button>
+  return (
+    <Button
+      variant="contained"
+      size="medium"
+      disableElevation
+      className={classes.root}
+      {...rest}
+    >
+      {title}
+    </Button>
+  )
 }
 
 export default CustomButton
