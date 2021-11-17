@@ -16,7 +16,8 @@ interface DomainEditProps {
 export const PipelineEdit = (props: DomainEditProps) => {
   const history = useHistory();
 
-  const [value, setValue] = useState<Domain>(props.domain);
+  const [mapping, setMapping] = useState<any>(props.domain.columnMapping??{});
+  const [file, setFile] = useState<string|undefined>(props.domain.file);
   const [sources, setSources] = useState<Source[]>([]);
 
   useEffect(() => {
@@ -26,17 +27,14 @@ export const PipelineEdit = (props: DomainEditProps) => {
   }, [props.domain]);
 
   useEffect(() => {
-    graphService.loadDefaultMappingConfig(value).then((r) => {
-      setValue({
-        ...value,
-        columnMapping: r.data,
-      });
+    graphService.loadDefaultMappingConfig(props.domain).then((r) => {
+      setMapping(r.data ?? {});
     });
   }, [props.domain]);
 
   const getMenuItems = () => {
     if (sources) {
-      const data = sources.filter((s) => s.name === value.file)[0];
+      const data = sources.filter((s) => s.name === file)[0];
       if (data) {
         let header = data.header;
         if (!(header.find((h) => h === "") === "")) {
@@ -55,43 +53,40 @@ export const PipelineEdit = (props: DomainEditProps) => {
    */
   const getColumnMappingKeys = () => {
     let keys: string[] = [];
-    if (value.columnMapping) {
-      for (const [key, v] of Object.entries(value.columnMapping)) {
+    if (mapping) {
+      for (const [key, v] of Object.entries(mapping)) {
         keys.push(key);
       }
     }
     return keys;
   };
 
-  const onNodeChangeEventHandler = (
-    event: React.ChangeEvent<HTMLFormElement>
+  const updateMappingKey = (
+     key: string,
+     mappingValue: string
+
   ) => {
-    const refersTo = event.target.parentElement?.innerText.split(
-      "\n"
-    )[0] as string;
-    if (value.columnMapping) {
-      const newColumnMapping = value.columnMapping;
-      newColumnMapping[refersTo] = event.target.value;
-      setValue({ ...value, columnMapping: newColumnMapping });
+    if (mapping) {
+      setMapping({ ...mapping,[key]: mappingValue });
     }
   };
 
   const onFileChangeEventHandler = (
     event: React.ChangeEvent<HTMLFormElement>
   ) => {
-    setValue({ ...value, file: event.target.value });
+    setFile( event.target.value);
   };
 
   const getReactNodes = (values: string[]) => {
     return getColumnMappingKeys().map((key) => {
       return (
-        <Grid item xs={12} md={6}>
+        <Grid key={key} item xs={12} md={6}>
           <FormSelect
             key={key}
             title={key}
             options={values}
-            value={value.columnMapping[key]}
-            onChangeHandler={onNodeChangeEventHandler}
+            value={mapping[key]}
+            onChangeHandler={e => updateMappingKey(key, e.target.value as string)}
           />
         </Grid>
       );
@@ -113,7 +108,7 @@ export const PipelineEdit = (props: DomainEditProps) => {
         key="FileSelection"
         title="Select file to map"
         options={options}
-        value={value.file ? value.file : "None"}
+        value={file ?? "None"}
         onChangeHandler={onFileChangeEventHandler}
       />
     </Grid>
@@ -131,10 +126,10 @@ export const PipelineEdit = (props: DomainEditProps) => {
 
   return (
     <>
-      {/*<span>{JSON.stringify(getMenuItems())}</span>*/}
+      <span>{JSON.stringify(mapping)}</span>
       <form onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        console.log("domain edit " + value.name);
-        props.onSubmit(value).then(() => {
+        console.log("domain edit " + file);
+        props.onSubmit({...props.domain, file: file,columnMapping: mapping}).then(() => {
           history.goBack();
         });
         event.preventDefault();
