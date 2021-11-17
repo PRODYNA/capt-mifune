@@ -32,7 +32,7 @@ export interface QueryRelation {
   targetId: string
 }
 
-export const QueryBuilder = (props: QueryBuilderProps) => {
+export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const width = 800
   const height = 600
 
@@ -61,7 +61,7 @@ export const QueryBuilder = (props: QueryBuilderProps) => {
     graphService.graphGet().then((g) => setGraph(g))
   }, [])
 
-  function addPossibleRelations(d: D3Node<QueryNode>) {
+  function addPossibleRelations(d: D3Node<QueryNode>): void {
     const possibleRelations: QueryRelation[] = graphService
       .possibleRelations(graph!, d.node.node.id)
       .map((r) => {

@@ -25,7 +25,7 @@ interface IPipelineRow {
   setShowProgress: Dispatch<SetStateAction<boolean>>
 }
 
-const PipelineRow = (props: IPipelineRow) => {
+const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const { domain, cleanActive, setShowProgress } = props
   const history = useHistory()
   const [message, setMessage] = useState<string>()

@@ -1,3 +1,4 @@
+import React from 'react'
 import { createStyles, makeStyles, Theme } from '@material-ui/core'
 import { Domain, GraphDelta, Node } from '../../api/model/Model'
 import { DomainListEntry } from './DomainListEntry'
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export const DomainList = (props: DomainListProps) => {
+export const DomainList = (props: DomainListProps): JSX.Element => {
   const {
     onSelect,
     onSubmit,

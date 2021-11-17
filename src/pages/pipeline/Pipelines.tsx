@@ -68,7 +68,7 @@ const Pipelines = (): JSX.Element => {
     }
   }, [cleanActive])
 
-  function clean() {
+  function clean(): void {
     const sseClient = graphService.cleanDatabase()
     sseClient.onmessage = function (e) {
       setCleanActive(true)

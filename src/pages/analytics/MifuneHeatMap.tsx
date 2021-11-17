@@ -4,7 +4,7 @@ import { Slider } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
-export const MifiuneHeatMap = (props: { query: Query }) => {
+export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
   const [labelX, setLabelX] = useState<string>()
   const [labelY, setLabelY] = useState<string>()
   const [count, setCount] = useState<string>()
@@ -62,7 +62,7 @@ export const MifiuneHeatMap = (props: { query: Query }) => {
     return result
   }
 
-  function buildChart(data: any[]) {
+  function buildChart(data: any[]): JSX.Element {
     if (
       data &&
       data.length > 0 &&

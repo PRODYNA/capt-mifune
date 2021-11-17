@@ -29,7 +29,7 @@ interface NodeEditProps {
   onClose: () => void
 }
 
-export const NodeEdit = (props: NodeEditProps) => {
+export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const [value, setValue] = useState<Node>(Object.create(props.node))
 
   const useStyle = makeStyles({
@@ -64,20 +64,20 @@ export const NodeEdit = (props: NodeEditProps) => {
   })
   const classes = useStyle()
 
-  const updateLabel = (event: any) => {
+  const updateLabel = (event: any): void => {
     setValue((node) => ({ ...node, label: event.target.value }))
   }
-  const updateColor = (hex: any) => {
+  const updateColor = (hex: any): void => {
     setValue((node) => ({ ...node, color: hex }))
   }
-  const updateDomain = (newDomainIds: string[]) => {
+  const updateDomain = (newDomainIds: string[]): void => {
     setValue((node) => ({ ...node, domainIds: newDomainIds }))
   }
-  const updateDomainEntry = (event: any, value: boolean) => {
+  const updateDomainEntry = (event: any, value: boolean): void => {
     setValue((node) => ({ ...node, root: value }))
   }
 
-  function addProperty() {
+  function addProperty(): void {
     setValue((value) => ({
       ...value,
       properties: (value.properties ?? []).concat({
@@ -88,7 +88,7 @@ export const NodeEdit = (props: NodeEditProps) => {
     }))
   }
 
-  function deleteProperty(idx: number) {
+  function deleteProperty(idx: number): void {
     const props = value.properties
     props.splice(idx, 1)
     setValue((value) => ({
@@ -97,7 +97,7 @@ export const NodeEdit = (props: NodeEditProps) => {
     }))
   }
 
-  const updateProperty = (idx: number, model: Property) => {
+  const updateProperty = (idx: number, model: Property): void => {
     setValue((value) => {
       const { properties } = value
       properties[idx] = model
@@ -108,7 +108,7 @@ export const NodeEdit = (props: NodeEditProps) => {
     })
   }
 
-  function properties() {
+  function properties(): JSX.Element {
     return (
       <>
         <h3>Properties</h3>
@@ -130,7 +130,7 @@ export const NodeEdit = (props: NodeEditProps) => {
     )
   }
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: any): void => {
     if (value.id === '') {
       props.onCreate(value)
     } else {

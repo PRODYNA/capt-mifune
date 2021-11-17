@@ -29,14 +29,14 @@ interface RelationEditProps {
   onClose: () => void
 }
 
-export const RelationEdit = (props: RelationEditProps) => {
-  const ID = function () {
+export const RelationEdit = (props: RelationEditProps): JSX.Element => {
+  const ID = function (): string {
     return `_${Math.random().toString(36).substr(2, 9)}`
   }
 
   const [value, setValue] = useState(props.relation)
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: any): void => {
     if (value.id === '') {
       props.onCreate(value)
     } else {
@@ -45,7 +45,7 @@ export const RelationEdit = (props: RelationEditProps) => {
     event.preventDefault()
   }
 
-  function addProperty() {
+  function addProperty(): void {
     setValue((value) => ({
       ...value,
       properties: (value.properties ?? []).concat({
@@ -56,7 +56,7 @@ export const RelationEdit = (props: RelationEditProps) => {
     }))
   }
 
-  function deleteProperty(idx: number) {
+  function deleteProperty(idx: number): void {
     const props = value.properties
     props.splice(idx, 1)
     setValue((value) => ({
@@ -65,7 +65,7 @@ export const RelationEdit = (props: RelationEditProps) => {
     }))
   }
 
-  const updateProperty = (idx: number, model: Property) => {
+  const updateProperty = (idx: number, model: Property): void => {
     setValue((value) => {
       const { properties } = value
       properties[idx] = model
@@ -107,17 +107,15 @@ export const RelationEdit = (props: RelationEditProps) => {
 
   const typeInput = useRef(null)
 
-  const updateDomain = (domainIds: string[]) => {
+  const updateDomain = (domainIds: string[]): void => {
     setValue((rel) => ({ ...rel, domainIds }))
   }
 
   useEffect(() => {
     setValue(props.relation)
-    // @ts-ignore
-    // typeInput?.current.focus();
   }, [props])
 
-  function properties() {
+  function properties(): JSX.Element {
     return (
       <>
         <h3>Properties</h3>

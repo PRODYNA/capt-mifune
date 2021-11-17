@@ -59,13 +59,13 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-export const DomainListEntry = (props: DomainListEntryProps) => {
+export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   const classes = useStyles()
 
   const [name, setName] = useState(props.domain.name)
   const [rootNodeId, setRootNodeId] = useState(props.domain.rootNodeId)
 
-  function executeUpdate() {
+  function executeUpdate(): void {
     graphService
       .domainPut(props.domain.id, {
         ...props.domain,
@@ -75,7 +75,7 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
       .then((d) => props.onUpdate(d))
   }
 
-  function buildEntry() {
+  function buildEntry(): JSX.Element {
     return (
       <div
         className={classes.root}
@@ -106,7 +106,7 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
     )
   }
 
-  function buildBadge() {
+  function buildBadge(): JSX.Element {
     if (props.domain.modelValid) {
       return (
         <Chip
@@ -123,7 +123,7 @@ export const DomainListEntry = (props: DomainListEntryProps) => {
     )
   }
 
-  function buildActive() {
+  function buildActive(): JSX.Element {
     if (!props.active) {
       return <></>
     }
