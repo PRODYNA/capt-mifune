@@ -34,6 +34,7 @@ import com.prodyna.mifune.core.json.JsonPathEditor;
 import com.prodyna.mifune.domain.*;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.IOException;
 import java.time.Duration;
@@ -85,10 +86,10 @@ public class GraphResource {
                           tx ->
                               tx.runAsync(
                                       """
-                                                                                    call {match (a) return count(a) as nodes}
-                                                                                    call {match ()-[r]->() return count(r) as relations}
-                                                                                    return nodes, relations
-                                                                                    """)
+                             call {match (a) return count(a) as nodes}
+                             call {match ()-[r]->() return count(r) as relations}
+                             return nodes, relations
+                             """)
                                   .thenCompose(
                                       fn ->
                                           fn.singleAsync()
@@ -237,20 +238,25 @@ public class GraphResource {
   @GET
   @Path("/domain/{domainId}/stats")
   @Produces(MediaType.SERVER_SENT_EVENTS)
-  public Multi<Long> stats(@PathParam("domainId") UUID domainId) {
+  public Multi<String> stats(@PathParam("domainId") UUID domainId) {
 
-    var count = this.countDomainRootNodes(domainId).toMulti();
+    var count = this.countDomainRootNodes(domainId).map("%s nodes"::formatted);
     var events =
         eventBus
             .localConsumer(domainId.toString())
             .bodyStream()
             .toMulti()
+            .emitOn(Infrastructure.getDefaultWorkerPool())
             .map(Long.class::cast)
             .onOverflow()
             .buffer(20)
             .onOverflow()
             .dropPreviousItems()
-            .toHotStream();
-    return Multi.createBy().concatenating().streams(count, events);
+            .group()
+            .intoLists()
+            .of(1000, Duration.ofMillis(300))
+            .map(l -> l.stream().max(Long::compare).orElse(0L))
+            .map("%s objects imported"::formatted);
+    return Multi.createBy().concatenating().streams(count.toMulti(), events);
   }
 }

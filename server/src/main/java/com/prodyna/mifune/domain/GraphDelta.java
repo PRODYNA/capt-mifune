@@ -33,12 +33,12 @@ import java.util.UUID;
 public class GraphDelta {
 
   private UUID trigger;
-  private Set<UUID> removedDomains = new HashSet<UUID>();
-  private Set<Domain> changedDomains = new HashSet<Domain>();
-  private Set<Node> changedNodes = new HashSet<Node>();
-  private Set<UUID> removedNodes = new HashSet<UUID>();
-  private Set<Relation> changedRelations = new HashSet<Relation>();
-  private Set<UUID> removedRelations = new HashSet<UUID>();
+  private Set<UUID> removedDomains = new HashSet<>();
+  private Set<Domain> changedDomains = new HashSet<>();
+  private Set<Node> changedNodes = new HashSet<>();
+  private Set<UUID> removedNodes = new HashSet<>();
+  private Set<Relation> changedRelations = new HashSet<>();
+  private Set<UUID> removedRelations = new HashSet<>();
 
   public UUID getTrigger() {
     return trigger;

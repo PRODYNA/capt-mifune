@@ -35,75 +35,34 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CypherUpdateContext {
+public record CypherUpdateContext(
+    boolean root,
+    String rootVar,
+    List<CypherUpdateContext> subContexts,
+    List<String> statements,
+    List<String> variables,
+    List<String> existChecks) {
 
-  public List<CypherUpdateContext> subContext = new ArrayList<>();
-  private String label;
-  private boolean root = false;
-  private List<String> statements = new ArrayList<>();
-  private List<String> variables = new ArrayList<>();
-
-  private List<String> existChecks = new ArrayList<>();
-  private String rootVar;
-
-  public List<String> getExistChecks() {
-    return existChecks;
+  CypherUpdateContext(String rootVar) {
+    this(false, rootVar);
   }
 
-  public void setExistChecks(List<String> existChecks) {
-    this.existChecks = existChecks;
-  }
-
-  public String getRootVar() {
-    return rootVar;
-  }
-
-  public void setRootVar(String rootVar) {
-    this.rootVar = rootVar;
+  CypherUpdateContext(boolean root, String rootVar) {
+    this(root, rootVar, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
   }
 
   public void addExistCheck(String propertyPath) {
     this.existChecks.add(propertyPath);
   }
 
-  public List<String> getVariables() {
-    return variables;
+  public void addStatement(String statement) {
+    this.statements.add(statement);
   }
 
-  public void setVariables(List<String> variables) {
-    this.variables = variables;
-  }
-
-  public boolean isRoot() {
-    return root;
-  }
-
-  public void setRoot(boolean root) {
-    this.root = root;
-  }
-
-  public String getLabel() {
-    return label;
-  }
-
-  public void setLabel(String label) {
-    this.label = label;
-  }
-
-  public List<String> getStatements() {
-    return statements;
-  }
-
-  public void setStatements(List<String> statements) {
-    this.statements = statements;
-  }
-
-  public List<CypherUpdateContext> getSubContext() {
-    return subContext;
-  }
-
-  public void setSubContext(List<CypherUpdateContext> subContext) {
-    this.subContext = subContext;
+  public CypherUpdateContext addSubContext(String rootVar) {
+    var cypherUpdateContext = new CypherUpdateContext(rootVar);
+    this.subContexts.add(cypherUpdateContext);
+    return cypherUpdateContext;
   }
 
   public String toCypher(boolean addReturn, int tabCount, AtomicInteger counter) {
@@ -112,15 +71,12 @@ public class CypherUpdateContext {
 
   private String toCypher(
       boolean addReturn, int tabCount, AtomicInteger counter, List<String> rootVars) {
-    var vars = new ArrayList<String>(rootVars);
+    var vars = new ArrayList<>(rootVars);
     vars.add(this.rootVar);
     vars.addAll(this.variables);
     var statements = new ArrayList<>(this.statements);
-    if (!subContext.isEmpty()) {
-      // statements.add("with *");
-    }
 
-    subContext.forEach(
+    subContexts.forEach(
         c -> {
           var checks = "";
           if (!c.existChecks.isEmpty()) {
@@ -133,13 +89,13 @@ public class CypherUpdateContext {
           var currentCounter = counter.incrementAndGet();
           var subContext =
               """
-					call {
-					return %s union
-					with %s
-					%s
-					return %s
-					}
-					"""
+                                    call {
+                                    return %s union
+                                    with %s
+                                    %s
+                                    return %s
+                                    }
+                                    """
                   .formatted(
                       currentCounter,
                       vars.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
@@ -161,5 +117,9 @@ public class CypherUpdateContext {
   String addTabs(String value, int tabCount) {
     var tabs = IntStream.range(0, tabCount).boxed().map(i -> "\t").collect(Collectors.joining());
     return value.lines().map(s -> tabs + s).collect(Collectors.joining("\n"));
+  }
+
+  public void addVariable(String varName) {
+    this.variables.add(varName);
   }
 }

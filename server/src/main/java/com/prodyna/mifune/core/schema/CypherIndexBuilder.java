@@ -34,11 +34,11 @@ import java.util.UUID;
 
 public class CypherIndexBuilder {
   public List<String> getCypher(UUID domainId, Graph graph) {
-    List<String> result = new ArrayList<String>();
+    List<String> result = new ArrayList<>();
 
     for (var node : graph.getNodes()) {
       if (node.getDomainIds().contains(domainId)) {
-        List<Property> props = new ArrayList<Property>();
+        List<Property> props = new ArrayList<>();
         for (Property prop : node.getProperties()) {
           if (prop.isPrimary()) {
             props.add(prop);
@@ -56,8 +56,8 @@ public class CypherIndexBuilder {
   }
 
   private String getPropertiesString(List<Property> props) {
-    String result = new String();
-    List<String> propStrings = new ArrayList<String>();
+    String result;
+    List<String> propStrings = new ArrayList<>();
 
     for (Property prop : props) {
       propStrings.add("n.%s".formatted(prop.getName()));

@@ -32,9 +32,4 @@ import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record DomainUpdate(
-    String name, UUID rootNodeId, String file, Map<String, String> columnMapping) {
-
-  public DomainUpdate(String name) {
-    this(name, null, null, null);
-  }
-}
+    String name, UUID rootNodeId, String file, Map<String, String> columnMapping) {}

@@ -48,13 +48,11 @@ public class CypherUpdateBuilder {
 
   public CypherUpdateBuilder(GraphModel graphModel, UUID domainId) {
     this.domainId = domainId;
-    this.rootContext = new CypherUpdateContext();
-    this.rootContext.setRoot(true);
     var rootNode = graphModel.rootNode(domainId);
     var varPath = new ArrayList<String>();
     varPath.add("$model");
     var nodeVar = generateVar();
-    rootContext.setRootVar(nodeVar);
+    this.rootContext = new CypherUpdateContext(true, nodeVar);
     buildSubContext(varPath, rootContext, rootNode, nodeVar, true, labels.add(rootNode.getLabel()));
   }
 
@@ -89,13 +87,11 @@ public class CypherUpdateBuilder {
 
   private void buildRelation(
       List<String> varPath, CypherUpdateContext cypherContext, String nodeVar, RelationModel r) {
-    var context = new CypherUpdateContext();
-    cypherContext.subContext.add(context);
 
     if (!r.isMultiple()) {
-      buildSingleRelation(context, varPath, nodeVar, r);
+      buildSingleRelation(cypherContext, varPath, nodeVar, r);
     } else {
-      buildMultiRelation(context, varPath, nodeVar, r);
+      buildMultiRelation(cypherContext, varPath, nodeVar, r);
     }
   }
 
@@ -104,7 +100,7 @@ public class CypherUpdateBuilder {
 
     var toNode = r.getTo();
     var toNodeVarName = generateVar();
-    context.setRootVar(toNodeVarName);
+    var subContext = context.addSubContext(toNodeVarName);
     if (toNode.isPrimary()) {
       var newPath = new ArrayList<>(varPath);
       newPath.add(r.varName());
@@ -112,24 +108,21 @@ public class CypherUpdateBuilder {
           .filter(Property::isPrimary)
           .map(Property::getName)
           .map(n -> String.join(".", newPath) + "." + toNode.varName() + "." + n)
-          .forEach(context::addExistCheck);
+          .forEach(subContext::addExistCheck);
 
-      buildSubContext(newPath, context, toNode, toNodeVarName, true, labels.add(toNode.getLabel()));
-      context
-          .getStatements()
-          .add(
-              "merge(%s)-[%s:%s]->(%s)"
-                  .formatted(nodeVar, r.varName(), r.getType(), toNodeVarName));
+      buildSubContext(
+          newPath, subContext, toNode, toNodeVarName, true, labels.add(toNode.getLabel()));
+      subContext.addStatement(
+          "merge(%s)-[%s:%s]->(%s)".formatted(nodeVar, r.varName(), r.getType(), toNodeVarName));
     } else {
 
       var newPath = new ArrayList<>(varPath);
       newPath.add(r.varName());
-      buildSubContext(newPath, context, toNode, toNodeVarName, true, labels.add(toNode.getLabel()));
-      context
-          .getStatements()
-          .add(
-              "merge(%s)-[%s:%s]->(%s:%s)"
-                  .formatted(nodeVar, r.varName(), r.getType(), toNodeVarName, toNode.getLabel()));
+      buildSubContext(
+          newPath, subContext, toNode, toNodeVarName, true, labels.add(toNode.getLabel()));
+      subContext.addStatement(
+          "merge(%s)-[%s:%s]->(%s:%s)"
+              .formatted(nodeVar, r.varName(), r.getType(), toNodeVarName, toNode.getLabel()));
     }
     Optional.ofNullable(r.getProperties()).stream()
         .flatMap(Collection::stream)
@@ -138,19 +131,17 @@ public class CypherUpdateBuilder {
             p -> {
               var path = new ArrayList<>(varPath);
               path.add(r.varName());
-              context
-                  .getStatements()
-                  .add(
-                      "set %s.%s = coalesce(%s.%s, %s.%s)"
-                          .formatted(
-                              r.varName(),
-                              p.getName(),
-                              String.join(".", path),
-                              p.getName(),
-                              r.varName(),
-                              p.getName()));
+              subContext.addStatement(
+                  "set %s.%s = coalesce(%s.%s, %s.%s)"
+                      .formatted(
+                          r.varName(),
+                          p.getName(),
+                          String.join(".", path),
+                          p.getName(),
+                          r.varName(),
+                          p.getName()));
             });
-    context.getStatements().add("with *");
+    subContext.addStatement("with *");
   }
 
   private void buildMultiRelation(
@@ -159,47 +150,43 @@ public class CypherUpdateBuilder {
     var varName = generateVar();
     var newPath = new ArrayList<>(varPath);
     newPath.add(r.varName());
-    context.getVariables().add(varName);
-    context.getStatements().add("unwind %s as %s".formatted(String.join(".", newPath), varName));
-    var contextVarPath = new ArrayList<>(List.of(varName));
     var toNodeVarName = generateVar();
-    context.setRootVar(toNodeVarName);
+    var subContext = context.addSubContext(toNodeVarName);
+    subContext.addVariable(varName);
+    subContext.addStatement("unwind %s as %s".formatted(String.join(".", newPath), varName));
+    var contextVarPath = new ArrayList<>(List.of(varName));
 
     if (r.getTo().isPrimary()) {
       buildSubContext(
           contextVarPath,
-          context,
+          subContext,
           r.getTo(),
           toNodeVarName,
           true,
           labels.add(r.getTo().getLabel()));
-      context
-          .getStatements()
-          .add(
-              "merge(%s)-[%s:%s%s]->(%s)"
-                  .formatted(
-                      nodeVar,
-                      r.varName(),
-                      r.getType(),
-                      primaryKeys(contextVarPath, r.getProperties()),
-                      toNodeVarName));
+      subContext.addStatement(
+          "merge(%s)-[%s:%s%s]->(%s)"
+              .formatted(
+                  nodeVar,
+                  r.varName(),
+                  r.getType(),
+                  primaryKeys(contextVarPath, r.getProperties()),
+                  toNodeVarName));
 
     } else {
-      context
-          .getStatements()
-          .add(
-              "create(%s)-[%s:%s%s]->(%s:%s%s)"
-                  .formatted(
-                      nodeVar,
-                      r.varName(),
-                      r.getType(),
-                      primaryKeys(contextVarPath, r.getProperties()),
-                      toNodeVarName,
-                      r.getTo().getLabel(),
-                      primaryKeys(contextVarPath, r.getTo().getProperties())));
+      subContext.addStatement(
+          "create(%s)-[%s:%s%s]->(%s:%s%s)"
+              .formatted(
+                  nodeVar,
+                  r.varName(),
+                  r.getType(),
+                  primaryKeys(contextVarPath, r.getProperties()),
+                  toNodeVarName,
+                  r.getTo().getLabel(),
+                  primaryKeys(contextVarPath, r.getTo().getProperties())));
       buildSubContext(
           contextVarPath,
-          context,
+          subContext,
           r.getTo(),
           toNodeVarName,
           false,
@@ -209,20 +196,17 @@ public class CypherUpdateBuilder {
         .flatMap(Collection::stream)
         .filter(not(Property::isPrimary))
         .forEach(
-            p -> {
-              context
-                  .getStatements()
-                  .add(
-                      "set %s.%s = coalesce(%s.%s, %s.%s)"
-                          .formatted(
-                              r.varName(),
-                              p.getName(),
-                              String.join(".", contextVarPath),
-                              p.getName(),
-                              r.varName(),
-                              p.getName()));
-            });
-    context.getStatements().add("with *");
+            p ->
+                subContext.addStatement(
+                    "set %s.%s = coalesce(%s.%s, %s.%s)"
+                        .formatted(
+                            r.varName(),
+                            p.getName(),
+                            String.join(".", contextVarPath),
+                            p.getName(),
+                            r.varName(),
+                            p.getName())));
+    subContext.addStatement("with *");
   }
 
   private void buildMerge(
@@ -235,20 +219,20 @@ public class CypherUpdateBuilder {
 
     pkRelation.ifPresentOrElse(
         r -> {
-          var newVarPath = new ArrayList<String>(varPath);
+          var newVarPath = new ArrayList<>(varPath);
           newVarPath.add(r.varName());
           newVarPath.add(r.getTo().varName());
           var pkNodeVar = generateVar();
           labels.add(r.getTo().getLabel());
-          cypherContext.getVariables().add(pkNodeVar);
+          cypherContext.addVariable(pkNodeVar);
           buildMerge(cypherContext, newVarPath, r.getTo(), pkNodeVar, false);
 
           if (r.getTo().getRelations().stream().anyMatch(not(RelationModel::isPrimary))) {
-            var pkNodeVarPath = new ArrayList<String>(varPath);
+            var pkNodeVarPath = new ArrayList<>(varPath);
             pkNodeVarPath.add(r.varName());
-            var cypherContext1 = new CypherUpdateContext();
+
+            var cypherContext1 = cypherContext.addSubContext(pkNodeVar);
             buildSubContext(pkNodeVarPath, cypherContext1, r.getTo(), pkNodeVar, false, true);
-            cypherContext.getSubContext().add(cypherContext1);
           }
 
           var merge =
@@ -259,44 +243,36 @@ public class CypherUpdateBuilder {
                       nodeVar,
                       node.getLabel(),
                       primaryKeys(varPath, node.getProperties()));
-          cypherContext.getStatements().add(merge);
+          cypherContext.addStatement(merge);
         },
-        () -> {
-          cypherContext
-              .getStatements()
-              .add(
-                  "merge(%s:%s%s)"
-                      .formatted(
-                          nodeVar, node.getLabel(), primaryKeys(varPath, node.getProperties())));
-        });
+        () ->
+            cypherContext.addStatement(
+                "merge(%s:%s%s)"
+                    .formatted(
+                        nodeVar, node.getLabel(), primaryKeys(varPath, node.getProperties()))));
     node.getProperties().stream()
         .filter(not(Property::isPrimary))
         .forEach(
-            p -> {
-              cypherContext
-                  .getStatements()
-                  .add(
-                      "set %s.%s = coalesce(%s.%s, %s.%s)"
-                          .formatted(
-                              nodeVar,
-                              p.getName(),
-                              String.join(".", varPath),
-                              p.getName(),
-                              nodeVar,
-                              p.getName()));
-            });
-    if (cypherContext.isRoot() && buildDomainLink) {
-      cypherContext
-          .getStatements()
-          .add(
-              """
+            p ->
+                cypherContext.addStatement(
+                    "set %s.%s = coalesce(%s.%s, %s.%s)"
+                        .formatted(
+                            nodeVar,
+                            p.getName(),
+                            String.join(".", varPath),
+                            p.getName(),
+                            nodeVar,
+                            p.getName())));
+    if (cypherContext.root() && buildDomainLink) {
+      cypherContext.addStatement(
+          """
 					merge (domain:Domain {id:$domainId})
 					merge(%s)<-[source:DOMAIN]-(domain)
 					on create set source.lines = $model.lines
 					on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
 					with *
 					"""
-                  .formatted(nodeVar));
+              .formatted(nodeVar));
     }
   }
 

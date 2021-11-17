@@ -30,11 +30,11 @@ import java.util.Objects;
 public class MappingObject {
 
   Integer lineCounter = 0;
-  ArrayList<Integer> fromLines = new ArrayList<>();
-  LinkedHashMap<String, Object> primitiveFieldValues = new LinkedHashMap<>();
-  LinkedHashMap<String, List<Object>> primitiveArrayFieldValues = new LinkedHashMap<>();
-  LinkedHashMap<String, MappingObject> objectFieldValues = new LinkedHashMap<>();
-  LinkedHashMap<String, LinkedHashMap<Integer, MappingObject>> objectFieldArrayValues =
+  final ArrayList<Integer> fromLines = new ArrayList<>();
+  final LinkedHashMap<String, Object> primitiveFieldValues = new LinkedHashMap<>();
+  final LinkedHashMap<String, List<Object>> primitiveArrayFieldValues = new LinkedHashMap<>();
+  final LinkedHashMap<String, MappingObject> objectFieldValues = new LinkedHashMap<>();
+  final LinkedHashMap<String, LinkedHashMap<Integer, MappingObject>> objectFieldArrayValues =
       new LinkedHashMap<>();
 
   public JsonNode toJson(boolean addLines) {
