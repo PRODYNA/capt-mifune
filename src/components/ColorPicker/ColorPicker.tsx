@@ -12,11 +12,11 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const { hex, onChange, className } = props
   const [show, setShow] = useState(false)
 
-  function handleClick(): void {
+  const handleClick = (): void => {
     setShow(!show)
   }
 
-  function handleClose(): void {
+  const handleClose = (): void => {
     setShow(false)
   }
 
@@ -33,7 +33,6 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
       backgroundColor: '#444',
       padding: 10,
     },
-
     cover: {
       position: 'fixed',
       top: '0px',

@@ -47,7 +47,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
     event.preventDefault()
   }
 
-  function addProperty(): void {
+  const addProperty = (): void => {
     setValue((value) => ({
       ...value,
       properties: (value.properties ?? []).concat({
@@ -58,7 +58,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
     }))
   }
 
-  function deleteProperty(idx: number): void {
+  const deleteProperty = (idx: number): void => {
     const props = value.properties
     splice(idx, 1)
     setValue((value) => ({
