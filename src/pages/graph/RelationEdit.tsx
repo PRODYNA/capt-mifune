@@ -30,17 +30,19 @@ interface RelationEditProps {
 }
 
 export const RelationEdit = (props: RelationEditProps): JSX.Element => {
+  const { relation, nodes, domains, onClose, onCreate, onDelete, onSubmit } =
+    props
   const ID = function (): string {
     return `_${Math.random().toString(36).substr(2, 9)}`
   }
 
-  const [value, setValue] = useState(props.relation)
+  const [value, setValue] = useState(relation)
 
   const handleSubmit = (event: any): void => {
     if (value.id === '') {
-      props.onCreate(value)
+      onCreate(value)
     } else {
-      props.onSubmit(value)
+      onSubmit(value)
     }
     event.preventDefault()
   }
@@ -58,7 +60,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
 
   function deleteProperty(idx: number): void {
     const props = value.properties
-    props.splice(idx, 1)
+    splice(idx, 1)
     setValue((value) => ({
       ...value,
       properties: props,
@@ -112,7 +114,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   }
 
   useEffect(() => {
-    setValue(props.relation)
+    setValue(relation)
   }, [props])
 
   function properties(): JSX.Element {
@@ -194,7 +196,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
             label="Domain"
             control={
               <DomainSelect
-                domains={props.domains}
+                domains={domains}
                 valueDomainIds={value.domainIds}
                 updateDomains={updateDomain}
               />
@@ -204,7 +206,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
         </FormGroup>
       </div>
       <div className={classes.footer}>
-        <IconButton onClick={() => props.onDelete(value)}>
+        <IconButton onClick={() => onDelete(value)}>
           <DeleteIcon />
         </IconButton>
         <Button
@@ -216,7 +218,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
         >
           Save
         </Button>
-        <IconButton onClick={() => props.onClose()}>
+        <IconButton onClick={() => onClose()}>
           <CloseIcon />
         </IconButton>
       </div>

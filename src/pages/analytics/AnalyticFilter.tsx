@@ -14,13 +14,14 @@ interface AnalyticFilterProps {
 }
 
 export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
+  const { query, onDelete, onKeyChange, onValueChange } = props
   const [filter, setFilter] = useState<string>()
   const [value, setValue] = useState<string>()
   const [values, setValues] = useState<string[]>()
 
   useEffect(() => {
     if (filter) {
-      graphService.query(props.query, [filter], [filter]).then((d) => {
+      graphService.query(query, [filter], [filter]).then((d) => {
         const values = d
           .map((d) => d[filter])
           .filter((v, i, s) => s.indexOf(v) === i)
@@ -36,14 +37,14 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
       <Grid item xs={12} md={4}>
         <AnalyticSelect
           label="Property"
-          query={props.query}
+          query={query}
           onChange={(value) => {
             const filter = value
             setFilter(filter)
             setValue(undefined)
             setValues([])
-            props.onKeyChange(filter)
-            props.onValueChange(undefined)
+            onKeyChange(filter)
+            onValueChange(undefined)
           }}
         />
       </Grid>
@@ -55,12 +56,12 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           onChangeHandler={(event) => {
             const { value } = event.target
             setValue(value)
-            props.onValueChange(value)
+            onValueChange(value)
           }}
         />
       </Grid>
       <Grid item xs={12} md={1}>
-        <IconButton onClick={props.onDelete}>
+        <IconButton onClick={onDelete}>
           <DeleteIcon />
         </IconButton>
       </Grid>

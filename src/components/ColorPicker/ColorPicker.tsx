@@ -9,6 +9,7 @@ interface ColorPickerProps {
 }
 
 export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
+  const { hex, onChange, className } = props
   const [show, setShow] = useState(false)
 
   function handleClick(): void {
@@ -22,7 +23,7 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const useStyle = makeStyles({
     button: {
       margin: 7,
-      backgroundColor: props.hex,
+      backgroundColor: hex,
     },
     popover: {
       boxShadow: '2px 2px 5px black',
@@ -44,7 +45,7 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
   const classes = useStyle()
 
   return (
-    <div className={props.className}>
+    <div className={className}>
       <IconButton
         size="medium"
         className={classes.button}
@@ -54,9 +55,9 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
         <div className={classes.popover}>
           <div className={classes.cover} onClick={handleClose} />
           <CompactPicker
-            color={props.hex}
+            color={hex}
             onChange={(e) => {
-              props.onChange(e.hex)
+              onChange(e.hex)
               setShow(false)
             }}
           />
