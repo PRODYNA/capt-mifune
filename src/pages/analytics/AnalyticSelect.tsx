@@ -4,17 +4,18 @@ import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
+  const { query, label, fnOptions, fnDefault } = props
   const [variable, setVariable] = useState<string>()
   const [property, setProperty] = useState<string>()
-  const [fn, setFn] = useState<string | undefined>(props.fnDefault)
+  const [fn, setFn] = useState<string | undefined>(fnDefault)
   const [properties, setProperties] = useState<string[]>()
 
   useEffect(() => {
-    const nodeProps = props.query.nodes
+    const nodeProps = query.nodes
       .filter((n) => n.varName === variable)
       .flatMap((n) => n.node.properties)
       .map((p) => p.name)
-    const relProps = props.query.relations
+    const relProps = query.relations
       .filter((n) => n.varName === variable)
       .flatMap((n) => n.relation.properties)
       .map((p) => p.name)
@@ -28,7 +29,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   ): void {
     if (variable && property && fn) {
       props.onChange(`${variable}.${property}[${fn}]`)
-    } else if (variable && property && (props.fnOptions?.length ?? 0 <= 0)) {
+    } else if (variable && property && (fnOptions?.length ?? 0 <= 0)) {
       props.onChange(`${variable}.${property}`)
     } else {
       props.onChange(undefined)
@@ -37,11 +38,11 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   }
 
   function buildFnSelect(): void {
-    if (fn && (props.fnOptions?.length ?? 0 > 1)) {
+    if (fn && (fnOptions?.length ?? 0 > 1)) {
       return (
         <FormSelect
           title="Function"
-          options={props.fnOptions ?? []}
+          options={fnOptions ?? []}
           value={fn}
           onChangeHandler={(e) => {
             const newFN = e.target.value as string
@@ -58,11 +59,11 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={fn ? 4 : 6}>
           <FormSelect
-            title={props.label}
+            title={label}
             options={
-              props.query.nodes
+              query.nodes
                 .map((n) => n.varName)
-                .concat(props.query.relations.map((r) => r.varName)) ?? []
+                .concat(query.relations.map((r) => r.varName)) ?? []
             }
             onChangeHandler={(e) => {
               const newValue = e.target.value as string
@@ -73,7 +74,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
         </Grid>
         <Grid item xs={12} md={fn ? 4 : 6}>
           <FormSelect
-            title={props.label}
+            title={label}
             options={properties ?? []}
             onChangeHandler={(e) => {
               const newValue = e.target.value as string

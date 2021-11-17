@@ -30,7 +30,8 @@ interface NodeEditProps {
 }
 
 export const NodeEdit = (props: NodeEditProps): JSX.Element => {
-  const [value, setValue] = useState<Node>(Object.create(props.node))
+  const { node, nodes, domains, onClose, onCreate, onDelete, onSubmit } = props
+  const [value, setValue] = useState<Node>(Object.create(node))
 
   const useStyle = makeStyles({
     root: {
@@ -90,7 +91,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
 
   function deleteProperty(idx: number): void {
     const props = value.properties
-    props.splice(idx, 1)
+    splice(idx, 1)
     setValue((value) => ({
       ...value,
       properties: props,
@@ -132,9 +133,9 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
 
   const handleSubmit = (event: any): void => {
     if (value.id === '') {
-      props.onCreate(value)
+      onCreate(value)
     } else {
-      props.onSubmit(value)
+      onSubmit(value)
     }
     event.preventDefault()
   }
@@ -142,7 +143,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const labelInput = useRef(null)
 
   useEffect(() => {
-    setValue(props.node)
+    setValue(node)
   }, [props])
 
   return (
@@ -179,7 +180,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
             control={
               <DomainSelect
                 className={classes.edit}
-                domains={props.domains}
+                domains={domains}
                 valueDomainIds={value.domainIds}
                 updateDomains={updateDomain}
               />
@@ -191,7 +192,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
       </div>
       <Divider />
       <div className={classes.footer}>
-        <IconButton onClick={() => props.onDelete(value)}>
+        <IconButton onClick={() => onDelete(value)}>
           <DeleteIcon />
         </IconButton>
         <Button
@@ -203,7 +204,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
         >
           Save
         </Button>
-        <IconButton onClick={() => props.onClose()}>
+        <IconButton onClick={() => onClose()}>
           <CloseIcon />
         </IconButton>
       </div>

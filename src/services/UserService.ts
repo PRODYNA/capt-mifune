@@ -26,8 +26,9 @@ const getToken = (): string => _kc.token
 
 const isLoggedIn = (): boolean => !!_kc.token
 
-const updateToken = (successCallback: () => Promise<AxiosRequestConfig>) =>
-  _kc.updateToken(5).then(successCallback).catch(doLogin)
+const updateToken = (
+  successCallback: () => Promise<AxiosRequestConfig>
+): void => _kc.updateToken(5).then(successCallback).catch(doLogin)
 
 const loginRequired = (): boolean =>
   // Strings should be normalized to uppercase.

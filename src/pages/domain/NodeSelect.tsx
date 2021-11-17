@@ -22,25 +22,24 @@ const MenuProps = {
 }
 
 export const NodeSelect = (props: NodeSelectProps): JSX.Element => {
+  const { nodes, nodeId, updateNode, className } = props
   return (
     <Select
-      className={props.className}
-      value={props.nodeId}
+      className={className}
+      value={nodeId}
       onChange={(e) => {
-        const node = props.nodes.filter(
-          (n) => n.id === (e.target.value as string)
-        )[0]
+        const node = nodes.filter((n) => n.id === (e.target.value as string))[0]
         console.log('select')
         console.log(node.id)
         console.log(node.label)
         console.log('select end')
-        props.updateNode(node)
+        updateNode(node)
         e.stopPropagation()
       }}
       input={<Input />}
       MenuProps={MenuProps}
     >
-      {props.nodes.map((n) => (
+      {nodes.map((n) => (
         <MenuItem key={n.id} value={n.id}>
           {n.label}
         </MenuItem>

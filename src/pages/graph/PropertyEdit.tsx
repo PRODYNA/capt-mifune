@@ -23,20 +23,21 @@ interface PropertyEditProps {
 }
 
 export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
-  const [model, setModel] = useState(props.property)
+  const { property, idx, onDelete, onSubmit } = props
+  const [model, setModel] = useState(property)
 
   useEffect(() => {
-    setModel(props.property)
+    setModel(property)
   }, [props])
 
   const updateType = (event: React.ChangeEvent<{ value: unknown }>): void => {
     const value = event.target.value as string
-    props.onSubmit(props.idx, { ...model, type: value })
+    onSubmit(idx, { ...model, type: value })
   }
 
   const updateName = (event: React.ChangeEvent<{ value: unknown }>): void => {
     const value = event.target.value as string
-    props.onSubmit(props.idx, { ...model, name: value })
+    onSubmit(idx, { ...model, name: value })
   }
 
   const updatePrimary = (
@@ -44,7 +45,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
     checked: boolean
   ): void => {
     const value = checked
-    props.onSubmit(props.idx, { ...model, primary: value })
+    onSubmit(idx, { ...model, primary: value })
   }
 
   const useStyles = makeStyles((theme: Theme) =>
@@ -62,7 +63,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
   const classes = useStyles()
 
   return (
-    <FormControl className={classes.root} key={props.idx}>
+    <FormControl className={classes.root} key={idx}>
       <FormGroup aria-label="position" row>
         <FormControlLabel
           className={classes.label}
@@ -108,7 +109,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           }
         />
         <div>
-          <IconButton onClick={() => props.onDelete(props.idx)}>
+          <IconButton onClick={() => onDelete(idx)}>
             <DeleteIcon />
           </IconButton>
         </div>

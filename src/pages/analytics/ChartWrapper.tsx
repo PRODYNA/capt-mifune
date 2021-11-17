@@ -32,6 +32,7 @@ interface ChartWrapperProps<T> {
 }
 
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
+  const { query, results, orders, dataPreparation, selects, chart } = props
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<any>()
   const [filters, setFilters] = useState<Filter[]>([])
@@ -52,7 +53,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
           return (
             <AnalyticFilter
               key={i}
-              query={props.query}
+              query={query}
               onKeyChange={(k) => {
                 setFilters((f) =>
                   f.map((f, idx) => {
@@ -89,9 +90,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   function loadData(): void {
     setLoading(true)
     graphService
-      .query(props.query, props.results, props.orders, filters)
+      .query(query, results, orders, filters)
       .then((data) => {
-        setData(props.dataPreparation(data, scale))
+        setData(dataPreparation(data, scale))
         setLoading(false)
       })
       .catch((e) => console.error(e))
@@ -112,7 +113,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
         </div>
       )
     }
-    return props.chart(data)
+    return chart(data)
   }
 
   return (
@@ -126,12 +127,12 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
         >
           <Grid container spacing={3}>
             <Grid item md={6} />
-            {props.selects.map((s) => (
+            {selects.map((s) => (
               <AnalyticSelect
                 fnOptions={s.fnOptions}
                 fnDefault={s.fnDefault}
                 label={s.label}
-                query={props.query}
+                query={query}
                 onChange={(value) => {
                   setData(undefined)
                   s.onChange(value)

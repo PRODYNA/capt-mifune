@@ -33,15 +33,16 @@ const MenuProps = {
 
 export const DomainSelect = (props: DomainSelectProps): JSX.Element => {
   const classes = useStyle()
+  const { domains, valueDomainIds, updateDomains, className } = props
 
   return (
     <Select
-      className={props.className}
+      className={className}
       labelId="demo-mutiple-chip-label"
       id="demo-mutiple-chip"
       multiple
-      value={props.valueDomainIds}
-      onChange={(e) => props.updateDomains(e.target.value as string[])}
+      value={valueDomainIds}
+      onChange={(e) => updateDomains(e.target.value as string[])}
       input={<Input id="select-multiple-chip" />}
       renderValue={(selected) => (
         <div className={classes.chips}>
@@ -49,7 +50,7 @@ export const DomainSelect = (props: DomainSelectProps): JSX.Element => {
             <Chip
               color="primary"
               key={value}
-              label={props.domains.find((d) => d.id === value)?.name}
+              label={domains.find((d) => d.id === value)?.name}
               className={classes.chip}
             />
           ))}
@@ -57,7 +58,7 @@ export const DomainSelect = (props: DomainSelectProps): JSX.Element => {
       )}
       MenuProps={MenuProps}
     >
-      {props.domains.map((d) => (
+      {domains.map((d) => (
         <MenuItem key={d.id} value={d.id}>
           {d.name}
         </MenuItem>
