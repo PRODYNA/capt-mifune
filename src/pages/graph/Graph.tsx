@@ -36,7 +36,12 @@ export const Graph = (props: IGraph): JSX.Element => {
     )
     graphDelta.changedNodes?.forEach((cn) => {
       if (d3Nodes.some((n) => n.node.id === cn.id)) {
-        d3Nodes.filter((n) => n.node.id === cn.id).forEach((n) => (n.node = cn))
+        d3Nodes
+          .filter((n) => n.node.id === cn.id)
+          .forEach((tempNode) => {
+            // eslint-disable-next-line no-param-reassign
+            tempNode.node = cn
+          })
       } else {
         d3Nodes = d3Nodes.concat(D3Helper.wrapNode(cn))
       }
@@ -51,8 +56,11 @@ export const Graph = (props: IGraph): JSX.Element => {
     graphDelta.changedRelations.forEach((cr) => {
       if (d3Relations.some((n) => n.relation.id === cr.id)) {
         d3Relations
-          .filter((n) => n.relation.id === cr.id)
-          .forEach((n) => (n.relation = cr))
+          .filter((d3Rel) => d3Rel.relation.id === cr.id)
+          .forEach((d3Rel) => {
+            // eslint-disable-next-line no-param-reassign
+            d3Rel.relation = cr
+          })
       } else {
         d3Relations = d3Relations.concat(D3Helper.wrapRelation(cr))
       }
@@ -66,7 +74,11 @@ export const Graph = (props: IGraph): JSX.Element => {
         .filter(
           (d) =>
             !graphDelta.removedDomains
-              .concat(graphDelta.changedDomains.map((d) => d.id))
+              .concat(
+                graphDelta.changedDomains.map(
+                  (changedDomain) => changedDomain.id
+                )
+              )
               .some((id) => id === d.id)
         )
         .concat(graphDelta.changedDomains)
@@ -135,7 +147,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const drawNodes = (
-      svg: d3.Selection<null, unknown, null, undefined>
+      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
     ): Selection<
       BaseType | SVGCircleElement,
       D3Node<Node>,
@@ -155,7 +167,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const drawNodeLabel = (
-      svg: d3.Selection<null, unknown, null, undefined>
+      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
     ): Selection<
       BaseType | SVGTextElement,
       D3Node<Node>,
@@ -175,7 +187,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const drawSelectionIndicator = (
-      svg: d3.Selection<null, unknown, null, undefined>
+      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
     ):
       | Selection<BaseType | SVGPathElement, D3Node<Node>, SVGGElement, unknown>
       | undefined => {
@@ -197,15 +209,15 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const drawRelations = (
-      svg: d3.Selection<null, unknown, null, undefined>,
-      relations: D3Relation<Relation>[]
+      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
+      d3Relation: D3Relation<Relation>[]
     ): d3.Selection<
       d3.BaseType | SVGPathElement,
       D3Relation<Relation>,
       SVGGElement,
       unknown
     > => {
-      const selection = svg.append('g').selectAll('path').data(relations)
+      const selection = svg.append('g').selectAll('path').data(d3Relation)
       const relation = selection
         .join('path')
         .attr('id', (d) => d.relation.id)
@@ -248,7 +260,9 @@ export const Graph = (props: IGraph): JSX.Element => {
     ): void => {
       const dragstart = (event: any, d: any): void => {}
       const dragged = (event: any, d: any): void => {
+        // eslint-disable-next-line no-param-reassign
         d.fx = event.x
+        // eslint-disable-next-line no-param-reassign
         d.fy = event.y
         simulation.alphaTarget(0.3).restart()
       }
@@ -258,11 +272,13 @@ export const Graph = (props: IGraph): JSX.Element => {
 
       const click = (event: any, d: any): void => {
         if (selected && 'node' in selected && selected.node.id === d.id) {
+          // eslint-disable-next-line no-param-reassign
           delete d.fx
+          // eslint-disable-next-line no-param-reassign
           delete d.fy
-          setSelected((x) => undefined)
+          setSelected(undefined)
         } else {
-          setSelected((x) => d)
+          setSelected(d)
         }
       }
 
@@ -278,6 +294,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       simulation: d3.Simulation<any, any>,
       relation: any
     ): void => {
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       const click = (event: any, r: D3Relation<Relation>) => {
         if (
           selected &&
@@ -306,15 +323,21 @@ export const Graph = (props: IGraph): JSX.Element => {
             const node: D3Node<Node> = selected as D3Node<Node>
             const nodeX = node.x ?? 0
             const nodeY = node.y ?? 0
+            // eslint-disable-next-line no-param-reassign
             d.d = D3Helper.selectionPath(nodeX, nodeY, e.x - nodeX, e.y - nodeY)
           }
           simulation.restart()
         })
         .on('end', (e, d: any) => {
+          // eslint-disable-next-line no-param-reassign
           delete d.d
           const target = nodes.filter((n) => {
-            const hyp = D3Helper.pointDistance(n, e)
-            return hyp < 20
+            if (n.x && n.y) {
+              return (
+                D3Helper.pointDistance({ x: n.x ?? -1, y: n.y ?? -1 }, e) < 20
+              )
+            }
+            return false
           })[0]
           if (selected?.kind === 'node' && target && selectedDomain) {
             const source = selected as D3Node<Node>
@@ -328,7 +351,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const buildSimulation = (
-      relations: D3Relation<Relation>[],
+      d3Relation: D3Relation<Relation>[],
       tick: () => void
     ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
       return d3
@@ -338,7 +361,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         .force(
           'link',
           d3
-            .forceLink<D3Node<Node>, D3Relation<Relation>>(relations)
+            .forceLink<D3Node<Node>, D3Relation<Relation>>(d3Relation)
             .id((d) => d.node.id)
             .distance(100)
             .strength(0.1)
@@ -379,9 +402,13 @@ export const Graph = (props: IGraph): JSX.Element => {
         rels = relations
       }
 
-      rels.forEach((r) => (r.incomingRelationsCount = 0))
+      rels.forEach((d3Rel) => {
+        // eslint-disable-next-line no-param-reassign
+        d3Rel.incomingRelationsCount = 0
+      })
 
       rels.forEach((r) => {
+        // eslint-disable-next-line no-param-reassign
         r.incomingRelationsCount = rels.filter(
           (r2) =>
             r2.relation.targetId === r.relation.sourceId &&
@@ -390,12 +417,14 @@ export const Graph = (props: IGraph): JSX.Element => {
       })
 
       rels.forEach((r) => {
+        // eslint-disable-next-line no-param-reassign
         r.relCount = rels.filter(
           (r2) =>
             r2.relation.sourceId === r.relation.sourceId &&
             r2.relation.targetId === r.relation.targetId
         ).length
 
+        // eslint-disable-next-line no-param-reassign
         r.relIndex = rels
           .filter(
             (r2) =>
@@ -404,6 +433,7 @@ export const Graph = (props: IGraph): JSX.Element => {
           )
           .indexOf(r)
 
+        // eslint-disable-next-line no-param-reassign
         r.firstRender = r.relation.sourceId > r.relation.targetId
       })
 
@@ -413,23 +443,26 @@ export const Graph = (props: IGraph): JSX.Element => {
       const node = drawNodes(svg)
       const text = drawNodeLabel(svg)
 
+      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       const tick = () => {
-        if (selection && selected) {
+        // todo:
+        if (selection && selected && selected.kind === 'node') {
+          const selectedNode = selected as D3Node<Node>
           selection.attr('d', (d) => {
             if (d.d) {
               return d.d
             }
             return D3Helper.selectionPath(
-              selected.x,
-              selected.y,
-              selected.x,
-              selected.y
+              d.x ?? 0,
+              d.y ?? 0,
+              d.x ?? 0,
+              d.y ?? 0
             )
           })
         }
 
-        node.attr('cx', (d) => d.x).attr('cy', (d) => d.y)
-        text.attr('x', (d) => d.x).attr('y', (d) => d.y)
+        node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
+        text.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
 
         relation.attr('d', (rel) => {
           return D3Helper.buildRelationPath(rel)
@@ -449,7 +482,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         <NodeEdit
           domains={domains}
           node={(selected as D3Node<Node>).node}
-          nodes={nodes.map((n) => n.node)}
           onCreate={(node) => {
             graphService.nodePost(node).then((graphDelta) => {
               updateState(graphDelta)
@@ -477,7 +509,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         <RelationEdit
           domains={domains}
           relation={(selected as D3Relation<Relation>).relation}
-          nodes={nodes.map((n) => n.node)}
           onCreate={(rel) => {
             graphService.relationPost(rel).then((graphDelta) => {
               updateState(graphDelta)
@@ -519,10 +550,6 @@ export const Graph = (props: IGraph): JSX.Element => {
           setDomains(domains.filter((d) => d.id !== domain.id).concat(domain))
           setSelectedDomain(domain)
         }}
-        onCreate={(domain) => {
-          setDomains(domains.concat(domain))
-          setSelectedDomain(domain)
-        }}
         onSelect={(domain: Domain) => {
           if (selectedDomain?.id === domain.id) {
             setSelectedDomain(undefined)
@@ -538,7 +565,7 @@ export const Graph = (props: IGraph): JSX.Element => {
           setSelected(
             D3Helper.wrapNode({
               id: '',
-              domainIds: [domain!.id],
+              domainIds: [domain.id],
               color: 'blue',
               label: '',
               properties: [],

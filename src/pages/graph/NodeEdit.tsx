@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   Button,
@@ -21,7 +21,6 @@ import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
 
 interface NodeEditProps {
   node: Node
-  nodes: Node[]
   domains: Domain[]
   onCreate: (node: Node) => void
   onSubmit: (node: Node) => void
@@ -30,7 +29,7 @@ interface NodeEditProps {
 }
 
 export const NodeEdit = (props: NodeEditProps): JSX.Element => {
-  const { node, nodes, domains, onClose, onCreate, onDelete, onSubmit } = props
+  const { node, domains, onClose, onCreate, onDelete, onSubmit } = props
   const [value, setValue] = useState<Node>(Object.create(node))
 
   const useStyle = makeStyles({
@@ -65,23 +64,23 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   })
   const classes = useStyle()
 
-  const updateLabel = (event: any): void => {
-    setValue((node) => ({ ...node, label: event.target.value }))
+  const handleSubmit = (event: any): void => {
+    if (value.id === '') {
+      onCreate(value)
+    } else {
+      onSubmit(value)
+    }
+    event.preventDefault()
   }
-  const updateColor = (hex: any): void => {
-    setValue((node) => ({ ...node, color: hex }))
-  }
+
   const updateDomain = (newDomainIds: string[]): void => {
-    setValue((node) => ({ ...node, domainIds: newDomainIds }))
-  }
-  const updateDomainEntry = (event: any, value: boolean): void => {
-    setValue((node) => ({ ...node, root: value }))
+    setValue((oldNode) => ({ ...oldNode, domainIds: newDomainIds }))
   }
 
   const addProperty = (): void => {
-    setValue((value) => ({
-      ...value,
-      properties: (value.properties ?? []).concat({
+    setValue((oldValue) => ({
+      ...oldValue,
+      properties: (oldValue.properties ?? []).concat({
         type: 'string',
         name: '',
         primary: false,
@@ -90,31 +89,26 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   }
 
   const deleteProperty = (idx: number): void => {
-    const props = value.properties
-    splice(idx, 1)
-    setValue((value) => ({
-      ...value,
-      properties: props,
+    const valueProps = value.properties
+    valueProps.splice(idx, 1)
+    setValue((oldNode) => ({
+      ...oldNode,
+      properties: valueProps,
     }))
   }
 
   const updateProperty = (idx: number, model: Property): void => {
-    setValue((value) => {
-      const { properties } = value
-      properties[idx] = model
-      return {
-        ...value,
-        properties,
-      }
-    })
+    const valueProps = value.properties
+    valueProps[idx] = model
+    setValue(() => ({ ...value, properties: valueProps }))
   }
 
-  const properties = (): JSX.Element => {
+  const propertyElements = (): JSX.Element => {
     return (
       <>
         <h3>Properties</h3>
         {value.properties?.map((p, idx) => (
-          <div key={p.name}>
+          <div>
             <PropertyEdit
               idx={idx}
               property={p}
@@ -130,17 +124,6 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
       </>
     )
   }
-
-  const handleSubmit = (event: any): void => {
-    if (value.id === '') {
-      onCreate(value)
-    } else {
-      onSubmit(value)
-    }
-    event.preventDefault()
-  }
-
-  const labelInput = useRef(null)
 
   useEffect(() => {
     setValue(node)
@@ -163,12 +146,21 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
                   className={classes.edit}
                   autoComplete="off"
                   id="node-label"
-                  inputRef={labelInput}
                   value={value.label}
                   label="Label"
-                  onChange={updateLabel}
+                  onChange={(event: any): void => {
+                    setValue((oldNode) => ({
+                      ...oldNode,
+                      label: event.target.value,
+                    }))
+                  }}
                 />
-                <ColorPicker hex={value.color} onChange={updateColor} />
+                <ColorPicker
+                  hex={value.color}
+                  onChange={(hex: any): void => {
+                    setValue((oldNode) => ({ ...oldNode, color: hex }))
+                  }}
+                />
               </>
             }
           />
@@ -187,7 +179,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
             }
           />
           <Divider />
-          {properties()}
+          {propertyElements()}
         </FormGroup>
       </div>
       <Divider />

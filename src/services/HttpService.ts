@@ -11,11 +11,14 @@ const configure = (): void => {
   axiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
     if (UserService.isLoggedIn()) {
       const successCallback = (): Promise<AxiosRequestConfig> => {
+        // eslint-disable-next-line no-param-reassign
         config.headers.Authorization = `Bearer ${UserService.getToken()}`
         return Promise.resolve(config)
       }
-      return UserService.updateToken(successCallback)
+      UserService.updateToken(successCallback)
+      return config
     }
+    return config
   })
 }
 
