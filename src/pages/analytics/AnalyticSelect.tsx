@@ -37,7 +37,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     }
   }
 
-  function buildFnSelect(): void {
+  function buildFnSelect(): JSX.Element {
     if (fn && (fnOptions?.length ?? 0 > 1)) {
       return (
         <FormSelect
@@ -52,6 +52,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
         />
       )
     }
+    return <></>
   }
 
   return (
