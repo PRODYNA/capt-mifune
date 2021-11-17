@@ -41,8 +41,8 @@ export class D3Helper {
     p1: { x: number; y: number },
     p2: { x: number; y: number }
   ): number => {
-    const a = Math.pow(p1.x - p2.x, 2)
-    const b = Math.pow(p1.y - p2.y, 2)
+    const a = (p1.x - p2.x) ** 2
+    const b = (p1.y - p2.y) ** 2
     return Math.sqrt(a + b)
   }
 
@@ -124,15 +124,15 @@ export class D3Helper {
       curveCenterY = Math.cos(angle + Math.PI / 2) * curveDistance
     }
     return `
-                     M ${sx} ${sy}
-                     Q
-                     ${(sx + tx) / 2 + curveCenterX - spacerX}
-                     ${(sy + ty) / 2 + curveCenterY - spacerY}
-                     ${(sx + tx) / 2 + curveCenterX}
-                     ${(sy + ty) / 2 + curveCenterY}
-                     ${(sx + tx) / 2 + curveCenterX + spacerX}
-                     ${(sy + ty) / 2 + curveCenterY + spacerY}
-                     ${tx} ${ty}
-                  `
+      M ${sx} ${sy}
+      Q
+      ${(sx + tx) / 2 + curveCenterX - spacerX}
+      ${(sy + ty) / 2 + curveCenterY - spacerY}
+      ${(sx + tx) / 2 + curveCenterX}
+      ${(sy + ty) / 2 + curveCenterY}
+      ${(sx + tx) / 2 + curveCenterX + spacerX}
+      ${(sy + ty) / 2 + curveCenterY + spacerY}
+      ${tx} ${ty}
+    `
   }
 }
