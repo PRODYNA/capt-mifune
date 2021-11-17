@@ -26,73 +26,14 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class GraphDelta {
-
-  private UUID trigger;
-  private Set<UUID> removedDomains = new HashSet<>();
-  private Set<Domain> changedDomains = new HashSet<>();
-  private Set<Node> changedNodes = new HashSet<>();
-  private Set<UUID> removedNodes = new HashSet<>();
-  private Set<Relation> changedRelations = new HashSet<>();
-  private Set<UUID> removedRelations = new HashSet<>();
-
-  public UUID getTrigger() {
-    return trigger;
-  }
-
-  public void setTrigger(UUID trigger) {
-    this.trigger = trigger;
-  }
-
-  public Set<UUID> getRemovedDomains() {
-    return removedDomains;
-  }
-
-  public void setRemovedDomains(Set<UUID> removedDomains) {
-    this.removedDomains = removedDomains;
-  }
-
-  public Set<Domain> getChangedDomains() {
-    return changedDomains;
-  }
-
-  public void setChangedDomains(Set<Domain> changedDomains) {
-    this.changedDomains = changedDomains;
-  }
-
-  public Set<Node> getChangedNodes() {
-    return changedNodes;
-  }
-
-  public void setChangedNodes(Set<Node> changedNodes) {
-    this.changedNodes = changedNodes;
-  }
-
-  public Set<Relation> getChangedRelations() {
-    return changedRelations;
-  }
-
-  public void setChangedRelations(Set<Relation> changedRelations) {
-    this.changedRelations = changedRelations;
-  }
-
-  public Set<UUID> getRemovedNodes() {
-    return removedNodes;
-  }
-
-  public void setRemovedNodes(Set<UUID> removedNodes) {
-    this.removedNodes = removedNodes;
-  }
-
-  public Set<UUID> getRemovedRelations() {
-    return removedRelations;
-  }
-
-  public void setRemovedRelations(Set<UUID> removedRelations) {
-    this.removedRelations = removedRelations;
-  }
-}
+public record GraphDelta(
+    UUID trigger,
+    Set<Domain> changedDomains,
+    Set<UUID> removedDomains,
+    Set<Node> changedNodes,
+    Set<UUID> removedNodes,
+    Set<Relation> changedRelations,
+    Set<UUID> removedRelations) {}
