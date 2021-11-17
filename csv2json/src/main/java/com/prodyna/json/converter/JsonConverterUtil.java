@@ -78,15 +78,15 @@ public class JsonConverterUtil {
       var list =
           mappingObject.primitiveArrayFieldValues.computeIfAbsent(name, x -> new ArrayList<>());
       var config = FieldConfig.fromString(next.asText());
-      var field = line.get(config.getIndex());
-      if ("string".equals(config.getType())) {
+      var field = line.get(config.index());
+      if ("string".equals(config.type())) {
         mappingObject.primitiveFieldValues.putIfAbsent(name, field);
         list.add(field);
-      } else if ("int".equals(config.getType())) {
+      } else if ("int".equals(config.type())) {
         list.add(Integer.parseInt(field));
-      } else if ("long".equals(config.getType())) {
+      } else if ("long".equals(config.type())) {
         list.add(Integer.parseInt(field));
-      } else if ("double".equals(config.getType())) {
+      } else if ("double".equals(config.type())) {
         list.add(Double.parseDouble(field));
       }
     }
@@ -104,19 +104,19 @@ public class JsonConverterUtil {
   static void handleTypeConfig(
       String name, JsonNode fieldConfig, MappingObject mappingObject, List<String> line) {
     var config = FieldConfig.fromString(fieldConfig.asText());
-    var index = config.getIndex();
+    var index = config.index();
     if (index >= line.size()) {
       return;
     }
     var field = Optional.of(line.get(index)).filter(not(String::isBlank));
-    if ("string".equals(config.getType())) {
+    if ("string".equals(config.type())) {
       mappingObject.primitiveFieldValues.putIfAbsent(name, field.orElse(null));
-    } else if ("int".equals(config.getType())) {
+    } else if ("int".equals(config.type())) {
       mappingObject.primitiveFieldValues.putIfAbsent(
           name, field.map(Integer::parseInt).orElse(null));
-    } else if ("long".equals(config.getType())) {
+    } else if ("long".equals(config.type())) {
       mappingObject.primitiveFieldValues.putIfAbsent(name, field.map(Long::parseLong).orElse(null));
-    } else if ("double".equals(config.getType())) {
+    } else if ("double".equals(config.type())) {
       mappingObject.primitiveFieldValues.putIfAbsent(
           name, field.map(Double::parseDouble).orElse(null));
     } else {

@@ -26,7 +26,10 @@ package com.prodyna.mifune.core;
  * #L%
  */
 
-import com.prodyna.mifune.domain.*;
+import com.prodyna.mifune.domain.Domain;
+import com.prodyna.mifune.domain.Graph;
+import com.prodyna.mifune.domain.Node;
+import com.prodyna.mifune.domain.Relation;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -34,13 +37,11 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
-import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.async.ResultCursor;
 
 @ApplicationScoped
 public class DeletionService {
-  @Inject protected Logger log;
 
   @Inject protected Driver driver;
 

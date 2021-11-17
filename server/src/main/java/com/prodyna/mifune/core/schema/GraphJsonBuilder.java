@@ -33,7 +33,6 @@ import java.util.*;
 
 public class GraphJsonBuilder {
 
-  private final Set<String> labels = new HashSet<>();
   private final ObjectNode json = new ObjectMapper().createObjectNode();
   private final UUID domainId;
   private final boolean primaryOnly;

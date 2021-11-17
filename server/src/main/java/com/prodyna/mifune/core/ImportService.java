@@ -36,6 +36,7 @@ import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
 import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.Domain;
+import com.prodyna.mifune.domain.Graph;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -44,10 +45,11 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -83,67 +85,44 @@ public class ImportService {
     }
 
     log.debug("start import");
-    var counter = new AtomicLong();
-    var graph = graphService.graph();
+
     var domain = graphService.fetchDomain(domainId);
     log.debugf("start import found domain %s", domain.getName());
-    GraphModel graphModel = new GraphModel(graph);
-    var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
-    log.info(cypher);
-    List<String> indexCyphers = new CypherIndexBuilder().getCypher(domainId, graph);
-    log.info(cypher);
+    var graph = graphService.graph();
 
+    return buildIndex(domainId, graph)
+        .onItem()
+        .transformToUni(v -> buildDomain(domain))
+        .onItem()
+        .invoke(
+            () -> {
+              Cancellable cancellable = startImportTask(domainId, domain, graph);
+
+              pipelineMap.put(domainId, cancellable);
+            })
+        .map(x -> "OK");
+  }
+
+  private Cancellable startImportTask(UUID domainId, Domain domain, Graph graph) {
+    GraphModel graphModel = new GraphModel(graph);
+    var counter = new AtomicLong();
     ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
     cleanJsonModel(domain, jsonModel);
-
-    var transformer = new JsonTransformer(jsonModel, 1);
     var importFile = Paths.get(uploadDir, domain.getFile());
-    var session = driver.asyncSession();
+    var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
+    log.info(cypher);
 
-    // Create the domain Node
-    Uni<Void> domainTask =
-        Uni.createFrom()
-            .completionStage(
-                session
-                    .writeTransactionAsync(
-                        tx ->
-                            tx.runAsync(
-                                "merge(d:Domain {id:$id}) set d.name = $name",
-                                Map.of("id", domain.getId().toString(), "name", domain.getName())))
-                    .thenCompose(r -> session.closeAsync().toCompletableFuture()));
-
-    // Create Indexes on Import
-    var indexTask =
+    var publisher =
         Multi.createFrom()
-            .iterable(indexCyphers)
-            .onItem()
-            .transformToUni(
-                indexCypher -> {
-                  var s = driver.asyncSession();
-                  return Uni.createFrom()
-                      .completionStage(
-                          s.writeTransactionAsync(tx -> tx.runAsync(indexCypher))
-                              .exceptionally(
-                                  e -> {
-                                    log.error(" Failed creating index: " + e.getMessage());
-                                    return null;
-                                  })
-                              .thenCompose(x1 -> s.closeAsync()));
-                });
+            .items(fileContentStream(importFile))
+            .emitOn(Infrastructure.getDefaultWorkerPool())
+            .subscribe()
+            .withSubscriber(FlowAdapters.toProcessor(new JsonTransformer(jsonModel, 100)));
 
-    indexTask
-        .withRequests(1)
-        .concatenate()
-        .subscribe()
-        .with(
-            s -> log.info(" created Index: " + s),
-            s -> log.error(" Failed creating Index: " + s.getMessage()),
-            () -> log.info(" Creating Indexes: Done! "));
-
-    // Create all nodes under this domain
+    var session = driver.asyncSession();
     var importTask =
         Multi.createFrom()
-            .publisher(FlowAdapters.toProcessor(transformer))
+            .publisher(publisher)
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .onItem()
             .transformToUni(
@@ -172,33 +151,57 @@ public class ImportService {
                               .thenApply(v -> counter.incrementAndGet()));
                 });
 
-    var cancellable =
-        importTask
-            .withRequests(1)
-            .concatenate()
-            .subscribe()
-            .with(
-                s -> eventBus.publish(domainId.toString(), s),
-                throwable -> log.error("error in pipeline: " + throwable.getMessage()),
-                () -> {
-                  pipelineMap.remove(domainId);
-                  log.info("done");
-                });
+    return importTask
+        .withRequests(1)
+        .concatenate()
+        .subscribe()
+        .with(
+            s -> eventBus.publish(domainId.toString(), s),
+            throwable -> {
+              log.error("error in pipeline: " + throwable.getMessage());
+              pipelineMap.remove(domainId);
+            },
+            () -> {
+              pipelineMap.remove(domainId);
+              log.info("import done ");
+            });
+  }
 
-    pipelineMap.put(domainId, cancellable);
+  private Uni<Void> buildDomain(Domain domain) {
+    var session = driver.asyncSession();
+    return Uni.createFrom()
+        .completionStage(
+            session
+                .writeTransactionAsync(
+                    tx ->
+                        tx.runAsync(
+                            "merge(d:Domain {id:$id}) set d.name = $name",
+                            Map.of("id", domain.getId().toString(), "name", domain.getName())))
+                .thenCompose(r -> session.closeAsync().toCompletableFuture()));
+  }
 
-    // this gets called before the above is finished
-    return domainTask
+  private Uni<Void> buildIndex(UUID domainId, Graph graph) {
+    List<String> indexCyphers = new CypherIndexBuilder().getCypher(domainId, graph);
+    return Multi.createFrom()
+        .iterable(indexCyphers)
         .onItem()
-        .invoke(
-            () ->
-                Infrastructure.getDefaultExecutor()
-                    .execute(
-                        () -> {
-                          pipeFile(importFile, transformer::accept);
-                          transformer.onComplete();
-                        }))
-        .map(x -> "OK");
+        .transformToUni(
+            indexCypher -> {
+              var s = driver.asyncSession();
+              return Uni.createFrom()
+                  .completionStage(
+                      s.writeTransactionAsync(tx -> tx.runAsync(indexCypher))
+                          .exceptionally(
+                              e -> {
+                                log.error(" Failed creating index: " + e.getMessage());
+                                return null;
+                              })
+                          .thenCompose(x1 -> s.closeAsync()));
+            })
+        .withRequests(1)
+        .concatenate()
+        .onItem()
+        .ignoreAsUni();
   }
 
   private void cleanJsonModel(Domain domain, ObjectNode jsonModel) {
@@ -212,9 +215,7 @@ public class ImportService {
             jsonPathEditor.update(
                 jsonModel,
                 path,
-                String.valueOf(header.indexOf(value))
-                    + ":"
-                    + jsonPathEditor.value(jsonModel, path).asText());
+                header.indexOf(value) + ":" + jsonPathEditor.value(jsonModel, path).asText());
           } else {
             jsonPathEditor.remove(jsonModel, path);
           }
@@ -223,15 +224,14 @@ public class ImportService {
     log.debugf("JsonModel: %s", jsonModel);
   }
 
-  private void pipeFile(java.nio.file.Path importFile, Consumer<? super List<String>> consumer) {
+  private Stream<List<String>> fileContentStream(Path importFile) {
     try {
-      StreamSupport.stream(
+      return StreamSupport.stream(
               new CSVReader(new FileReader(importFile.toFile(), StandardCharsets.UTF_8))
                   .spliterator(),
               false)
           .skip(1)
-          .map(Arrays::asList)
-          .forEach(consumer);
+          .map(Arrays::asList);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -239,7 +239,6 @@ public class ImportService {
 
   public Uni<String> stopImport(UUID domainId) {
     Optional.ofNullable(this.pipelineMap.remove(domainId)).ifPresent(Cancellable::cancel);
-
     return Uni.createFrom().item("done");
   }
 }

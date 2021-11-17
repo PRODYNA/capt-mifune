@@ -87,10 +87,10 @@ public class JsonPathEditor {
     }
     if (node.isArray()) {
       ((ArrayNode) node).removeAll();
-      return ((ArrayNode) node).get(0);
+      return node.get(0);
 
     } else if (node.isObject()) {
-      return ((ObjectNode) node).get(part);
+      return node.get(part);
     } else {
       throw new IllegalArgumentException("Path not valid");
     }
@@ -135,7 +135,7 @@ public class JsonPathEditor {
           (key, v) -> {
             ArrayList<String> newPrefix = new ArrayList<>(prefix);
             if (v instanceof List listValue) {
-              newPrefix.add(((String) key) + "[]");
+              newPrefix.add(key + "[]");
               extract(result, newPrefix, listValue.get(0));
             } else {
               newPrefix.add((String) key);
@@ -145,6 +145,5 @@ public class JsonPathEditor {
     } else {
       result.add(prefix);
     }
-    ;
   }
 }
