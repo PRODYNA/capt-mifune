@@ -71,7 +71,7 @@ const PipelineRow = (props: IPipelineRow) => {
     <>
       <TableRow key={domain.id}>
         <TableCell align="left" onClick={() => history.push("/pipeline/" + domain.id)}>
-          <IconButton>
+          <IconButton size="small">
             <VisibilityIcon htmlColor={theme.palette.grey[700]} />
           </IconButton>
         </TableCell>
@@ -79,17 +79,17 @@ const PipelineRow = (props: IPipelineRow) => {
         <TableCell align="center">{valid(domain.modelValid)}</TableCell>
         <TableCell align="center">{valid(domain.mappingValid)}</TableCell>
         <TableCell align="center">
-          <IconButton disabled={cleanActive} onClick={runImport}>
+          <IconButton size="small" disabled={cleanActive} onClick={runImport}>
             <PlayArrowIcon htmlColor={theme.palette.primary.main} />
           </IconButton>
         </TableCell>
         <TableCell align="center">
-          <IconButton onClick={stopImport}>
+          <IconButton size="small" onClick={stopImport}>
             <StopIcon htmlColor={theme.palette.info.main} />
           </IconButton>
         </TableCell>
         <TableCell align="center">
-          <IconButton onClick={clearDomain}>
+          <IconButton size="small" onClick={clearDomain}>
             <ClearIcon htmlColor={theme.palette.error.main} />
           </IconButton>
         </TableCell>
