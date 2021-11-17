@@ -15,7 +15,7 @@ import {
   TableRow,
   Typography,
 } from "@material-ui/core";
-import { PipelineRow } from "./PipelineRow";
+import PipelineRow from "./PipelineRow";
 import DeleteIcon from "@material-ui/icons/Delete";
 import CustomButton from "../../components/Button/CustomButton";
 import { useTheme } from '@material-ui/core/styles';

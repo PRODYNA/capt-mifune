@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
@@ -10,11 +10,14 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import StopIcon from "@material-ui/icons/Stop";
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useTheme } from '@material-ui/core/styles';
+import { SnackbarContext } from "../../context/Snackbar";
+import { Translations } from "../../utils/Translations";
 
-export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
+const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
   const { domain, cleanActive } = props
   const history = useHistory();
   const [message, setMessage] = useState<String>();
+  const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
 
   useEffect(() => {
@@ -45,19 +48,31 @@ export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => 
       <TableCell align="center">{valid(domain.mappingValid)}</TableCell>
       <TableCell align="center">
         <IconButton disabled={cleanActive}
-          onClick={() => graphService.domainRunImport(domain.id)}>
+          onClick={() =>
+            graphService.domainRunImport(domain.id)
+              .then(() => openSnackbar(Translations.IMPORT_RUN, 'success'))
+              .catch((e) => openSnackbarError(e))
+          }>
           <PlayArrowIcon htmlColor={theme.palette.primary.main} />
         </IconButton>
       </TableCell>
       <TableCell align="center">
         <IconButton
-          onClick={() => graphService.domainStopImport(domain.id)}>
+          onClick={() =>
+            graphService.domainStopImport(domain.id)
+              .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
+              .catch((e) => openSnackbarError(e))
+          }>
           <StopIcon htmlColor={theme.palette.info.main} />
         </IconButton>
       </TableCell>
       <TableCell align="center">
         <IconButton
-          onClick={() => graphService.domainClear(domain.id)}>
+          onClick={() =>
+            graphService.domainClear(domain.id)
+              .then(() => openSnackbar(Translations.DOMAIN_DELETE, 'success'))
+              .catch((e) => openSnackbarError(e))
+          }>
           <DeleteIcon htmlColor={theme.palette.error.main} />
         </IconButton>
       </TableCell>
@@ -66,3 +81,5 @@ export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => 
     </TableRow>
   );
 };
+
+export default PipelineRow;
