@@ -1,81 +1,103 @@
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import WarningIcon from "@material-ui/icons/Warning";
-import DoneOutlineIcon from "@material-ui/icons/DoneOutline";
+import ClearIcon from '@material-ui/icons/Clear';
+import DoneIcon from "@material-ui/icons/Done";
 import { IconButton, TableCell, TableRow } from "@material-ui/core";
 import { useHistory } from "react-router-dom";
-import DeleteIcon from "@material-ui/icons/Delete";
 import StopIcon from "@material-ui/icons/Stop";
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import { useTheme } from '@material-ui/core/styles';
+import { SnackbarContext } from "../../context/Snackbar";
+import { Translations } from "../../utils/Translations";
 
-export const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
-    const history = useHistory();
+interface IPipelineRow {
+  domain: Domain;
+  cleanActive: boolean;
+  setShowProgress: Dispatch<SetStateAction<boolean>>;
+}
 
+const PipelineRow = (props: IPipelineRow) => {
+  const { domain, cleanActive, setShowProgress } = props
+  const history = useHistory();
+  const [message, setMessage] = useState<string>();
+  const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
+  const theme = useTheme()
 
-    const [message, setMessage] = useState<String>();
+  useEffect(() => {
+    let sseClient = graphService.importSource(domain.id);
+    sseClient.onmessage = function (e) {
+      setMessage(e.data);
+    };
+    
+    return function cleanUp() {
+      sseClient.close();
+    };
+  }, [domain.id, cleanActive]);
 
-    useEffect(() => {
-        let sseClient = graphService.importSource(props.domain.id);
-        sseClient.onmessage = function(e) {
-            setMessage(e.data);
-        };
+  const valid = (valid: boolean): JSX.Element => {
+    if (valid) return (<DoneIcon htmlColor={theme.palette.success.main} />)
+    else return (<WarningIcon htmlColor={theme.palette.warning.main} />)
+  }
 
-        return function cleanUp() {
-            sseClient.close();
-        };
-    }, [ props.domain.id, props.cleanActive]);
+  const runImport = (): void => {
+    setShowProgress(true)
+    graphService.domainRunImport(domain.id)
+      .then(() => {
+        openSnackbar(Translations.IMPORT_RUN, 'success')
+        setShowProgress(false)
+      })
+      .catch((e) => {
+        openSnackbarError(e)
+        setShowProgress(false)
+      })
+  }
 
-    function valid(valid: boolean) {
-        if (valid) {
-            return <DoneOutlineIcon color={"primary"} />;
-        } else {
-            return <WarningIcon color={"error"}/>;
-        }
-    }
+  const stopImport = (): void => {
+    graphService.domainStopImport(domain.id)
+      .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
+      .catch((e) => openSnackbarError(e))
+  }
 
-    return (
-        <TableRow
-            key={props.domain.id}
-            onClick={() => history.push("/pipeline/" + props.domain.id)}
-        >
-            <TableCell component="th" scope="row">
-                {props.domain.name}
-            </TableCell>
-            <TableCell align="left">{valid(props.domain.modelValid)}</TableCell>
-            <TableCell align="left">{valid(props.domain.mappingValid)}</TableCell>
-            <TableCell align="left">
-                <IconButton color={"primary"} disabled={props.cleanActive}
-                    onClick={(e) => {
-                        graphService.domainRunImport(props.domain.id);
-                        e.stopPropagation();
-                    }}
-                >
-                    <PlayArrowIcon />
-                </IconButton>
-            </TableCell>
-            <TableCell align="left">
-                <IconButton color={"primary"}
-                    onClick={(e) => {
-                        graphService.domainStopImport(props.domain.id);
-                        e.stopPropagation();
-                    }}
-                >
-                    <StopIcon />
-                </IconButton>
-            </TableCell>
-            <TableCell align="left">
-                <IconButton  color={"secondary"}
-                    onClick={(e) => {
-                        graphService.domainClear(props.domain.id);
-                        e.stopPropagation();
-                    }}
-                >
-                    <DeleteIcon />
-                </IconButton>
-            </TableCell>
-            <TableCell align="left">{message}</TableCell>
-            <TableCell align="right">{props.domain.id}</TableCell>
-        </TableRow>
-    );
+  const clearDomain = (): void => {
+    graphService.domainClear(domain.id)
+      .then(() => openSnackbar(Translations.DOMAIN_CLEAR, 'success'))
+      .catch((e) => openSnackbarError(e))
+  }
+
+  return (
+    <>
+      <TableRow key={domain.id}>
+        <TableCell align="left" onClick={() => history.push("/pipeline/" + domain.id)}>
+          <IconButton size="small">
+            <VisibilityIcon htmlColor={theme.palette.grey[700]} />
+          </IconButton>
+        </TableCell>
+        <TableCell align="left">{domain.name}</TableCell>
+        <TableCell align="center">{valid(domain.modelValid)}</TableCell>
+        <TableCell align="center">{valid(domain.mappingValid)}</TableCell>
+        <TableCell align="center">
+          <IconButton size="small" disabled={cleanActive} onClick={runImport}>
+            <PlayArrowIcon htmlColor={theme.palette.primary.main} />
+          </IconButton>
+        </TableCell>
+        <TableCell align="center">
+          <IconButton size="small" onClick={stopImport}>
+            <StopIcon htmlColor={theme.palette.info.main} />
+          </IconButton>
+        </TableCell>
+        <TableCell align="center">
+          <IconButton size="small" onClick={clearDomain}>
+            <ClearIcon htmlColor={theme.palette.error.main} />
+          </IconButton>
+        </TableCell>
+        <TableCell align="left">{message}</TableCell>
+        <TableCell align="left">{domain.id}</TableCell>
+      </TableRow >
+    </>
+  );
 };
+
+export default PipelineRow;
