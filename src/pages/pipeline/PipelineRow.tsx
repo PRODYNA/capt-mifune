@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { Domain } from "../../api/model/Model";
 import graphService from "../../api/GraphService";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
@@ -13,10 +13,16 @@ import { useTheme } from '@material-ui/core/styles';
 import { SnackbarContext } from "../../context/Snackbar";
 import { Translations } from "../../utils/Translations";
 
-const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
-  const { domain, cleanActive } = props
+interface IPipelineRow {
+  domain: Domain;
+  cleanActive: boolean;
+  setShowProgress: Dispatch<SetStateAction<boolean>>;
+}
+
+const PipelineRow = (props: IPipelineRow) => {
+  const { domain, cleanActive, setShowProgress } = props
   const history = useHistory();
-  const [message, setMessage] = useState<String>();
+  const [message, setMessage] = useState<string>('');
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
 
@@ -36,6 +42,31 @@ const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
     else return (<WarningIcon htmlColor={theme.palette.warning.main} />)
   }
 
+  const runImport = (): void => {
+    setShowProgress(true)
+    graphService.domainRunImport(domain.id)
+      .then(() => {
+        openSnackbar(Translations.IMPORT_RUN, 'success')
+        setShowProgress(false)
+      })
+      .catch((e) => {
+        openSnackbarError(e)
+        setShowProgress(false)
+      })
+  }
+
+  const stopImport = (): void => {
+    graphService.domainStopImport(domain.id)
+      .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
+      .catch((e) => openSnackbarError(e))
+  }
+
+  const deleteDomain = (): void => {
+    graphService.domainClear(domain.id)
+      .then(() => openSnackbar(Translations.DOMAIN_DELETE, 'success'))
+      .catch((e) => openSnackbarError(e))
+  }
+
   return (
     <TableRow key={domain.id}>
       <TableCell align="left" onClick={() => history.push("/pipeline/" + domain.id)}>
@@ -47,38 +78,23 @@ const PipelineRow = (props: { domain: Domain, cleanActive: boolean }) => {
       <TableCell align="center">{valid(domain.modelValid)}</TableCell>
       <TableCell align="center">{valid(domain.mappingValid)}</TableCell>
       <TableCell align="center">
-        <IconButton disabled={cleanActive}
-          onClick={() =>
-            graphService.domainRunImport(domain.id)
-              .then(() => openSnackbar(Translations.IMPORT_RUN, 'success'))
-              .catch((e) => openSnackbarError(e))
-          }>
+        <IconButton disabled={cleanActive} onClick={runImport}>
           <PlayArrowIcon htmlColor={theme.palette.primary.main} />
         </IconButton>
       </TableCell>
       <TableCell align="center">
-        <IconButton
-          onClick={() =>
-            graphService.domainStopImport(domain.id)
-              .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
-              .catch((e) => openSnackbarError(e))
-          }>
+        <IconButton onClick={stopImport}>
           <StopIcon htmlColor={theme.palette.info.main} />
         </IconButton>
       </TableCell>
       <TableCell align="center">
-        <IconButton
-          onClick={() =>
-            graphService.domainClear(domain.id)
-              .then(() => openSnackbar(Translations.DOMAIN_DELETE, 'success'))
-              .catch((e) => openSnackbarError(e))
-          }>
+        <IconButton onClick={deleteDomain }>
           <DeleteIcon htmlColor={theme.palette.error.main} />
         </IconButton>
       </TableCell>
       <TableCell align="left">{message}</TableCell>
       <TableCell align="left">{domain.id}</TableCell>
-    </TableRow>
+    </TableRow >
   );
 };
 
