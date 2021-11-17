@@ -27,6 +27,8 @@ export interface DomainCreate {
 export interface DomainUpdate {
     name: string;
     rootNodeId?: string;
+    file?: string;
+    columnMapping?: any;
 }
 
 export interface Domain {
