@@ -54,7 +54,7 @@ public class NodeModel {
   public boolean isPrimary() {
     return Optional.ofNullable(properties).stream()
         .flatMap(Collection::stream)
-        .anyMatch(Property::isPrimary);
+        .anyMatch(Property::primary);
   }
 
   public String getLabel() {

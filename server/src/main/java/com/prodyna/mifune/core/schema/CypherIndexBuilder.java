@@ -40,7 +40,7 @@ public class CypherIndexBuilder {
       if (node.getDomainIds().contains(domainId)) {
         List<Property> props = new ArrayList<>();
         for (Property prop : node.getProperties()) {
-          if (prop.isPrimary()) {
+          if (prop.primary()) {
             props.add(prop);
           }
         }
@@ -60,7 +60,7 @@ public class CypherIndexBuilder {
     List<String> propStrings = new ArrayList<>();
 
     for (Property prop : props) {
-      propStrings.add("n.%s".formatted(prop.getName()));
+      propStrings.add("n.%s".formatted(prop.name()));
     }
     if (propStrings.size() < 1) {
       return null;

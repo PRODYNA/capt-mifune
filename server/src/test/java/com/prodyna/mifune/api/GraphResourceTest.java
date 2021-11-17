@@ -203,14 +203,8 @@ class GraphResourceTest {
   @Test
   void testMapping() {
     Domain sampleDomain = createSampleDomain();
-    Property name = new Property();
-    name.setName("name");
-    name.setType("string");
-    name.setPrimary(true);
-    Property other = new Property();
-    other.setName("other");
-    other.setType("string");
-    other.setPrimary(false);
+    Property name = new Property("name", "string", true);
+    Property other = new Property("other", "string", false);
     List<Property> props = new ArrayList<>();
 
     props.add(other);
@@ -284,7 +278,7 @@ class GraphResourceTest {
         .body("changedNodes[0].label", equalTo(label))
         .extract()
         .as(GraphDelta.class)
-        .getChangedNodes()
+        .changedNodes()
         .stream()
         .findFirst()
         .orElseThrow();
@@ -302,7 +296,7 @@ class GraphResourceTest {
         .statusCode(200)
         .extract()
         .as(GraphDelta.class)
-        .getChangedNodes()
+        .changedNodes()
         .stream()
         .findFirst()
         .orElseThrow();
@@ -323,7 +317,7 @@ class GraphResourceTest {
         .body("changedRelations[0].type", equalTo(type))
         .extract()
         .as(GraphDelta.class)
-        .getChangedRelations()
+        .changedRelations()
         .iterator()
         .next();
   }

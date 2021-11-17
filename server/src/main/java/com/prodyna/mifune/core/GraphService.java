@@ -243,56 +243,69 @@ public class GraphService {
       throw new ClientErrorException(Status.NOT_FOUND);
     }
 
-    var graphDelta = new GraphDelta();
-    graphDelta.getRemovedDomains().add(id);
-    var removedNodeIds =
-        graph.getNodes().stream()
-            .filter(n -> n.getDomainIds().size() <= 1)
-            .filter(n -> n.getDomainIds().contains(id))
-            .map(Node::getId)
-            .collect(Collectors.toSet());
+    var changedDomains = new HashSet<Domain>();
+    var removedNodes = new HashSet<UUID>();
+    var changedNodes = new HashSet<Node>();
+    var removedRelations = new HashSet<UUID>();
+    var changedRelations = new HashSet<Relation>();
 
-    var changedNodes =
-        graph.getNodes().stream()
-            .filter(n -> n.getDomainIds().contains(id))
-            .peek(d -> d.getDomainIds().remove(id))
-            .collect(Collectors.toSet());
+    graph.getNodes().stream()
+        .filter(n -> n.getDomainIds().size() <= 1)
+        .filter(n -> n.getDomainIds().contains(id))
+        .map(Node::getId)
+        .forEach(removedNodes::add);
 
-    var removedRelations =
-        graph.getRelations().stream()
-            .filter(n -> n.getDomainIds().size() <= 1)
-            .filter(n -> n.getDomainIds().contains(id))
-            .peek(d -> d.getDomainIds().remove(id))
-            .collect(Collectors.toSet());
+    graph.getNodes().stream()
+        .filter(n -> n.getDomainIds().contains(id))
+        .peek(d -> d.getDomainIds().remove(id))
+        .forEach(changedNodes::add);
 
-    graph.getRelations().removeAll(removedRelations);
-    removedRelations.stream().map(Relation::getId).forEach(graphDelta.getRemovedRelations()::add);
+    graph.getRelations().stream()
+        .filter(n -> n.getDomainIds().size() <= 1)
+        .filter(n -> n.getDomainIds().contains(id))
+        .peek(d -> d.getDomainIds().remove(id))
+        .map(Relation::getId)
+        .forEach(removedRelations::add);
 
-    var changedRelations =
-        graph.getRelations().stream()
-            .filter(n -> n.getDomainIds().contains(id))
-            .peek(d -> d.getDomainIds().remove(id))
-            .collect(Collectors.toSet());
+    graph.getRelations().stream()
+        .filter(n -> n.getDomainIds().contains(id))
+        .peek(d -> d.getDomainIds().remove(id))
+        .forEach(changedRelations::add);
 
-    removedNodeIds.stream()
+    removedNodes.stream()
         .map(this::deleteNode)
         .forEach(
             gd -> {
-              graphDelta.getChangedRelations().addAll(gd.getChangedRelations());
-              graphDelta.getChangedDomains().addAll(gd.getChangedDomains());
-              graphDelta.getRemovedNodes().addAll(gd.getRemovedNodes());
-              graphDelta.getRemovedRelations().addAll(gd.getRemovedRelations());
+              changedDomains.addAll(gd.changedDomains());
+              changedNodes.addAll(gd.changedNodes());
+              changedRelations.addAll(gd.changedRelations());
+              removedRelations.addAll(gd.removedRelations());
             });
 
-    graphDelta.getChangedRelations().addAll(changedRelations);
-    graphDelta.getChangedNodes().addAll(changedNodes);
-    graphDelta.getRemovedNodes().addAll(removedNodeIds);
-    graphDelta.getChangedNodes().removeIf(d -> graphDelta.getRemovedNodes().contains(d.getId()));
-    graphDelta
-        .getChangedRelations()
-        .removeIf(d -> graphDelta.getRemovedRelations().contains(d.getId()));
+    removedRelations.stream()
+        .filter(graph.getRelations()::contains)
+        .map(this::deleteRelation)
+        .forEach(
+            gd -> {
+              removedNodes.addAll(gd.removedNodes());
+              changedDomains.addAll(gd.changedDomains());
+              changedNodes.addAll(gd.changedNodes());
+              changedRelations.addAll(gd.changedRelations());
+              removedRelations.addAll(gd.removedRelations());
+            });
 
-    return graphDelta;
+    changedNodes.removeIf(node -> removedNodes.contains(node.getId()));
+    changedRelations.removeIf(relation -> removedRelations.contains(relation.getId()));
+    changedDomains.removeIf(r -> id.equals(r.getId()));
+
+    return new GraphDelta(
+        id,
+        changedDomains,
+        Set.of(id),
+        changedNodes,
+        removedNodes,
+        changedRelations,
+        removedRelations);
   }
 
   public GraphDelta createNode(NodeCreate model) {
@@ -312,14 +325,14 @@ public class GraphService {
         .ifPresentOrElse(node::setColor, () -> node.setColor(colorFromUUID(uuid)));
 
     graph.getNodes().add(node);
-    var graphDelta = new GraphDelta();
-    graphDelta.setTrigger(node.getId());
-    graphDelta.getChangedNodes().add(node);
-    graphDelta.setChangedDomains(
-        graph().getDomains().stream()
-            .filter(d -> model.domainIds().contains(d.getId()))
-            .collect(Collectors.toSet()));
-    return graphDelta;
+    return new GraphDelta(
+        node.getId(),
+        domainsFromNode(model.domainIds()),
+        Set.of(),
+        Set.of(node),
+        Set.of(),
+        Set.of(),
+        Set.of());
   }
 
   String colorFromUUID(UUID uuid) {
@@ -330,7 +343,7 @@ public class GraphService {
 
   public GraphDelta updateNode(UUID id, NodeUpdate model) {
     var changedDomains = new HashSet<>(model.domainIds());
-    var graphDelta = new GraphDelta();
+
     checkDomainIds(model.domainIds());
     var node = nodeById(id);
     changedDomains.addAll(node.getDomainIds());
@@ -341,13 +354,14 @@ public class GraphService {
     node.setColor(model.color());
     node.setProperties(model.properties());
 
-    graphDelta.getChangedNodes().add(node);
-    graphDelta.setChangedDomains(
-        graph().getDomains().stream()
-            .filter(d -> changedDomains.contains(d.getId()))
-            .collect(Collectors.toSet()));
-
-    return graphDelta;
+    return new GraphDelta(
+        node.getId(),
+        domainsFromNode(changedDomains),
+        Set.of(),
+        Set.of(node),
+        Set.of(),
+        Set.of(),
+        Set.of());
   }
 
   private void checkForIfLabelExist(UUID id, NodeUpdate model) {
@@ -362,36 +376,49 @@ public class GraphService {
   }
 
   public GraphDelta deleteNode(UUID id) {
-    var graphDelta = new GraphDelta();
-    var node =
-        graph.getNodes().stream()
-            .filter(n -> n.getId().equals(id))
-            .findFirst()
-            .orElseThrow(
-                () -> {
-                  throw new ClientErrorException(Status.NOT_FOUND);
-                });
+
+    var node = nodeById(id);
+    var changedDomains = new HashSet<>(domainsFromNode(node.getDomainIds()));
+    var changedNodes = new HashSet<Node>();
+    var removedRelationIds = new HashSet<UUID>();
+
+    relationConnectedWithNode(id).stream()
+        .map(Relation::getId)
+        .map(this::deleteRelation)
+        .forEach(
+            gd -> {
+              changedDomains.addAll(gd.changedDomains());
+              changedNodes.addAll(gd.changedNodes());
+              removedRelationIds.addAll(gd.removedRelations());
+            });
+
     graph.getNodes().remove(node);
+    changedNodes.removeIf(n -> n.getId().equals(id));
 
-    graphDelta.getRemovedNodes().add(id);
-    var removedRelationIds =
-        graph.getRelations().stream()
-            .filter(r -> r.getSourceId().equals(id) || r.getTargetId().equals(id))
-            .map(Relation::getId)
-            .collect(Collectors.toSet());
+    return new GraphDelta(
+        node.getId(),
+        changedDomains,
+        Set.of(),
+        changedNodes,
+        Set.of(node.getId()),
+        Set.of(),
+        removedRelationIds);
+  }
 
-    graph.getRelations().removeIf(r -> removedRelationIds.contains(r.getId()));
+  private Set<Domain> domainsFromNode(Set<UUID> domainIds) {
+    return graph().getDomains().stream()
+        .filter(d -> domainIds.contains(d.getId()))
+        .collect(Collectors.toSet());
+  }
 
-    graphDelta.setRemovedRelations(removedRelationIds);
-    graphDelta.setChangedDomains(
-        graph().getDomains().stream()
-            .filter(d -> node.getDomainIds().contains(d.getId()))
-            .collect(Collectors.toSet()));
-    return graphDelta;
+  private Set<Relation> relationConnectedWithNode(UUID id) {
+    return graph.getRelations().stream()
+        .filter(r -> r.getSourceId().equals(id) || r.getTargetId().equals(id))
+        .collect(Collectors.toSet());
   }
 
   public GraphDelta createRelation(RelationCreate model) {
-    var graphDelta = new GraphDelta();
+
     checkNodeIds(model.sourceId(), model.targetId());
 
     var rel = new Relation();
@@ -405,25 +432,26 @@ public class GraphService {
     rel.setDomainIds(model.domainIds());
     rel.setColor(nodeById(rel.getSourceId()).getColor());
 
+    Node node = null;
     if (model.domainIds().size() == 1) {
-      Node node = nodeById(model.targetId());
+      node = nodeById(model.targetId());
       node.getDomainIds().addAll(model.domainIds());
-      graphDelta.getChangedNodes().add(node);
     }
 
     graph.getRelations().add(rel);
 
-    graphDelta.getChangedRelations().add(rel);
-    graphDelta.setChangedDomains(
-        graph().getDomains().stream()
-            .filter(d -> rel.getDomainIds().contains(d.getId()))
-            .collect(Collectors.toSet()));
-
-    return graphDelta;
+    return new GraphDelta(
+        rel.getId(),
+        domainsFromNode(rel.getDomainIds()),
+        Set.of(),
+        Optional.ofNullable(node).map(Set::of).orElse(Set.of()),
+        Set.of(),
+        Set.of(rel),
+        Set.of());
   }
 
   public GraphDelta deleteRelation(UUID id) {
-    var graphDelta = new GraphDelta();
+
     var removed =
         graph.getRelations().stream()
             .filter(r -> r.getId().equals(id))
@@ -433,19 +461,24 @@ public class GraphService {
                   throw new ClientErrorException(Status.NOT_FOUND);
                 });
     graph.getRelations().remove(removed);
-    graphDelta.getRemovedRelations().add(removed.getId());
 
-    graphDelta.setChangedDomains(
-        graph().getDomains().stream()
-            .filter(d -> removed.getDomainIds().contains(d.getId()))
-            .collect(Collectors.toSet()));
-    return graphDelta;
+    return new GraphDelta(
+        id,
+        domainsFromNode(removed.getDomainIds()),
+        Set.of(),
+        graph.getNodes().stream()
+            .filter(n -> n.getId().equals(removed.getTargetId()))
+            .findFirst()
+            .map(Set::of)
+            .orElse(Set.of()),
+        Set.of(),
+        Set.of(),
+        Set.of(removed.getId()));
   }
 
   public GraphDelta updateRelation(UUID id, RelationUpdate model) {
     var changeDomainIds = new HashSet<>(model.domainIds());
     checkDomainIds(model.domainIds());
-    var graphDelta = new GraphDelta();
     var relation = relationById(id);
     changeDomainIds.addAll(relation.getDomainIds());
     relation.setType(model.type());
@@ -453,12 +486,14 @@ public class GraphService {
     relation.setMultiple(model.multiple());
     relation.setProperties(model.properties());
     relation.setDomainIds(model.domainIds());
-    graphDelta.getChangedRelations().add(relation);
-    graphDelta.setChangedDomains(
-        graph().getDomains().stream()
-            .filter(d -> changeDomainIds.contains(d.getId()))
-            .collect(Collectors.toSet()));
-    return graphDelta;
+    return new GraphDelta(
+        id,
+        domainsFromNode(changeDomainIds),
+        Set.of(),
+        Set.of(),
+        Set.of(),
+        Set.of(relation),
+        Set.of());
   }
 
   private Relation relationById(UUID id) {

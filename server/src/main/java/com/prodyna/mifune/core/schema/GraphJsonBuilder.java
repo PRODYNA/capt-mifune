@@ -83,14 +83,14 @@ public class GraphJsonBuilder {
   private void buildProperties(ObjectNode jsonNodes, List<Property> properties) {
     Optional.ofNullable(properties).stream()
         .flatMap(Collection::stream)
-        .filter(p -> p.isPrimary() || !primaryOnly)
+        .filter(p -> p.primary() || !primaryOnly)
         .forEach(
             p -> {
-              switch (p.getType()) {
-                case "string" -> jsonNodes.put(p.getName(), "string");
-                case "long" -> jsonNodes.put(p.getName(), "long");
-                case "double" -> jsonNodes.put(p.getName(), "double");
-                case "boolean" -> jsonNodes.put(p.getName(), "boolean");
+              switch (p.type()) {
+                case "string" -> jsonNodes.put(p.name(), "string");
+                case "long" -> jsonNodes.put(p.name(), "long");
+                case "double" -> jsonNodes.put(p.name(), "double");
+                case "boolean" -> jsonNodes.put(p.name(), "boolean");
               }
             });
   }

@@ -64,13 +64,7 @@ public class SourceResource {
   public Response sources() throws IOException {
     var files =
         sourceService.sources().stream()
-            .map(
-                fileName -> {
-                  var source = new Source();
-                  source.setName(fileName);
-                  source.setHeader(sourceService.fileHeader(fileName));
-                  return source;
-                })
+            .map(fileName -> new Source(fileName, sourceService.fileHeader(fileName)))
             .collect(Collectors.toList());
     return Response.ok().entity(files).build();
   }
