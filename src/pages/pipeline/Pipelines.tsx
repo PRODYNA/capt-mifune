@@ -35,6 +35,18 @@ const Pipelines = (): JSX.Element => {
   const classes = makeStyles({
     chip: {
       marginRight: '1rem'
+    }, 
+    paper: {
+      backgroundColor: 'inherit',
+      border: '1px dashed rgba(224, 224, 224, 1)',
+      borderRadius: 0,
+      '& .MuiTableBody-root .MuiTableRow-root': {
+        '&:last-child': {
+          '& .MuiTableCell-root': {
+            borderBottom: 'unset',
+          }
+        }
+    },
     }
   })();
 
@@ -87,7 +99,7 @@ const Pipelines = (): JSX.Element => {
           />
         </Box>
         {showProgress && (<LinearProgress color="primary" />)}
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} className={classes.paper}>
           <Table aria-label="simple table">
             <TableHead>
               <TableRow key="table-header">
