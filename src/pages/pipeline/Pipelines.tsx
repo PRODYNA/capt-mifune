@@ -5,6 +5,7 @@ import {
   Box,
   Chip,
   Container,
+  LinearProgress,
   makeStyles,
   Paper,
   Table,
@@ -23,6 +24,7 @@ import { useTheme } from '@material-ui/core/styles';
 const Pipelines = (): JSX.Element => {
   const [domains, setDomains] = useState<Domain[]>();
   const [cleanActive, setCleanActive] = useState<boolean>(false);
+  const [showProgress, setShowProgress] = useState<boolean>(false);
   const [statistics, setStatistics] = useState<GraphStatistics>();
   const tableHeaders = [
     'Show Details', 'Domain Name', 'Model Valid', 'Mapping Valid', 'Run Import', 'Stop Import', 'Delete Domain', 'Root Nodes', 'ID'
@@ -82,6 +84,7 @@ const Pipelines = (): JSX.Element => {
             startIcon={<DeleteIcon />}
           />
         </Box>
+        {showProgress && (<LinearProgress color="primary" />)}
         <TableContainer component={Paper}>
           <Table aria-label="simple table">
             <TableHead>
@@ -95,7 +98,7 @@ const Pipelines = (): JSX.Element => {
             </TableHead>
             <TableBody>
               {domains?.map((row) => (
-                <PipelineRow key={row.id} domain={row} cleanActive={cleanActive} />
+                <PipelineRow key={row.id} domain={row} cleanActive={cleanActive} setShowProgress={setShowProgress} />
               ))}
             </TableBody>
           </Table>
