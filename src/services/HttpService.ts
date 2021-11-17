@@ -2,13 +2,13 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import UserService from './UserService'
 import { ENV } from '../env/Environments'
 
-const _axios = axios.create({
+const axiosInstance = axios.create({
   baseURL: localStorage.getItem(ENV.API_SERVER) ?? undefined,
   timeout: 25000,
 })
 
 const configure = (): void => {
-  _axios.interceptors.request.use((config: AxiosRequestConfig) => {
+  axiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
     if (UserService.isLoggedIn()) {
       const successCallback = (): Promise<AxiosRequestConfig> => {
         config.headers.Authorization = `Bearer ${UserService.getToken()}`
@@ -19,7 +19,7 @@ const configure = (): void => {
   })
 }
 
-const getAxiosClient = (): AxiosInstance => _axios
+const getAxiosClient = (): AxiosInstance => axiosInstance
 
 const HttpService = {
   configure,

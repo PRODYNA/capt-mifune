@@ -1,7 +1,7 @@
 import { AxiosRequestConfig } from 'axios'
 import Keycloak from 'keycloak-js'
 
-const _kc = new (Keycloak as any)('keycloak.json')
+const kc = new (Keycloak as any)('keycloak.json')
 
 /**
  * Initializes Keycloak instance and calls the provided callback function if successfully authenticated.
@@ -9,26 +9,24 @@ const _kc = new (Keycloak as any)('keycloak.json')
  * @param onAuthenticatedCallback
  */
 const initKeycloak = (onAuthenticatedCallback: () => void): void => {
-  _kc
-    .init({
-      onLoad: 'login-required',
-    })
-    .then(() => {
-      onAuthenticatedCallback()
-    })
+  kc.init({
+    onLoad: 'login-required',
+  }).then(() => {
+    onAuthenticatedCallback()
+  })
 }
 
-const doLogin = _kc.login
+const doLogin = kc.login
 
-const doLogout = _kc.logout
+const doLogout = kc.logout
 
-const getToken = (): string => _kc.token
+const getToken = (): string => kc.token
 
-const isLoggedIn = (): boolean => !!_kc.token
+const isLoggedIn = (): boolean => !!kc.token
 
 const updateToken = (
   successCallback: () => Promise<AxiosRequestConfig>
-): void => _kc.updateToken(5).then(successCallback).catch(doLogin)
+): void => kc.updateToken(5).then(successCallback).catch(doLogin)
 
 const loginRequired = (): boolean =>
   // Strings should be normalized to uppercase.
