@@ -1,29 +1,32 @@
-import axios, { AxiosRequestConfig } from "axios";
-import UserService from "./UserService";
-import { ENV } from "../env/Environments";
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import UserService from './UserService'
+import { ENV } from '../env/Environments'
 
-const _axios = axios.create({
-    baseURL: localStorage.getItem(ENV.API_SERVER) ?? undefined,
-    timeout: 25000,
-});
+const axiosInstance = axios.create({
+  baseURL: localStorage.getItem(ENV.API_SERVER) ?? undefined,
+  timeout: 25000,
+})
 
-const configure = () => {
-    _axios.interceptors.request.use((config: AxiosRequestConfig) => {
-        if (UserService.isLoggedIn()) {
-            const successCallback = (): Promise<AxiosRequestConfig> => {
-                config.headers.Authorization = `Bearer ${UserService.getToken()}`;
-                return Promise.resolve(config);
-            };
-            return UserService.updateToken(successCallback);
-        }
-    });
-};
+const configure = (): void => {
+  axiosInstance.interceptors.request.use((config: AxiosRequestConfig) => {
+    if (UserService.isLoggedIn()) {
+      const successCallback = (): Promise<AxiosRequestConfig> => {
+        // eslint-disable-next-line no-param-reassign
+        config.headers.Authorization = `Bearer ${UserService.getToken()}`
+        return Promise.resolve(config)
+      }
+      UserService.updateToken(successCallback)
+      return config
+    }
+    return config
+  })
+}
 
-const getAxiosClient = () => _axios;
+const getAxiosClient = (): AxiosInstance => axiosInstance
 
 const HttpService = {
-    configure,
-    getAxiosClient,
-};
+  configure,
+  getAxiosClient,
+}
 
-export default HttpService;
+export default HttpService

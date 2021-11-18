@@ -1,11 +1,17 @@
-import { FormControl, FormGroup, InputLabel, MenuItem, Select } from "@material-ui/core";
-import * as React from "react";
+import {
+  FormControl,
+  FormGroup,
+  InputLabel,
+  MenuItem,
+  Select,
+} from '@material-ui/core'
+import * as React from 'react'
 
 interface IFormSelectProps {
-  title: string;
-  options: string[];
-  value?: string;
-  onChangeHandler?: (event: any) => void;
+  title: string
+  options: string[]
+  value?: string
+  onChangeHandler?: (event: any) => void
 }
 
 const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
@@ -14,11 +20,13 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
   value,
   onChangeHandler,
 }) => {
-  const handleChange = (event: React.ChangeEvent<{ name?: string | undefined; value: unknown; }>): void => {
+  const handleChange = (
+    event: React.ChangeEvent<{ name?: string | undefined; value: unknown }>
+  ): void => {
     if (onChangeHandler) {
-      onChangeHandler(event);
+      onChangeHandler(event)
     }
-  };
+  }
 
   return (
     <FormGroup key={title}>
@@ -34,18 +42,15 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
         >
           {options.map((option: string) => {
             return (
-              <MenuItem
-                key={option}
-                value={option !== "" ? option : undefined}
-              >
-                {option !== "" ? option : "None"}
+              <MenuItem key={option} value={option !== '' ? option : undefined}>
+                {option !== '' ? option : 'None'}
               </MenuItem>
-            );
+            )
           })}
         </Select>
       </FormControl>
     </FormGroup>
-  );
-};
+  )
+}
 
-export default FormSelect;
+export default FormSelect
