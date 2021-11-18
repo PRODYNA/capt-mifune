@@ -60,6 +60,7 @@ const CustomButton = (props: ICustomButton): JSX.Element => {
       size="medium"
       disableElevation
       className={classes.root}
+      color={color}
       {...rest}
     >
       {title}
