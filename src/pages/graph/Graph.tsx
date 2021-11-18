@@ -18,6 +18,14 @@ interface IGraph {
   openSidenav: boolean
 }
 
+interface Force {
+  fx?: number
+  fy?: number
+}
+interface Path {
+  d?: string
+}
+
 /* Component */
 export const Graph = (props: IGraph): JSX.Element => {
   const { openSidenav } = props
@@ -36,12 +44,8 @@ export const Graph = (props: IGraph): JSX.Element => {
     )
     graphDelta.changedNodes?.forEach((cn) => {
       if (d3Nodes.some((n) => n.node.id === cn.id)) {
-        d3Nodes
-          .filter((n) => n.node.id === cn.id)
-          .forEach((tempNode) => {
-            // eslint-disable-next-line no-param-reassign
-            tempNode.node = cn
-          })
+        const [changeNode] = d3Nodes.filter((n) => n.node.id === cn.id)
+        changeNode.node = cn
       } else {
         d3Nodes = d3Nodes.concat(D3Helper.wrapNode(cn))
       }
@@ -55,12 +59,10 @@ export const Graph = (props: IGraph): JSX.Element => {
     )
     graphDelta.changedRelations.forEach((cr) => {
       if (d3Relations.some((n) => n.relation.id === cr.id)) {
-        d3Relations
-          .filter((d3Rel) => d3Rel.relation.id === cr.id)
-          .forEach((d3Rel) => {
-            // eslint-disable-next-line no-param-reassign
-            d3Rel.relation = cr
-          })
+        const [changedRelation] = d3Relations.filter(
+          (d3Rel) => d3Rel.relation.id === cr.id
+        )
+        changedRelation.relation = cr
       } else {
         d3Relations = d3Relations.concat(D3Helper.wrapRelation(cr))
       }
@@ -212,7 +214,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
       d3Relation: D3Relation<Relation>[]
     ): d3.Selection<
-      d3.BaseType | SVGPathElement,
+      d3.BaseType,
       D3Relation<Relation>,
       SVGGElement,
       unknown
@@ -259,23 +261,24 @@ export const Graph = (props: IGraph): JSX.Element => {
       node: any
     ): void => {
       const dragstart = (): void => {}
-      const dragged = (event: any, d: any): void => {
-        // eslint-disable-next-line no-param-reassign
-        d.fx = event.x
-        // eslint-disable-next-line no-param-reassign
-        d.fy = event.y
+      const dragged = (
+        event: { x: number; y: number },
+        d: Force | unknown
+      ): void => {
+        const force = d as Force
+        force.fx = event.x
+        force.fy = event.y
         simulation.alphaTarget(0.3).restart()
       }
       const dragend = (): void => {
         simulation.stop()
       }
 
-      const click = (e: any, d: any): void => {
-        if (selected && 'node' in selected && selected.node.id === d.id) {
-          // eslint-disable-next-line no-param-reassign
-          delete d.fx
-          // eslint-disable-next-line no-param-reassign
-          delete d.fy
+      const click = (e: any, d: D3Node<Node>): void => {
+        if (selected && 'node' in selected && selected.node.id === d.node.id) {
+          const force = d as Force
+          delete force.fx
+          delete force.fy
           setSelected(undefined)
         } else {
           setSelected(d)
@@ -298,8 +301,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         unknown
       >
     ): void => {
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      const click = (event: any, r: D3Relation<Relation>) => {
+      const click = (event: any, r: D3Relation<Relation>): void => {
         if (
           selected &&
           'relation' in selected &&
@@ -322,19 +324,24 @@ export const Graph = (props: IGraph): JSX.Element => {
         .on('start', () => {
           simulation.restart()
         })
-        .on('drag', (e: any, d: any) => {
+        .on('drag', (e: any, d: unknown): void => {
           if (selected && 'node' in selected && selected.node.id) {
             const node: D3Node<Node> = selected as D3Node<Node>
             const nodeX = node.x ?? 0
             const nodeY = node.y ?? 0
-            // eslint-disable-next-line no-param-reassign
-            d.d = D3Helper.selectionPath(nodeX, nodeY, e.x - nodeX, e.y - nodeY)
+            const path = d as Path
+            path.d = D3Helper.selectionPath(
+              nodeX,
+              nodeY,
+              e.x - nodeX,
+              e.y - nodeY
+            )
           }
           simulation.restart()
         })
-        .on('end', (e, d: any) => {
-          // eslint-disable-next-line no-param-reassign
-          delete d.d
+        .on('end', (e, d: unknown) => {
+          const path = d as Path
+          delete path.d
           const target = nodes.filter((n) => {
             if (n.x && n.y) {
               return (
@@ -400,7 +407,6 @@ export const Graph = (props: IGraph): JSX.Element => {
           `)
       let rels: D3Relation<Relation>[]
       if (selected && 'relation' in selected && selected.relation.id === '') {
-        console.log('add selected to relations')
         rels = relations.concat(selected)
       } else {
         rels = relations

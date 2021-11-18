@@ -41,7 +41,6 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
         if (!(header.find((h) => h === '') === '')) {
           header = [''].concat(header)
         }
-        console.log(JSON.stringify(header))
         return header
       }
     }
@@ -89,10 +88,10 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   }
   const values = getMenuItems()
 
-  const childrens: React.ReactNode[] = getReactNodes(values)
+  const children: React.ReactNode[] = getReactNodes(values)
   const options = ['']
   sources.map((source) => source.name).forEach((s) => options.push(s))
-  childrens.unshift(
+  children.unshift(
     <Grid item xs={12} md={4}>
       <FormSelect
         key="FileSelection"
@@ -107,7 +106,6 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   return (
     <form
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        console.log(`domain edit ${domain.name}`)
         graphService
           .domainPut(domain.id, {
             ...domain,
@@ -123,7 +121,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
       }}
     >
       <Grid container spacing={3}>
-        {childrens.map((child) => child)}
+        {children.map((child) => child)}
       </Grid>
       <FormActions
         saveText="Save"
