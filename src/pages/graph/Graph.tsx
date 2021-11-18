@@ -255,10 +255,10 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const nodeMouseEvents = (
-      simulation: d3.Simulation<any, any>,
+      simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
       node: any
     ): void => {
-      const dragstart = (event: any, d: any): void => {}
+      const dragstart = (): void => {}
       const dragged = (event: any, d: any): void => {
         // eslint-disable-next-line no-param-reassign
         d.fx = event.x
@@ -266,11 +266,11 @@ export const Graph = (props: IGraph): JSX.Element => {
         d.fy = event.y
         simulation.alphaTarget(0.3).restart()
       }
-      const dragend = (event: any, d: any): void => {
+      const dragend = (): void => {
         simulation.stop()
       }
 
-      const click = (event: any, d: any): void => {
+      const click = (e: any, d: any): void => {
         if (selected && 'node' in selected && selected.node.id === d.id) {
           // eslint-disable-next-line no-param-reassign
           delete d.fx
@@ -291,8 +291,12 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const relationMouseEvents = (
-      simulation: d3.Simulation<any, any>,
-      relation: any
+      relation: d3.Selection<
+        d3.BaseType | SVGPathElement,
+        D3Relation<Relation>,
+        SVGGElement,
+        unknown
+      >
     ): void => {
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       const click = (event: any, r: D3Relation<Relation>) => {
@@ -310,12 +314,12 @@ export const Graph = (props: IGraph): JSX.Element => {
     }
 
     const relationDrawEvents = (
-      simulation: d3.Simulation<any, any>,
+      simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
       selection: any
     ): void => {
       const selectionDrag = d3
         .drag()
-        .on('start', (e, d: any) => {
+        .on('start', () => {
           simulation.restart()
         })
         .on('drag', (e: any, d: any) => {
@@ -447,7 +451,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       const tick = () => {
         // todo:
         if (selection && selected && selected.kind === 'node') {
-          const selectedNode = selected as D3Node<Node>
+          // const selectedNode = selected as D3Node<Node>
           selection.attr('d', (d) => {
             if (d.d) {
               return d.d
@@ -472,7 +476,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       const simulation = buildSimulation(rels, tick)
       nodeMouseEvents(simulation, node)
       relationDrawEvents(simulation, selection)
-      relationMouseEvents(simulation, relation)
+      relationMouseEvents(relation)
     }
   }, [selectedDomain, domains, selected, nodes, relations, color])
 
