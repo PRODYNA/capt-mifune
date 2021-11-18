@@ -6,7 +6,7 @@ import ShuffleIcon from '@material-ui/icons/Shuffle'
 import { MifuneBarChart } from './MifuneBarChart'
 import { MifuneSankey } from './MifuneSankey'
 import { MifiuneHeatMap } from './MifuneHeatMap'
-import { Query, QueryBuilder, QueryNode, QueryRelation } from './QueryBuilder'
+import { Query, QueryBuilder } from './QueryBuilder'
 
 export const Analytics = (): JSX.Element => {
   const [chart, setChart] = useState<string>('BarChart')

@@ -51,7 +51,7 @@ const CreateDomain = (props: ICreateDomain): JSX.Element => {
         className={`${classes.createDomainBtn} ${
           domains.length === 0 ? classes.animatedBtn : ''
         }`}
-        onClick={(e) =>
+        onClick={() =>
           graphService
             .domainPost({ name: `domain_${domains.length}` })
             .then((domain) => {

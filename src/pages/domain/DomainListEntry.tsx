@@ -5,7 +5,6 @@ import {
   IconButton,
   makeStyles,
   TextField,
-  Theme,
 } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import AddIcon from '@material-ui/icons/Add'
@@ -25,7 +24,7 @@ interface DomainListEntryProps {
   nodes: Node[]
 }
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles(() =>
   createStyles({
     root: {
       display: 'grid',

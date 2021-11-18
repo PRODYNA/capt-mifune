@@ -64,10 +64,12 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
         orders={[count ?? '']}
         dataPreparation={(data, scale) =>
           data
-            .filter((d) => d[label!])
+            .filter((d) => d[label as string])
             .map((d) => {
               const item = d
-              item[count!] = (parseFloat(item[count!]) / scale).toFixed(2)
+              item[count as string] = (
+                parseFloat(item[count as string]) / scale
+              ).toFixed(2)
               return item
             })
         }

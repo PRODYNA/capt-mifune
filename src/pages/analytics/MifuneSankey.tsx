@@ -14,7 +14,7 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
   const [to, setTo] = useState<string>()
   const [count, setCount] = useState<string>()
 
-  const prepareData = (data: any[], scale: number): Data | undefined => {
+  const prepareData = (data: any[]): Data | undefined => {
     if (data && from && to && count) {
       const nodes: SankeyDataNode[] = data
         .map((d) => d[from])
@@ -59,7 +59,7 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
   return (
     <ChartWrapper
       query={query}
-      results={[from!, to!, count!]}
+      results={from && to && count ? [from, to, count] : []}
       orders={[]}
       dataPreparation={prepareData}
       selects={[
