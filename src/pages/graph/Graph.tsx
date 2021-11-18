@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
@@ -29,6 +29,8 @@ interface Path {
 /* Component */
 export const Graph = (props: IGraph): JSX.Element => {
   const { openSidenav } = props
+  const [width, setWidth] = useState<number>(800)
+  const [height, setHeight] = useState<number>(600)
   const [selectedDomain, setSelectedDomain] = useState<Domain>()
   const [domains, setDomains] = useState<Domain[]>([])
   const [nodes, setNodes] = useState<D3Node<Node>[]>([])
@@ -37,6 +39,19 @@ export const Graph = (props: IGraph): JSX.Element => {
     D3Node<Node> | D3Relation<Relation>
   >()
   const d3Container = useRef(null)
+
+  React.useEffect(() => {
+    const handleResize = (): void => {
+      setWidth(window.innerWidth)
+      setHeight(window.innerHeight)
+    }
+    window.addEventListener('resize', handleResize)
+  })
+
+  useLayoutEffect(() => {
+    setWidth(window.innerWidth)
+    setHeight(window.innerHeight)
+  }, [])
 
   const updateNodes = (graphDelta: GraphDelta): void => {
     let d3Nodes = nodes.filter(
@@ -382,9 +397,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         .force('y', d3.forceY().strength(0.3))
         .on('tick', tick)
     }
-
-    const width = window.innerWidth
-    const height = window.innerHeight
 
     if (d3Container.current && nodes) {
       const svg = d3.select(d3Container.current)

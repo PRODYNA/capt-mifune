@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Button, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import { BaseType, Selection } from 'd3'
@@ -34,15 +34,19 @@ export interface QueryRelation {
 
 export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const { onChange } = props
-  const width = 800
+
   const height = 600
 
   const useStyle = makeStyles({
     svg: {
-      // backgroundColor: "blue"
+      border: '1px dashed grey',
+    },
+    'query-builder': {
+      width: '100%',
     },
   })
   const classes = useStyle()
+  const [width, setWidth] = useState<number>(100)
   const [graph, setGraph] = useState<Graph>()
   const [varCounter, setVarCounter] = useState<number>(1)
   const [startNodeId, setStartNodeId] = useState<string>()
@@ -52,6 +56,17 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [nodes, setNodes] = useState<D3Node<QueryNode>[]>([])
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
   const d3Container = useRef(null)
+
+  React.useEffect(() => {
+    const handleResize = (): void => {
+      setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
+    }
+    window.addEventListener('resize', handleResize)
+  })
+
+  useLayoutEffect(() => {
+    setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
+  }, [])
 
   const color = (id: string): string => {
     return nodes.find((n) => n.node.node.id === id)?.node.node.color ?? 'green'
@@ -365,7 +380,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   }
 
   return (
-    <>
+    <div id="query-builder">
       <h1>Query Builder</h1>
       {graph?.nodes.map((n) => (
         <Button onClick={() => addNode(n)}>{n.label}</Button>
@@ -378,6 +393,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           ref={d3Container}
         />
       </div>
-    </>
+    </div>
   )
 }
