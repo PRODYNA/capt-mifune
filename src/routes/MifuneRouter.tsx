@@ -11,14 +11,16 @@ import Upload from '../pages/Upload'
 import { ANALYTCIS, PIPELINE, PIPELINES, ROOT_PATH, UPLOAD } from './routes'
 import ErrorBoundary from '../components/Error/ErrorBoundaries'
 
-
 const MifuneRouter = (): JSX.Element => {
-  const [openSidenav, setOpenSidenav] = useState(false);
+  const [openSidenav, setOpenSidenav] = useState(false)
 
   return (
     <SnackbarProvider>
       <>
-        <Sidenavigation openSidenav={openSidenav} setOpenSidenav={setOpenSidenav} />
+        <Sidenavigation
+          openSidenav={openSidenav}
+          setOpenSidenav={setOpenSidenav}
+        />
         <Box position="relative" height="100vh">
           <Switch>
             <Route path={ROOT_PATH} exact>

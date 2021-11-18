@@ -1,7 +1,13 @@
 FROM node:14 as builder
-COPY package.json package.json
+COPY package.json .
 COPY yarn.lock yarn.lock
-COPY tsconfig.json tsconfig.json
+COPY tsconfig.json .
+COPY .prettierrc.json .
+COPY .eslintrc.json .
+COPY .prettierignore .
+COPY .eslintignore .
+
+
 RUN yarn install
 COPY public public
 COPY src src

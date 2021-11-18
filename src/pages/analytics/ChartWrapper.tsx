@@ -1,17 +1,22 @@
-import { AnalyticFilter } from "./AnalyticFilter";
-import React, { useState } from "react";
-import { Filter} from "../../api/model/Model";
-import graphService from "../../api/GraphService";
-import { Box, Button, CircularProgress, Grid, makeStyles } from "@material-ui/core";
-import { AnalyticSelect } from "./AnalyticSelect";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import FilterListIcon from '@material-ui/icons/FilterList';
-import {Query} from "./QueryBuilder";
-
+import React, { useState } from 'react'
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  makeStyles,
+} from '@material-ui/core'
+import PlayArrowIcon from '@material-ui/icons/PlayArrow'
+import FilterListIcon from '@material-ui/icons/FilterList'
+import { AnalyticFilter } from './AnalyticFilter'
+import { Filter } from '../../api/model/Model'
+import graphService from '../../api/GraphService'
+import { AnalyticSelect } from './AnalyticSelect'
+import { Query } from './QueryBuilder'
 
 export interface SelectProps {
-  query: Query,
-  label: string,
+  query: Query
+  label: string
   onChange: (v: string | undefined) => void
   fnOptions?: string[]
   fnDefault?: string
@@ -19,111 +24,109 @@ export interface SelectProps {
 
 interface ChartWrapperProps<T> {
   query: Query
-  results: string[],
-  orders: string[],
-  dataPreparation: (data: any[], scale: number) => T | undefined,
-  selects: SelectProps[],
-  chart: (data: T) => React.ReactNode,
+  results: string[]
+  orders: string[]
+  dataPreparation: (data: any[], scale: number) => T | undefined
+  selects: SelectProps[]
+  chart: (data: T) => JSX.Element
 }
 
-export const ChartWrapper = (props: ChartWrapperProps<any>) => {
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<any>();
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const [scale, setScale] = useState<number>(1);
+export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
+  const { query, results, orders, dataPreparation, selects, chart } = props
+  const [loading, setLoading] = useState<boolean>(false)
+  const [data, setData] = useState<any>()
+  const [filters, setFilters] = useState<Filter[]>([])
+  const [scale, setScale] = useState<number>(1)
 
   const useStyle = makeStyles({
     infoBox: {
-      textAlign: "center"
-    }
-  });
-  const classes = useStyle();
+      textAlign: 'center',
+    },
+  })
+  const classes = useStyle()
 
-  function filterElements() {
-    return <>
-      {filters.map((f, i) => {
-        console.log(i)
-        return <AnalyticFilter  key={i} query={props.query}
-          onKeyChange={(k) => {
-            setFilters(f =>
-              f.map((f, idx) => {
-                if (idx === i) {
-                  f.property = k ?? '';
-                }
-                return f;
-              })
-            )
-          }}
-          onValueChange={(k) => {
-            console.log('value change:' + k)
-            setFilters(f =>
-              f.map((f, idx) => {
-                if (idx === i) {
-                  f.value = k;
-                }
-                return f;
-              })
-            )
-
-          }}
-          onDelete={() => {
-            console.log(i)
-            console.log(JSON.stringify(filters))
-            setFilters(f => f.filter((item, j) => i !== j))
-          }}
-
-        />
-      }
-      )}
-    </>;
+  const filterElements = (): JSX.Element => {
+    return (
+      <>
+        {filters.map((f, i) => {
+          return (
+            <AnalyticFilter
+              key={f.property}
+              query={query}
+              onKeyChange={(k) => {
+                setFilters(() => {
+                  filters[i].property = k ?? ''
+                  return filters
+                })
+              }}
+              onValueChange={(k) => {
+                setFilters(() => {
+                  filters[i].value = k ?? ''
+                  return filters
+                })
+              }}
+              onDelete={() => {
+                setFilters(filters.filter((item, j) => i !== j))
+              }}
+            />
+          )
+        })}
+      </>
+    )
   }
 
-
-
-  function loadData() {
-      setLoading(true)
-      graphService
-        .query(props.query, props.results, props.orders, filters)
-        .then((data) => {
-          setData(props.dataPreparation(data, scale))
-          setLoading(false)
-        })
-        .catch(e => console.error(e));
+  const loadData = (): void => {
+    setLoading(true)
+    graphService
+      .query(query, results, orders, filters)
+      .then((newData) => {
+        setData(dataPreparation(newData, scale))
+        setLoading(false)
+      })
+      .catch((e) => console.error(e))
   }
 
-
-
-  function buildChart() {
+  const buildChart = (): JSX.Element => {
     if (loading) {
-      return <div className={classes.infoBox}>
-        <CircularProgress />
-      </div>
-    } else if (!data) {
-      return <div className={classes.infoBox}>
-        <h2>Please Update</h2>
-      </div>
-    } else {
-      return props.chart(data)
+      return (
+        <div className={classes.infoBox}>
+          <CircularProgress />
+        </div>
+      )
     }
+    if (!data) {
+      return (
+        <div className={classes.infoBox}>
+          <h2>Please Update</h2>
+        </div>
+      )
+    }
+    return chart(data)
   }
 
   return (
     <>
       <Box mb={4}>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          loadData();
-        }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            loadData()
+          }}
+        >
           <Grid container spacing={3}>
             <Grid item md={6} />
-            {props.selects.map(s =>
-              <AnalyticSelect fnOptions={s.fnOptions} fnDefault={s.fnDefault} label={s.label} query={props.query}
-                onChange={value => {
+            {selects.map((s) => (
+              <AnalyticSelect
+                fnOptions={s.fnOptions}
+                fnDefault={s.fnDefault}
+                label={s.label}
+                query={query}
+                onChange={(value) => {
                   setData(undefined)
                   s.onChange(value)
-                }} />
-            )}
+                }}
+              />
+            ))}
           </Grid>
           <Box mt={4}>
             <Button
@@ -131,23 +134,16 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
               variant="contained"
               color="secondary"
               onClick={() => {
-                setFilters(f => f.concat({property:'',value: undefined}))
-              }}>
+                setFilters((f) => f.concat({ property: '', value: undefined }))
+              }}
+            >
               add filter
             </Button>
-            Scale: <Button onClick={e => {
-              setScale(scale * 0.1)
-            }
-
-            }>-</Button>{scale}
-            <Button onClick={e => {
-              setScale(scale * 10)
-            }
-            }>+</Button>
+            Scale: <Button onClick={() => setScale(scale * 0.1)}>-</Button>
+            {scale}
+            <Button onClick={() => setScale(scale * 10)}>+</Button>
           </Box>
-          <Box my={2}>
-            {filterElements()}
-          </Box>
+          <Box my={2}>{filterElements()}</Box>
           <Button
             startIcon={<PlayArrowIcon />}
             key="submit-button"
@@ -161,6 +157,5 @@ export const ChartWrapper = (props: ChartWrapperProps<any>) => {
       </Box>
       {buildChart()}
     </>
-
-  );
+  )
 }
