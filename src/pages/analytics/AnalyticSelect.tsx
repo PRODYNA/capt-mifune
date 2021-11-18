@@ -29,7 +29,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   ): void => {
     if (newVar && newProp && newFn) {
       onChange(`${newVar}.${newProp}[${newFn}]`)
-    } else if (fnOptions?.length && fnOptions?.length <= 0) {
+    } else if (!fnOptions?.length || fnOptions.length <= 0) {
       onChange(`${newVar}.${newProp}`)
     } else {
       onChange(undefined)
