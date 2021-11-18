@@ -7,7 +7,7 @@ import PipelineEdit from './PipelineEdit'
 
 const PipelinesDetail = (): JSX.Element => {
   const [domain, setDomain] = useState<Domain>()
-  const { id } = useParams<any>()
+  const { id } = useParams<{ id: string }>()
 
   useEffect(() => {
     graphService.domainGet(id).then((d) => setDomain(d))

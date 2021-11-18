@@ -1,22 +1,20 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import {
   Button,
   Checkbox,
-  createStyles,
   Divider,
   FormControlLabel,
   FormGroup,
   IconButton,
   makeStyles,
   TextField,
-  Theme,
 } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import SaveIcon from '@material-ui/icons/Save'
 import CloseIcon from '@material-ui/icons/Close'
 import AddIcon from '@material-ui/icons/Add'
 import { PropertyEdit } from './PropertyEdit'
-import { Domain, Node, Property, Relation } from '../../api/model/Model'
+import { Domain, Property, Relation } from '../../api/model/Model'
 import { DomainSelect } from './DomainSelect'
 
 interface RelationEditProps {
@@ -58,7 +56,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   })
   const classes = useStyles()
 
-  const handleSubmit = (event: any): void => {
+  const handleSubmit = (event: FormEvent): void => {
     if (value.id === '') {
       onCreate(value)
     } else {
@@ -67,7 +65,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
     event.preventDefault()
   }
 
-  const updateType = (event: any): void => {
+  const updateType = (event: ChangeEvent<HTMLInputElement>): void => {
     setValue((oldNode) => ({ ...oldNode, type: event.target.value }))
   }
 
@@ -154,7 +152,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
             control={
               <Checkbox
                 checked={value.multiple}
-                onChange={(event: any, clicked: boolean) => {
+                onChange={(e, clicked: boolean) => {
                   setValue({ ...value, multiple: clicked })
                 }}
                 name="multiple"
@@ -168,7 +166,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
             control={
               <Checkbox
                 checked={value.primary}
-                onChange={(event: any, clicked: boolean) => {
+                onChange={(e, clicked: boolean) => {
                   setValue({ ...value, primary: clicked })
                 }}
                 name="primary"

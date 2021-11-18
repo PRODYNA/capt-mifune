@@ -139,22 +139,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
             >
               add filter
             </Button>
-            Scale:{' '}
-            <Button
-              onClick={(e) => {
-                setScale(scale * 0.1)
-              }}
-            >
-              -
-            </Button>
+            Scale: <Button onClick={() => setScale(scale * 0.1)}>-</Button>
             {scale}
-            <Button
-              onClick={(e) => {
-                setScale(scale * 10)
-              }}
-            >
-              +
-            </Button>
+            <Button onClick={() => setScale(scale * 10)}>+</Button>
           </Box>
           <Box my={2}>{filterElements()}</Box>
           <Button

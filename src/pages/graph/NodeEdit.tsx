@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 
 import {
   Button,
@@ -64,7 +64,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   })
   const classes = useStyle()
 
-  const handleSubmit = (event: any): void => {
+  const handleSubmit = (event: FormEvent): void => {
     if (value.id === '') {
       onCreate(value)
     } else {
@@ -108,7 +108,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
       <>
         <h3>Properties</h3>
         {value.properties?.map((p, idx) => (
-          <div>
+          <div key={p.name}>
             <PropertyEdit
               idx={idx}
               property={p}
@@ -148,7 +148,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
                   id="node-label"
                   value={value.label}
                   label="Label"
-                  onChange={(event: any): void => {
+                  onChange={(event: ChangeEvent<HTMLInputElement>): void => {
                     setValue((oldNode) => ({
                       ...oldNode,
                       label: event.target.value,
@@ -157,7 +157,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
                 />
                 <ColorPicker
                   hex={value.color}
-                  onChange={(hex: any): void => {
+                  onChange={(hex: string): void => {
                     setValue((oldNode) => ({ ...oldNode, color: hex }))
                   }}
                 />
