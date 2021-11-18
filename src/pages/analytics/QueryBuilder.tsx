@@ -253,7 +253,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
       node: any
     ): void => {
-      const dragstart = (event: any, d: any): void => {}
+      const dragstart = (): void => {}
       const dragged = (event: any, element: any): void => {
         // eslint-disable-next-line no-param-reassign
         element.fx = event.x
@@ -261,7 +261,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         element.fy = event.y
         simulation.alphaTarget(0.3).restart()
       }
-      const dragend = (event: any, d: any): void => {
+      const dragend = (): void => {
         simulation.stop()
       }
 
