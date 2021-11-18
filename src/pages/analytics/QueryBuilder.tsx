@@ -235,7 +235,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         )
         // .attr("stroke", (r)=>'url(#grand-'+r.relation.id+')')
         .attr('fill', 'none')
-        .attr('stroke-width', (rel) => 20)
+        .attr('stroke-width', () => 20)
         .classed('path', true)
       selection
         .join('text')
@@ -250,7 +250,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     }
 
     const nodeMouseEvents = (
-      simulation: d3.Simulation<any, any>,
+      simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
       node: any
     ): void => {
       const dragstart = (event: any, d: any): void => {}
@@ -368,13 +368,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     <>
       <h1>Query Builder</h1>
       {graph?.nodes.map((n) => (
-        <Button
-          onClick={(e) => {
-            addNode(n)
-          }}
-        >
-          {n.label}
-        </Button>
+        <Button onClick={() => addNode(n)}>{n.label}</Button>
       ))}
       <div>
         <svg
