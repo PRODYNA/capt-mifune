@@ -1,50 +1,57 @@
-import { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
-import { Domain } from "../../api/model/Model";
-import graphService from "../../api/GraphService";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import WarningIcon from "@material-ui/icons/Warning";
-import ClearIcon from '@material-ui/icons/Clear';
-import DoneIcon from "@material-ui/icons/Done";
-import { IconButton, TableCell, TableRow } from "@material-ui/core";
-import { useHistory } from "react-router-dom";
-import StopIcon from "@material-ui/icons/Stop";
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { useTheme } from '@material-ui/core/styles';
-import { SnackbarContext } from "../../context/Snackbar";
-import { Translations } from "../../utils/Translations";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
+import PlayArrowIcon from '@material-ui/icons/PlayArrow'
+import WarningIcon from '@material-ui/icons/Warning'
+import ClearIcon from '@material-ui/icons/Clear'
+import DoneIcon from '@material-ui/icons/Done'
+import { IconButton, TableCell, TableRow } from '@material-ui/core'
+import { useHistory } from 'react-router-dom'
+import StopIcon from '@material-ui/icons/Stop'
+import VisibilityIcon from '@material-ui/icons/Visibility'
+import { useTheme } from '@material-ui/core/styles'
+import graphService from '../../api/GraphService'
+import { Domain } from '../../api/model/Model'
+import { SnackbarContext } from '../../context/Snackbar'
+import { Translations } from '../../utils/Translations'
 
 interface IPipelineRow {
-  domain: Domain;
-  cleanActive: boolean;
-  setShowProgress: Dispatch<SetStateAction<boolean>>;
+  domain: Domain
+  cleanActive: boolean
+  setShowProgress: Dispatch<SetStateAction<boolean>>
 }
 
-const PipelineRow = (props: IPipelineRow) => {
+const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const { domain, cleanActive, setShowProgress } = props
-  const history = useHistory();
-  const [message, setMessage] = useState<string>();
+  const history = useHistory()
+  const [message, setMessage] = useState<string>()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
 
   useEffect(() => {
-    let sseClient = graphService.importSource(domain.id);
-    sseClient.onmessage = function (e) {
-      setMessage(e.data);
-    };
-    
-    return function cleanUp() {
-      sseClient.close();
-    };
-  }, [domain.id, cleanActive]);
+    const sseClient = graphService.importSource(domain.id)
+    sseClient.onmessage = (e) => {
+      setMessage(e.data)
+    }
 
-  const valid = (valid: boolean): JSX.Element => {
-    if (valid) return (<DoneIcon htmlColor={theme.palette.success.main} />)
-    else return (<WarningIcon htmlColor={theme.palette.warning.main} />)
+    return function cleanUp() {
+      sseClient.close()
+    }
+  }, [domain.id, cleanActive])
+
+  const valid = (isValid: boolean): JSX.Element => {
+    if (isValid) return <DoneIcon htmlColor={theme.palette.success.main} />
+    return <WarningIcon htmlColor={theme.palette.warning.main} />
   }
 
   const runImport = (): void => {
     setShowProgress(true)
-    graphService.domainRunImport(domain.id)
+    graphService
+      .domainRunImport(domain.id)
       .then(() => {
         openSnackbar(Translations.IMPORT_RUN, 'success')
         setShowProgress(false)
@@ -56,13 +63,15 @@ const PipelineRow = (props: IPipelineRow) => {
   }
 
   const stopImport = (): void => {
-    graphService.domainStopImport(domain.id)
+    graphService
+      .domainStopImport(domain.id)
       .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
       .catch((e) => openSnackbarError(e))
   }
 
   const clearDomain = (): void => {
-    graphService.domainClear(domain.id)
+    graphService
+      .domainClear(domain.id)
       .then(() => openSnackbar(Translations.DOMAIN_CLEAR, 'success'))
       .catch((e) => openSnackbarError(e))
   }
@@ -70,7 +79,10 @@ const PipelineRow = (props: IPipelineRow) => {
   return (
     <>
       <TableRow key={domain.id}>
-        <TableCell align="left" onClick={() => history.push("/pipeline/" + domain.id)}>
+        <TableCell
+          align="left"
+          onClick={() => history.push(`/pipeline/${domain.id}`)}
+        >
           <IconButton size="small">
             <VisibilityIcon htmlColor={theme.palette.grey[700]} />
           </IconButton>
@@ -95,9 +107,9 @@ const PipelineRow = (props: IPipelineRow) => {
         </TableCell>
         <TableCell align="left">{message}</TableCell>
         <TableCell align="left">{domain.id}</TableCell>
-      </TableRow >
+      </TableRow>
     </>
-  );
-};
+  )
+}
 
-export default PipelineRow;
+export default PipelineRow

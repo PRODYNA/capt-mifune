@@ -1,16 +1,16 @@
-import { Input, MenuItem, Select } from "@material-ui/core";
-import { Node } from "../../api/model/Model";
-import React from "react";
+import { Input, MenuItem, Select } from '@material-ui/core'
+import React from 'react'
+import { Node } from '../../api/model/Model'
 
 export interface NodeSelectProps {
-  nodes: Node[];
-  nodeId?: string;
-  updateNode: (node: Node) => void;
-  className?: string;
+  nodes: Node[]
+  nodeId?: string
+  updateNode: (node: Node) => void
+  className?: string
 }
 
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
+const ITEM_HEIGHT = 48
+const ITEM_PADDING_TOP = 8
 
 const MenuProps = {
   PaperProps: {
@@ -19,32 +19,31 @@ const MenuProps = {
       width: 250,
     },
   },
-};
+}
 
-export const NodeSelect = (props: NodeSelectProps) => {
+export const NodeSelect = (props: NodeSelectProps): JSX.Element => {
+  const { nodes, nodeId, updateNode, className } = props
   return (
     <Select
-      className={props.className}
-      value={props.nodeId}
+      className={className}
+      value={nodeId}
       onChange={(e) => {
-        let node = props.nodes.filter(
-          (n) => n.id === (e.target.value as string)
-        )[0];
-        console.log("select");
-        console.log(node.id);
-        console.log(node.label);
-        console.log("select end");
-        props.updateNode(node);
+        const node = nodes.filter((n) => n.id === (e.target.value as string))[0]
+        console.log('select')
+        console.log(node.id)
+        console.log(node.label)
+        console.log('select end')
+        updateNode(node)
         e.stopPropagation()
       }}
       input={<Input />}
       MenuProps={MenuProps}
     >
-      {props.nodes.map((n) => (
+      {nodes.map((n) => (
         <MenuItem key={n.id} value={n.id}>
           {n.label}
         </MenuItem>
       ))}
     </Select>
-  );
-};
+  )
+}

@@ -1,13 +1,13 @@
-import React from "react";
-import { BrowserRouter } from "react-router-dom";
-import MifuneRouter from "./routes/MifuneRouter";
+import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import MifuneRouter from './routes/MifuneRouter'
 
-function App() {
+function App(): JSX.Element {
   return (
     <BrowserRouter>
       <MifuneRouter />
-    </BrowserRouter >
-  );
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App

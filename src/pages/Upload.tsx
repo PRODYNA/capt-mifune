@@ -1,33 +1,30 @@
-import React, { useContext, useState } from "react";
-import {
-  Box,
-  Container,
-  makeStyles,
-  Typography,
-} from "@material-ui/core";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
-import HttpService from "../services/HttpService";
-import CustomButton from "../components/Button/CustomButton";
-import { SnackbarContext } from "../context/Snackbar";
-import { Translations } from "../utils/Translations";
-import { CustomTexts } from "../utils/CustomTexts";
+import React, { useContext, useState } from 'react'
+import { Box, Container, makeStyles, Typography } from '@material-ui/core'
+import CloudUploadIcon from '@material-ui/icons/CloudUpload'
+import HttpService from '../services/HttpService'
+import CustomButton from '../components/Button/CustomButton'
+import { SnackbarContext } from '../context/Snackbar'
+import { Translations } from '../utils/Translations'
+import { CustomTexts } from '../utils/CustomTexts'
 
-const rest = HttpService.getAxiosClient();
+const rest = HttpService.getAxiosClient()
 
 const useStyle = makeStyles({
   content: {
-    borderBottom: "1px solid gray",
-    borderTop: "1px solid gray",
+    borderBottom: '1px solid gray',
+    borderTop: '1px solid gray',
     padding: '0.5rem 0',
     maxWidth: 500,
-    width: '100%'
-  }
-});
+    width: '100%',
+  },
+})
 
-const FileUpload = () => {
-  const classes = useStyle();
+const FileUpload = (): JSX.Element => {
+  const classes = useStyle()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(undefined);
+  const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(
+    undefined
+  )
 
   return (
     <Container>
@@ -41,16 +38,18 @@ const FileUpload = () => {
       </Box>
       <form
         onSubmit={(event) => {
-          event.preventDefault();
+          event.preventDefault()
           if (file) {
             const fileSize = (file.file.size / (1024 * 1024)).toFixed(2)
             if (fileSize < '10') {
-              const data = new FormData();
-              data.append("name", file.file.name);
-              data.append("file", file.file);
+              const data = new FormData()
+              data.append('name', file.file.name)
+              data.append('file', file.file)
               rest
-                .post("/sources", data, {})
-                .then((): void => openSnackbar(Translations.UPLOAD_SUCCESS, 'success'))
+                .post('/sources', data, {})
+                .then((): void =>
+                  openSnackbar(Translations.UPLOAD_SUCCESS, 'success')
+                )
                 .catch((e): void => openSnackbarError(e))
             } else openSnackbar(Translations.MAX_FILESIZE, 'error')
           }
@@ -80,7 +79,7 @@ const FileUpload = () => {
         </Box>
       </form>
     </Container>
-  );
-};
+  )
+}
 
 export default FileUpload
