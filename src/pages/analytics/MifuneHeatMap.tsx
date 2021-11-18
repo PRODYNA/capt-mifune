@@ -9,7 +9,7 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
   const [labelX, setLabelX] = useState<string>()
   const [labelY, setLabelY] = useState<string>()
   const [count, setCount] = useState<string>()
-  const [keys, setKeys] = useState<any[]>()
+  const [keys, setKeys] = useState<string[] | undefined>(undefined)
   const [min, setMin] = useState<number>(Number.MAX_VALUE)
   const [max, setMax] = useState<number>(Number.MIN_VALUE)
   const [heatMax, setHeatMax] = useState<number>()

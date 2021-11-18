@@ -33,7 +33,6 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
       onChange(`${newVar}.${newProp}`)
     } else {
       onChange(undefined)
-      console.log('incomplete analytic select')
     }
   }
 
