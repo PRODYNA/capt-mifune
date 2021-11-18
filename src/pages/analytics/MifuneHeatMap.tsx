@@ -111,15 +111,12 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
       </div>
     )
   }
-  if (!labelY || !labelX || !count) {
-    return <></>
-  }
 
   return (
     <ChartWrapper
       query={query}
-      results={[labelX, labelY, count]}
-      orders={[labelX]}
+      results={[labelX ?? '', labelY ?? '', count ?? '']}
+      orders={[labelX ?? '']}
       dataPreparation={dataPreparation}
       selects={[
         { query, label: 'X', onChange: setLabelX },
