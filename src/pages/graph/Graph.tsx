@@ -550,46 +550,17 @@ export const Graph = (props: IGraph): JSX.Element => {
 
   const classes = useStyles()
 
-  const domainList = (): JSX.Element => {
-    return (
+  return (
+    <>
       <DomainList
         domains={domains}
         nodes={nodes.map((n) => n.node)}
         selectedDomain={selectedDomain}
-        onSubmit={(domain) => {
-          setDomains(domains.filter((d) => d.id !== domain.id).concat(domain))
-          setSelectedDomain(domain)
-        }}
-        onSelect={(domain: Domain) => {
-          if (selectedDomain?.id === domain.id) {
-            setSelectedDomain(undefined)
-          } else {
-            setSelectedDomain(domain)
-          }
-        }}
-        onDelete={(graphDelta) => {
-          updateState(graphDelta)
-          setSelected(undefined)
-        }}
-        addNode={(domain: Domain) => {
-          setSelected(
-            D3Helper.wrapNode({
-              id: '',
-              domainIds: [domain.id],
-              color: 'blue',
-              label: '',
-              properties: [],
-            })
-          )
-          setSelectedDomain(domain)
-        }}
+        setDomains={setDomains}
+        setSelectedDomain={setSelectedDomain}
+        updateState={updateState}
+        setSelected={setSelected}
       />
-    )
-  }
-
-  return (
-    <>
-      {domainList()}
       <div className={classes.overlay}>{editSection()}</div>
       <svg
         className={classes.svg}
