@@ -108,7 +108,8 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
       <>
         <h3>Properties</h3>
         {value.properties?.map((p, idx) => (
-          <div key={p.name}>
+          // eslint-disable-next-line react/no-array-index-key
+          <div key={idx}>
             <PropertyEdit
               idx={idx}
               property={p}
