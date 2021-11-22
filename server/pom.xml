@@ -14,8 +14,6 @@
 
   <properties>
     <compiler-plugin.version>3.8.1</compiler-plugin.version>
-    <license.licenseName>mit</license.licenseName>
-    <license.licenseResolver>${project.baseUri}/src/license</license.licenseResolver>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -92,28 +90,6 @@
   </dependencies>
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
-        <version>2.0.0</version>
-        <executions>
-          <execution>
-            <id>default-cli</id>
-            <phase>process-sources</phase>
-            <goals>
-              <goal>update-file-header</goal>
-            </goals>
-            <configuration>
-              <licenseName>mit</licenseName>
-              <organizationName>PRODYNA SE</organizationName>
-              <inceptionYear>2021</inceptionYear>
-              <excludes>
-                <exclude>**/graph.json</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>io.quarkus</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
