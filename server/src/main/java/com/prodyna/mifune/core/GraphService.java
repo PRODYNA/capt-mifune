@@ -283,7 +283,7 @@ public class GraphService {
             });
 
     removedRelations.stream()
-        .filter(graph.getRelations()::contains)
+        .filter(relId -> graph.getRelations().stream().map(Relation::getId).anyMatch(relId::equals))
         .map(this::deleteRelation)
         .forEach(
             gd -> {
