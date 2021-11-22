@@ -2,7 +2,7 @@ package com.prodyna.mifune.core;
 
 /*-
  * #%L
- * prodyna-mifune-server
+ * prodyna-mifune-parent
  * %%
  * Copyright (C) 2021 PRODYNA SE
  * %%
