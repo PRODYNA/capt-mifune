@@ -40,6 +40,47 @@ export const Graph = (props: IGraph): JSX.Element => {
   >()
   const d3Container = useRef(null)
 
+  const nodeRadius = (n: D3Node<Node>): number => {
+    const isSelected =
+      selected && 'node' in selected && selected.node.id === n.node.id
+    if (isSelected) {
+      return 40
+    }
+    if (n.node.domainIds.some((id) => id === selectedDomain?.id)) {
+      return 30
+    }
+    return 20
+  }
+
+  const relWidth = (rel: D3Relation<Relation>): number => {
+    const isSelected =
+      selected &&
+      'relation' in selected &&
+      selected.relation.id === rel.relation.id
+    if (isSelected) {
+      return 12
+    }
+    if (rel.relation.domainIds.some((id) => id === selectedDomain?.id)) {
+      return 8
+    }
+    return 4
+  }
+
+  React.useEffect(() => {
+    nodes.forEach((n) => {
+      // eslint-disable-next-line no-param-reassign
+      n.radius = nodeRadius(n)
+      return n
+    })
+    setNodes(nodes)
+    relations.forEach((n) => {
+      // eslint-disable-next-line no-param-reassign
+      n.width = relWidth(n)
+      return n
+    })
+    setRelations(relations)
+  }, [selectedDomain, selected])
+
   React.useEffect(() => {
     const handleResize = (): void => {
       setWidth(window.innerWidth)
@@ -137,32 +178,6 @@ export const Graph = (props: IGraph): JSX.Element => {
       setSelected(d3Relation)
     }
 
-    const nodeRadius = (n: D3Node<Node>): number => {
-      const isSelected =
-        selected && 'node' in selected && selected.node.id === n.node.id
-      if (isSelected) {
-        return 40
-      }
-      if (n.node.domainIds.some((id) => id === selectedDomain?.id)) {
-        return 30
-      }
-      return 20
-    }
-
-    const relWidth = (rel: D3Relation<Relation>): number => {
-      const isSelected =
-        selected &&
-        'relation' in selected &&
-        selected.relation.id === rel.relation.id
-      if (isSelected) {
-        return 18
-      }
-      if (rel.relation.domainIds.some((id) => id === selectedDomain?.id)) {
-        return 12
-      }
-      return 6
-    }
-
     const drawNodes = (
       svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
     ): Selection<
@@ -178,7 +193,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         .selectAll('circle')
         .data(nodes)
         .join('circle')
-        .attr('r', (n) => nodeRadius(n))
+        .attr('r', (n) => n.radius)
         .attr('fill', (n) => n.node.color)
         .classed('node', true)
     }
@@ -234,6 +249,21 @@ export const Graph = (props: IGraph): JSX.Element => {
       SVGGElement,
       unknown
     > => {
+      relations.forEach((rel) => {
+        svg
+          .append('defs')
+          .append('marker')
+          .attr('id', `arrow-${rel.relation.id}`)
+          .attr('markerWidth', '5')
+          .attr('markerHeight', '3')
+          .attr('refX', '3.5')
+          .attr('refY', '1.5')
+          .attr('orient', 'auto-start-reverse')
+          .append('polygon')
+          .attr('points', '0 3, 0 0, 5 1.5')
+          .attr('fill', color(rel.relation.sourceId))
+      })
+
       const selection = svg.append('g').selectAll('path').data(d3Relation)
       const relation = selection
         .join('path')
@@ -250,7 +280,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         })
         .attr('stroke', (d) => color(d.relation.sourceId))
         .attr('fill', 'transparent')
-        .attr('stroke-width', (rel) => relWidth(rel))
+        .attr('stroke-width', (rel) => rel.width)
         .classed('path', true)
 
       selection
@@ -485,7 +515,13 @@ export const Graph = (props: IGraph): JSX.Element => {
 
         node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
         text.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
-
+        relation
+          .attr('marker-end', (r) =>
+            D3Helper.isFlipped(r) ? '' : `url(#arrow-${r.relation.id})`
+          )
+          .attr('marker-start', (r) =>
+            D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
+          )
         relation.attr('d', (rel) => {
           return D3Helper.buildRelationPath(rel)
         })
