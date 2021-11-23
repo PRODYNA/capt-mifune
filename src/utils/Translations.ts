@@ -7,4 +7,5 @@ export const Translations = {
   IMPORT_STOPPED: 'Import stopped',
   DOMAIN_CLEAR: 'Domain cleared',
   SAVE: 'Saved !',
+  DELETE: 'Deleted !',
 }
