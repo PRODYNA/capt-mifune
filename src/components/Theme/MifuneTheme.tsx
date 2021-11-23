@@ -50,6 +50,11 @@ const theme = createTheme({
         borderRadius: 0,
       },
     },
+    MuiFormControl: {
+      root: {
+        marginBottom: '0.5rem',
+      },
+    },
   },
 })
 interface MifuneThemeProps {
