@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 import { Box, createStyles, makeStyles, Typography } from '@material-ui/core'
 import { Domain, GraphDelta, Node, Relation } from '../../api/model/Model'
 import { DomainListEntry } from './DomainListEntry'
@@ -39,6 +39,11 @@ export const DomainList = (props: DomainListProps): JSX.Element => {
     updateState,
   } = props
   const classes = useStyles()
+  const [expanded, setExpanded] = useState<string>('')
+
+  const toggleAccordion = (id: string): void => {
+    setExpanded(id === expanded ? '' : id)
+  }
 
   const onSubmit = (domain: Domain): void => {
     setDomains(domains.filter((d) => d.id !== domain.id).concat(domain))
@@ -86,6 +91,8 @@ export const DomainList = (props: DomainListProps): JSX.Element => {
             onUpdate={onSubmit}
             onDelete={onDelete}
             addNode={addNode}
+            expanded={expanded}
+            toggleAccordion={toggleAccordion}
             active={d.id === selectedDomain?.id}
           />
         ))}
