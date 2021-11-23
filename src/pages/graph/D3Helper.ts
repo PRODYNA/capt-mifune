@@ -3,6 +3,7 @@ import * as d3 from 'd3'
 export interface D3Node<T> extends d3.SimulationNodeDatum {
   d?: string
   kind: string
+  radius: number
   node: T
 }
 
@@ -14,6 +15,11 @@ export interface D3Relation<T> extends d3.SimulationLinkDatum<D3Node<any>> {
   relIndex: number
   incomingRelationsCount: number
   firstRender?: boolean
+  width: number
+}
+export interface Point {
+  x: number
+  y: number
 }
 
 export class D3Helper {
@@ -21,6 +27,7 @@ export class D3Helper {
     return {
       kind: 'node',
       node,
+      radius: 20,
     }
   }
 
@@ -35,6 +42,7 @@ export class D3Helper {
       relCount: 1,
       incomingRelationsCount: 0,
       relIndex: 0,
+      width: 6,
     }
   }
 
@@ -72,42 +80,63 @@ export class D3Helper {
             `
   }
 
+  static isFlipped(rel: D3Relation<any>): boolean {
+    return (
+      ((rel.source as D3Node<any>).x ?? 0) >
+      ((rel.target as D3Node<any>).x ?? 0)
+    )
+  }
+
   static buildRelationPath = (rel: D3Relation<any>): string => {
     let source: D3Node<any>
     let target: D3Node<any>
     const allRelCount = rel.relCount + rel.incomingRelationsCount - 1
     const nodeIndex = rel.relIndex
     let order = allRelCount / 2 - nodeIndex
-    if (
-      ((rel.source as D3Node<any>).x ?? 0) <=
-      ((rel.target as D3Node<any>).x ?? 0)
-    ) {
+    if (!D3Helper.isFlipped(rel)) {
+      // eslint-disable-next-line prefer-const
       source = rel.source as D3Node<any>
+      // eslint-disable-next-line prefer-const
       target = rel.target as D3Node<any>
     } else {
       source = rel.target as D3Node<any>
       target = rel.source as D3Node<any>
       order *= -1
     }
-    const sx = source.x ?? 0
-    const sy = source.y ?? 0
-    const tx = target.x ?? 0
-    const ty = target.y ?? 0
+    let sourcePoint: Point
+    let targetPoint: Point
+    if (source.x === target.x && source.y === target.y) {
+      sourcePoint = { x: source.x ?? 0, y: (source.y ?? 0) - source.radius }
+      targetPoint = { x: target.x ?? 0, y: (target.y ?? 0) - target.radius }
+    } else {
+      sourcePoint = D3Helper.correctPosition(
+        { x: source.x ?? 0, y: source.y ?? 0 },
+        source.radius,
+        { x: target.x ?? 0, y: target.y ?? 0 },
+        order
+      )
+      targetPoint = D3Helper.correctPosition(
+        { x: target.x ?? 0, y: target.y ?? 0 },
+        target.radius,
+        { x: source.x ?? 0, y: source.y ?? 0 },
+        order * -1
+      )
+    }
 
     const space = 50
 
     let correct = 1
-    if (ty < sy) {
+    if (targetPoint.y < sourcePoint.y) {
       correct = -1
     }
 
     let curveDistance = order * space
-    if (ty < sy) {
+    if (targetPoint.y < sourcePoint.y) {
       curveDistance *= correct
     }
 
-    const distanceX = sx - tx
-    const distanceY = sy - ty
+    const distanceX = sourcePoint.x - targetPoint.x
+    const distanceY = sourcePoint.y - targetPoint.y
     let angle = Math.PI / 4
 
     let spacerX = space * (order + 3)
@@ -116,7 +145,10 @@ export class D3Helper {
     let curveCenterY = -(curveDistance + space)
 
     const distance =
-      D3Helper.pointDistance({ x: sx, y: sy }, { x: tx, y: ty }) / 3
+      D3Helper.pointDistance(
+        { x: sourcePoint.x, y: sourcePoint.y },
+        { x: targetPoint.x, y: targetPoint.y }
+      ) / 3
     if (Math.abs(distanceX) > 1 || Math.abs(distanceY) > 1) {
       angle = Math.atan(distanceX / distanceY)
       spacerX = Math.sin(angle) * (distance / 3) * correct
@@ -125,15 +157,36 @@ export class D3Helper {
       curveCenterY = Math.cos(angle + Math.PI / 2) * curveDistance
     }
     return `
-      M ${sx} ${sy}
+      M ${sourcePoint.x} ${sourcePoint.y}
       Q
-      ${(sx + tx) / 2 + curveCenterX - spacerX}
-      ${(sy + ty) / 2 + curveCenterY - spacerY}
-      ${(sx + tx) / 2 + curveCenterX}
-      ${(sy + ty) / 2 + curveCenterY}
-      ${(sx + tx) / 2 + curveCenterX + spacerX}
-      ${(sy + ty) / 2 + curveCenterY + spacerY}
-      ${tx} ${ty}
+      ${(sourcePoint.x + targetPoint.x) / 2 + curveCenterX - spacerX}
+      ${(sourcePoint.y + targetPoint.y) / 2 + curveCenterY - spacerY}
+      ${(sourcePoint.x + targetPoint.x) / 2 + curveCenterX}
+      ${(sourcePoint.y + targetPoint.y) / 2 + curveCenterY}
+      ${(sourcePoint.x + targetPoint.x) / 2 + curveCenterX + spacerX}
+      ${(sourcePoint.y + targetPoint.y) / 2 + curveCenterY + spacerY}
+      ${targetPoint.x} ${targetPoint.y}
     `
+  }
+
+  static correctPosition(
+    source: Point,
+    distance: number,
+    direction: Point,
+    order: number
+  ): Point {
+    const angle =
+      Math.atan((source.x - direction.x) / (source.y - direction.y)) +
+      order * (Math.PI / 16)
+    if (source.y > direction.y) {
+      return {
+        x: source.x - Math.sin(angle) * distance,
+        y: source.y - Math.cos(angle) * distance,
+      }
+    }
+    return {
+      x: source.x + Math.sin(angle) * distance,
+      y: source.y + Math.cos(angle) * distance,
+    }
   }
 }

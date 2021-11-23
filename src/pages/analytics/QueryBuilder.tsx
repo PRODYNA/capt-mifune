@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Button, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
-import { BaseType, Selection } from 'd3'
+import { BaseType, Selection, svg } from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../graph/D3Helper'
 import { Graph, Node, Relation } from '../../api/model/Model'
@@ -76,55 +76,58 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     graphService.graphGet().then((g) => setGraph(g))
   }, [])
 
+  function addPossibleNode(node: Node): D3Node<QueryNode> {
+    const qNode: QueryNode = {
+      id: v4(),
+      varName: `${node.label}_${varCounter}`,
+      node,
+      selected: false,
+    }
+    const wrapNode = D3Helper.wrapNode(qNode)
+    wrapNode.radius = 30
+    return wrapNode
+  }
+
   const addPossibleRelations = (d: D3Node<QueryNode>): void => {
+    const possibleNodes: D3Node<QueryNode>[] = []
     const possibleRelations: QueryRelation[] = graphService
       .possibleRelations(graph!, d.node.node.id)
-      .map((r) => {
-        setVarCounter((vc) => vc + 1)
-        return {
-          id: v4(),
-          varName: `${r.type}_${varCounter}`,
-          relation: r,
-          sourceId: r.sourceId,
-          targetId: r.targetId,
-          selected: false,
+      .flatMap((r) => {
+        const tmpRelations: QueryRelation[] = []
+        if (r.targetId === d.node.node.id) {
+          const [n] = graph!.nodes.filter(
+            (tempNode) => r.sourceId === tempNode.id
+          )
+          const sourceNode = addPossibleNode(n)
+          possibleNodes.push(sourceNode)
+          setVarCounter((vc) => vc + 1)
+          tmpRelations.push({
+            id: v4(),
+            varName: `${r.type}_${varCounter}`,
+            relation: r,
+            sourceId: sourceNode.node.id,
+            targetId: d.node.id,
+            selected: false,
+          })
         }
+        if (r.sourceId === d.node.node.id) {
+          const [n] = graph!.nodes.filter(
+            (tempNode) => r.targetId === tempNode.id
+          )
+          const targetNode = addPossibleNode(n)
+          possibleNodes.push(targetNode)
+          setVarCounter((vc) => vc + 1)
+          tmpRelations.push({
+            id: v4(),
+            varName: `${r.type}_${varCounter}`,
+            relation: r,
+            sourceId: d.node.id,
+            targetId: targetNode.node.id,
+            selected: false,
+          })
+        }
+        return tmpRelations
       })
-
-    const possibleNodes: D3Node<QueryNode>[] = []
-    possibleRelations.forEach((relation) => {
-      let node
-      const id = v4()
-      const r = relation
-      if (
-        r.relation.targetId === d.node.node.id &&
-        r.relation.targetId !== r.relation.sourceId
-      ) {
-        r.sourceId = id
-        r.targetId = d.node.id
-        const [n] = graph!.nodes.filter(
-          (tempNode) => tempNode.id === r.relation.sourceId
-        )
-        node = n
-      } else if (r.relation.sourceId === d.node.node.id) {
-        r.sourceId = d.node.id
-        r.targetId = id
-        const [n] = graph!.nodes.filter(
-          (tempNode) => tempNode.id === r.relation.targetId
-        )
-        node = n
-      }
-      setVarCounter((vc) => vc + 1)
-      if (node) {
-        const qNode: QueryNode = {
-          id,
-          varName: `${node.label}_${varCounter}`,
-          node,
-          selected: false,
-        }
-        possibleNodes.push(D3Helper.wrapNode(qNode))
-      }
-    })
 
     const activeNodes = nodes
       .filter((n) => n.node.selected)
@@ -183,13 +186,14 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       return svgSection
         .append('g')
         .attr('stroke', '#fff')
-        .attr('stroke-width', 1.5)
+        .attr('stroke-width', 5)
         .selectAll('circle')
         .data(queryNodes || [])
         .join('circle')
-        .attr('r', (n) => (startNodeId === n.node.id ? 50 : 30))
+        .attr('r', (n) => n.radius)
         .attr('fill', (n) => (n.node.selected ? n.node.node.color : 'gray'))
         .attr('fill-opacity', 1)
+        .attr('stroke', (n) => n.node.node.color)
         .classed('node', true)
     }
 
@@ -215,7 +219,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     }
 
     const drawRelations = (
-      svgSection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
+      svgSelection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
       queryRelations: D3Relation<QueryRelation>[]
     ): d3.Selection<
       d3.BaseType | SVGPathElement,
@@ -223,21 +227,22 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       SVGGElement,
       unknown
     > => {
-      //
-      // relations.forEach( r => {
-      //     var linearGradient = svg.append("defs")
-      //         .append("linearGradient")
-      //         .attr("id",'grand-'+r.relation.id);
-      //     linearGradient.append("stop")
-      //         .attr("offset","0%")
-      //         .attr("stop-color",color(r.relation.relation.sourceId));
-      //     linearGradient.append("stop")
-      //         .attr("offset","100%")
-      //         .attr("stop-color",color(r.relation.relation.sourceId))
-      //         .attr("stop-opacity",'20%');
-      // })
+      relations.forEach((rel) => {
+        svgSelection
+          .append('defs')
+          .append('marker')
+          .attr('id', `arrow-${rel.relation.id}`)
+          .attr('markerWidth', '5')
+          .attr('markerHeight', '3')
+          .attr('refX', '3.5')
+          .attr('refY', '1.5')
+          .attr('orient', 'auto-start-reverse')
+          .append('polygon')
+          .attr('points', '0 3, 0 0, 5 1.5')
+          .attr('fill', color(rel.relation.relation.sourceId))
+      })
 
-      const selection = svgSection
+      const selection = svgSelection
         .append('g')
         .selectAll('path')
         .data(queryRelations)
@@ -245,12 +250,9 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         .join('path')
         .attr('id', (d) => d.relation.id)
         .attr('stroke-opacity', 6)
-        .attr('stroke', (d) =>
-          d.relation.selected ? color(d.relation.relation.sourceId) : 'gray'
-        )
-        // .attr("stroke", (r)=>'url(#grand-'+r.relation.id+')')
+        .attr('stroke', (d) => color(d.relation.relation.sourceId))
         .attr('fill', 'none')
-        .attr('stroke-width', () => 20)
+        .attr('stroke-width', (rel) => rel.width)
         .classed('path', true)
       selection
         .join('text')
@@ -289,6 +291,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           d3Node.node.selected = true
           setSelectActive(false)
           const activeNodes = nodes.filter((n) => n.node.selected)
+          setNodes(activeNodes)
           setNodes(activeNodes)
           const activeRealtions = relations
             .map((r) => {
@@ -351,9 +354,16 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const tick = (): void => {
       node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
       labels.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
-      relation.attr('d', (rel) => {
-        return D3Helper.buildRelationPath(rel)
-      })
+      relation
+        .attr('d', (rel) => {
+          return D3Helper.buildRelationPath(rel)
+        })
+        .attr('marker-end', (r) =>
+          D3Helper.isFlipped(r) ? '' : `url(#arrow-${r.relation.id})`
+        )
+        .attr('marker-start', (r) =>
+          D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
+        )
     }
 
     const simulation = buildSimulation(tick)
@@ -370,6 +380,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       selected: true,
     }
     const newNode = D3Helper.wrapNode(qNode)
+    newNode.radius = 40
     newNode.x = 100
     newNode.y = 100
 
