@@ -17,41 +17,36 @@ import Delete from '@material-ui/icons/Delete'
 import Save from '@material-ui/icons/Save'
 import Add from '@material-ui/icons/Add'
 import graphService from '../../api/GraphService'
-import { Domain, GraphDelta, Node } from '../../api/model/Model'
+import { Domain, GraphDelta } from '../../api/model/Model'
 import { NodeSelect } from './NodeSelect'
 import CustomAccordion from '../../components/Accordion/CustomAccordion'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import CustomDialog from '../../components/Dialog/CustomDialog'
+import GraphContext from '../../context/GraphContext'
+import { D3Helper } from '../graph/D3Helper'
 
 interface DomainListEntryProps {
   domain: Domain
   expanded: string
   toggleAccordion: (item: string) => void
-  onUpdate: (domain: Domain) => void
-  onSelect: (domain: Domain) => void
-  onDelete: (graphDelta: GraphDelta) => void
-  addNode: (domain: Domain) => void
-  active: boolean
-  nodes: Node[]
+  updateState: (g: GraphDelta) => void
 }
 
 export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
-  const {
-    domain,
-    active,
-    nodes,
-    expanded,
-    toggleAccordion,
-    onUpdate,
-    onDelete,
-    onSelect,
-    addNode,
-  } = props
+  const { domain, expanded, toggleAccordion, updateState } = props
   const [name, setName] = useState(domain.name)
   const [rootNodeId, setRootNodeId] = useState(domain.rootNodeId)
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [showModal, setShowModal] = useState<boolean>(false)
+  const {
+    nodes,
+    domains,
+    selectedDomain,
+    setDomains,
+    setSelected,
+    setSelectedDomain,
+  } = useContext(GraphContext)
   const theme = useTheme()
 
   const useStyles = makeStyles(() =>
@@ -67,25 +62,49 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
 
   const classes = useStyles()
 
-  const handleUpdate = (): void => {
+  const handleChange = (): void => {
+    toggleAccordion(domain.id)
+    if (selectedDomain?.id === domain.id) {
+      setSelectedDomain(undefined)
+    } else {
+      setSelectedDomain(domain)
+    }
+  }
+
+  const addDomainNode = (): void => {
+    setSelected(
+      D3Helper.wrapNode({
+        id: '',
+        domainIds: [domain.id],
+        color: 'blue',
+        label: '',
+        properties: [],
+      })
+    )
+    setSelectedDomain(domain)
+  }
+
+  const updateDomain = (): void => {
     graphService
       .domainPut(domain.id, {
         ...domain,
         name,
         rootNodeId,
       })
-      .then((d) => {
-        onUpdate(d)
+      .then((res: Domain) => {
+        setDomains(domains.filter((d) => d.id !== res.id).concat(res))
+        setSelectedDomain(res)
         openSnackbar(Translations.SAVE, 'success')
       })
       .catch((e) => openSnackbarError(e))
   }
 
-  const handleDelete = (): void => {
+  const deleteDomain = (): void => {
     graphService
       .domainDelete(domain.id)
       .then((delta) => {
-        onDelete(delta)
+        updateState(delta)
+        setSelected(undefined)
         openSnackbar(Translations.DELETE, 'success')
       })
       .catch((e) => openSnackbarError(e))
@@ -107,7 +126,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   }
 
   const renderForm = (): JSX.Element => {
-    if (!active) {
+    if (domain.id !== selectedDomain?.id) {
       return <></>
     }
 
@@ -126,7 +145,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         </FormControl>
         <FormControl fullWidth>
           <NodeSelect
-            nodes={nodes}
+            nodes={nodes.map((n) => n.node)}
             nodeId={rootNodeId}
             label="Domain node"
             updateNode={(n) => {
@@ -159,12 +178,12 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
               </IconButton>
             </Tooltip>
             <Tooltip arrow title="Add new Node to Domain">
-              <IconButton onClick={() => addNode(domain)}>
+              <IconButton onClick={addDomainNode}>
                 <Add htmlColor={theme.palette.secondary.main} />
               </IconButton>
             </Tooltip>
             <Tooltip arrow title="Save changes">
-              <IconButton onClick={() => handleUpdate()}>
+              <IconButton onClick={updateDomain}>
                 <Save htmlColor={theme.palette.success.main} />
               </IconButton>
             </Tooltip>
@@ -172,8 +191,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         }
         onChange={(event: React.ChangeEvent<Record<string, unknown>>): void => {
           event.preventDefault()
-          toggleAccordion(domain.id)
-          onSelect(domain)
+          handleChange()
         }}
       >
         {renderForm()}
@@ -184,7 +202,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         title="Delete Domain"
         submitBtnText="Yes, Delete"
         submitBtnColor={theme.palette.error.main}
-        handleSubmit={handleDelete}
+        handleSubmit={deleteDomain}
       >
         <Typography variant="body1">
           Sure, you want to delete the Domain: {domain.name} ?
