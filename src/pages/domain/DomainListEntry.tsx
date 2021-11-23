@@ -1,181 +1,213 @@
 import {
-  Button,
-  Chip,
+  Box,
   createStyles,
+  FormControl,
   IconButton,
+  ListItemIcon,
+  ListItemText,
   makeStyles,
   TextField,
+  Tooltip,
+  Typography,
 } from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
-import AddIcon from '@material-ui/icons/Add'
-import React, { useState } from 'react'
-import SaveIcon from '@material-ui/icons/Save'
+import React, { useContext, useState } from 'react'
+import { useTheme } from '@material-ui/core/styles'
+import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord'
+import Delete from '@material-ui/icons/Delete'
+import Save from '@material-ui/icons/Save'
+import Add from '@material-ui/icons/Add'
 import graphService from '../../api/GraphService'
-import { Domain, GraphDelta, Node } from '../../api/model/Model'
+import { Domain, GraphDelta } from '../../api/model/Model'
 import { NodeSelect } from './NodeSelect'
+import CustomAccordion from '../../components/Accordion/CustomAccordion'
+import { SnackbarContext } from '../../context/Snackbar'
+import { Translations } from '../../utils/Translations'
+import CustomDialog from '../../components/Dialog/CustomDialog'
+import GraphContext from '../../context/GraphContext'
+import { D3Helper } from '../graph/D3Helper'
 
 interface DomainListEntryProps {
   domain: Domain
-  onUpdate: (domain: Domain) => void
-  onSelect: (domain: Domain) => void
-  onDelete: (graphDelta: GraphDelta) => void
-  addNode: (domain: Domain) => void
-  active: boolean
-  nodes: Node[]
+  expanded: string
+  toggleAccordion: (item: string) => void
+  updateState: (g: GraphDelta) => void
 }
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      display: 'grid',
-      width: 200,
-      margin: 5,
-      boxShadow: '2px 2px 5px black',
-      backgroundColor: 'rgba(220, 220, 220, 0.7)',
-      borderRadius: 5,
-      position: 'relative',
-    },
-    flexBox: {
-      padding: 2,
-      display: 'flex',
-    },
-    flex1: {
-      flexGrow: 1,
-    },
-    flex3: {
-      flexGrow: 3,
-    },
-    box: {
-      padding: 10,
-    },
-    buttons: {
-      width: 100,
-    },
-    values: {
-      display: 'flex',
-      flexDirection: 'column',
-    },
-  })
-)
-
 export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
+  const { domain, expanded, toggleAccordion, updateState } = props
+  const [name, setName] = useState(domain.name)
+  const [rootNodeId, setRootNodeId] = useState(domain.rootNodeId)
+  const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
+  const [showModal, setShowModal] = useState<boolean>(false)
+  const {
+    nodes,
+    domains,
+    selectedDomain,
+    setDomains,
+    setSelected,
+    setSelectedDomain,
+  } = useContext(GraphContext)
+  const theme = useTheme()
+
+  const useStyles = makeStyles(() =>
+    createStyles({
+      active: {
+        backgroundColor: theme.palette.grey[100],
+      },
+      icon: {
+        fontSize: 20,
+      },
+    })
+  )
+
   const classes = useStyles()
 
-  const [name, setName] = useState(props.domain.name)
-  const [rootNodeId, setRootNodeId] = useState(props.domain.rootNodeId)
+  const handleChange = (): void => {
+    toggleAccordion(domain.id)
+    if (selectedDomain?.id === domain.id) {
+      setSelectedDomain(undefined)
+    } else {
+      setSelectedDomain(domain)
+    }
+  }
 
-  const executeUpdate = (): void => {
+  const addDomainNode = (): void => {
+    setSelected(
+      D3Helper.wrapNode({
+        id: '',
+        domainIds: [domain.id],
+        color: 'blue',
+        label: '',
+        properties: [],
+      })
+    )
+    setSelectedDomain(domain)
+  }
+
+  const updateDomain = (): void => {
     graphService
-      .domainPut(props.domain.id, {
-        ...props.domain,
+      .domainPut(domain.id, {
+        ...domain,
         name,
         rootNodeId,
       })
-      .then((d) => props.onUpdate(d))
+      .then((res: Domain) => {
+        setDomains(domains.filter((d) => d.id !== res.id).concat(res))
+        setSelectedDomain(res)
+        openSnackbar(Translations.SAVE, 'success')
+      })
+      .catch((e) => openSnackbarError(e))
+  }
+
+  const deleteDomain = (): void => {
+    graphService
+      .domainDelete(domain.id)
+      .then((delta) => {
+        updateState(delta)
+        setSelected(undefined)
+        openSnackbar(Translations.DELETE, 'success')
+      })
+      .catch((e) => openSnackbarError(e))
   }
 
   const buildBadge = (): JSX.Element => {
-    if (props.domain.modelValid) {
-      return (
-        <Chip
-          label="valid"
-          style={{ backgroundColor: 'green', color: 'white' }}
-        />
-      )
-    }
     return (
-      <Chip
-        label="invalid"
-        style={{ backgroundColor: 'red', color: 'white' }}
-      />
+      <Tooltip arrow title={domain.modelValid ? 'valid' : 'invalid'}>
+        <FiberManualRecordIcon
+          className={classes.icon}
+          htmlColor={
+            domain.modelValid
+              ? theme.palette.success.main
+              : theme.palette.warning.main
+          }
+        />
+      </Tooltip>
     )
   }
 
-  const buildActive = (): JSX.Element | JSX.Element[] => {
-    if (!props.active) {
+  const renderForm = (): JSX.Element => {
+    if (domain.id !== selectedDomain?.id) {
       return <></>
     }
 
-    return [
-      <div className={classes.box}>
-        <TextField
-          autoComplete="off"
-          id="node-label"
-          value={name}
-          label="Name"
-          onChange={(e) => {
-            e.stopPropagation()
-            setName(e.target.value)
-          }}
-          onClick={(e) => e.stopPropagation()}
-        />
-        <NodeSelect
-          nodes={props.nodes}
-          nodeId={rootNodeId}
-          updateNode={(n) => {
-            console.log(n.label)
-            setRootNodeId(n.id)
-          }}
-        />
-      </div>,
-      <div className={classes.flexBox}>
-        <Button
-          className={classes.flex3}
-          variant="contained"
-          color="primary"
-          startIcon={<SaveIcon />}
-          size="small"
-          onClick={(e) => {
-            executeUpdate()
-            e.stopPropagation()
-          }}
-        />
-        <IconButton
-          className={classes.flex1}
-          color="secondary"
-          size="small"
-          onClick={() => {
-            graphService
-              .domainDelete(props.domain.id)
-              .then((delta) => props.onDelete(delta))
-          }}
-        >
-          <DeleteIcon />
-        </IconButton>
-      </div>,
-    ]
-  }
-
-  const buildEntry = (): JSX.Element => {
     return (
-      <div
-        className={classes.root}
-        onClick={(event) => {
-          console.log('click')
-          props.onSelect(props.domain)
-          event.stopPropagation()
-        }}
-      >
-        {buildBadge()}
-
-        <div className={classes.flexBox}>
-          <IconButton
-            title="create node"
-            size="small"
-            color="primary"
-            onClick={(e) => {
-              props.addNode(props.domain)
-              e.stopPropagation()
+      <Box maxWidth={199} p={0}>
+        <FormControl>
+          <TextField
+            autoComplete="off"
+            id="node-label"
+            value={name}
+            label="Domain name"
+            fullWidth
+            onChange={(e) => setName(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </FormControl>
+        <FormControl fullWidth>
+          <NodeSelect
+            nodes={nodes.map((n) => n.node)}
+            nodeId={rootNodeId}
+            label="Domain node"
+            updateNode={(n) => {
+              console.log(n.label)
+              setRootNodeId(n.id)
             }}
-          >
-            <AddIcon />
-          </IconButton>
-          <span>{props.domain.name}</span>
-        </div>
-        {buildActive()}
-      </div>
+          />
+        </FormControl>
+      </Box>
     )
   }
 
-  return buildEntry()
+  return (
+    <>
+      <CustomAccordion
+        id={domain.id}
+        title={domain.name}
+        isExpanded={expanded}
+        summary={
+          <>
+            <ListItemIcon>{buildBadge()}</ListItemIcon>
+            <ListItemText primary={domain.name} />
+          </>
+        }
+        actions={
+          <>
+            <Tooltip arrow title="Delete Domain">
+              <IconButton onClick={() => setShowModal(true)}>
+                <Delete htmlColor={theme.palette.error.main} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip arrow title="Add new Node to Domain">
+              <IconButton onClick={addDomainNode}>
+                <Add htmlColor={theme.palette.secondary.main} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip arrow title="Save changes">
+              <IconButton onClick={updateDomain}>
+                <Save htmlColor={theme.palette.success.main} />
+              </IconButton>
+            </Tooltip>
+          </>
+        }
+        onChange={(event: React.ChangeEvent<Record<string, unknown>>): void => {
+          event.preventDefault()
+          handleChange()
+        }}
+      >
+        {renderForm()}
+      </CustomAccordion>
+      <CustomDialog
+        open={showModal}
+        setOpen={setShowModal}
+        title="Delete Domain"
+        submitBtnText="Yes, Delete"
+        submitBtnColor={theme.palette.error.main}
+        handleSubmit={deleteDomain}
+      >
+        <Typography variant="body1">
+          Sure, you want to delete the Domain: {domain.name} ?
+        </Typography>
+      </CustomDialog>
+    </>
+  )
 }

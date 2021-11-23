@@ -13,6 +13,7 @@ import {
   DRAWER_WIDTH_OPEN,
 } from '../../components/Navigation/SideNavigation'
 import CreateDomain from '../domain/CreateDomain'
+import GraphContext from '../../context/GraphContext'
 
 interface IGraph {
   openSidenav: boolean
@@ -81,7 +82,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     setRelations(relations)
   }, [selectedDomain, selected])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = (): void => {
       setWidth(window.innerWidth)
       setHeight(window.innerHeight)
@@ -599,46 +600,22 @@ export const Graph = (props: IGraph): JSX.Element => {
 
   const classes = useStyles()
 
-  const domainList = (): JSX.Element => {
-    return (
-      <DomainList
-        domains={domains}
-        nodes={nodes.map((n) => n.node)}
-        selectedDomain={selectedDomain}
-        onSubmit={(domain) => {
-          setDomains(domains.filter((d) => d.id !== domain.id).concat(domain))
-          setSelectedDomain(domain)
-        }}
-        onSelect={(domain: Domain) => {
-          if (selectedDomain?.id === domain.id) {
-            setSelectedDomain(undefined)
-          } else {
-            setSelectedDomain(domain)
-          }
-        }}
-        onDelete={(graphDelta) => {
-          updateState(graphDelta)
-          setSelected(undefined)
-        }}
-        addNode={(domain: Domain) => {
-          setSelected(
-            D3Helper.wrapNode({
-              id: '',
-              domainIds: [domain.id],
-              color: 'blue',
-              label: '',
-              properties: [],
-            })
-          )
-          setSelectedDomain(domain)
-        }}
-      />
-    )
-  }
-
   return (
-    <>
-      {domainList()}
+    <GraphContext.Provider
+      value={{
+        selectedDomain,
+        setSelectedDomain,
+        domains,
+        setDomains,
+        selected,
+        setSelected: (v): void => setSelected(v),
+        nodes,
+        setNodes: (v): void => setNodes(v),
+        relations,
+        setRelations,
+      }}
+    >
+      <DomainList domains={domains} updateState={updateState} />
       <div className={classes.overlay}>{editSection()}</div>
       <svg
         className={classes.svg}
@@ -653,6 +630,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         setSelectedDomain={setSelectedDomain}
         setDomains={setDomains}
       />
-    </>
+    </GraphContext.Provider>
   )
 }
