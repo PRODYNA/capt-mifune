@@ -13,6 +13,7 @@ import {
   DRAWER_WIDTH_OPEN,
 } from '../../components/Navigation/SideNavigation'
 import CreateDomain from '../domain/CreateDomain'
+import GraphContext from '../../context/GraphContext'
 
 interface IGraph {
   openSidenav: boolean
@@ -40,7 +41,7 @@ export const Graph = (props: IGraph): JSX.Element => {
   >()
   const d3Container = useRef(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = (): void => {
       setWidth(window.innerWidth)
       setHeight(window.innerHeight)
@@ -563,16 +564,21 @@ export const Graph = (props: IGraph): JSX.Element => {
   const classes = useStyles()
 
   return (
-    <>
-      <DomainList
-        domains={domains}
-        nodes={nodes.map((n) => n.node)}
-        selectedDomain={selectedDomain}
-        setDomains={setDomains}
-        setSelectedDomain={setSelectedDomain}
-        updateState={updateState}
-        setSelected={setSelected}
-      />
+    <GraphContext.Provider
+      value={{
+        selectedDomain,
+        setSelectedDomain,
+        domains,
+        setDomains,
+        selected,
+        setSelected: (v): void => setSelected(v),
+        nodes,
+        setNodes: (v): void => setNodes(v),
+        relations,
+        setRelations,
+      }}
+    >
+      <DomainList domains={domains} updateState={updateState} />
       <div className={classes.overlay}>{editSection()}</div>
       <svg
         className={classes.svg}
@@ -587,6 +593,6 @@ export const Graph = (props: IGraph): JSX.Element => {
         setSelectedDomain={setSelectedDomain}
         setDomains={setDomains}
       />
-    </>
+    </GraphContext.Provider>
   )
 }
