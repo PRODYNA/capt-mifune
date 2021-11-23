@@ -63,7 +63,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     if (rel.relation.domainIds.some((id) => id === selectedDomain?.id)) {
       return 8
     }
-    return 4
+    return 6
   }
 
   React.useEffect(() => {
@@ -254,13 +254,13 @@ export const Graph = (props: IGraph): JSX.Element => {
           .append('defs')
           .append('marker')
           .attr('id', `arrow-${rel.relation.id}`)
-          .attr('markerWidth', '5')
-          .attr('markerHeight', '3')
-          .attr('refX', '3.5')
-          .attr('refY', '1.5')
+          .attr('markerWidth', '3')
+          .attr('markerHeight', '2')
+          .attr('refX', '1')
+          .attr('refY', '1')
           .attr('orient', 'auto-start-reverse')
           .append('polygon')
-          .attr('points', '0 3, 0 0, 5 1.5')
+          .attr('points', '0 2, 0 0, 3 1')
           .attr('fill', color(rel.relation.sourceId))
       })
 
@@ -268,6 +268,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       const relation = selection
         .join('path')
         .attr('id', (d) => d.relation.id)
+        .attr('stroke-linecap', 'round')
         .attr('stroke-opacity', (r) => {
           if (
             selected &&
