@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import { withStyles } from '@material-ui/core/styles'
+import React from 'react'
+import { Theme, withStyles } from '@material-ui/core/styles'
 import MuiAccordion, { AccordionProps } from '@material-ui/core/Accordion'
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary'
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails'
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight'
-import { AccordionActions, Divider } from '@material-ui/core'
+import { AccordionActions } from '@material-ui/core'
 
-const Accordion = withStyles({
+const Accordion = withStyles((theme: Theme) => ({
   root: {
     border: 'unset',
-    padding: '0.25rem 1rem',
+    padding: 0,
     boxShadow: 'none',
     maxWidth: 220,
     width: '100%',
@@ -24,17 +24,23 @@ const Accordion = withStyles({
       marginTop: 0,
       marginBottom: '0.5rem',
     },
+    '&.active': {
+      border: `2px solid ${theme.palette.primary.light}`,
+    },
   },
   expanded: {},
-})(MuiAccordion)
+}))(MuiAccordion)
 
 const AccordionSummary = withStyles(() => ({
   root: {
     backgroundColor: 'white',
     border: 'unset',
-    padding: '0',
+    padding: '0.5rem 1rem',
     minHeight: 35,
     width: '100%',
+    '&$expanded': {
+      minHeight: 35,
+    },
   },
   content: {
     justifyContent: 'space-between',
@@ -57,50 +63,34 @@ const AccordionSummary = withStyles(() => ({
 const AccordionDetails = withStyles(() => ({
   root: {
     display: 'block',
-    padding: '0',
+    padding: '1rem 1rem 0',
     backgroundColor: 'white',
   },
 }))(MuiAccordionDetails)
 
 type CustomAccordionProps = AccordionProps & {
-  children: JSX.Element | JSX.Element[]
+  children: JSX.Element
   summary: JSX.Element
+  isExpanded: string
   actions?: JSX.Element
   id: string
-  isExpanded?: boolean
-  defaultExpanded?: boolean
 }
 
 const CustomAccordion = (props: CustomAccordionProps): JSX.Element => {
-  const {
-    defaultExpanded,
-    isExpanded,
-    children,
-    actions,
-    id,
-    summary,
-    ...rest
-  } = props
-  const [expanded, setExpanded] = useState<boolean>(
-    isExpanded || defaultExpanded || false
-  )
-
-  useEffect(() => {
-    if (isExpanded) setExpanded(isExpanded)
-  }, [isExpanded])
-
-  const handleChange = (): void => {
-    setExpanded(!expanded)
-  }
+  const { children, isExpanded, actions, id, summary, ...rest } = props
 
   return (
-    <Accordion square expanded={expanded} onChange={handleChange} {...rest}>
+    <Accordion
+      square
+      expanded={isExpanded === id}
+      className={isExpanded === id ? 'active' : ''}
+      {...rest}
+    >
       <AccordionSummary aria-controls={`${id}-content`} id={`${id}-header`}>
         {summary}
         <KeyboardArrowRightIcon />
       </AccordionSummary>
       <AccordionDetails>{children}</AccordionDetails>
-      <Divider />
       <AccordionActions>{actions}</AccordionActions>
     </Accordion>
   )
