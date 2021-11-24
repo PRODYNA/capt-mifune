@@ -144,6 +144,19 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     )
   }
 
+  function cleanNodes(): void {
+    const activeNodes = nodes.filter((n) => n.node.selected)
+
+    setNodes(activeNodes)
+    setRelations(
+      relations.filter(
+        (r) =>
+          activeNodes.some((n) => n.node.id === r.relation.targetId) &&
+          activeNodes.some((n) => n.node.id === r.relation.sourceId)
+      )
+    )
+  }
+
   useEffect(() => {
     if (!d3Container.current) {
       return
@@ -408,6 +421,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       ))}
       <div>
         <svg
+          onClick={(e) => {
+            cleanNodes()
+            setSelectActive(false)
+          }}
           className={classes.svg}
           width={width}
           height={height}
