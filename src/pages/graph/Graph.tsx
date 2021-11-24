@@ -48,9 +48,9 @@ export const Graph = (props: IGraph): JSX.Element => {
       return 40
     }
     if (n.node.domainIds.some((id) => id === selectedDomain?.id)) {
-      return 30
+      return 40
     }
-    return 20
+    return 30
   }
 
   const relWidth = (rel: D3Relation<Relation>): number => {
@@ -59,10 +59,10 @@ export const Graph = (props: IGraph): JSX.Element => {
       'relation' in selected &&
       selected.relation.id === rel.relation.id
     if (isSelected) {
-      return 12
+      return 14
     }
     if (rel.relation.domainIds.some((id) => id === selectedDomain?.id)) {
-      return 8
+      return 10
     }
     return 6
   }
@@ -196,6 +196,9 @@ export const Graph = (props: IGraph): JSX.Element => {
         .join('circle')
         .attr('r', (n) => n.radius)
         .attr('fill', (n) => n.node.color)
+        .attr('opacity', (n) =>
+          n.node.domainIds.some((id) => selectedDomain?.id === id) ? 1 : 0.4
+        )
         .classed('node', true)
     }
 
@@ -271,14 +274,10 @@ export const Graph = (props: IGraph): JSX.Element => {
         .attr('id', (d) => d.relation.id)
         .attr('stroke-linecap', 'round')
         .attr('stroke-opacity', (r) => {
-          if (
-            selected &&
-            'relation' in selected &&
-            selected.relation.id === r.relation.id
-          ) {
+          if (r.relation.domainIds.some((id) => id === selectedDomain?.id)) {
             return 1
           }
-          return 0.6
+          return 0.4
         })
         .attr('stroke', (d) => color(d.relation.sourceId))
         .attr('fill', 'transparent')
