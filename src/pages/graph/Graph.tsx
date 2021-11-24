@@ -623,6 +623,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       <DomainList domains={domains} updateState={updateState} />
       <div className={classes.overlay}>{editSection()}</div>
       <svg
+        onClick={(e) => setSelected(undefined)}
         className={classes.svg}
         width={
           window.innerWidth - (openSidenav ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH)
