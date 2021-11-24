@@ -27,7 +27,7 @@ export class D3Helper {
     return {
       kind: 'node',
       node,
-      radius: 20,
+      radius: 30,
     }
   }
 
@@ -42,7 +42,7 @@ export class D3Helper {
       relCount: 1,
       incomingRelationsCount: 0,
       relIndex: 0,
-      width: 6,
+      width: 8,
     }
   }
 
@@ -114,7 +114,7 @@ export class D3Helper {
           x: source.x ?? 0,
           y: source.y ?? 0,
         },
-        source.radius,
+        source.radius + rel.width / 2,
         order,
         'right'
       )
@@ -123,20 +123,20 @@ export class D3Helper {
           x: target.x ?? 0,
           y: target.y ?? 0,
         },
-        target.radius,
+        target.radius + rel.width / 2,
         order,
         'left'
       )
     } else {
       sourcePoint = D3Helper.correctPosition(
         { x: source.x ?? 0, y: source.y ?? 0 },
-        source.radius,
+        source.radius + rel.width / 2,
         { x: target.x ?? 0, y: target.y ?? 0 },
         order
       )
       targetPoint = D3Helper.correctPosition(
         { x: target.x ?? 0, y: target.y ?? 0 },
-        target.radius,
+        target.radius + rel.width / 2,
         { x: source.x ?? 0, y: source.y ?? 0 },
         order * -1
       )
@@ -179,7 +179,7 @@ export class D3Helper {
       if (!flipped) {
         targetCorrection = D3Helper.correctPosition(
           targetPoint,
-          rel.width * 2,
+          rel.width * 1.5,
           {
             x: (sourcePoint.x + targetPoint.x) / 2 + curveCenterX,
             y: (sourcePoint.y + targetPoint.y) / 2 + curveCenterY,
@@ -189,7 +189,7 @@ export class D3Helper {
       } else {
         sourceCorrection = D3Helper.correctPosition(
           sourcePoint,
-          rel.width * 2,
+          rel.width * 1.5,
           {
             x: (sourcePoint.x + targetPoint.x) / 2 + curveCenterX,
             y: (sourcePoint.y + targetPoint.y) / 2 + curveCenterY,
@@ -200,7 +200,7 @@ export class D3Helper {
     } else if (!flipped) {
       targetCorrection = D3Helper.correctPosition(
         targetPoint,
-        rel.width * 2,
+        rel.width * 1.5,
         {
           x: (sourcePoint.x + targetPoint.x) / 2 + curveCenterX + spacerX,
           y: (sourcePoint.y + targetPoint.y) / 2 + curveCenterY + spacerY,
@@ -210,7 +210,7 @@ export class D3Helper {
     } else {
       sourceCorrection = D3Helper.correctPosition(
         targetPoint,
-        rel.width * 2,
+        rel.width * 1.5,
         {
           x: (sourcePoint.x + targetPoint.x) / 2 + curveCenterX - spacerX,
           y: (sourcePoint.y + targetPoint.y) / 2 + curveCenterY - spacerY,
