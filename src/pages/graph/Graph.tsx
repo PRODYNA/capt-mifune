@@ -273,7 +273,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         .join('path')
         .attr('id', (d) => d.relation.id)
         .attr('stroke-linecap', 'round')
-        .attr('stroke-opacity', (r) => {
+        .attr('opacity', (r) => {
           if (r.relation.domainIds.some((id) => id === selectedDomain?.id)) {
             return 1
           }
