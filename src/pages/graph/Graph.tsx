@@ -282,7 +282,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         .attr('stroke', (d) => color(d.relation.sourceId))
         .attr('fill', 'transparent')
         .attr('stroke-width', (rel) => rel.width)
-        .classed('path', true)
+        .classed('relation', true)
 
       selection
         .join('text')
@@ -433,6 +433,12 @@ export const Graph = (props: IGraph): JSX.Element => {
       const svg = d3.select(d3Container.current)
       svg.selectAll('*').remove()
       svg.append('style').text(`
+            .node {
+              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+            }
+            .relation {
+              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+            }
             .relation-label { 
                 font: bold 13px sans-serif; 
                 fill: white; 
