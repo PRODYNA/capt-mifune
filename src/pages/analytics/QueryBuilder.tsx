@@ -48,11 +48,8 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const classes = useStyle()
   const [width, setWidth] = useState<number>(100)
   const [graph, setGraph] = useState<Graph>()
-  const [varCounter, setVarCounter] = useState<number>(1)
-  const [startNodeId, setStartNodeId] = useState<string>()
-
+  const [varCounter, setVarCounter] = useState<Map<string, number>>(new Map())
   const [selectActive, setSelectActive] = useState<boolean>(false)
-
   const [nodes, setNodes] = useState<D3Node<QueryNode>[]>([])
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
   const d3Container = useRef(null)
@@ -79,7 +76,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   function addPossibleNode(node: Node): D3Node<QueryNode> {
     const qNode: QueryNode = {
       id: v4(),
-      varName: `${node.label}_${varCounter}`,
+      varName: `${node.label}_${varCounter.get(node.label) ?? 1}`,
       node,
       selected: false,
     }
@@ -100,10 +97,9 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           )
           const sourceNode = addPossibleNode(n)
           possibleNodes.push(sourceNode)
-          setVarCounter((vc) => vc + 1)
           tmpRelations.push({
             id: v4(),
-            varName: `${r.type}_${varCounter}`,
+            varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
             relation: r,
             sourceId: sourceNode.node.id,
             targetId: d.node.id,
@@ -116,10 +112,9 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           )
           const targetNode = addPossibleNode(n)
           possibleNodes.push(targetNode)
-          setVarCounter((vc) => vc + 1)
           tmpRelations.push({
             id: v4(),
-            varName: `${r.type}_${varCounter}`,
+            varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
             relation: r,
             sourceId: d.node.id,
             targetId: targetNode.node.id,
@@ -155,6 +150,29 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           activeNodes.some((n) => n.node.id === r.relation.sourceId)
       )
     )
+  }
+
+  function updateCounterMap(
+    map: Map<string, number>,
+    activeRelations: D3Relation<QueryRelation>[],
+    activeNodes: D3Node<QueryNode>[]
+  ): void {
+    activeRelations.forEach((r) =>
+      map.set(
+        r.relation.relation.type,
+        activeRelations.filter(
+          (ar) => ar.relation.relation.type === r.relation.relation.type
+        ).length + 1
+      )
+    )
+    activeNodes.forEach((n) =>
+      map.set(
+        n.node.node.label,
+        activeNodes.filter((an) => an.node.node.label === n.node.node.label)
+          .length + 1
+      )
+    )
+    setVarCounter(map)
   }
 
   useEffect(() => {
@@ -315,8 +333,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           setSelectActive(false)
           const activeNodes = nodes.filter((n) => n.node.selected)
           setNodes(activeNodes)
-          setNodes(activeNodes)
-          const activeRealtions = relations
+          const activeRelations = relations
             .map((r) => {
               // eslint-disable-next-line no-param-reassign
               r.relation.selected = true
@@ -327,11 +344,12 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
                 activeNodes.some((n) => n.node.id === r.relation.targetId) &&
                 activeNodes.some((n) => n.node.id === r.relation.sourceId)
             )
-          setRelations(activeRealtions)
+          setRelations(activeRelations)
+          updateCounterMap(varCounter, activeRelations, activeNodes)
 
           onChange({
             nodes: activeNodes.map((n) => n.node),
-            relations: activeRealtions.map((r) => r.relation),
+            relations: activeRelations.map((r) => r.relation),
           })
         }
         if (!graph) {
@@ -395,10 +413,9 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   const addNode = (node: Node): void => {
     console.log('add node')
-    setVarCounter(0)
     const qNode: QueryNode = {
       id: v4(),
-      varName: `${node.label}_${varCounter}`,
+      varName: `${node.label}_${1}`,
       node,
       selected: true,
     }
@@ -406,11 +423,9 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     newNode.radius = 40
     newNode.x = 100
     newNode.y = 100
-
-    setStartNodeId(qNode.id)
     setNodes([newNode])
     setRelations([])
-    setVarCounter(0)
+    updateCounterMap(new Map(), [], [newNode])
   }
 
   return (
@@ -420,6 +435,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         <Button onClick={() => addNode(n)}>{n.label}</Button>
       ))}
       <div>
+        {JSON.stringify(varCounter)}
         <svg
           onClick={(e) => {
             cleanNodes()
