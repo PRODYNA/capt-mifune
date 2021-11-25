@@ -144,6 +144,19 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     )
   }
 
+  function cleanNodes(): void {
+    const activeNodes = nodes.filter((n) => n.node.selected)
+
+    setNodes(activeNodes)
+    setRelations(
+      relations.filter(
+        (r) =>
+          activeNodes.some((n) => n.node.id === r.relation.targetId) &&
+          activeNodes.some((n) => n.node.id === r.relation.sourceId)
+      )
+    )
+  }
+
   useEffect(() => {
     if (!d3Container.current) {
       return
@@ -152,6 +165,12 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     svgSelect.selectAll('*').remove()
 
     svgSelect.append('style').text(`
+             .node {
+              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+            }
+            .relation {
+              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+            }
             .relation-label { 
                 font: bold 13px sans-serif; 
                 fill: white; 
@@ -186,14 +205,12 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       return svgSection
         .append('g')
         .attr('stroke', '#fff')
-        .attr('stroke-width', 5)
         .selectAll('circle')
         .data(queryNodes || [])
         .join('circle')
         .attr('r', (n) => n.radius)
-        .attr('fill', (n) => (n.node.selected ? n.node.node.color : 'gray'))
-        .attr('fill-opacity', 1)
-        .attr('stroke', (n) => n.node.node.color)
+        .attr('fill', (n) => n.node.node.color)
+        .attr('fill-opacity', (n) => (n.node.selected ? 1 : 0.4))
         .classed('node', true)
     }
 
@@ -232,13 +249,13 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           .append('defs')
           .append('marker')
           .attr('id', `arrow-${rel.relation.id}`)
-          .attr('markerWidth', '5')
-          .attr('markerHeight', '3')
-          .attr('refX', '3.5')
-          .attr('refY', '1.5')
+          .attr('markerWidth', '3')
+          .attr('markerHeight', '2')
+          .attr('refX', '1')
+          .attr('refY', '1')
           .attr('orient', 'auto-start-reverse')
           .append('polygon')
-          .attr('points', '0 3, 0 0, 5 1.5')
+          .attr('points', '0 2, 0 0, 3 1')
           .attr('fill', color(rel.relation.relation.sourceId))
       })
 
@@ -249,11 +266,17 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       const relation = selection
         .join('path')
         .attr('id', (d) => d.relation.id)
-        .attr('stroke-opacity', 6)
+        .attr('stroke-linecap', 'round')
+        .attr('opacity', (r) => {
+          if (r.relation.selected) {
+            return 1
+          }
+          return 0.4
+        })
         .attr('stroke', (d) => color(d.relation.relation.sourceId))
-        .attr('fill', 'none')
+        .attr('fill', 'transparent')
         .attr('stroke-width', (rel) => rel.width)
-        .classed('path', true)
+        .classed('relation', true)
       selection
         .join('text')
         .attr('dominant-baseline', 'middle')
@@ -398,6 +421,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       ))}
       <div>
         <svg
+          onClick={(e) => {
+            cleanNodes()
+            setSelectActive(false)
+          }}
           className={classes.svg}
           width={width}
           height={height}
