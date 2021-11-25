@@ -48,9 +48,9 @@ export const Graph = (props: IGraph): JSX.Element => {
       return 40
     }
     if (n.node.domainIds.some((id) => id === selectedDomain?.id)) {
-      return 30
+      return 40
     }
-    return 20
+    return 30
   }
 
   const relWidth = (rel: D3Relation<Relation>): number => {
@@ -59,10 +59,10 @@ export const Graph = (props: IGraph): JSX.Element => {
       'relation' in selected &&
       selected.relation.id === rel.relation.id
     if (isSelected) {
-      return 12
+      return 14
     }
     if (rel.relation.domainIds.some((id) => id === selectedDomain?.id)) {
-      return 8
+      return 10
     }
     return 6
   }
@@ -196,6 +196,9 @@ export const Graph = (props: IGraph): JSX.Element => {
         .join('circle')
         .attr('r', (n) => n.radius)
         .attr('fill', (n) => n.node.color)
+        .attr('opacity', (n) =>
+          n.node.domainIds.some((id) => selectedDomain?.id === id) ? 1 : 0.4
+        )
         .classed('node', true)
     }
 
@@ -270,20 +273,16 @@ export const Graph = (props: IGraph): JSX.Element => {
         .join('path')
         .attr('id', (d) => d.relation.id)
         .attr('stroke-linecap', 'round')
-        .attr('stroke-opacity', (r) => {
-          if (
-            selected &&
-            'relation' in selected &&
-            selected.relation.id === r.relation.id
-          ) {
+        .attr('opacity', (r) => {
+          if (r.relation.domainIds.some((id) => id === selectedDomain?.id)) {
             return 1
           }
-          return 0.6
+          return 0.4
         })
         .attr('stroke', (d) => color(d.relation.sourceId))
         .attr('fill', 'transparent')
         .attr('stroke-width', (rel) => rel.width)
-        .classed('path', true)
+        .classed('relation', true)
 
       selection
         .join('text')
@@ -434,6 +433,12 @@ export const Graph = (props: IGraph): JSX.Element => {
       const svg = d3.select(d3Container.current)
       svg.selectAll('*').remove()
       svg.append('style').text(`
+            .node {
+              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+            }
+            .relation {
+              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+            }
             .relation-label { 
                 font: bold 13px sans-serif; 
                 fill: white; 
@@ -618,6 +623,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       <DomainList domains={domains} updateState={updateState} />
       <div className={classes.overlay}>{editSection()}</div>
       <svg
+        onClick={(e) => setSelected(undefined)}
         className={classes.svg}
         width={
           window.innerWidth - (openSidenav ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH)
