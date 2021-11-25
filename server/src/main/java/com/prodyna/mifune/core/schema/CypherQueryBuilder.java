@@ -34,6 +34,7 @@ import com.prodyna.mifune.domain.QueryNode;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.internal.types.TypeConstructor;
 
@@ -60,7 +61,7 @@ public class CypherQueryBuilder {
     buildNodeMatch(queryNodeId, cypher, new HashSet<>());
     cypher.append(addFilterStatement());
     cypher.append("\n");
-    cypher.append("with distinct %s".formatted(String.join(",", this.vars.keySet())));
+    cypher.append(buildDistinct());
     cypher.append("\n");
     cypher.append(buildResult());
     cypher.append("\n");
@@ -78,66 +79,73 @@ public class CypherQueryBuilder {
       cypher.append("match(%s:%s)\n".formatted(nodeVar, nodeModel.getLabel()));
     }
 
-    buildOutgoingRelationMatch(cypher, processedIds, nodeVar, nodeModel.getRelations());
-    buildIncomingRelationMatch(
-        cypher, processedIds, nodeVar, graphModel.incommingRelations(nodeModel.getId()));
+    Stream.concat(
+            buildOutgoingRelationMatch(cypher, queryNode, processedIds),
+            buildIncomingRelationMatch(cypher, queryNode, processedIds))
+        .distinct()
+        .forEach(id -> buildNodeMatch(id, cypher, processedIds));
   }
 
-  private void buildOutgoingRelationMatch(
-      StringBuilder cypher, Set<UUID> processedIds, String nodeVar, Set<RelationModel> relations) {
-    relations.stream()
+  private Stream<UUID> buildOutgoingRelationMatch(
+      StringBuilder cypher, QueryNode queryNode, Set<UUID> processedIds) {
+    var nodeVar = generateVar(queryNode.varName());
+    return this.graphModel.nodes.get(queryNode.nodeId()).getRelations().stream()
         .filter(r -> query.relations().stream().anyMatch(qr -> qr.relationId().equals(r.getId())))
-        .forEach(
+        .flatMap(
             r ->
                 query.relations().stream()
                     .filter(qr -> qr.relationId().equals(r.getId()))
+                    .filter(qr -> qr.sourceId().equals(queryNode.id()))
                     .filter(qr -> !processedIds.contains(qr.id()))
-                    .forEach(
+                    .map(
                         qr -> {
                           var targetNode = queryNode(qr.targetId());
                           processedIds.add(qr.id());
                           cypher.append(
                               """
-                                              match(%s)-[%s:%s]->(%s:%s)
-                                              """
+                              match(%s)-[%s:%s]->(%s:%s)
+                              """
                                   .formatted(
                                       nodeVar,
-                                      generateVar(r.varName()),
+                                      generateVar(qr.varName()),
                                       r.getType(),
                                       generateVar(targetNode.varName()),
                                       graphModel.nodes.get(targetNode.nodeId()).getLabel()));
 
                           processedIds.add(targetNode.id());
-                          buildNodeMatch(targetNode.id(), cypher, processedIds);
+
+                          return targetNode.id();
                         }));
   }
 
-  private void buildIncomingRelationMatch(
-      StringBuilder cypher, Set<UUID> processedIds, String nodeVar, Set<RelationModel> relations) {
-    relations.stream()
+  private Stream<UUID> buildIncomingRelationMatch(
+      StringBuilder cypher, QueryNode queryNode, Set<UUID> processedIds) {
+    var nodeVar = generateVar(queryNode.varName());
+    return graphModel.incommingRelations(queryNode.nodeId()).stream()
         .filter(r -> query.relations().stream().anyMatch(qr -> qr.relationId().equals(r.getId())))
-        .forEach(
+        .flatMap(
             r ->
                 query.relations().stream()
                     .filter(qr -> qr.relationId().equals(r.getId()))
+                    .filter(qr -> qr.targetId().equals(queryNode.id()))
                     .filter(qr -> !processedIds.contains(qr.id()))
-                    .forEach(
+                    .map(
                         qr -> {
                           var sourceNode = queryNode(qr.sourceId());
                           processedIds.add(qr.id());
                           cypher.append(
                               """
-                                              match(%s)<-[%s:%s]-(%s:%s)
-                                              """
+                              match(%s)<-[%s:%s]-(%s:%s)
+                              """
                                   .formatted(
                                       nodeVar,
-                                      generateVar(r.varName()),
+                                      generateVar(qr.varName()),
                                       r.getType(),
                                       generateVar(sourceNode.varName()),
                                       graphModel.nodes.get(sourceNode.nodeId()).getLabel()));
 
                           processedIds.add(sourceNode.id());
-                          buildNodeMatch(sourceNode.id(), cypher, processedIds);
+                          return sourceNode.id();
                         }));
   }
 
@@ -166,6 +174,15 @@ public class CypherQueryBuilder {
             .collect(Collectors.joining(","));
 
     return "return %s".formatted(returnStatement);
+  }
+
+  private String buildDistinct() {
+    var distinctStatement =
+        this.query.results().stream()
+            .map(this::baseName)
+            .map(getVarMap()::get)
+            .collect(Collectors.joining(","));
+    return "with distinct %s".formatted(distinctStatement);
   }
 
   private String buildOrder() {
