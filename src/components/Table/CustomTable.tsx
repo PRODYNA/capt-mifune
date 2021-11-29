@@ -33,7 +33,9 @@ const CustomTable = (props: ICustomTable): JSX.Element => {
           <TableRow>
             {tableHeaders.map(
               (header: string): JSX.Element => (
-                <TableCell className={classes.tableCell}>{header}</TableCell>
+                <TableCell key={header} className={classes.tableCell}>
+                  {header}
+                </TableCell>
               )
             )}
           </TableRow>
