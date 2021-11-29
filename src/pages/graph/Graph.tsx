@@ -3,7 +3,6 @@ import * as d3 from 'd3'
 import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
 import { Domain, GraphDelta, Node, Relation } from '../../api/model/Model'
-import { useStyles } from './FromStyle'
 import { RelationEdit } from './RelationEdit'
 import graphService from '../../api/GraphService'
 import { DomainList } from '../domain/DomainList'
@@ -412,65 +411,21 @@ export const Graph = (props: IGraph): JSX.Element => {
     if (selected?.kind === 'node') {
       return (
         <NodeEdit
-          domains={domains}
           node={(selected as D3Node<Node>).node}
-          onCreate={(node) => {
-            graphService.nodePost(node).then((graphDelta) => {
-              updateState(graphDelta)
-              setSelected(nodes.filter((n) => n.node.id === node.id)[0])
-            })
-          }}
-          onSubmit={(n) => {
-            graphService.nodePut(n).then((graphDelta) => {
-              updateState(graphDelta)
-              setSelected(nodes.filter((node) => node.node.id === n.id)[0])
-            })
-          }}
-          onDelete={(deleted) => {
-            graphService.nodeDelete(deleted.id).then((graphDelta) => {
-              updateState(graphDelta)
-              setSelected(undefined)
-            })
-          }}
-          onClose={() => setSelected(undefined)}
+          updateState={updateState}
         />
       )
     }
     if (selected?.kind === 'relation') {
       return (
         <RelationEdit
-          domains={domains}
           relation={(selected as D3Relation<Relation>).relation}
-          onCreate={(rel) => {
-            graphService.relationPost(rel).then((graphDelta) => {
-              updateState(graphDelta)
-              setSelected(
-                relations.filter(
-                  (r) => r.relation.id === graphDelta.changedRelations[0].id
-                )[0]
-              )
-            })
-          }}
-          onSubmit={(rel) => {
-            graphService.relationPut(rel).then((graphDelta) => {
-              updateState(graphDelta)
-              setSelected(relations.filter((r) => r.relation.id === rel.id)[0])
-            })
-          }}
-          onDelete={(rel) => {
-            graphService.relationDelete(rel.id).then((graphDelta) => {
-              updateState(graphDelta)
-              setSelected(undefined)
-            })
-          }}
-          onClose={() => setSelected(undefined)}
+          updateState={updateState}
         />
       )
     }
     return <></>
   }
-
-  const classes = useStyles()
 
   return (
     <GraphContext.Provider
@@ -491,7 +446,11 @@ export const Graph = (props: IGraph): JSX.Element => {
       {editSection()}
       <svg
         onClick={(): void => setSelected(undefined)}
-        className={classes.svg}
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+        }}
         width={
           window.innerWidth - (openSidenav ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH)
         }
