@@ -33,7 +33,7 @@ const useStyles = makeStyles<Theme, StylesProps>(() =>
       '&.MuiButton-outlined': {
         borderWidth: '2px',
         backgroundColor: 'white',
-        color: fontWhite,
+        color: (props): string => props.customColor,
         borderColor: (props): string => props.customColor,
       },
       '&.MuiButton-text': {
