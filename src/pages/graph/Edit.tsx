@@ -1,4 +1,10 @@
-import React, { Dispatch, FormEvent, SetStateAction } from 'react'
+import React, {
+  Dispatch,
+  FormEvent,
+  SetStateAction,
+  useContext,
+  useState,
+} from 'react'
 
 import {
   Box,
@@ -19,9 +25,12 @@ import { PropertyEdit } from './PropertyEdit'
 import { Node, Property, Relation } from '../../api/model/Model'
 import CustomButton from '../../components/Button/CustomButton'
 import CustomTable from '../../components/Table/CustomTable'
+import CustomDialog from '../../components/Dialog/CustomDialog'
+import { SnackbarContext } from '../../context/Snackbar'
 
 interface EditProps {
   title: string
+  modalTitle: string
   children: JSX.Element | JSX.Element[]
   onCreate: (v: any) => void
   onSubmit: (v: any) => void
@@ -71,12 +80,15 @@ const Edit = (props: EditProps): JSX.Element => {
     properties,
     setProperties,
     title,
+    modalTitle,
     children,
     onClose,
     onCreate,
     onDelete,
     onSubmit,
   } = props
+  const [showModal, setShowModal] = useState<boolean>(false)
+  const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
   const classes = useStyle()
 
@@ -149,48 +161,62 @@ const Edit = (props: EditProps): JSX.Element => {
   }
 
   return (
-    <form className={classes.root} onSubmit={handleSubmit}>
-      <Box position="relative">
-        <Box position="absolute" top={0} right={0}>
-          <IconButton onClick={() => onClose()}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-        <Box px={2} pt={1} pb={2}>
-          <Typography variant="h6">{title}</Typography>
-          <Box mt={2} bgcolor="white" p={2}>
-            {children}
+    <>
+      <form className={classes.root} onSubmit={handleSubmit}>
+        <Box position="relative">
+          <Box position="absolute" top={0} right={0}>
+            <IconButton onClick={() => onClose()}>
+              <CloseIcon />
+            </IconButton>
           </Box>
-          <Box mt={2} bgcolor="white" p={2}>
-            {properties && renderPropertyEdit()}
+          <Box px={2} pt={1} pb={2}>
+            <Typography variant="h6">{title}</Typography>
+            <Box mt={2} bgcolor="white" p={2}>
+              {children}
+            </Box>
+            <Box mt={2} bgcolor="white" p={2}>
+              {properties && renderPropertyEdit()}
+            </Box>
+          </Box>
+          <Box
+            position="sticky"
+            width="100%"
+            bottom={2}
+            px={2}
+            py={1}
+            textAlign="right"
+          >
+            <CustomButton
+              title="Delete"
+              size="small"
+              onClick={(): void => setShowModal(true)}
+              startIcon={<DeleteIcon />}
+              customColor={theme.palette.error.main}
+              style={{ marginRight: '1rem' }}
+            />
+            <CustomButton
+              type="submit"
+              title="Update"
+              size="small"
+              startIcon={<SaveIcon />}
+              customColor={theme.palette.success.main}
+            />
           </Box>
         </Box>
-        <Box
-          position="sticky"
-          width="100%"
-          bottom={2}
-          px={2}
-          py={1}
-          textAlign="right"
-        >
-          <CustomButton
-            title="Delete"
-            size="small"
-            onClick={(): void => onDelete(value)}
-            startIcon={<DeleteIcon />}
-            customColor={theme.palette.error.main}
-            style={{ marginRight: '1rem' }}
-          />
-          <CustomButton
-            type="submit"
-            title="Update"
-            size="small"
-            startIcon={<SaveIcon />}
-            customColor={theme.palette.success.main}
-          />
-        </Box>
-      </Box>
-    </form>
+      </form>
+      <CustomDialog
+        open={showModal}
+        setOpen={setShowModal}
+        title={`Delete ${modalTitle}`}
+        submitBtnText="Yes, Delete"
+        submitBtnColor={theme.palette.error.main}
+        handleSubmit={(): void => onDelete(value)}
+      >
+        <Typography variant="body1">
+          Sure, you want to delete {modalTitle}?
+        </Typography>
+      </CustomDialog>
+    </>
   )
 }
 
