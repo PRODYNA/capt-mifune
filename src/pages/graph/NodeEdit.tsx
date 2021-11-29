@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { makeStyles, TableCell, TableRow, TextField } from '@material-ui/core'
-import { Domain, GraphDelta, Node, Property } from '../../api/model/Model'
+import { GraphDelta, Node, Property } from '../../api/model/Model'
 import { DomainSelect } from './DomainSelect'
 import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
 import CustomTable from '../../components/Table/CustomTable'
