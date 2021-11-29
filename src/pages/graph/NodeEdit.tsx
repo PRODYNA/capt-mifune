@@ -1,18 +1,16 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { makeStyles, TableCell, TableRow, TextField } from '@material-ui/core'
-import { Domain, Node, Property } from '../../api/model/Model'
+import { Domain, GraphDelta, Node, Property } from '../../api/model/Model'
 import { DomainSelect } from './DomainSelect'
 import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
 import CustomTable from '../../components/Table/CustomTable'
 import Edit from './Edit'
+import GraphContext from '../../context/GraphContext'
+import graphService from '../../api/GraphService'
 
 interface NodeEditProps {
   node: Node
-  domains: Domain[]
-  onCreate: (v: Node) => void
-  onSubmit: (v: Node) => void
-  onDelete: (v: Node) => void
-  onClose: () => void
+  updateState: (graphDelta: GraphDelta) => void
 }
 
 export const useStyleCell = makeStyles(() => ({
@@ -23,7 +21,8 @@ export const useStyleCell = makeStyles(() => ({
 }))
 
 export const NodeEdit = (props: NodeEditProps): JSX.Element => {
-  const { node, domains, onClose, onCreate, onDelete, onSubmit } = props
+  const { node, updateState } = props
+  const { nodes, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Node>(node)
   const [properties, setProperties] = useState<Property[]>([])
   const classes = useStyleCell()
@@ -36,6 +35,26 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
     setValue(node)
     setProperties(node.properties ?? [])
   }, [node])
+
+  const onCreate = (newNode: Node): void => {
+    graphService.nodePost(newNode).then((graphDelta) => {
+      updateState(graphDelta)
+      setSelected(nodes.filter((n) => n.node.id === newNode.id)[0])
+    })
+  }
+  const onSubmit = (newNode: Node): void => {
+    graphService.nodePut(newNode).then((graphDelta) => {
+      updateState(graphDelta)
+      setSelected(nodes.filter((n) => n.node.id === newNode.id)[0])
+    })
+  }
+  const onDelete = (deleted: Node): void => {
+    graphService.nodeDelete(deleted.id).then((graphDelta) => {
+      updateState(graphDelta)
+      setSelected(undefined)
+    })
+  }
+  const onClose = (): void => setSelected(undefined)
 
   return (
     <Edit
