@@ -38,8 +38,6 @@ export const DomainSelect = (props: DomainSelectProps): JSX.Element => {
   return (
     <Select
       className={className}
-      labelId="demo-mutiple-chip-label"
-      id="demo-mutiple-chip"
       multiple
       value={valueDomainIds}
       onChange={(e) => updateDomains(e.target.value as string[])}
