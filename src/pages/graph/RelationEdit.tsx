@@ -1,22 +1,21 @@
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { Checkbox, TableCell, TableRow, TextField } from '@material-ui/core'
-import { Domain, Property, Relation } from '../../api/model/Model'
+import { GraphDelta, Property, Relation } from '../../api/model/Model'
 import { DomainSelect } from './DomainSelect'
 import Edit from './Edit'
 import CustomTable from '../../components/Table/CustomTable'
 import { useStyleCell } from './NodeEdit'
+import GraphContext from '../../context/GraphContext'
+import graphService from '../../api/GraphService'
 
 interface RelationEditProps {
   relation: Relation
-  domains: Domain[]
-  onCreate: (model: Relation) => void
-  onSubmit: (model: Relation) => void
-  onDelete: (model: Relation) => void
-  onClose: () => void
+  updateState: (graphDelta: GraphDelta) => void
 }
 
 export const RelationEdit = (props: RelationEditProps): JSX.Element => {
-  const { relation, domains, onClose, onCreate, onDelete, onSubmit } = props
+  const { relation, updateState } = props
+  const { relations, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Relation>(relation)
   const [properties, setProperties] = useState<Property[]>([])
   const classes = useStyleCell()
@@ -28,6 +27,30 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   const updateDomain = (domainIds: string[]): void => {
     setValue((oldRel) => ({ ...oldRel, domainIds }))
   }
+
+  const onCreate = (rel: Relation): void => {
+    graphService.relationPost(rel).then((graphDelta) => {
+      updateState(graphDelta)
+      setSelected(
+        relations.filter(
+          (r) => r.relation.id === graphDelta.changedRelations[0].id
+        )[0]
+      )
+    })
+  }
+  const onSubmit = (rel: Relation): void => {
+    graphService.relationPut(rel).then((graphDelta) => {
+      updateState(graphDelta)
+      setSelected(relations.filter((r) => r.relation.id === rel.id)[0])
+    })
+  }
+  const onDelete = (rel: Relation): void => {
+    graphService.relationDelete(rel.id).then((graphDelta) => {
+      updateState(graphDelta)
+      setSelected(undefined)
+    })
+  }
+  const onClose = (): void => setSelected(undefined)
 
   useEffect(() => {
     setValue(relation)

@@ -70,7 +70,6 @@ const Edit = (props: EditProps): JSX.Element => {
     onDelete,
     onSubmit,
   } = props
-
   const theme = useTheme()
   const classes = useStyle()
 
