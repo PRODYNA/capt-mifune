@@ -30,20 +30,6 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
 
   const useStyles = makeStyles(() =>
     createStyles({
-      root: {},
-      label: {
-        marginLeft: 0,
-        '& .MuiTypography-body1': {
-          fontSize: '1rem',
-          fontWeight: 400,
-          color: 'rgba(0, 0, 0, 0.54)',
-          transform: 'translate(0, 1.5px) scale(0.75)',
-          transformOrigin: 'top left',
-        },
-        '& .MuiCheckbox-root': {
-          top: '-8px',
-        },
-      },
       iconButton: {
         padding: 0,
         '&.MuiIconButton-root:hover': {
@@ -94,7 +80,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           name="primary"
         />
       </TableCell>
-      <TableCell className={classes.tableCell}>
+      <TableCell>
         <IconButton
           onClick={(): void => onDelete(idx)}
           className={classes.iconButton}

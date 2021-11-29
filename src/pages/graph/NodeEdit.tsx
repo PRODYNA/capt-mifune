@@ -13,10 +13,15 @@ interface NodeEditProps {
   updateState: (graphDelta: GraphDelta) => void
 }
 
-export const useStyleCell = makeStyles(() => ({
+export const useStyleTable = makeStyles(() => ({
   tableCell: {
     padding: '0 1rem 0 0',
     verticalAlign: 'bottom',
+  },
+  tableRow: {
+    '& .MuiTableCell-sizeSmall:last-child': {
+      padding: 0,
+    },
   },
 }))
 
@@ -25,7 +30,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const { nodes, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Node>(node)
   const [properties, setProperties] = useState<Property[]>([])
-  const classes = useStyleCell()
+  const classes = useStyleTable()
 
   const updateDomain = (newDomainIds: string[]): void => {
     setValue((oldNode) => ({ ...oldNode, domainIds: newDomainIds }))
@@ -68,41 +73,39 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
       onDelete={onDelete}
       onClose={onClose}
     >
-      <CustomTable
-        tableHeaders={['Color', 'Name', 'Domains']}
-        label="domain-table"
-      >
-        <TableRow>
-          <TableCell className={classes.tableCell}>
-            <ColorPicker
-              hex={value.color}
-              onChange={(hex: string): void => {
-                setValue((prevNode) => ({ ...prevNode, color: hex }))
-              }}
-            />
-          </TableCell>
-          <TableCell className={classes.tableCell}>
-            <TextField
-              autoComplete="off"
-              id="node-label"
-              value={value.label}
-              onChange={(event: ChangeEvent<HTMLInputElement>): void => {
-                setValue((prevNode) => ({
-                  ...prevNode,
-                  label: event.target.value,
-                }))
-              }}
-            />
-          </TableCell>
-          <TableCell className={classes.tableCell}>
-            <DomainSelect
-              domains={domains}
-              valueDomainIds={value.domainIds}
-              updateDomains={updateDomain}
-            />
-          </TableCell>
-        </TableRow>
-      </CustomTable>
+      <>
+        <CustomTable tableHeaders={['Color', 'Name']} label="domain-table">
+          <TableRow className={classes.tableRow}>
+            <TableCell className={classes.tableCell}>
+              <ColorPicker
+                hex={value.color}
+                onChange={(hex: string): void => {
+                  setValue((prevNode) => ({ ...prevNode, color: hex }))
+                }}
+              />
+            </TableCell>
+            <TableCell className={classes.tableCell}>
+              <TextField
+                autoComplete="off"
+                id="node-label"
+                value={value.label}
+                onChange={(event: ChangeEvent<HTMLInputElement>): void => {
+                  setValue((prevNode) => ({
+                    ...prevNode,
+                    label: event.target.value,
+                  }))
+                }}
+              />
+            </TableCell>
+          </TableRow>
+        </CustomTable>
+        <DomainSelect
+          domains={domains}
+          label="Selected Domains"
+          valueDomainIds={value.domainIds}
+          updateDomains={updateDomain}
+        />
+      </>
     </Edit>
   )
 }
