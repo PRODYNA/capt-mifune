@@ -4,7 +4,7 @@ import { GraphDelta, Property, Relation } from '../../api/model/Model'
 import { DomainSelect } from './DomainSelect'
 import Edit from './Edit'
 import CustomTable from '../../components/Table/CustomTable'
-import { useStyleCell } from './NodeEdit'
+import { useStyleTable } from './NodeEdit'
 import GraphContext from '../../context/GraphContext'
 import graphService from '../../api/GraphService'
 
@@ -18,7 +18,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   const { relations, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Relation>(relation)
   const [properties, setProperties] = useState<Property[]>([])
-  const classes = useStyleCell()
+  const classes = useStyleTable()
 
   const updateType = (event: ChangeEvent<HTMLInputElement>): void => {
     setValue((oldRel) => ({ ...oldRel, type: event.target.value }))
@@ -69,41 +69,42 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
       onDelete={onDelete}
       onClose={onClose}
     >
-      <CustomTable
-        tableHeaders={['Name', 'Multiple', 'Primary', 'Domains']}
-        label="relation-table"
-      >
-        <TableRow>
-          <TableCell className={classes.tableCell} style={{ minWidth: 120 }}>
-            <TextField id="type" value={value.type} onChange={updateType} />
-          </TableCell>
-          <TableCell className={classes.tableCell}>
-            <Checkbox
-              checked={value.multiple}
-              onChange={(e, clicked: boolean) => {
-                setValue((prevRel) => ({ ...prevRel, multiple: clicked }))
-              }}
-              name="multiple"
-            />
-          </TableCell>
-          <TableCell className={classes.tableCell}>
-            <Checkbox
-              checked={value.primary}
-              onChange={(e, clicked: boolean) => {
-                setValue((prevRel) => ({ ...prevRel, primary: clicked }))
-              }}
-              name="primary"
-            />
-          </TableCell>
-          <TableCell className={classes.tableCell}>
-            <DomainSelect
-              domains={domains}
-              valueDomainIds={value.domainIds}
-              updateDomains={updateDomain}
-            />
-          </TableCell>
-        </TableRow>
-      </CustomTable>
+      <>
+        <CustomTable
+          tableHeaders={['Name', 'Multiple', 'Primary']}
+          label="relation-table"
+        >
+          <TableRow className={classes.tableRow}>
+            <TableCell className={classes.tableCell} style={{ minWidth: 120 }}>
+              <TextField id="type" value={value.type} onChange={updateType} />
+            </TableCell>
+            <TableCell className={classes.tableCell}>
+              <Checkbox
+                checked={value.multiple}
+                onChange={(e, clicked: boolean) => {
+                  setValue((prevRel) => ({ ...prevRel, multiple: clicked }))
+                }}
+                name="multiple"
+              />
+            </TableCell>
+            <TableCell className={classes.tableCell}>
+              <Checkbox
+                checked={value.primary}
+                onChange={(e, clicked: boolean) => {
+                  setValue((prevRel) => ({ ...prevRel, primary: clicked }))
+                }}
+                name="primary"
+              />
+            </TableCell>
+          </TableRow>
+        </CustomTable>
+        <DomainSelect
+          label="Selected Domains"
+          domains={domains}
+          valueDomainIds={value.domainIds}
+          updateDomains={updateDomain}
+        />
+      </>
     </Edit>
   )
 }

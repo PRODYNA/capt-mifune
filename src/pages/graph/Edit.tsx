@@ -36,8 +36,8 @@ interface EditProps {
 const useStyle = makeStyles((theme: Theme) => ({
   root: {
     maxHeight: '95vh',
-    overflowY: 'scroll',
-    maxWidth: 400,
+    height: 'auto',
+    maxWidth: 450,
     zIndex: 100,
     position: 'absolute',
     top: '1rem',
@@ -50,6 +50,12 @@ const useStyle = makeStyles((theme: Theme) => ({
   propertyBox: {
     maxHeight: 300,
     overflowY: 'scroll',
+    overflow: 'hidden',
+  },
+  tableRow: {
+    '& .MuiTableCell-sizeSmall:last-child': {
+      padding: 0,
+    },
   },
   tableCell: {
     padding: '0 1rem 0 0',
@@ -126,7 +132,8 @@ const Edit = (props: EditProps): JSX.Element => {
         </Box>
         <CustomTable tableHeaders={tableHeaders} label="property-table">
           {value.properties.map((p, idx) => (
-            <TableRow key={p.name}>
+            // eslint-disable-next-line react/no-array-index-key
+            <TableRow key={`${p.name}-${idx}`} className={classes.tableRow}>
               <PropertyEdit
                 idx={idx}
                 property={p}
