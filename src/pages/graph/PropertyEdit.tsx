@@ -99,10 +99,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           onClick={(): void => onDelete(idx)}
           className={classes.iconButton}
         >
-          <IndeterminateCheckBoxIcon
-            onClick={(): void => onDelete(idx)}
-            htmlColor={theme.palette.error.main}
-          />
+          <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>
       </TableCell>
     </>
