@@ -14,6 +14,13 @@ import {
 } from '../../components/Navigation/SideNavigation'
 import CreateDomain from '../domain/CreateDomain'
 import GraphContext from '../../context/GraphContext'
+import {
+  addSvgStyles,
+  drawLabel,
+  drawNodes,
+  drawRelations,
+  nodeMouseEvents,
+} from '../../utils/GraphHelper'
 
 interface IGraph {
   openSidenav: boolean
@@ -27,7 +34,6 @@ interface Path {
   d?: string
 }
 
-/* Component */
 export const Graph = (props: IGraph): JSX.Element => {
   const { openSidenav } = props
   const [width, setWidth] = useState<number>(800)
@@ -179,49 +185,6 @@ export const Graph = (props: IGraph): JSX.Element => {
       setSelected(d3Relation)
     }
 
-    const drawNodes = (
-      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
-    ): Selection<
-      BaseType | SVGCircleElement,
-      D3Node<Node>,
-      SVGGElement,
-      unknown
-    > => {
-      return svg
-        .append('g')
-        .attr('stroke', '#fff')
-        .attr('stroke-width', 1.5)
-        .selectAll('circle')
-        .data(nodes)
-        .join('circle')
-        .attr('r', (n) => n.radius)
-        .attr('fill', (n) => n.node.color)
-        .attr('opacity', (n) =>
-          n.node.domainIds.some((id) => selectedDomain?.id === id) ? 1 : 0.4
-        )
-        .classed('node', true)
-    }
-
-    const drawNodeLabel = (
-      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
-    ): Selection<
-      BaseType | SVGTextElement,
-      D3Node<Node>,
-      SVGGElement,
-      unknown
-    > => {
-      return svg
-        .append('g')
-        .selectAll('text')
-        .data(nodes)
-        .join('text')
-        .text((d) => d.node.label)
-        .attr('dominant-baseline', 'middle')
-        .attr('text-anchor', 'middle')
-        .attr('class', 'node-label')
-        .attr('background-color', (n) => n.node.color)
-    }
-
     const drawSelectionIndicator = (
       svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>
     ):
@@ -242,101 +205,6 @@ export const Graph = (props: IGraph): JSX.Element => {
           .classed('path', true)
       }
       return undefined
-    }
-
-    const drawRelations = (
-      svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-      d3Relation: D3Relation<Relation>[]
-    ): d3.Selection<
-      d3.BaseType,
-      D3Relation<Relation>,
-      SVGGElement,
-      unknown
-    > => {
-      relations.forEach((rel) => {
-        svg
-          .append('defs')
-          .append('marker')
-          .attr('id', `arrow-${rel.relation.id}`)
-          .attr('markerWidth', '3')
-          .attr('markerHeight', '2')
-          .attr('refX', '1')
-          .attr('refY', '1')
-          .attr('orient', 'auto-start-reverse')
-          .append('polygon')
-          .attr('points', '0 2, 0 0, 3 1')
-          .attr('fill', color(rel.relation.sourceId))
-      })
-
-      const selection = svg.append('g').selectAll('path').data(d3Relation)
-      const relation = selection
-        .join('path')
-        .attr('id', (d) => d.relation.id)
-        .attr('stroke-linecap', 'round')
-        .attr('opacity', (r) => {
-          if (r.relation.domainIds.some((id) => id === selectedDomain?.id)) {
-            return 1
-          }
-          return 0.4
-        })
-        .attr('stroke', (d) => color(d.relation.sourceId))
-        .attr('fill', 'transparent')
-        .attr('stroke-width', (rel) => rel.width)
-        .classed('relation', true)
-
-      selection
-        .join('text')
-        .attr('dominant-baseline', 'middle')
-        .append('textPath')
-        .attr('startOffset', '50%')
-        .attr('text-anchor', 'middle')
-        .attr('href', (d) => `#${d.relation.id}`)
-        .text(
-          (d) =>
-            d.relation.type +
-            (d.relation.multiple ? ' []' : '') +
-            (d.relation.primary ? '*' : '')
-        )
-
-        .attr('class', 'relation-label')
-      return relation
-    }
-
-    const nodeMouseEvents = (
-      simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
-      node: any
-    ): void => {
-      const dragstart = (): void => {}
-      const dragged = (
-        event: { x: number; y: number },
-        d: Force | unknown
-      ): void => {
-        const force = d as Force
-        force.fx = event.x
-        force.fy = event.y
-        simulation.alphaTarget(0.3).restart()
-      }
-      const dragend = (): void => {
-        simulation.stop()
-      }
-
-      const click = (e: any, d: D3Node<Node>): void => {
-        if (selected && 'node' in selected && selected.node.id === d.node.id) {
-          const force = d as Force
-          delete force.fx
-          delete force.fy
-          setSelected(undefined)
-        } else {
-          setSelected(d)
-        }
-      }
-
-      const drag = d3
-        .drag()
-        .on('start', dragstart)
-        .on('drag', dragged)
-        .on('end', dragend)
-      node.call(drag).on('click', click)
     }
 
     const relationMouseEvents = (
@@ -431,29 +299,8 @@ export const Graph = (props: IGraph): JSX.Element => {
 
     if (d3Container.current && nodes) {
       const svg = d3.select(d3Container.current)
-      svg.selectAll('*').remove()
-      svg.append('style').text(`
-            .node {
-              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
-            }
-            .relation {
-              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
-            }
-            .relation-label { 
-                font: bold 13px sans-serif; 
-                fill: white; 
-                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-                cursor: default;
-                pointer-events: none;
-            }
-            .node-label {
-                font: bold 13px sans-serif; 
-                fill: white; 
-                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-                cursor: default;
-                pointer-events: none;
-            }
-          `)
+      addSvgStyles(svg, width, height)
+
       let rels: D3Relation<Relation>[]
       if (selected && 'relation' in selected && selected.relation.id === '') {
         rels = relations.concat(selected)
@@ -496,11 +343,22 @@ export const Graph = (props: IGraph): JSX.Element => {
         r.firstRender = r.relation.sourceId > r.relation.targetId
       })
 
-      svg.attr('viewBox', `${-width / 2},${-height / 2},${width},${height}`)
-      const relation = drawRelations(svg, rels)
+      const relation = drawRelations<Relation>(
+        svg,
+        rels,
+        relations,
+        nodes,
+        'relation',
+        selectedDomain?.id
+      )
       const selection = drawSelectionIndicator(svg)
-      const node = drawNodes(svg)
-      const text = drawNodeLabel(svg)
+      const node = drawNodes<Node>(
+        svg,
+        nodes,
+        'node',
+        selectedDomain?.id as string
+      )
+      const text = drawLabel<Node>(svg, nodes, 'node')
 
       // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
       const tick = () => {
@@ -535,7 +393,16 @@ export const Graph = (props: IGraph): JSX.Element => {
       }
 
       const simulation = buildSimulation(rels, tick)
-      nodeMouseEvents(simulation, node)
+      nodeMouseEvents(simulation, node, (e: any, d: D3Node<Node>): void => {
+        if (selected && 'node' in selected && selected.node.id === d.node.id) {
+          const force = d as Force
+          delete force.fx
+          delete force.fy
+          setSelected(undefined)
+        } else {
+          setSelected(d)
+        }
+      })
       relationDrawEvents(simulation, selection)
       relationMouseEvents(relation)
     }
