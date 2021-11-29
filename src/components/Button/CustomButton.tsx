@@ -6,7 +6,6 @@ import {
   Theme,
 } from '@material-ui/core'
 import React from 'react'
-import { fontWhite } from '../Theme/CustomColors'
 
 type ICustomButton = ButtonProps & {
   title: string
