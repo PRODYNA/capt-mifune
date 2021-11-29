@@ -36,6 +36,7 @@ interface EditProps {
 const useStyle = makeStyles((theme: Theme) => ({
   root: {
     maxHeight: '95vh',
+    overflow: 'hidden',
     height: 'auto',
     maxWidth: 450,
     zIndex: 100,
