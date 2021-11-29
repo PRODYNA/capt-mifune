@@ -7,6 +7,9 @@ import CustomTable from '../../components/Table/CustomTable'
 import Edit from './Edit'
 import GraphContext from '../../context/GraphContext'
 import graphService from '../../api/GraphService'
+import { SnackbarContext } from '../../context/Snackbar'
+import { CustomTexts } from '../../utils/CustomTexts'
+import { Translations } from '../../utils/Translations'
 
 interface NodeEditProps {
   node: Node
@@ -30,6 +33,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const { nodes, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Node>(node)
   const [properties, setProperties] = useState<Property[]>([])
+  const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const classes = useStyleTable()
 
   const updateDomain = (newDomainIds: string[]): void => {
@@ -48,10 +52,14 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
     })
   }
   const onSubmit = (newNode: Node): void => {
-    graphService.nodePut(newNode).then((graphDelta) => {
-      updateState(graphDelta)
-      setSelected(nodes.filter((n) => n.node.id === newNode.id)[0])
-    })
+    graphService
+      .nodePut(newNode)
+      .then((graphDelta) => {
+        updateState(graphDelta)
+        setSelected(nodes.filter((n) => n.node.id === newNode.id)[0])
+      })
+      .then(() => openSnackbar(Translations.SAVE, 'success'))
+      .catch((e) => openSnackbarError(e))
   }
   const onDelete = (deleted: Node): void => {
     graphService.nodeDelete(deleted.id).then((graphDelta) => {
@@ -63,7 +71,8 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
 
   return (
     <Edit
-      title={node.id ? 'Update Node' : 'Create Node'}
+      title={node.id ? `Update Node: ${value.label}` : 'Create Node'}
+      modalTitle={`Node: ${value.label}`}
       value={value}
       setValue={setValue}
       properties={properties}

@@ -59,7 +59,8 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
 
   return (
     <Edit
-      title={relation.id ? 'Update Relation' : 'Create Relation'}
+      title={relation.id ? `Update Relation: ${value.type}` : 'Create Relation'}
+      modalTitle={`Relation: ${value.type}`}
       value={value}
       setValue={setValue}
       properties={properties}
