@@ -6,7 +6,6 @@ import {
   Theme,
 } from '@material-ui/core'
 import React from 'react'
-import { fontWhite } from '../Theme/CustomColors'
 
 type ICustomButton = ButtonProps & {
   title: string
@@ -33,7 +32,7 @@ const useStyles = makeStyles<Theme, StylesProps>(() =>
       '&.MuiButton-outlined': {
         borderWidth: '2px',
         backgroundColor: 'white',
-        color: fontWhite,
+        color: (props): string => props.customColor,
         borderColor: (props): string => props.customColor,
       },
       '&.MuiButton-text': {
