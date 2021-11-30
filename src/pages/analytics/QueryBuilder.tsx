@@ -11,6 +11,7 @@ import {
   drawNodes,
   drawRelations,
   nodeMouseEvents,
+  tick,
 } from '../../utils/GraphHelper'
 
 export interface QueryBuilderProps {
@@ -70,10 +71,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   useLayoutEffect(() => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
   }, [])
-
-  const color = (id: string): string => {
-    return nodes.find((n) => n.node.node.id === id)?.node.node.color ?? 'green'
-  }
 
   useEffect(() => {
     graphService.graphGet().then((g) => setGraph(g))
@@ -192,9 +189,20 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       console.error('no nodes exist')
     }
 
-    const buildSimulation = (
-      tick: () => void
-    ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
+    const relation = drawRelations<QueryRelation>(
+      svgSelect,
+      relations,
+      relations,
+      nodes,
+      'queryRelation'
+    )
+    const node = drawNodes<QueryNode>(svgSelect, nodes, 'queryNode')
+    const labels = drawLabel<QueryNode>(svgSelect, nodes, 'queryNode')
+
+    const buildSimulation = (): d3.Simulation<
+      d3.SimulationNodeDatum,
+      undefined
+    > => {
       return d3
         .forceSimulation()
         .nodes(nodes)
@@ -210,35 +218,13 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         .force('collision', d3.forceCollide().radius(100).strength(0.8))
         .force('x', d3.forceX().strength(0.1))
         .force('y', d3.forceY().strength(0.1))
-        .on('tick', tick)
-    }
-
-    const relation = drawRelations<QueryRelation>(
-      svgSelect,
-      relations,
-      relations,
-      nodes,
-      'queryRelation'
-    )
-    const node = drawNodes<QueryNode>(svgSelect, nodes, 'queryNode')
-    const labels = drawLabel<QueryNode>(svgSelect, nodes, 'queryNode')
-
-    const tick = (): void => {
-      node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
-      labels.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
-      relation
-        .attr('d', (rel) => {
-          return D3Helper.buildRelationPath(rel)
-        })
-        .attr('marker-end', (r) =>
-          D3Helper.isFlipped(r) ? '' : `url(#arrow-${r.relation.id})`
-        )
-        .attr('marker-start', (r) =>
-          D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
+        .on('tick', () =>
+          tick<QueryNode, QueryRelation>(node, labels, relation)
         )
     }
 
-    const simulation = buildSimulation(tick)
+    const simulation = buildSimulation()
+
     nodeMouseEvents(
       simulation,
       node,
@@ -306,7 +292,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       <div>
         {JSON.stringify(varCounter)}
         <svg
-          onClick={(e) => {
+          onClick={() => {
             cleanNodes()
             setSelectActive(false)
           }}
