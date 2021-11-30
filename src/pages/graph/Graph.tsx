@@ -19,13 +19,14 @@ import {
   drawNodes,
   drawRelations,
   nodeMouseEvents,
+  tick,
 } from '../../utils/GraphHelper'
 
 interface IGraph {
   openSidenav: boolean
 }
 
-interface Force {
+export interface Force {
   fx?: number
   fy?: number
 }
@@ -274,28 +275,6 @@ export const Graph = (props: IGraph): JSX.Element => {
       }
     }
 
-    const buildSimulation = (
-      d3Relation: D3Relation<Relation>[],
-      tick: () => void
-    ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
-      return d3
-        .forceSimulation()
-        .nodes(nodes)
-        .force('charge', d3.forceManyBody().strength(0.1))
-        .force(
-          'link',
-          d3
-            .forceLink<D3Node<Node>, D3Relation<Relation>>(d3Relation)
-            .id((d) => d.node.id)
-            .distance(100)
-            .strength(0.1)
-        )
-        .force('collision', d3.forceCollide().radius(100).strength(0.8))
-        .force('x', d3.forceX().strength(0.1))
-        .force('y', d3.forceY().strength(0.3))
-        .on('tick', tick)
-    }
-
     if (d3Container.current && nodes) {
       const svg = d3.select(d3Container.current)
       addSvgStyles(svg, width, height)
@@ -359,39 +338,45 @@ export const Graph = (props: IGraph): JSX.Element => {
       )
       const text = drawLabel<Node>(svg, nodes, 'node')
 
-      // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-      const tick = () => {
-        // todo:
-        if (selection && selected && selected.kind === 'node') {
-          // const selectedNode = selected as D3Node<Node>
-          selection.attr('d', (d) => {
-            if (d.d) {
-              return d.d
+      const buildSimulation = (
+        d3Relation: D3Relation<Relation>[]
+      ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
+        return d3
+          .forceSimulation()
+          .nodes(nodes)
+          .force('charge', d3.forceManyBody().strength(0.1))
+          .force(
+            'link',
+            d3
+              .forceLink<D3Node<Node>, D3Relation<Relation>>(d3Relation)
+              .id((d) => d.node.id)
+              .distance(100)
+              .strength(0.1)
+          )
+          .force('collision', d3.forceCollide().radius(100).strength(0.8))
+          .force('x', d3.forceX().strength(0.1))
+          .force('y', d3.forceY().strength(0.3))
+          .on('tick', (): void => {
+            // todo:
+            if (selection && selected && selected.kind === 'node') {
+              // const selectedNode = selected as D3Node<Node>
+              selection.attr('d', (d) => {
+                if (d.d) {
+                  return d.d
+                }
+                return D3Helper.selectionPath(
+                  d.x ?? 0,
+                  d.y ?? 0,
+                  d.x ?? 0,
+                  d.y ?? 0
+                )
+              })
             }
-            return D3Helper.selectionPath(
-              d.x ?? 0,
-              d.y ?? 0,
-              d.x ?? 0,
-              d.y ?? 0
-            )
+            tick<Node, Relation>(node, text, relation)
           })
-        }
-
-        node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
-        text.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
-        relation
-          .attr('marker-end', (r) =>
-            D3Helper.isFlipped(r) ? '' : `url(#arrow-${r.relation.id})`
-          )
-          .attr('marker-start', (r) =>
-            D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
-          )
-        relation.attr('d', (rel) => {
-          return D3Helper.buildRelationPath(rel)
-        })
       }
 
-      const simulation = buildSimulation(rels, tick)
+      const simulation = buildSimulation(rels)
       nodeMouseEvents(simulation, node, (e: any, d: D3Node<Node>): void => {
         if (selected && 'node' in selected && selected.node.id === d.node.id) {
           const force = d as Force

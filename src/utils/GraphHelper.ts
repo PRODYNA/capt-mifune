@@ -1,15 +1,16 @@
 import { BaseType, Selection } from 'd3'
 import * as d3 from 'd3'
 import { QueryNode, QueryRelation } from '../pages/analytics/QueryBuilder'
-import { D3Node, D3Relation } from '../pages/graph/D3Helper'
+import { D3Helper, D3Node, D3Relation } from '../pages/graph/D3Helper'
 import { Node, Relation } from '../api/model/Model'
+import { Force } from '../pages/graph/Graph'
 
-export function drawNodes<T extends Node | QueryNode>(
+export function drawNodes<N extends Node | QueryNode>(
   svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-  data: D3Node<T>[],
+  data: D3Node<N>[],
   type: 'node' | 'queryNode',
-  selectedDomainId?: T extends Node ? string : undefined
-): Selection<BaseType | SVGCircleElement, D3Node<T>, SVGGElement, unknown> {
+  selectedDomainId?: N extends Node ? string : undefined
+): Selection<BaseType | SVGCircleElement, D3Node<N>, SVGGElement, unknown> {
   return svg
     .append('g')
     .attr('stroke', '#fff')
@@ -36,11 +37,11 @@ export function drawNodes<T extends Node | QueryNode>(
     .classed('node', true)
 }
 
-export function drawLabel<T extends Node | QueryNode>(
+export function drawLabel<N extends Node | QueryNode>(
   svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-  data: D3Node<T>[],
+  data: D3Node<N>[],
   type: 'node' | 'queryNode'
-): Selection<BaseType | SVGTextElement, D3Node<T>, SVGGElement, unknown> {
+): Selection<BaseType | SVGTextElement, D3Node<N>, SVGGElement, unknown> {
   return svg
     .append('g')
     .selectAll('text')
@@ -61,15 +62,10 @@ export function drawLabel<T extends Node | QueryNode>(
     )
 }
 
-interface Force {
-  fx?: number
-  fy?: number
-}
-
-export function nodeMouseEvents<T extends Node | QueryNode>(
+export function nodeMouseEvents<N extends Node | QueryNode>(
   simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
   node: any,
-  onClick: (e: any, d: D3Node<T>) => void
+  onClick: (e: any, d: D3Node<N>) => void
 ): void {
   const dragstart = (): void => {}
   const dragged = (
@@ -110,16 +106,16 @@ const color = (
   )
 }
 
-export function drawRelations<T extends Relation | QueryRelation>(
+export function drawRelations<R extends Relation | QueryRelation>(
   svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-  relations: D3Relation<T>[],
-  d3Relation: D3Relation<T>[],
-  data: D3Node<T extends Relation ? Node : QueryNode>[],
+  relations: D3Relation<R>[],
+  d3Relation: D3Relation<R>[],
+  data: D3Node<R extends Relation ? Node : QueryNode>[],
   type: 'relation' | 'queryRelation',
-  selectedDomainId?: T extends Relation ? string : undefined
+  selectedDomainId?: R extends Relation ? string : undefined
 ): d3.Selection<
   d3.BaseType | SVGPathElement,
-  D3Relation<T>,
+  D3Relation<R>,
   SVGGElement,
   unknown
 > {
@@ -227,4 +223,41 @@ export function addSvgStyles(
         }
       `)
   svg.attr('viewBox', `${-width / 2},${-height / 2},${width},${height}`)
+}
+
+export function tick<
+  N extends Node | QueryNode,
+  R extends Relation | QueryRelation
+>(
+  node: d3.Selection<
+    d3.BaseType | SVGCircleElement,
+    D3Node<N>,
+    SVGGElement,
+    unknown
+  >,
+  labels: d3.Selection<
+    d3.BaseType | SVGTextElement,
+    D3Node<N>,
+    SVGGElement,
+    unknown
+  >,
+  relation: d3.Selection<
+    d3.BaseType | SVGPathElement,
+    D3Relation<R>,
+    SVGGElement,
+    unknown
+  >
+): void {
+  node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
+  labels.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
+  relation
+    .attr('d', (rel) => {
+      return D3Helper.buildRelationPath(rel)
+    })
+    .attr('marker-end', (r) =>
+      D3Helper.isFlipped(r) ? '' : `url(#arrow-${r.relation.id})`
+    )
+    .attr('marker-start', (r) =>
+      D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
+    )
 }
