@@ -4,13 +4,15 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectProps,
 } from '@material-ui/core'
 import * as React from 'react'
 
-interface IFormSelectProps {
+type IFormSelectProps = SelectProps & {
   title: string
   options: string[]
   value?: string
+  hideLabel?: boolean
   onChangeHandler?: (event: any) => void
 }
 
@@ -18,6 +20,7 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
   title,
   options,
   value,
+  hideLabel,
   onChangeHandler,
 }) => {
   const handleChange = (
@@ -31,13 +34,12 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
   return (
     <FormGroup key={title}>
       <FormControl variant="standard">
-        <InputLabel id={title}>{title}</InputLabel>
+        {!hideLabel && <InputLabel id={`${title}-label`}>{title}</InputLabel>}
         <Select
-          labelId="demo-simple-select-outlined-label"
-          id="demo-simple-select-outlined"
+          labelId={`${title}-label`}
+          id={title}
           value={value}
           onChange={handleChange}
-          label="Age"
           fullWidth
         >
           {options.map((option: string) => {
