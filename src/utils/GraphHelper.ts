@@ -89,7 +89,7 @@ export function nodeMouseEvents<N extends Node | QueryNode>(
   node.call(drag).on('click', onClick)
 }
 
-const color = (
+export const color = (
   type: 'node' | 'queryNode',
   data: D3Node<Node | QueryNode>[],
   id: string
@@ -153,8 +153,6 @@ export function drawRelations<R extends Relation | QueryRelation>(
         return (r as D3Relation<Relation>).relation.domainIds.some(
           (id) => id === selectedDomainId
         )
-          ? 1
-          : 0.4
       }
       return (r as D3Relation<QueryRelation>).relation.selected ? 1 : 0.4
     })
