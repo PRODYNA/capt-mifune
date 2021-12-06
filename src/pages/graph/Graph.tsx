@@ -15,6 +15,7 @@ import CreateDomain from '../domain/CreateDomain'
 import GraphContext from '../../context/GraphContext'
 import {
   addSvgStyles,
+  buildSimulation,
   color,
   drawLabel,
   drawNodes,
@@ -329,47 +330,29 @@ export const Graph = (props: IGraph): JSX.Element => {
       const selection = drawSelectionIndicator(svg)
       const node = drawNodes<Node>(svg, nodes, 'node', selectedDomain?.id)
       const text = drawLabel<Node>(svg, nodes, 'node')
+      const simulation = buildSimulation<Relation, Node>(
+        rels,
+        nodes,
+        (): void => {
+          // todo:
+          if (selection && selected && selected.kind === 'node') {
+            // const selectedNode = selected as D3Node<Node>
+            selection.attr('d', (d) => {
+              if (d.d) {
+                return d.d
+              }
+              return D3Helper.selectionPath(
+                d.x ?? 0,
+                d.y ?? 0,
+                d.x ?? 0,
+                d.y ?? 0
+              )
+            })
+          }
 
-      const buildSimulation = (
-        d3Relation: D3Relation<Relation>[]
-      ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
-        return d3
-          .forceSimulation()
-          .nodes(nodes)
-          .force('charge', d3.forceManyBody().strength(0.1))
-          .force(
-            'link',
-            d3
-              .forceLink<D3Node<Node>, D3Relation<Relation>>(d3Relation)
-              .id((d) => d.node.id)
-              .distance(100)
-              .strength(0.1)
-          )
-          .force('collision', d3.forceCollide().radius(100).strength(0.8))
-          .force('x', d3.forceX().strength(0.1))
-          .force('y', d3.forceY().strength(0.3))
-          .on('tick', (): void => {
-            // todo:
-            if (selection && selected && selected.kind === 'node') {
-              // const selectedNode = selected as D3Node<Node>
-              selection.attr('d', (d) => {
-                if (d.d) {
-                  return d.d
-                }
-                return D3Helper.selectionPath(
-                  d.x ?? 0,
-                  d.y ?? 0,
-                  d.x ?? 0,
-                  d.y ?? 0
-                )
-              })
-            }
-
-            tick<Node, Relation>(node, text, relation)
-          })
-      }
-
-      const simulation = buildSimulation(rels)
+          tick<Node, Relation>(node, text, relation)
+        }
+      )
 
       nodeMouseEvents(simulation, node, (e: any, d: D3Node<Node>): void => {
         if (selected && 'node' in selected && selected.node.id === d.node.id) {
@@ -385,26 +368,6 @@ export const Graph = (props: IGraph): JSX.Element => {
       relationMouseEvents(relation)
     }
   }, [selectedDomain, domains, selected, nodes, relations, color])
-
-  const editSection = (): JSX.Element => {
-    if (selected?.kind === 'node') {
-      return (
-        <NodeEdit
-          node={(selected as D3Node<Node>).node}
-          updateState={updateState}
-        />
-      )
-    }
-    if (selected?.kind === 'relation') {
-      return (
-        <RelationEdit
-          relation={(selected as D3Relation<Relation>).relation}
-          updateState={updateState}
-        />
-      )
-    }
-    return <></>
-  }
 
   return (
     <GraphContext.Provider
@@ -422,7 +385,18 @@ export const Graph = (props: IGraph): JSX.Element => {
       }}
     >
       <DomainList domains={domains} updateState={updateState} />
-      {editSection()}
+      {selected?.kind === 'node' && (
+        <NodeEdit
+          node={(selected as D3Node<Node>).node}
+          updateState={updateState}
+        />
+      )}
+      {selected?.kind === 'relation' && (
+        <RelationEdit
+          relation={(selected as D3Relation<Relation>).relation}
+          updateState={updateState}
+        />
+      )}
       <svg
         onClick={(): void => setSelected(undefined)}
         style={{
