@@ -15,6 +15,7 @@ import CreateDomain from '../domain/CreateDomain'
 import GraphContext from '../../context/GraphContext'
 import {
   addSvgStyles,
+  color,
   drawLabel,
   drawNodes,
   drawRelations,
@@ -73,7 +74,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     return 6
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     nodes.forEach((n) => {
       // eslint-disable-next-line no-param-reassign
       n.radius = nodeRadius(n)
@@ -150,10 +151,6 @@ export const Graph = (props: IGraph): JSX.Element => {
     )
     updateNodes(graphDelta)
     updateRelations(graphDelta)
-  }
-
-  const color = (id: string): string => {
-    return nodes.find((n) => n.node.id === id)?.node.color ?? 'green'
   }
 
   useEffect(() => {
@@ -323,19 +320,14 @@ export const Graph = (props: IGraph): JSX.Element => {
 
       const relation = drawRelations<Relation>(
         svg,
-        rels,
         relations,
+        rels,
         nodes,
         'relation',
         selectedDomain?.id
       )
       const selection = drawSelectionIndicator(svg)
-      const node = drawNodes<Node>(
-        svg,
-        nodes,
-        'node',
-        selectedDomain?.id as string
-      )
+      const node = drawNodes<Node>(svg, nodes, 'node', selectedDomain?.id)
       const text = drawLabel<Node>(svg, nodes, 'node')
 
       const buildSimulation = (
@@ -372,11 +364,13 @@ export const Graph = (props: IGraph): JSX.Element => {
                 )
               })
             }
+
             tick<Node, Relation>(node, text, relation)
           })
       }
 
       const simulation = buildSimulation(rels)
+
       nodeMouseEvents(simulation, node, (e: any, d: D3Node<Node>): void => {
         if (selected && 'node' in selected && selected.node.id === d.node.id) {
           const force = d as Force
