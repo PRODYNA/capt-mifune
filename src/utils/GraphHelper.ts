@@ -259,3 +259,29 @@ export function tick<
       D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
     )
 }
+
+export function buildSimulation<
+  R extends Relation | QueryRelation,
+  N extends Node | QueryNode
+>(
+  d3Relation: D3Relation<R>[],
+  data: D3Node<N>[],
+  onTick: () => void
+): d3.Simulation<d3.SimulationNodeDatum, undefined> {
+  return d3
+    .forceSimulation()
+    .nodes(data)
+    .force('charge', d3.forceManyBody().strength(0.1))
+    .force(
+      'link',
+      d3
+        .forceLink<D3Node<N>, D3Relation<R>>(d3Relation)
+        .id((d) => d.node.id)
+        .distance(100)
+        .strength(0.1)
+    )
+    .force('collision', d3.forceCollide().radius(100).strength(0.8))
+    .force('x', d3.forceX().strength(0.1))
+    .force('y', d3.forceY().strength(0.3))
+    .on('tick', onTick)
+}
