@@ -7,6 +7,7 @@ import { Graph, Node, Relation } from '../../api/model/Model'
 import graphService from '../../api/GraphService'
 import {
   addSvgStyles,
+  buildSimulation,
   drawLabel,
   drawNodes,
   drawRelations,
@@ -61,7 +62,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
   const d3Container = useRef(null)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = (): void => {
       setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
     }
@@ -198,32 +199,11 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     )
     const node = drawNodes<QueryNode>(svgSelect, nodes, 'queryNode')
     const labels = drawLabel<QueryNode>(svgSelect, nodes, 'queryNode')
-
-    const buildSimulation = (): d3.Simulation<
-      d3.SimulationNodeDatum,
-      undefined
-    > => {
-      return d3
-        .forceSimulation()
-        .nodes(nodes)
-        .force('charge', d3.forceManyBody().strength(0.1))
-        .force(
-          'link',
-          d3
-            .forceLink<D3Node<QueryNode>, D3Relation<QueryRelation>>(relations)
-            .id((d) => d.node.id)
-            .distance(100)
-            .strength(0.3)
-        )
-        .force('collision', d3.forceCollide().radius(100).strength(0.8))
-        .force('x', d3.forceX().strength(0.1))
-        .force('y', d3.forceY().strength(0.1))
-        .on('tick', () =>
-          tick<QueryNode, QueryRelation>(node, labels, relation)
-        )
-    }
-
-    const simulation = buildSimulation()
+    const simulation = buildSimulation<QueryRelation, QueryNode>(
+      relations,
+      nodes,
+      (): void => tick<QueryNode, QueryRelation>(node, labels, relation)
+    )
 
     nodeMouseEvents(
       simulation,
