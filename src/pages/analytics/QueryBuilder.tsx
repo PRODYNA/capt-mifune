@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Button, makeStyles } from '@material-ui/core'
+import { Box, Button } from '@material-ui/core'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
@@ -42,18 +42,7 @@ export interface QueryRelation {
 
 export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const { onChange } = props
-
   const height = 600
-
-  const useStyle = makeStyles({
-    svg: {
-      border: '1px dashed grey',
-    },
-    'query-builder': {
-      width: '100%',
-    },
-  })
-  const classes = useStyle()
   const [width, setWidth] = useState<number>(100)
   const [graph, setGraph] = useState<Graph>()
   const [varCounter, setVarCounter] = useState<Map<string, number>>(new Map())
@@ -62,19 +51,20 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
   const d3Container = useRef(null)
 
+  const handleResize = (): void => {
+    setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
+  }
+
   useEffect(() => {
-    const handleResize = (): void => {
-      setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
-    }
+    graphService.graphGet().then((g): void => setGraph(g))
     window.addEventListener('resize', handleResize)
-  })
+    return (): void => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   useLayoutEffect(() => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
-  }, [])
-
-  useEffect(() => {
-    graphService.graphGet().then((g) => setGraph(g))
   }, [])
 
   function addPossibleNode(node: Node): D3Node<QueryNode> {
@@ -93,36 +83,36 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const possibleNodes: D3Node<QueryNode>[] = []
     const possibleRelations: QueryRelation[] = graphService
       .possibleRelations(graph!, d.node.node.id)
-      .flatMap((r) => {
+      .flatMap((r: Relation): QueryRelation[] => {
         const tmpRelations: QueryRelation[] = []
+        const relationObj = {
+          id: v4(),
+          varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
+          relation: r,
+          selected: false,
+        }
         if (r.targetId === d.node.node.id) {
           const [n] = graph!.nodes.filter(
-            (tempNode) => r.sourceId === tempNode.id
+            (tempNode: Node): boolean => r.sourceId === tempNode.id
           )
           const sourceNode = addPossibleNode(n)
           possibleNodes.push(sourceNode)
           tmpRelations.push({
-            id: v4(),
-            varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
-            relation: r,
+            ...relationObj,
             sourceId: sourceNode.node.id,
             targetId: d.node.id,
-            selected: false,
           })
         }
         if (r.sourceId === d.node.node.id) {
           const [n] = graph!.nodes.filter(
-            (tempNode) => r.targetId === tempNode.id
+            (tempNode: Node): boolean => r.targetId === tempNode.id
           )
           const targetNode = addPossibleNode(n)
           possibleNodes.push(targetNode)
           tmpRelations.push({
-            id: v4(),
-            varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
-            relation: r,
+            ...relationObj,
             sourceId: d.node.id,
             targetId: targetNode.node.id,
-            selected: false,
           })
         }
         return tmpRelations
@@ -145,7 +135,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   function cleanNodes(): void {
     const activeNodes = nodes.filter((n) => n.node.selected)
-
     setNodes(activeNodes)
     setRelations(
       relations.filter(
@@ -264,24 +253,25 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   }
 
   return (
-    <div id="query-builder">
+    <Box id="query-builder" width="100%">
       <h1>Query Builder</h1>
-      {graph?.nodes.map((n) => (
-        <Button onClick={() => addNode(n)}>{n.label}</Button>
-      ))}
-      <div>
+      {graph?.nodes.map(
+        (n): JSX.Element => (
+          <Button onClick={(): void => addNode(n)}>{n.label}</Button>
+        )
+      )}
+      <Box border={1}>
         {JSON.stringify(varCounter)}
         <svg
-          onClick={() => {
+          onClick={(): void => {
             cleanNodes()
             setSelectActive(false)
           }}
-          className={classes.svg}
           width={width}
           height={height}
           ref={d3Container}
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
