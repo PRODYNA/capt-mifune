@@ -24,7 +24,7 @@ import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import CustomDialog from '../../components/Dialog/CustomDialog'
 import GraphContext from '../../context/GraphContext'
-import { D3Helper } from '../graph/D3Helper'
+import { D3Helper } from '../../helpers/D3Helper'
 
 interface DomainListEntryProps {
   domain: Domain

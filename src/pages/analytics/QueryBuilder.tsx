@@ -1,11 +1,19 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Button, makeStyles } from '@material-ui/core'
+import { Box, Button } from '@material-ui/core'
 import * as d3 from 'd3'
-import { BaseType, Selection, svg } from 'd3'
 import { v4 } from 'uuid'
-import { D3Helper, D3Node, D3Relation } from '../graph/D3Helper'
+import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
 import { Graph, Node, Relation } from '../../api/model/Model'
 import graphService from '../../api/GraphService'
+import {
+  addSvgStyles,
+  buildSimulation,
+  drawLabel,
+  drawNodes,
+  drawRelations,
+  nodeMouseEvents,
+  tick,
+} from '../../helpers/GraphHelper'
 
 export interface QueryBuilderProps {
   onChange: (query: Query) => void
@@ -34,18 +42,7 @@ export interface QueryRelation {
 
 export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const { onChange } = props
-
   const height = 600
-
-  const useStyle = makeStyles({
-    svg: {
-      border: '1px dashed grey',
-    },
-    'query-builder': {
-      width: '100%',
-    },
-  })
-  const classes = useStyle()
   const [width, setWidth] = useState<number>(100)
   const [graph, setGraph] = useState<Graph>()
   const [varCounter, setVarCounter] = useState<Map<string, number>>(new Map())
@@ -54,23 +51,20 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
   const d3Container = useRef(null)
 
-  React.useEffect(() => {
-    const handleResize = (): void => {
-      setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
-    }
-    window.addEventListener('resize', handleResize)
-  })
-
-  useLayoutEffect(() => {
+  const handleResize = (): void => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
-  }, [])
-
-  const color = (id: string): string => {
-    return nodes.find((n) => n.node.node.id === id)?.node.node.color ?? 'green'
   }
 
   useEffect(() => {
-    graphService.graphGet().then((g) => setGraph(g))
+    graphService.graphGet().then((g): void => setGraph(g))
+    window.addEventListener('resize', handleResize)
+    return (): void => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  useLayoutEffect(() => {
+    setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
   }, [])
 
   function addPossibleNode(node: Node): D3Node<QueryNode> {
@@ -89,36 +83,36 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const possibleNodes: D3Node<QueryNode>[] = []
     const possibleRelations: QueryRelation[] = graphService
       .possibleRelations(graph!, d.node.node.id)
-      .flatMap((r) => {
+      .flatMap((r: Relation): QueryRelation[] => {
         const tmpRelations: QueryRelation[] = []
+        const relationObj = {
+          id: v4(),
+          varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
+          relation: r,
+          selected: false,
+        }
         if (r.targetId === d.node.node.id) {
           const [n] = graph!.nodes.filter(
-            (tempNode) => r.sourceId === tempNode.id
+            (tempNode: Node): boolean => r.sourceId === tempNode.id
           )
           const sourceNode = addPossibleNode(n)
           possibleNodes.push(sourceNode)
           tmpRelations.push({
-            id: v4(),
-            varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
-            relation: r,
+            ...relationObj,
             sourceId: sourceNode.node.id,
             targetId: d.node.id,
-            selected: false,
           })
         }
         if (r.sourceId === d.node.node.id) {
           const [n] = graph!.nodes.filter(
-            (tempNode) => r.targetId === tempNode.id
+            (tempNode: Node): boolean => r.targetId === tempNode.id
           )
           const targetNode = addPossibleNode(n)
           possibleNodes.push(targetNode)
           tmpRelations.push({
-            id: v4(),
-            varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
-            relation: r,
+            ...relationObj,
             sourceId: d.node.id,
             targetId: targetNode.node.id,
-            selected: false,
           })
         }
         return tmpRelations
@@ -141,7 +135,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   function cleanNodes(): void {
     const activeNodes = nodes.filter((n) => n.node.selected)
-
     setNodes(activeNodes)
     setRelations(
       relations.filter(
@@ -180,150 +173,31 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       return
     }
     const svgSelect = d3.select(d3Container.current)
-    svgSelect.selectAll('*').remove()
-
-    svgSelect.append('style').text(`
-             .node {
-              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
-            }
-            .relation {
-              filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
-            }
-            .relation-label { 
-                font: bold 13px sans-serif; 
-                fill: white; 
-                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-                cursor: default;
-                pointer-events: none;
-            }
-            .node-label {
-                font: bold 13px sans-serif; 
-                fill: white; 
-                text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-                cursor: default;
-                pointer-events: none;
-            }
-          `)
-
-    svgSelect.attr('viewBox', `${-width / 2},${-height / 2},${width},${height}`)
+    addSvgStyles(svgSelect, width, height)
 
     if (nodes && nodes?.length <= 0) {
       console.error('no nodes exist')
     }
 
-    const drawNodes = (
-      svgSection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-      queryNodes: D3Node<QueryNode>[]
-    ): Selection<
-      BaseType | SVGTextElement,
-      D3Node<QueryNode>,
-      SVGGElement,
-      unknown
-    > => {
-      return svgSection
-        .append('g')
-        .attr('stroke', '#fff')
-        .selectAll('circle')
-        .data(queryNodes || [])
-        .join('circle')
-        .attr('r', (n) => n.radius)
-        .attr('fill', (n) => n.node.node.color)
-        .attr('fill-opacity', (n) => (n.node.selected ? 1 : 0.4))
-        .classed('node', true)
-    }
+    const relation = drawRelations<QueryRelation>(
+      svgSelect,
+      relations,
+      relations,
+      nodes,
+      'queryRelation'
+    )
+    const node = drawNodes<QueryNode>(svgSelect, nodes, 'queryNode')
+    const labels = drawLabel<QueryNode>(svgSelect, nodes, 'queryNode')
+    const simulation = buildSimulation<QueryRelation, QueryNode>(
+      relations,
+      nodes,
+      (): void => tick<QueryNode, QueryRelation>(node, labels, relation)
+    )
 
-    const drawNodeLabel = (
-      svgSection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-      queryNodes: D3Node<QueryNode>[]
-    ): Selection<
-      BaseType | SVGTextElement,
-      D3Node<QueryNode>,
-      SVGGElement,
-      unknown
-    > => {
-      return svgSection
-        .append('g')
-        .selectAll('text')
-        .data(queryNodes)
-        .join('text')
-        .text((d) => d.node.varName)
-        .attr('dominant-baseline', 'middle')
-        .attr('text-anchor', 'middle')
-        .attr('class', 'node-label')
-        .attr('background-color', (n) => n.node.node.color)
-    }
-
-    const drawRelations = (
-      svgSelection: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
-      queryRelations: D3Relation<QueryRelation>[]
-    ): d3.Selection<
-      d3.BaseType | SVGPathElement,
-      D3Relation<QueryRelation>,
-      SVGGElement,
-      unknown
-    > => {
-      relations.forEach((rel) => {
-        svgSelection
-          .append('defs')
-          .append('marker')
-          .attr('id', `arrow-${rel.relation.id}`)
-          .attr('markerWidth', '3')
-          .attr('markerHeight', '2')
-          .attr('refX', '1')
-          .attr('refY', '1')
-          .attr('orient', 'auto-start-reverse')
-          .append('polygon')
-          .attr('points', '0 2, 0 0, 3 1')
-          .attr('fill', color(rel.relation.relation.sourceId))
-      })
-
-      const selection = svgSelection
-        .append('g')
-        .selectAll('path')
-        .data(queryRelations)
-      const relation = selection
-        .join('path')
-        .attr('id', (d) => d.relation.id)
-        .attr('stroke-linecap', 'round')
-        .attr('opacity', (r) => {
-          if (r.relation.selected) {
-            return 1
-          }
-          return 0.4
-        })
-        .attr('stroke', (d) => color(d.relation.relation.sourceId))
-        .attr('fill', 'transparent')
-        .attr('stroke-width', (rel) => rel.width)
-        .classed('relation', true)
-      selection
-        .join('text')
-        .attr('dominant-baseline', 'middle')
-        .append('textPath')
-        .attr('startOffset', '50%')
-        .attr('text-anchor', 'middle')
-        .attr('href', (d) => `#${d.relation.id}`)
-        .text((d) => d.relation.varName)
-        .attr('class', 'relation-label')
-      return relation
-    }
-
-    const nodeMouseEvents = (
-      simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
-      node: any
-    ): void => {
-      const dragstart = (): void => {}
-      const dragged = (event: any, element: any): void => {
-        // eslint-disable-next-line no-param-reassign
-        element.fx = event.x
-        // eslint-disable-next-line no-param-reassign
-        element.fy = event.y
-        simulation.alphaTarget(0.3).restart()
-      }
-      const dragend = (): void => {
-        simulation.stop()
-      }
-
-      const click = (event: any, d3Node: D3Node<QueryNode>): void => {
+    nodeMouseEvents(
+      simulation,
+      node,
+      (event: any, d3Node: D3Node<QueryNode>): void => {
         if (d3Node.node.selected) {
           setSelectActive(true)
           addPossibleRelations(d3Node)
@@ -358,57 +232,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
         simulation.alphaTarget(0.3).restart()
       }
-
-      const drag = d3
-        .drag()
-        .on('start', dragstart)
-        .on('drag', dragged)
-        .on('end', dragend)
-      node.call(drag).on('click', click)
-    }
-
-    const buildSimulation = (
-      tick: () => void
-    ): d3.Simulation<d3.SimulationNodeDatum, undefined> => {
-      return d3
-        .forceSimulation()
-        .nodes(nodes)
-        .force('charge', d3.forceManyBody().strength(0.1))
-        .force(
-          'link',
-          d3
-            .forceLink<D3Node<QueryNode>, D3Relation<QueryRelation>>(relations)
-            .id((d) => d.node.id)
-            .distance(100)
-            .strength(0.3)
-        )
-        .force('collision', d3.forceCollide().radius(100).strength(0.8))
-        .force('x', d3.forceX().strength(0.1))
-        .force('y', d3.forceY().strength(0.1))
-        .on('tick', tick)
-    }
-
-    const relation = drawRelations(svgSelect, relations)
-    const node = drawNodes(svgSelect, nodes)
-    const labels = drawNodeLabel(svgSelect, nodes)
-
-    const tick = (): void => {
-      node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
-      labels.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
-      relation
-        .attr('d', (rel) => {
-          return D3Helper.buildRelationPath(rel)
-        })
-        .attr('marker-end', (r) =>
-          D3Helper.isFlipped(r) ? '' : `url(#arrow-${r.relation.id})`
-        )
-        .attr('marker-start', (r) =>
-          D3Helper.isFlipped(r) ? `url(#arrow-${r.relation.id})` : ''
-        )
-    }
-
-    const simulation = buildSimulation(tick)
-    nodeMouseEvents(simulation, node)
+    )
   }, [nodes, relations, selectActive])
 
   const addNode = (node: Node): void => {
@@ -429,24 +253,25 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   }
 
   return (
-    <div id="query-builder">
+    <Box id="query-builder" width="100%">
       <h1>Query Builder</h1>
-      {graph?.nodes.map((n) => (
-        <Button onClick={() => addNode(n)}>{n.label}</Button>
-      ))}
-      <div>
+      {graph?.nodes.map(
+        (n): JSX.Element => (
+          <Button onClick={(): void => addNode(n)}>{n.label}</Button>
+        )
+      )}
+      <Box border={1}>
         {JSON.stringify(varCounter)}
         <svg
-          onClick={(e) => {
+          onClick={(): void => {
             cleanNodes()
             setSelectActive(false)
           }}
-          className={classes.svg}
           width={width}
           height={height}
           ref={d3Container}
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   )
 }
