@@ -1,7 +1,7 @@
 import { BaseType, Selection } from 'd3'
 import * as d3 from 'd3'
 import { QueryNode, QueryRelation } from '../pages/analytics/QueryBuilder'
-import { D3Helper, D3Node, D3Relation } from '../pages/graph/D3Helper'
+import { D3Helper, D3Node, D3Relation } from './D3Helper'
 import { Node, Relation } from '../api/model/Model'
 import { Force } from '../pages/graph/Graph'
 
