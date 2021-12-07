@@ -90,13 +90,17 @@ export const Graph = (props: IGraph): JSX.Element => {
     setRelations(relations)
   }, [selectedDomain, selected])
 
+  const handleResize = (): void => {
+    setWidth(window.innerWidth)
+    setHeight(window.innerHeight)
+  }
+
   useEffect(() => {
-    const handleResize = (): void => {
-      setWidth(window.innerWidth)
-      setHeight(window.innerHeight)
-    }
     window.addEventListener('resize', handleResize)
-  })
+    return (): void => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   useLayoutEffect(() => {
     setWidth(window.innerWidth)
@@ -285,38 +289,29 @@ export const Graph = (props: IGraph): JSX.Element => {
       }
 
       rels.forEach((d3Rel) => {
-        // eslint-disable-next-line no-param-reassign
-        d3Rel.incomingRelationsCount = 0
-      })
-
-      rels.forEach((r) => {
-        // eslint-disable-next-line no-param-reassign
-        r.incomingRelationsCount = rels.filter(
-          (r2) =>
-            r2.relation.targetId === r.relation.sourceId &&
-            r2.relation.sourceId === r.relation.targetId
-        ).length
-      })
-
-      rels.forEach((r) => {
-        // eslint-disable-next-line no-param-reassign
-        r.relCount = rels.filter(
-          (r2) =>
-            r2.relation.sourceId === r.relation.sourceId &&
-            r2.relation.targetId === r.relation.targetId
+        const d3RelCopy = { ...d3Rel }
+        d3RelCopy.incomingRelationsCount = rels.filter(
+          (r) =>
+            r.relation.targetId === d3Rel.relation.sourceId &&
+            r.relation.sourceId === d3Rel.relation.targetId
         ).length
 
-        // eslint-disable-next-line no-param-reassign
-        r.relIndex = rels
+        d3RelCopy.relCount = rels.filter(
+          (r) =>
+            r.relation.sourceId === d3Rel.relation.sourceId &&
+            r.relation.targetId === d3Rel.relation.targetId
+        ).length
+
+        d3RelCopy.relIndex = rels
           .filter(
-            (r2) =>
-              r2.relation.sourceId === r.relation.sourceId &&
-              r2.relation.targetId === r.relation.targetId
+            (r) =>
+              r.relation.sourceId === d3Rel.relation.sourceId &&
+              r.relation.targetId === d3Rel.relation.targetId
           )
-          .indexOf(r)
+          .indexOf(d3Rel)
 
-        // eslint-disable-next-line no-param-reassign
-        r.firstRender = r.relation.sourceId > r.relation.targetId
+        d3RelCopy.firstRender =
+          d3Rel.relation.sourceId > d3Rel.relation.targetId
       })
 
       const relation = drawRelations<Relation>(
