@@ -8,7 +8,6 @@ import Edit from './Edit'
 import GraphContext from '../../context/GraphContext'
 import graphService from '../../api/GraphService'
 import { SnackbarContext } from '../../context/Snackbar'
-import { CustomTexts } from '../../utils/CustomTexts'
 import { Translations } from '../../utils/Translations'
 
 interface NodeEditProps {
