@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Button, makeStyles } from '@material-ui/core'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
-import { D3Helper, D3Node, D3Relation } from '../graph/D3Helper'
+import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
 import { Graph, Node, Relation } from '../../api/model/Model'
 import graphService from '../../api/GraphService'
 import {
@@ -13,7 +13,7 @@ import {
   drawRelations,
   nodeMouseEvents,
   tick,
-} from '../../utils/GraphHelper'
+} from '../../helpers/GraphHelper'
 
 export interface QueryBuilderProps {
   onChange: (query: Query) => void

@@ -6,7 +6,7 @@ import { Domain, GraphDelta, Node, Relation } from '../../api/model/Model'
 import { RelationEdit } from './RelationEdit'
 import graphService from '../../api/GraphService'
 import { DomainList } from '../domain/DomainList'
-import { D3Helper, D3Node, D3Relation } from './D3Helper'
+import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
 import {
   DRAWER_WIDTH,
   DRAWER_WIDTH_OPEN,
@@ -22,7 +22,7 @@ import {
   drawRelations,
   nodeMouseEvents,
   tick,
-} from '../../utils/GraphHelper'
+} from '../../helpers/GraphHelper'
 
 interface IGraph {
   openSidenav: boolean
