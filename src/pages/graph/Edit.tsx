@@ -1,10 +1,4 @@
-import React, {
-  Dispatch,
-  FormEvent,
-  SetStateAction,
-  useContext,
-  useState,
-} from 'react'
+import React, { Dispatch, FormEvent, SetStateAction, useState } from 'react'
 
 import {
   Box,
@@ -26,17 +20,16 @@ import { Node, Property, Relation } from '../../api/model/Model'
 import CustomButton from '../../components/Button/CustomButton'
 import CustomTable from '../../components/Table/CustomTable'
 import CustomDialog from '../../components/Dialog/CustomDialog'
-import { SnackbarContext } from '../../context/Snackbar'
 
 interface EditProps {
   title: string
   modalTitle: string
   children: JSX.Element | JSX.Element[]
+  value: Node | Relation
   onCreate: (v: any) => void
   onSubmit: (v: any) => void
   onDelete: (v: any) => void
   onClose: () => void
-  value: Node | Relation
   setValue: Dispatch<SetStateAction<any>>
   properties: Property[]
   setProperties: Dispatch<SetStateAction<Property[]>>
@@ -88,7 +81,6 @@ const Edit = (props: EditProps): JSX.Element => {
     onSubmit,
   } = props
   const [showModal, setShowModal] = useState<boolean>(false)
-  const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
   const classes = useStyle()
 
