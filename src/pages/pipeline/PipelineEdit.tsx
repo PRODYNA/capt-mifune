@@ -71,37 +71,43 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
     setFile(event.target.value)
   }
 
-  const getReactNodes = (values: string[]): JSX.Element[] => {
-    return getColumnMappingKeys().map((key) => (
-      <Grid item xs={12} md={4}>
+  const getReactNodes = (
+    values: string[]
+  ): { key: string; node: JSX.Element }[] => {
+    return getColumnMappingKeys().map((key) => ({
+      key,
+      node: (
         <FormSelect
           key={key}
           title={key}
           options={values}
-          value={mapping[key]}
+          value={mapping[key] ?? ''}
           onChangeHandler={(e) =>
             updateMappingKey(key, e.target.value as string)
           }
         />
-      </Grid>
-    ))
+      ),
+    }))
   }
-  const values = getMenuItems()
 
-  const children: React.ReactNode[] = getReactNodes(values)
-  const options = ['']
-  sources.map((source) => source.name).forEach((s) => options.push(s))
-  children.unshift(
-    <Grid item xs={12} md={4}>
-      <FormSelect
-        key="FileSelection"
-        title="Select file to map"
-        options={options}
-        value={file ?? 'None'}
-        onChangeHandler={onFileChangeEventHandler}
-      />
-    </Grid>
-  )
+  let children: { key: string; node: JSX.Element }[] = []
+
+  if (sources.length > 0) {
+    const values = getMenuItems()
+    children = getReactNodes(values)
+    children.unshift({
+      key: 'FileSelection',
+      node: (
+        <FormSelect
+          key="FileSelection"
+          title="Select file to map"
+          options={[...sources.map((source) => source.name), '']}
+          value={file ?? 'None'}
+          onChangeHandler={onFileChangeEventHandler}
+        />
+      ),
+    })
+  }
 
   return (
     <form
@@ -121,7 +127,11 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
       }}
     >
       <Grid container spacing={3}>
-        {children.map((child) => child)}
+        {children.map((child) => (
+          <Grid item xs={12} md={4} key={`child-${child?.key}`}>
+            {child?.node}
+          </Grid>
+        ))}
       </Grid>
       <FormActions
         saveText="Save"
