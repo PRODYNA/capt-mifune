@@ -41,10 +41,6 @@ export const NodeSelect = (props: NodeSelectProps): JSX.Element => {
           const node = nodes.filter(
             (n) => n.id === (e.target.value as string)
           )[0]
-          console.log('select')
-          console.log(node.id)
-          console.log(node.label)
-          console.log('select end')
           updateNode(node)
           e.stopPropagation()
         }}

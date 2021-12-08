@@ -38,7 +38,7 @@ export interface Domain {
   modelValid: boolean
   mappingValid: boolean
   file?: string
-  columnMapping?: any
+  columnMapping?: { [key: string]: string }
 }
 
 export interface NodeCreate {
