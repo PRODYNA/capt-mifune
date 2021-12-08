@@ -149,7 +149,6 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
             nodeId={rootNodeId}
             label="Domain node"
             updateNode={(n) => {
-              console.log(n.label)
               setRootNodeId(n.id)
             }}
           />

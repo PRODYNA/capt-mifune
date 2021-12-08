@@ -217,7 +217,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         unknown
       >
     ): void => {
-      const click = (event: any, r: D3Relation<Relation>): void => {
+      const click = (event: unknown, r: D3Relation<Relation>): void => {
         if (
           selected &&
           'relation' in selected &&
@@ -349,7 +349,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         }
       )
 
-      nodeMouseEvents(simulation, node, (e: any, d: D3Node<Node>): void => {
+      nodeMouseEvents(simulation, node, (e: unknown, d: D3Node<Node>): void => {
         if (selected && 'node' in selected && selected.node.id === d.node.id) {
           const force = d as Force
           delete force.fx

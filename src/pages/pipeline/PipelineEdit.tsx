@@ -19,7 +19,9 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const { domain } = props
   const history = useHistory()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const [mapping, setMapping] = useState<any>(domain.columnMapping ?? {})
+  const [mapping, setMapping] = useState<{ [key: string]: string }>(
+    domain.columnMapping ?? {}
+  )
   const [file, setFile] = useState<string | undefined>(domain.file)
   const [sources, setSources] = useState<Source[]>([])
 
