@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Grid, IconButton } from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
+import { IconButton, TableCell, useTheme } from '@material-ui/core'
+import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
 import graphService from '../../api/GraphService'
 import FormSelect from '../../components/Form/FormSelect'
 import { Query } from './QueryBuilder'
@@ -18,7 +18,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const [filter, setFilter] = useState<string>()
   const [value, setValue] = useState<string>()
   const [values, setValues] = useState<string[]>()
-
+  const theme = useTheme()
   useEffect(() => {
     if (filter) {
       graphService.query(query, [filter], [filter]).then((d) => {
@@ -33,23 +33,23 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   }, [filter])
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={4}>
-        <AnalyticSelect
-          label="Property"
-          query={query}
-          onChange={(newFilter) => {
-            setFilter(newFilter)
-            setValue(undefined)
-            setValues([])
-            onKeyChange(newFilter)
-            onValueChange(undefined)
-          }}
-        />
-      </Grid>
-      <Grid item xs={12} md={4}>
+    <>
+      <AnalyticSelect
+        renderAsTable
+        label="Property"
+        query={query}
+        onChange={(newFilter) => {
+          setFilter(newFilter)
+          setValue(undefined)
+          setValues([])
+          onKeyChange(newFilter)
+          onValueChange(undefined)
+        }}
+      />
+      <TableCell>
         <FormSelect
-          title="Value"
+          title=""
+          hideLabel
           options={values ?? []}
           value={value}
           onChangeHandler={(event) => {
@@ -57,12 +57,12 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
             onValueChange(event.target.value)
           }}
         />
-      </Grid>
-      <Grid item xs={12} md={1}>
-        <IconButton onClick={onDelete}>
-          <DeleteIcon />
+      </TableCell>
+      <TableCell width={40}>
+        <IconButton onClick={onDelete} style={{ padding: 0 }}>
+          <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>
-      </Grid>
-    </Grid>
+      </TableCell>
+    </>
   )
 }
