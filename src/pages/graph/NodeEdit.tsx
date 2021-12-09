@@ -20,6 +20,9 @@ export const useStyleTable = makeStyles(() => ({
     padding: '0 1rem 0 0',
     verticalAlign: 'bottom',
   },
+  cellMinWidth: {
+    minWidth: 120,
+  },
   tableRow: {
     '& .MuiTableCell-sizeSmall:last-child': {
       padding: 0,

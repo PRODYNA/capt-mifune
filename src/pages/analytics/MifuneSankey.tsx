@@ -5,6 +5,7 @@ import {
   SankeyDataLink,
   SankeyDataNode,
 } from '@nivo/sankey'
+import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
@@ -45,14 +46,14 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
 
   const buildChart = (data: any): JSX.Element => {
     return (
-      <div style={{ height: window.innerHeight }}>
+      <Box height={window.innerHeight}>
         <ResponsiveSankey
           data={data.data}
           margin={{ top: 40, right: 160, bottom: 100, left: 150 }}
           align="justify"
           colors={{ scheme: 'dark2' }}
         />
-      </div>
+      </Box>
     )
   }
 
