@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Grid } from '@material-ui/core'
+import { Grid, TableCell } from '@material-ui/core'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
-  const { query, label, fnOptions, fnDefault, onChange } = props
+  const { query, label, fnOptions, fnDefault, onChange, renderAsTable } = props
   const [variable, setVariable] = useState<string>()
   const [property, setProperty] = useState<string>()
   const [fn, setFn] = useState<string | undefined>(fnDefault)
@@ -42,7 +42,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
         <FormSelect
           title="Function"
           options={fnOptions ?? []}
-          value={fn}
+          value={fn ?? ''}
           onChangeHandler={(e) => {
             const newFN = e.target.value as string
             setFn(newFN)
@@ -54,12 +54,13 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     return <></>
   }
 
-  return (
-    <Grid item xs={12}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={fn ? 4 : 6}>
+  if (renderAsTable) {
+    return (
+      <>
+        <TableCell>
           <FormSelect
             title={label}
+            hideLabel
             options={
               query.nodes
                 .map((n) => n.varName)
@@ -71,10 +72,11 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
               fireUpdate(newValue, property, fn)
             }}
           />
-        </Grid>
-        <Grid item xs={12} md={fn ? 4 : 6}>
+        </TableCell>
+        <TableCell>
           <FormSelect
             title={label}
+            hideLabel
             options={properties ?? []}
             onChangeHandler={(e) => {
               const newValue = e.target.value as string
@@ -82,10 +84,41 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
               fireUpdate(variable, newValue, fn)
             }}
           />
-        </Grid>
-        <Grid item xs={12} md={fn ? 4 : 6}>
-          {buildFnSelect()}
-        </Grid>
+        </TableCell>
+      </>
+    )
+  }
+
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={fn ? 4 : 6}>
+        <FormSelect
+          title={label}
+          options={
+            query.nodes
+              .map((n) => n.varName)
+              .concat(query.relations.map((r) => r.varName)) ?? []
+          }
+          onChangeHandler={(e) => {
+            const newValue = e.target.value as string
+            setVariable(newValue)
+            fireUpdate(newValue, property, fn)
+          }}
+        />
+      </Grid>
+      <Grid item xs={12} md={fn ? 4 : 6}>
+        <FormSelect
+          title={label}
+          options={properties ?? []}
+          onChangeHandler={(e) => {
+            const newValue = e.target.value as string
+            setProperty(newValue)
+            fireUpdate(variable, newValue, fn)
+          }}
+        />
+      </Grid>
+      <Grid item xs={12} md={fn ? 4 : 6}>
+        {buildFnSelect()}
       </Grid>
     </Grid>
   )

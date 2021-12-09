@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Fab, makeStyles } from '@material-ui/core'
+import { Box, Container, Fab, Tooltip, Typography } from '@material-ui/core'
 import FireplaceIcon from '@material-ui/icons/Fireplace'
 import BarChartIcon from '@material-ui/icons/BarChart'
 import ShuffleIcon from '@material-ui/icons/Shuffle'
@@ -7,73 +7,75 @@ import { MifuneBarChart } from './MifuneBarChart'
 import { MifuneSankey } from './MifuneSankey'
 import { MifiuneHeatMap } from './MifuneHeatMap'
 import { Query, QueryBuilder } from './QueryBuilder'
+import ChartsNavigation from '../../components/Navigation/ChartsNavigation'
+import { CustomTexts } from '../../utils/CustomTexts'
 
 export const Analytics = (): JSX.Element => {
   const [chart, setChart] = useState<string>('BarChart')
   const [query, setQuery] = useState<Query>({ nodes: [], relations: [] })
-  const useStyle = makeStyles({
-    box: {
-      padding: 5,
-      marginLeft: 10,
-      marginRight: 10,
+  const charts = [
+    {
+      title: 'BarChart',
+      icon: <BarChartIcon />,
+      chart: <MifuneBarChart query={query} />,
     },
-    button: {
-      margin: 5,
+    {
+      title: 'HeatMap',
+      icon: <FireplaceIcon />,
+      chart: <MifuneSankey query={query} />,
     },
-  })
-  const classes = useStyle()
+    {
+      title: 'Sankey',
+      icon: <ShuffleIcon />,
+      chart: <MifiuneHeatMap query={query} />,
+    },
+  ]
 
   const getChart = (): JSX.Element => {
-    if (chart === 'BarChart') {
-      return <MifuneBarChart query={query} />
-    }
-    if (chart === 'Sankey') {
-      return <MifuneSankey query={query} />
-    }
-    if (chart === 'HeatMap') {
-      return <MifiuneHeatMap query={query} />
-    }
-    return <></>
+    const selectedChart = charts.find((item) => item.title === chart)
+    return selectedChart?.chart ?? <></>
   }
 
-  const select = (onSelect = (value: string) => {}): JSX.Element => {
+  const renderChartButtons = (): JSX.Element => {
     return (
-      <div className={classes.box}>
-        <Fab
-          className={classes.button}
-          title="BarChart"
-          onClick={() => setChart('BarChart')}
-        >
-          <BarChartIcon />
-        </Fab>
-        <Fab
-          className={classes.button}
-          title="HeatMap"
-          onClick={() => setChart('HeatMap')}
-        >
-          <FireplaceIcon />
-        </Fab>
-        <Fab
-          className={classes.button}
-          title="Sankey"
-          onClick={() => setChart('Sankey')}
-        >
-          <ShuffleIcon />
-        </Fab>
-      </div>
+      <>
+        {charts.map(
+          (item): JSX.Element => (
+            <Tooltip arrow title={item.title}>
+              <Fab
+                title={item.title}
+                key={item.title}
+                onClick={() => setChart(item.title)}
+                color={chart === item.title ? 'primary' : 'default'}
+                style={{ marginRight: '1rem', boxShadow: 'none' }}
+              >
+                {item.icon}
+              </Fab>
+            </Tooltip>
+          )
+        )}
+      </>
     )
   }
 
   return (
-    <div className={classes.box}>
-      <h1>Analytics</h1>
-      <QueryBuilder onChange={(q) => setQuery(q)} />
-      <div>
-        {select((l) => {
-          setChart(l)
-        })}
-        {getChart()}
-      </div>
-    </div>
+    <Container>
+      <Box mt={3} color="text.primary">
+        <Typography variant="h5">Analytics</Typography>
+        <QueryBuilder onChange={(q) => setQuery(q)} />
+        <ChartsNavigation>
+          {renderChartButtons()}
+          {query.nodes.length <= 0 ? (
+            <Box mt={4}>
+              <Typography variant="body1" color="textPrimary">
+                {CustomTexts.introductionQuery}
+              </Typography>
+            </Box>
+          ) : (
+            getChart()
+          )}
+        </ChartsNavigation>
+      </Box>
+    </Container>
   )
 }
