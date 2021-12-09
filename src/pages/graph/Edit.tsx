@@ -64,9 +64,6 @@ const useStyle = makeStyles((theme: Theme) => ({
     padding: '0 1rem 0 0',
     verticalAlign: 'bottom',
   },
-  button: {
-    marginRight: '1rem',
-  },
 }))
 
 const Edit = (props: EditProps): JSX.Element => {
@@ -186,8 +183,8 @@ const Edit = (props: EditProps): JSX.Element => {
               size="small"
               onClick={(): void => setShowModal(true)}
               startIcon={<DeleteIcon />}
+              style={{ marginRight: '1rem' }}
               customColor={theme.palette.error.main}
-              className={classes.button}
             />
             <CustomButton
               type="submit"
