@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { ResponsiveBar } from '@nivo/bar'
+import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
@@ -13,7 +14,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
       return <></>
     }
     return (
-      <div style={{ height: 200 + data.length * 25 }}>
+      <Box height={200 + data.length * 25}>
         <ResponsiveBar
           data={data}
           keys={[count]}
@@ -52,7 +53,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
             },
           ]}
         />
-      </div>
+      </Box>
     )
   }
 

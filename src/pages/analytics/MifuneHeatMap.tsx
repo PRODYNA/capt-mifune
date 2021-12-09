@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { ResponsiveHeatMap } from '@nivo/heatmap'
-import { Slider } from '@material-ui/core'
+import { Box, Slider } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import { Query } from './QueryBuilder'
 
@@ -81,7 +81,7 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
       return <h1>Ups</h1>
     }
     return (
-      <div style={{ height: 300 + data.length * 25 }}>
+      <Box height={300 + data.length * 25}>
         <Slider
           min={min}
           max={max}
@@ -108,7 +108,7 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
           maxValue={heatMax}
           labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
         />
-      </div>
+      </Box>
     )
   }
 

@@ -76,7 +76,9 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
           label="relation-table"
         >
           <TableRow className={classes.tableRow}>
-            <TableCell className={classes.tableCell} style={{ minWidth: 120 }}>
+            <TableCell
+              className={`${classes.tableCell} ${classes.cellMinWidth}`}
+            >
               <TextField id="type" value={value.type} onChange={updateType} />
             </TableCell>
             <TableCell className={classes.tableCell}>
