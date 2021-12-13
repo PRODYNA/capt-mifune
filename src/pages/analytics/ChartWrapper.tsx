@@ -1,16 +1,17 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Button,
   CircularProgress,
   Grid,
+  IconButton,
   makeStyles,
   Slider,
   TableRow,
   Typography,
 } from '@material-ui/core'
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
-import FilterListIcon from '@material-ui/icons/FilterList'
+import { Add } from '@material-ui/icons'
 import { AnalyticFilter } from './AnalyticFilter'
 import { Filter } from '../../api/model/Model'
 import graphService from '../../api/GraphService'
@@ -41,7 +42,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const { query, results, orders, dataPreparation, selects, chart } = props
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<any>()
-  const [filters, setFilters] = useState<Filter[]>([])
+  const [filters, setFilters] = useState<Filter[]>([
+    { property: '', value: undefined },
+  ])
   const [scale, setScale] = useState<number>(1)
   const tableHeaders = ['Node', 'Property', 'Value', ' ']
 
@@ -61,7 +64,6 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
               // eslint-disable-next-line react/no-array-index-key
               <TableRow key={`${f.property}-${i}`}>
                 <AnalyticFilter
-                  key={f.property}
                   query={query}
                   onKeyChange={(k) => {
                     setFilters(() => {
@@ -118,13 +120,26 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
 
   return (
     <>
-      <Box mb={4}>
+      <Box mb={4} color="text.primary">
         <form
           onSubmit={(e) => {
             e.preventDefault()
             loadData()
           }}
         >
+          <Box mt={4} display="flex" justifyContent="space-between">
+            <Typography variant="overline">
+              <b>Chart options</b>
+            </Typography>
+            <CustomButton
+              startIcon={<PlayArrowIcon />}
+              key="submit-button"
+              type="submit"
+              color="primary"
+              size="small"
+              title="Generate Chart"
+            />
+          </Box>
           <Box bgcolor="#f7f7f7" p={2} my={2}>
             {selects.map((s) => (
               <AnalyticSelect
@@ -139,16 +154,11 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
                 }}
               />
             ))}
-          </Box>
-          <Box
-            mt={4}
-            color="text.primary"
-            display="flex"
-            justifyContent="space-between"
-          >
             Scale: <Button onClick={() => setScale(scale * 0.1)}>-</Button>
             {scale}
             <Button onClick={() => setScale(scale * 10)}>+</Button>
+          </Box>
+          <Box mt={4} display="flex" justifyContent="space-between">
             {/* <Typography variant="body1" style={{ marginRight: '1rem' }}>
               Scale:
             </Typography>
@@ -166,28 +176,27 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
               valueLabelDisplay="on"
             /> */}
           </Box>
-          <Box bgcolor="#f7f7f7" p={2} my={2} textAlign="right">
-            <CustomButton
-              title="Add Filter"
-              startIcon={<FilterListIcon />}
-              color="secondary"
-              onClick={() => {
-                setFilters((f) => f.concat({ property: '', value: undefined }))
-              }}
-            />
-            <Box mt={2} mb={4}>
-              {filterElements()}
-            </Box>
-          </Box>
-          <Button
-            startIcon={<PlayArrowIcon />}
-            key="submit-button"
-            type="submit"
-            variant="contained"
-            color="primary"
+          <Box
+            color="text.primary"
+            display="flex"
+            justifyContent="space-between"
           >
-            Generate Chart
-          </Button>
+            <Typography variant="overline">
+              <b>Filter options</b>
+            </Typography>
+            <CustomButton
+              startIcon={<Add />}
+              color="primary"
+              size="small"
+              title="Add Filter"
+              onClick={(): void =>
+                setFilters((f) => f.concat({ property: '', value: undefined }))
+              }
+            />
+          </Box>
+          <Box bgcolor="#f7f7f7" p={2} my={2}>
+            {filterElements()}
+          </Box>
         </form>
       </Box>
       {buildChart()}
