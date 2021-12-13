@@ -41,9 +41,8 @@ export const Analytics = (): JSX.Element => {
       <>
         {charts.map(
           (item): JSX.Element => (
-            <Tooltip arrow title={item.title}>
+            <Tooltip arrow title={item.title} key={item.title}>
               <Fab
-                title={item.title}
                 key={item.title}
                 onClick={() => setChart(item.title)}
                 color={chart === item.title ? 'primary' : 'default'}
