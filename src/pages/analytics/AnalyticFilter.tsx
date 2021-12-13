@@ -19,6 +19,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const [value, setValue] = useState<string>()
   const [values, setValues] = useState<string[]>()
   const theme = useTheme()
+
   useEffect(() => {
     if (filter) {
       graphService.query(query, [filter], [filter]).then((d) => {
@@ -51,14 +52,14 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           title=""
           hideLabel
           options={values ?? []}
-          value={value}
+          value={value ?? ''}
           onChangeHandler={(event) => {
             setValue(event.target.value)
             onValueChange(event.target.value)
           }}
         />
       </TableCell>
-      <TableCell width={40}>
+      <TableCell width={80}>
         <IconButton onClick={onDelete} style={{ padding: 0 }}>
           <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>
