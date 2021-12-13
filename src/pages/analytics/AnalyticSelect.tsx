@@ -54,37 +54,43 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     return <></>
   }
 
+  const renderNodeSelect = (): JSX.Element => (
+    <FormSelect
+      title={label}
+      value={variable ?? ''}
+      options={
+        query.nodes
+          .map((n) => n.varName)
+          .concat(query.relations.map((r) => r.varName)) ?? []
+      }
+      hideLabel={renderAsTable}
+      onChangeHandler={(e) => {
+        const newValue = e.target.value as string
+        setVariable(newValue)
+        fireUpdate(newValue, property, fn)
+      }}
+    />
+  )
+
+  const renderPropertySelect = (): JSX.Element => (
+    <FormSelect
+      title={label}
+      value={property ?? ''}
+      hideLabel={renderAsTable}
+      options={properties ?? []}
+      onChangeHandler={(e) => {
+        const newValue = e.target.value as string
+        setProperty(newValue)
+        fireUpdate(variable, newValue, fn)
+      }}
+    />
+  )
+
   if (renderAsTable) {
     return (
       <>
-        <TableCell>
-          <FormSelect
-            title={label}
-            hideLabel
-            options={
-              query.nodes
-                .map((n) => n.varName)
-                .concat(query.relations.map((r) => r.varName)) ?? []
-            }
-            onChangeHandler={(e) => {
-              const newValue = e.target.value as string
-              setVariable(newValue)
-              fireUpdate(newValue, property, fn)
-            }}
-          />
-        </TableCell>
-        <TableCell>
-          <FormSelect
-            title={label}
-            hideLabel
-            options={properties ?? []}
-            onChangeHandler={(e) => {
-              const newValue = e.target.value as string
-              setProperty(newValue)
-              fireUpdate(variable, newValue, fn)
-            }}
-          />
-        </TableCell>
+        <TableCell>{renderNodeSelect()}</TableCell>
+        <TableCell>{renderPropertySelect()}</TableCell>
       </>
     )
   }
@@ -92,30 +98,10 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={fn ? 4 : 6}>
-        <FormSelect
-          title={label}
-          options={
-            query.nodes
-              .map((n) => n.varName)
-              .concat(query.relations.map((r) => r.varName)) ?? []
-          }
-          onChangeHandler={(e) => {
-            const newValue = e.target.value as string
-            setVariable(newValue)
-            fireUpdate(newValue, property, fn)
-          }}
-        />
+        {renderNodeSelect()}
       </Grid>
       <Grid item xs={12} md={fn ? 4 : 6}>
-        <FormSelect
-          title={label}
-          options={properties ?? []}
-          onChangeHandler={(e) => {
-            const newValue = e.target.value as string
-            setProperty(newValue)
-            fireUpdate(variable, newValue, fn)
-          }}
-        />
+        {renderPropertySelect()}
       </Grid>
       <Grid item xs={12} md={fn ? 4 : 6}>
         {buildFnSelect()}
