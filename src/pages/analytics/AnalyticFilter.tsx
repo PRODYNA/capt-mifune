@@ -5,6 +5,7 @@ import graphService from '../../api/GraphService'
 import FormSelect from '../../components/Form/FormSelect'
 import { Query } from './QueryBuilder'
 import { AnalyticSelect } from './AnalyticSelect'
+import { useStyleTable } from '../graph/NodeEdit'
 
 interface AnalyticFilterProps {
   query: Query
@@ -19,6 +20,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const [value, setValue] = useState<string>()
   const [values, setValues] = useState<string[]>()
   const theme = useTheme()
+  const classes = useStyleTable()
 
   useEffect(() => {
     if (filter) {
@@ -47,7 +49,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           onValueChange(undefined)
         }}
       />
-      <TableCell>
+      <TableCell className={classes.tableCell}>
         <FormSelect
           title=""
           hideLabel
@@ -59,7 +61,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           }}
         />
       </TableCell>
-      <TableCell width={80}>
+      <TableCell width={30}>
         <IconButton onClick={onDelete} style={{ padding: 0 }}>
           <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>
