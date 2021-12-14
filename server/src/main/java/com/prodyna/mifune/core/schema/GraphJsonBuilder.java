@@ -43,23 +43,41 @@ public class GraphJsonBuilder {
     var rootNode = graphModel.rootNode(domainId);
     var varPath = new ArrayList<String>();
     varPath.add("model");
-    buildSubContext(varPath, json, rootNode);
+    buildSubContext(varPath, json, rootNode, true);
   }
 
   public ObjectNode getJson() {
     return json;
   }
 
-  private void buildSubContext(List<String> varPath, ObjectNode parentNode, NodeModel node) {
+  private void buildSubContext(
+      List<String> varPath, ObjectNode parentNode, NodeModel node, boolean forward) {
     var contextVarPath = new ArrayList<>(varPath);
     var currentNode = parentNode.putObject(node.varName());
     buildProperties(currentNode, node.getProperties());
     contextVarPath.add(node.varName());
-    node.getRelations().stream()
-        .filter(r -> r.getDomainIds().contains(domainId))
-        .filter(r -> r.getTo().getDomainIds().contains(domainId))
-        .filter(r -> !varPath.contains(r.getTo().varName()))
-        .forEach(r -> buildRelation(contextVarPath, currentNode, r));
+    if (forward) {
+      node.getRelations().stream()
+          .filter(r -> r.getDomainIds().contains(domainId))
+          .filter(r -> r.getTo().getDomainIds().contains(domainId))
+          //              .filter(r -> !varPath.contains(r.getTo().varName()))
+          .forEach(r -> buildRelation(contextVarPath, currentNode, r));
+    }
+  }
+
+  boolean containsSubPath(List<String> varPath, String... subPath) {
+    var sub = Arrays.asList(subPath);
+
+    outer:
+    for (int i = 0; i <= varPath.size() - sub.size(); i++) {
+      for (int j = 0; j < sub.size(); j++) {
+        if (!varPath.get(i + j).equals(sub.get(j))) {
+          continue outer;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   private void buildRelation(List<String> varPath, ObjectNode parentNode, RelationModel r) {
@@ -74,10 +92,11 @@ public class GraphJsonBuilder {
   }
 
   private void buildRelation(List<String> varPath, RelationModel r, ObjectNode currentNode) {
+    boolean forward = !(varPath.contains(r.getTo().varName()));
     buildProperties(currentNode, r.getProperties());
     var newPath = new ArrayList<>(varPath);
     newPath.add(r.varName());
-    buildSubContext(newPath, currentNode, r.getTo());
+    buildSubContext(newPath, currentNode, r.getTo(), forward);
   }
 
   private void buildProperties(ObjectNode jsonNodes, List<Property> properties) {
