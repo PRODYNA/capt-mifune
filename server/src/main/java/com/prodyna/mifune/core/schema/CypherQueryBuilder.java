@@ -181,6 +181,7 @@ public class CypherQueryBuilder {
         this.query.results().stream()
             .map(this::baseName)
             .map(getVarMap()::get)
+            .distinct()
             .collect(Collectors.joining(","));
     return "with distinct %s".formatted(distinctStatement);
   }
