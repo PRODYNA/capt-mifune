@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Grid, TableCell } from '@material-ui/core'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
+import { useStyleTable } from '../graph/NodeEdit'
 
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const { query, label, fnOptions, fnDefault, onChange, renderAsTable } = props
@@ -9,6 +10,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const [property, setProperty] = useState<string>()
   const [fn, setFn] = useState<string | undefined>(fnDefault)
   const [properties, setProperties] = useState<string[]>()
+  const classes = useStyleTable()
 
   useEffect(() => {
     const nodeProps = query.nodes
@@ -89,8 +91,12 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   if (renderAsTable) {
     return (
       <>
-        <TableCell>{renderNodeSelect()}</TableCell>
-        <TableCell>{renderPropertySelect()}</TableCell>
+        <TableCell className={classes.tableCell}>
+          {renderNodeSelect()}
+        </TableCell>
+        <TableCell className={classes.tableCell}>
+          {renderPropertySelect()}
+        </TableCell>
       </>
     )
   }
