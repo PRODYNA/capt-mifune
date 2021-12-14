@@ -105,7 +105,7 @@ public class ImportService {
 
   private Cancellable startImportTask(UUID domainId, Domain domain, Graph graph) {
     GraphModel graphModel = new GraphModel(graph);
-    var counter = new AtomicLong();
+    var counter = new AtomicLong(1L);
     ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
     cleanJsonModel(domain, jsonModel);
     var importFile = Paths.get(uploadDir, domain.getFile());
@@ -142,13 +142,13 @@ public class ImportService {
                                         " Failed item import in file: "
                                             + domain.getFile()
                                             + " on line "
-                                            + counter.getAndIncrement()
+                                            + counter.get()
                                             + " Message: "
                                             + e.getMessage());
                                     return null;
                                   })
                               .thenCompose(x1 -> session.closeAsync())
-                              .thenApply(v -> counter.incrementAndGet()));
+                              .thenApply(v -> counter.getAndIncrement()));
                 });
 
     return importTask
