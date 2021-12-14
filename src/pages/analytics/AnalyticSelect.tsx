@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Grid, TableCell } from '@material-ui/core'
+import { Grid, TableCell, Typography } from '@material-ui/core'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 import { useStyleTable } from '../graph/NodeEdit'
@@ -41,16 +41,26 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const buildFnSelect = (): JSX.Element => {
     if (fn && (fnOptions?.length ?? 0 > 1)) {
       return (
-        <FormSelect
-          title="Function"
-          options={fnOptions ?? []}
-          value={fn ?? ''}
-          onChangeHandler={(e) => {
-            const newFN = e.target.value as string
-            setFn(newFN)
-            fireUpdate(variable, property, newFN)
-          }}
-        />
+        <>
+          <Grid item xs={12} md={2}>
+            <Typography variant="overline">
+              <b>Function</b>
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={5}>
+            <FormSelect
+              title=""
+              hideLabel
+              options={fnOptions ?? []}
+              value={fn ?? ''}
+              onChangeHandler={(e) => {
+                const newFN = e.target.value as string
+                setFn(newFN)
+                fireUpdate(variable, property, newFN)
+              }}
+            />
+          </Grid>
+        </>
       )
     }
     return <></>
@@ -58,7 +68,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
 
   const renderNodeSelect = (): JSX.Element => (
     <FormSelect
-      title={label}
+      title="Node"
       value={variable ?? ''}
       options={
         query.nodes
@@ -76,7 +86,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
 
   const renderPropertySelect = (): JSX.Element => (
     <FormSelect
-      title={label}
+      title="Property"
       value={property ?? ''}
       hideLabel={renderAsTable}
       options={properties ?? []}
@@ -102,16 +112,19 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   }
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={fn ? 4 : 6}>
+    <Grid container spacing={3} alignItems="center">
+      <Grid item xs={12} md={2}>
+        <Typography variant="overline">
+          <b>{label}</b>
+        </Typography>
+      </Grid>
+      <Grid item xs={12} md={5}>
         {renderNodeSelect()}
       </Grid>
-      <Grid item xs={12} md={fn ? 4 : 6}>
+      <Grid item xs={12} md={5}>
         {renderPropertySelect()}
       </Grid>
-      <Grid item xs={12} md={fn ? 4 : 6}>
-        {buildFnSelect()}
-      </Grid>
+      {fn && <>{buildFnSelect()}</>}
     </Grid>
   )
 }

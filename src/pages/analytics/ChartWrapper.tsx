@@ -1,8 +1,7 @@
-import React, { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useContext, useState } from 'react'
 import {
   Box,
   CircularProgress,
-  makeStyles,
   Slider,
   TableRow,
   Typography,
@@ -16,6 +15,7 @@ import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
 import CustomTable from '../../components/Table/CustomTable'
 import CustomButton from '../../components/Button/CustomButton'
+import ChartContext from '../../context/ChartContext'
 
 export interface SelectProps {
   query: Query
@@ -27,28 +27,19 @@ export interface SelectProps {
 }
 
 interface ChartWrapperProps<T> {
-  query: Query
   results: string[]
   orders: string[]
   dataPreparation: (data: any[], scale: number) => T | undefined
   selects: SelectProps[]
-  chart: (data: T) => JSX.Element
 }
 
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
-  const { query, results, orders, dataPreparation, selects, chart } = props
+  const { results, orders, dataPreparation, selects } = props
+  const { setData, query } = useContext(ChartContext)
   const [loading, setLoading] = useState<boolean>(false)
-  const [data, setData] = useState<any>()
   const [filters, setFilters] = useState<Filter[]>([])
   const [scale, setScale] = useState<number>(1)
   const tableHeaders = ['Node', 'Property', 'Value', ' ']
-
-  const useStyle = makeStyles({
-    infoBox: {
-      textAlign: 'center',
-    },
-  })
-  const classes = useStyle()
 
   const filterElements = (): JSX.Element => {
     return (
@@ -57,7 +48,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
           {filters.map((f, i) => {
             return (
               // eslint-disable-next-line react/no-array-index-key
-              <TableRow key={`${f.property}-${i}`}>
+              <TableRow key={`filter-${i}`}>
                 <AnalyticFilter
                   query={query}
                   onKeyChange={(k) => {
@@ -84,6 +75,14 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
     )
   }
 
+  const scrollToBottom = (): void => {
+    window.scroll({
+      top: document.body.offsetHeight,
+      left: 0,
+      behavior: 'smooth',
+    })
+  }
+
   const loadData = (): void => {
     setLoading(true)
     graphService
@@ -91,26 +90,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
       .then((newData) => {
         setData(dataPreparation(newData, scale))
         setLoading(false)
+        scrollToBottom()
       })
       .catch((e) => console.error(e))
-  }
-
-  const buildChart = (): JSX.Element => {
-    if (loading) {
-      return (
-        <div className={classes.infoBox}>
-          <CircularProgress />
-        </div>
-      )
-    }
-    if (!data) {
-      return (
-        <div className={classes.infoBox}>
-          <h2>Please Update</h2>
-        </div>
-      )
-    }
-    return chart(data)
   }
 
   return (
@@ -150,8 +132,8 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
               />
             ))}
             <Box mt={6} display="flex" justifyContent="space-between">
-              <Typography variant="body1" style={{ marginRight: '1rem' }}>
-                Scale:
+              <Typography variant="overline" style={{ marginRight: '1rem' }}>
+                <b>Scale</b>
               </Typography>
               <Slider
                 defaultValue={1}
@@ -183,7 +165,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
               size="small"
               title="Add Filter"
               onClick={(): void =>
-                setFilters((f) => f.concat({ property: '', value: undefined }))
+                setFilters([...filters, { property: '', value: undefined }])
               }
             />
           </Box>
@@ -192,7 +174,11 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
           </Box>
         </form>
       </Box>
-      {buildChart()}
+      {loading && (
+        <Box textAlign="center">
+          <CircularProgress />
+        </Box>
+      )}
     </>
   )
 }
