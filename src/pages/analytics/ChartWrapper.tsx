@@ -1,10 +1,7 @@
-import React, { useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import {
   Box,
-  Button,
   CircularProgress,
-  Grid,
-  IconButton,
   makeStyles,
   Slider,
   TableRow,
@@ -42,9 +39,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const { query, results, orders, dataPreparation, selects, chart } = props
   const [loading, setLoading] = useState<boolean>(false)
   const [data, setData] = useState<any>()
-  const [filters, setFilters] = useState<Filter[]>([
-    { property: '', value: undefined },
-  ])
+  const [filters, setFilters] = useState<Filter[]>([])
   const [scale, setScale] = useState<number>(1)
   const tableHeaders = ['Node', 'Property', 'Value', ' ']
 
@@ -154,27 +149,25 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
                 }}
               />
             ))}
-            Scale: <Button onClick={() => setScale(scale * 0.1)}>-</Button>
-            {scale}
-            <Button onClick={() => setScale(scale * 10)}>+</Button>
-          </Box>
-          <Box mt={4} display="flex" justifyContent="space-between">
-            {/* <Typography variant="body1" style={{ marginRight: '1rem' }}>
-              Scale:
-            </Typography>
-            <Slider
-              defaultValue={1}
-              step={10}
-              marks
-              min={0}
-              max={10}
-              aria-labelledby="discrete-slider-always"
-              onChangeCommitted={(
-                event: ChangeEvent<Record<string, unknown>>,
-                value: number | number[]
-              ): void => setScale((value as number) * 10)}
-              valueLabelDisplay="on"
-            /> */}
+            <Box mt={6} display="flex" justifyContent="space-between">
+              <Typography variant="body1" style={{ marginRight: '1rem' }}>
+                Scale:
+              </Typography>
+              <Slider
+                defaultValue={1}
+                step={0.1}
+                marks
+                min={0}
+                max={10}
+                aria-labelledby="non-linear-slider"
+                scale={(x) => (x < 1 ? x * 0.5 : x * 10)}
+                onChange={(
+                  event: ChangeEvent<Record<string, unknown>>,
+                  value: number | number[]
+                ): void => setScale(value as number)}
+                valueLabelDisplay="on"
+              />
+            </Box>
           </Box>
           <Box
             color="text.primary"
