@@ -45,7 +45,6 @@ import com.prodyna.mifune.domain.RelationUpdate;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.vertx.core.json.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,10 +204,7 @@ class GraphResourceTest {
     Domain sampleDomain = createSampleDomain();
     Property name = new Property("name", "string", true);
     Property other = new Property("other", "string", false);
-    List<Property> props = new ArrayList<>();
-
-    props.add(other);
-    props.add(name);
+    List<Property> props = List.of(name, other);
 
     Node blaNode = createNodeInDomain(sampleDomain, "Bla");
     Node blubNode = createNodeInDomain(sampleDomain, "Blub");
@@ -220,16 +216,29 @@ class GraphResourceTest {
     blubNode = updateNodeInDomain(blubNode, blubNode.getLabel(), props);
     bliNode = updateNodeInDomain(bliNode, bliNode.getLabel(), props);
 
-    Relation rel = buildRelationBetweenNodes(blaNode, blubNode, "HAS_BLUB");
-    Relation rel2 = buildRelationBetweenNodes(bliNode, blaNode, "HAS_BLA");
-    Relation rel3 = buildRelationBetweenNodes(blubNode, bliNode, "HAS_BLI");
-    Relation rel4 = buildRelationBetweenNodes(bliNode, blubNode, "HAS_ALSO_BLUB");
+    buildRelationBetweenNodes(blaNode, blubNode, "HAS_BLUB");
+    buildRelationBetweenNodes(blubNode, bliNode, "HAS_BLI");
+    buildRelationBetweenNodes(bliNode, blubNode, "HAS_ALSO_BLUB");
+    buildRelationBetweenNodes(bliNode, blaNode, "HAS_BLA");
     sampleDomain.setRootNodeId(blaNode.getId());
     Domain updatedDomain = updateSampleDomain(sampleDomain);
 
     JsonObject jo =
         new JsonObject(
-            "{\"bla.name\": null,\"bla.other\": null,\"bla.hasBlub.blub.name\": null,\"bla.hasBlub.blub.other\": null,\"bla.hasBlub.blub.hasBli.bli.name\": null,\"bla.hasBlub.blub.hasBli.bli.other\": null}");
+            """
+            {
+              "bla.name":null,
+              "bla.other":null,
+              "bla.hasBlub.blub.name":null,
+              "bla.hasBlub.blub.other":null,
+              "bla.hasBlub.blub.hasBli.bli.name":null,
+              "bla.hasBlub.blub.hasBli.bli.other":null,
+              "bla.hasBlub.blub.hasBli.bli.hasAlsoBlub.blub.name":null,
+              "bla.hasBlub.blub.hasBli.bli.hasAlsoBlub.blub.other":null,
+              "bla.hasBlub.blub.hasBli.bli.hasBla.bla.name":null,
+              "bla.hasBlub.blub.hasBli.bli.hasBla.bla.other":null
+            }
+                  """);
     given()
         .when()
         .get("/graph/domain/%s/mapping".formatted(updatedDomain.getId()))
