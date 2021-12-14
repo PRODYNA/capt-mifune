@@ -86,7 +86,7 @@ const Edit = (props: EditProps): JSX.Element => {
 
   const handleSubmit = (event: FormEvent): void => {
     if (value.id === '') {
-      onCreate(value)
+      onCreate({ ...value, properties })
     } else {
       onSubmit({ ...value, properties })
     }

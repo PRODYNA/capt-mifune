@@ -76,7 +76,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
       D3Helper.wrapNode({
         id: '',
         domainIds: [domain.id],
-        color: 'blue',
+        color: '#0000FF',
         label: '',
         properties: [],
       })
