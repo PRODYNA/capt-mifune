@@ -289,20 +289,22 @@ export const Graph = (props: IGraph): JSX.Element => {
       }
 
       rels.forEach((d3Rel) => {
-        const d3RelCopy = { ...d3Rel }
-        d3RelCopy.incomingRelationsCount = rels.filter(
+        // eslint-disable-next-line no-param-reassign
+        d3Rel.incomingRelationsCount = rels.filter(
           (r) =>
             r.relation.targetId === d3Rel.relation.sourceId &&
             r.relation.sourceId === d3Rel.relation.targetId
         ).length
 
-        d3RelCopy.relCount = rels.filter(
+        // eslint-disable-next-line no-param-reassign
+        d3Rel.relCount = rels.filter(
           (r) =>
             r.relation.sourceId === d3Rel.relation.sourceId &&
             r.relation.targetId === d3Rel.relation.targetId
         ).length
 
-        d3RelCopy.relIndex = rels
+        // eslint-disable-next-line no-param-reassign
+        d3Rel.relIndex = rels
           .filter(
             (r) =>
               r.relation.sourceId === d3Rel.relation.sourceId &&
@@ -310,8 +312,8 @@ export const Graph = (props: IGraph): JSX.Element => {
           )
           .indexOf(d3Rel)
 
-        d3RelCopy.firstRender =
-          d3Rel.relation.sourceId > d3Rel.relation.targetId
+        // eslint-disable-next-line no-param-reassign
+        d3Rel.firstRender = d3Rel.relation.sourceId > d3Rel.relation.targetId
       })
 
       const relation = drawRelations<Relation>(
