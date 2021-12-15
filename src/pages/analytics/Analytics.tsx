@@ -28,14 +28,14 @@ export const Analytics = (): JSX.Element => {
 
   const charts = [
     {
-      title: 'BarChart',
+      title: 'Bar Chart',
       icon: <BarChartIcon />,
       chartOptions: <MifuneBarChart />,
       build: (): JSX.Element =>
         buildBarChart(data, chartOptions.label, chartOptions.count),
     },
     {
-      title: 'HeatMap',
+      title: 'Heatmap',
       icon: <AppsIcon />,
       chartOptions: <MifiuneHeatMap />,
       build: (): JSX.Element => buildHeatMapChart(data, chartOptions),
