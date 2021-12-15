@@ -11,7 +11,7 @@ import {
   DRAWER_WIDTH,
   DRAWER_WIDTH_OPEN,
 } from '../../components/Navigation/SideNavigation'
-import CreateDomain from '../domain/CreateDomain'
+import DomainActions from '../domain/DomainActions'
 import GraphContext from '../../context/GraphContext'
 import {
   addSvgStyles,
@@ -407,7 +407,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         height={window.innerHeight}
         ref={d3Container}
       />
-      <CreateDomain
+      <DomainActions
         domains={domains}
         setSelectedDomain={setSelectedDomain}
         setDomains={setDomains}
