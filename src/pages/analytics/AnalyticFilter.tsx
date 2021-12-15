@@ -28,9 +28,8 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         const tmpValues = d
           .map((x) => x[filter])
           .filter((v, i, s) => s.indexOf(v) === i)
-        tmpValues.unshift('None')
         setValues(tmpValues)
-        setValue(tmpValues[0])
+        if (tmpValues.length > 0) setValue(tmpValues[0])
       })
     }
   }, [filter])
