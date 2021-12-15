@@ -24,7 +24,7 @@ import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
 
 export const DRAWER_WIDTH = 60
-export const DRAWER_WIDTH_OPEN = 160
+export const DRAWER_WIDTH_OPEN = 170
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -100,7 +100,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
     { title: 'Pipelines', icon: <RotateRightIcon />, path: PIPELINES },
     { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
     {
-      title: 'Save',
+      title: 'Save Graph',
       icon: <SaveIcon />,
       onClick: () => graphService.persistGraph().then((e) => console.log(e)),
     },
