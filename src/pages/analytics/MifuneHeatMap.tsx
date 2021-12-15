@@ -34,7 +34,7 @@ export const buildHeatMapChart = (
           colors="oranges"
           enableLabels
           animate={false}
-          margin={{ top: 200, right: 60, bottom: 60, left: 150 }}
+          margin={{ top: 100, right: 60, bottom: 60, left: 100 }}
           forceSquare={false}
           minValue={min}
           maxValue={heatMax}
