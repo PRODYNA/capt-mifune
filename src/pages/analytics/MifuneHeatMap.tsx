@@ -113,13 +113,13 @@ export const MifiuneHeatMap = (): JSX.Element => {
       selects={[
         {
           query,
-          label: 'X',
+          label: 'Y',
           onChange: (v: string | undefined) =>
             setChartOptions({ ...chartOptions, labelX: v }),
         },
         {
           query,
-          label: 'Y',
+          label: 'X',
           onChange: (v: string | undefined) =>
             setChartOptions({ ...chartOptions, labelY: v }),
         },
