@@ -68,7 +68,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
 
   const renderNodeSelect = (): JSX.Element => (
     <FormSelect
-      title="Node"
+      title="Node/Relation"
       value={variable ?? ''}
       options={
         query.nodes
