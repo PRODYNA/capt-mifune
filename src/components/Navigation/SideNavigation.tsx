@@ -15,10 +15,8 @@ import CloudUpload from '@material-ui/icons/CloudUpload'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import PieChartIcon from '@material-ui/icons/PieChart'
 import RotateRightIcon from '@material-ui/icons/RotateRight'
-import SaveIcon from '@material-ui/icons/Save'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { useHistory, useLocation } from 'react-router-dom'
-import graphService from '../../api/GraphService'
 import UserService from '../../services/UserService'
 import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
@@ -99,11 +97,6 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
     { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
     { title: 'Pipelines', icon: <RotateRightIcon />, path: PIPELINES },
     { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
-    {
-      title: 'Save Graph',
-      icon: <SaveIcon />,
-      onClick: () => graphService.persistGraph().then((e) => console.log(e)),
-    },
   ]
 
   const logoutItem = {
