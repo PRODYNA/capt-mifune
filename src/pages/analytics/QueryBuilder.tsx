@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Box, Button } from '@material-ui/core'
+import { Box, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
@@ -14,6 +14,7 @@ import {
   nodeMouseEvents,
   tick,
 } from '../../helpers/GraphHelper'
+import CustomButton from '../../components/Button/CustomButton'
 
 export interface QueryBuilderProps {
   onChange: (query: Query) => void
@@ -42,7 +43,7 @@ export interface QueryRelation {
 
 export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const { onChange } = props
-  const height = 600
+  const height = 450
   const [width, setWidth] = useState<number>(100)
   const [graph, setGraph] = useState<Graph>()
   const [varCounter, setVarCounter] = useState<Map<string, number>>(new Map())
@@ -254,14 +255,24 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   return (
     <Box id="query-builder" width="100%">
-      <h1>Query Builder</h1>
+      <Box mt={3} mb={1}>
+        <Typography variant="h6">Query Builder</Typography>
+      </Box>
       {graph?.nodes.map(
         (n): JSX.Element => (
-          <Button onClick={(): void => addNode(n)}>{n.label}</Button>
+          <CustomButton
+            title={n.label}
+            key={n.id}
+            onClick={(): void => addNode(n)}
+            customColor={n.color}
+            style={{
+              marginRight: '1rem',
+              borderRadius: '5px',
+            }}
+          />
         )
       )}
-      <Box border={1}>
-        {JSON.stringify(varCounter)}
+      <Box mt={2}>
         <svg
           onClick={(): void => {
             cleanNodes()
@@ -270,6 +281,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           width={width}
           height={height}
           ref={d3Container}
+          style={{
+            borderRadius: '5px',
+            border: `2px dashed lightGrey`,
+          }}
         />
       </Box>
     </Box>

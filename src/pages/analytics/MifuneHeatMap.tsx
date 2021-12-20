@@ -1,18 +1,53 @@
-import React, { useState } from 'react'
+import React, { useContext } from 'react'
 import { ResponsiveHeatMap } from '@nivo/heatmap'
-import { Box, Slider } from '@material-ui/core'
+import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
-import { Query } from './QueryBuilder'
+import ChartContext, { IChartOptions } from '../../context/ChartContext'
 
-export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
-  const { query } = props
-  const [labelX, setLabelX] = useState<string>()
-  const [labelY, setLabelY] = useState<string>()
-  const [count, setCount] = useState<string>()
-  const [keys, setKeys] = useState<string[] | undefined>(undefined)
-  const [min, setMin] = useState<number>(Number.MAX_VALUE)
-  const [max, setMax] = useState<number>(Number.MIN_VALUE)
-  const [heatMax, setHeatMax] = useState<number>()
+export const buildHeatMapChart = (
+  data: any[],
+  chartOptions: IChartOptions
+): JSX.Element => {
+  const { keys, labelX, labelY, min, heatMax, count } = chartOptions
+  if (
+    data &&
+    data.length > 0 &&
+    keys &&
+    keys.length > 0 &&
+    labelX &&
+    labelY &&
+    count
+  )
+    return (
+      <Box height={300 + data.length * 25}>
+        <ResponsiveHeatMap
+          data={data}
+          keys={keys}
+          indexBy={labelX}
+          axisTop={{
+            tickSize: 5,
+            tickPadding: 5,
+            tickRotation: -50,
+            legend: '',
+            legendOffset: 36,
+          }}
+          colors="oranges"
+          enableLabels
+          animate={false}
+          margin={{ top: 100, right: 60, bottom: 60, left: 100 }}
+          forceSquare={false}
+          minValue={min}
+          maxValue={heatMax}
+          labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
+        />
+      </Box>
+    )
+  return <></>
+}
+
+export const MifiuneHeatMap = (): JSX.Element => {
+  const { query, chartOptions, setChartOptions } = useContext(ChartContext)
+  const { count, labelX, labelY } = chartOptions
 
   const dataPreparation = (data: any[], scale: number): any[] | undefined => {
     if (!labelX || !labelY || !count) {
@@ -55,83 +90,51 @@ export const MifiuneHeatMap = (props: { query: Query }): JSX.Element => {
     tempMin /= scale
     tempMax /= scale
 
-    setMin(tempMin)
-    setMax(tempMax)
-    setHeatMax(tempMin + (tempMax - tempMin) / 2)
+    setChartOptions({
+      ...chartOptions,
+      min: tempMin,
+      max: tempMax,
+      heatMax: tempMin + (tempMax - tempMin) / 2,
+      keys: result.length < 1 || tempKeys.length < 1 ? undefined : tempKeys,
+    })
+
     if (result.length < 1 || tempKeys.length < 1) {
-      setKeys(undefined)
       return undefined
     }
-    setKeys(tempKeys)
+    console.log(result)
     return result
-  }
-
-  const buildChart = (data: any[]): JSX.Element => {
-    if (
-      data &&
-      data.length > 0 &&
-      keys &&
-      keys.length > 0 &&
-      labelX &&
-      labelY &&
-      count
-    ) {
-      console.log('build chart')
-    } else {
-      return <h1>Ups</h1>
-    }
-    return (
-      <Box height={300 + data.length * 25}>
-        <Slider
-          min={min}
-          max={max}
-          value={heatMax}
-          onChange={(e, v) => setHeatMax(v as number)}
-        />
-        <ResponsiveHeatMap
-          data={data}
-          keys={keys}
-          indexBy={labelX}
-          axisTop={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: -50,
-            legend: '',
-            legendOffset: 36,
-          }}
-          colors="oranges"
-          enableLabels
-          animate={false}
-          margin={{ top: 200, right: 60, bottom: 60, left: 150 }}
-          forceSquare={false}
-          minValue={min}
-          maxValue={heatMax}
-          labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
-        />
-      </Box>
-    )
   }
 
   return (
     <ChartWrapper
-      query={query}
       results={[labelX ?? '', labelY ?? '', count ?? '']}
       orders={[labelX ?? '']}
       dataPreparation={dataPreparation}
       selects={[
-        { query, label: 'X', onChange: setLabelX },
-        { query, label: 'Y', onChange: setLabelY },
+        {
+          query,
+          label: 'Y',
+          onChange: (v: string | undefined) =>
+            setChartOptions({ ...chartOptions, labelX: v }),
+        },
+        {
+          query,
+          label: 'X',
+          onChange: (v: string | undefined) =>
+            setChartOptions({ ...chartOptions, labelY: v }),
+        },
         {
           query,
           label: 'Value',
           fnDefault: 'count',
           fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
-          onChange: (v) => {
-            setCount(v)
-          },
+          onChange: (v) =>
+            setChartOptions({
+              ...chartOptions,
+              count: v,
+            }),
         },
       ]}
-      chart={buildChart}
     />
   )
 }
