@@ -1,7 +1,6 @@
 import React from 'react'
 import { createTheme, CssBaseline } from '@material-ui/core'
 import { ThemeProvider } from '@material-ui/core/styles'
-import { Shadows } from '@material-ui/core/styles/shadows'
 import {
   fontWhite,
   primaryDark,
@@ -31,7 +30,6 @@ const theme = createTheme({
       contrastText: fontWhite,
     },
   },
-  shadows: Array(25).fill('none') as Shadows,
   overrides: {
     MuiCssBaseline: {
       '@global': {
@@ -43,6 +41,7 @@ const theme = createTheme({
     MuiButton: {
       root: {
         borderRadius: 0,
+        boxShadow: 'none',
       },
     },
     MuiPaper: {
@@ -53,6 +52,11 @@ const theme = createTheme({
     MuiFormControl: {
       root: {
         marginBottom: '0.5rem',
+      },
+    },
+    MuiTableContainer: {
+      root: {
+        boxShadow: 'none',
       },
     },
   },

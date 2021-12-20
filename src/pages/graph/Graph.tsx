@@ -11,7 +11,7 @@ import {
   DRAWER_WIDTH,
   DRAWER_WIDTH_OPEN,
 } from '../../components/Navigation/SideNavigation'
-import CreateDomain from '../domain/CreateDomain'
+import DomainActions from '../domain/DomainActions'
 import GraphContext from '../../context/GraphContext'
 import {
   addSvgStyles,
@@ -203,7 +203,12 @@ export const Graph = (props: IGraph): JSX.Element => {
           .attr('stroke-opacity', 0.7)
           .attr('stroke', (d) => d.node.color)
           .attr('fill', (d) => d.node.color)
-          .attr('stroke-width', 20)
+          .attr(
+            'stroke-width',
+            selectedNode.node.domainIds.includes(selectedDomain?.id ?? '')
+              ? 20
+              : 0
+          )
           .classed('path', true)
       }
       return undefined
@@ -407,7 +412,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         height={window.innerHeight}
         ref={d3Container}
       />
-      <CreateDomain
+      <DomainActions
         domains={domains}
         setSelectedDomain={setSelectedDomain}
         setDomains={setDomains}

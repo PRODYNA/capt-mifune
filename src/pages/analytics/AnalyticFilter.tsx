@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Grid, IconButton } from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
+import { IconButton, TableCell, useTheme } from '@material-ui/core'
+import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
 import graphService from '../../api/GraphService'
 import FormSelect from '../../components/Form/FormSelect'
 import { Query } from './QueryBuilder'
 import { AnalyticSelect } from './AnalyticSelect'
+import { useStyleTable } from '../graph/NodeEdit'
 
 interface AnalyticFilterProps {
   query: Query
@@ -18,6 +19,8 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const [filter, setFilter] = useState<string>()
   const [value, setValue] = useState<string>()
   const [values, setValues] = useState<string[]>()
+  const theme = useTheme()
+  const classes = useStyleTable()
 
   useEffect(() => {
     if (filter) {
@@ -25,44 +28,43 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         const tmpValues = d
           .map((x) => x[filter])
           .filter((v, i, s) => s.indexOf(v) === i)
-        tmpValues.unshift('None')
         setValues(tmpValues)
-        setValue(tmpValues[0])
+        if (tmpValues.length > 0) setValue(tmpValues[0])
       })
     }
   }, [filter])
 
   return (
-    <Grid container spacing={2}>
-      <Grid item xs={12} md={4}>
-        <AnalyticSelect
-          label="Property"
-          query={query}
-          onChange={(newFilter) => {
-            setFilter(newFilter)
-            setValue(undefined)
-            setValues([])
-            onKeyChange(newFilter)
-            onValueChange(undefined)
-          }}
-        />
-      </Grid>
-      <Grid item xs={12} md={4}>
+    <>
+      <AnalyticSelect
+        renderAsTable
+        label="Property"
+        query={query}
+        onChange={(newFilter) => {
+          setFilter(newFilter)
+          setValue(undefined)
+          setValues([])
+          onKeyChange(newFilter)
+          onValueChange(undefined)
+        }}
+      />
+      <TableCell className={classes.tableCell}>
         <FormSelect
-          title="Value"
+          title=""
+          hideLabel
           options={values ?? []}
-          value={value}
+          value={value ?? ''}
           onChangeHandler={(event) => {
             setValue(event.target.value)
             onValueChange(event.target.value)
           }}
         />
-      </Grid>
-      <Grid item xs={12} md={1}>
-        <IconButton onClick={onDelete}>
-          <DeleteIcon />
+      </TableCell>
+      <TableCell width={30}>
+        <IconButton onClick={onDelete} style={{ padding: 0 }}>
+          <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>
-      </Grid>
-    </Grid>
+      </TableCell>
+    </>
   )
 }
