@@ -1,66 +1,68 @@
-import React, { useState } from 'react'
+import React, { useContext } from 'react'
 import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
-import { Query } from './QueryBuilder'
+import ChartContext from '../../context/ChartContext'
 
-export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
-  const { query } = props
-  const [label, setLabel] = useState<string>()
-  const [count, setCount] = useState<string>()
-
-  const buildChart = (data: any[]): JSX.Element => {
-    if (!(count && label && data) || data.length < 1) {
-      return <></>
-    }
-    return (
-      <Box height={200 + data.length * 25}>
-        <ResponsiveBar
-          data={data}
-          keys={[count]}
-          indexBy={label}
-          layout="horizontal"
-          margin={{ top: 50, right: 30, bottom: 150, left: 150 }}
-          padding={0.3}
-          valueScale={{ type: 'linear' }}
-          indexScale={{ type: 'band', round: true }}
-          valueFormat=""
-          colors={{ scheme: 'dark2' }}
-          borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-          labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-          legends={[
-            {
-              dataFrom: 'keys',
-              anchor: 'bottom-right',
-              direction: 'column',
-              justify: false,
-              translateX: 120,
-              translateY: 0,
-              itemsSpacing: 2,
-              itemWidth: 100,
-              itemHeight: 20,
-              itemDirection: 'left-to-right',
-              itemOpacity: 0.85,
-              symbolSize: 20,
-              effects: [
-                {
-                  on: 'hover',
-                  style: {
-                    itemOpacity: 1,
-                  },
-                },
-              ],
-            },
-          ]}
-        />
-      </Box>
-    )
+export const buildBarChart = (
+  data: any[],
+  label: string | undefined,
+  count: string | undefined
+): JSX.Element => {
+  if (!(count && label && data) || data.length < 1) {
+    return <></>
   }
+  return (
+    <Box height={200 + data.length * 25}>
+      <ResponsiveBar
+        data={data}
+        keys={[count]}
+        indexBy={label}
+        layout="horizontal"
+        margin={{ top: 50, right: 30, bottom: 150, left: 80 }}
+        padding={0.3}
+        valueScale={{ type: 'linear' }}
+        indexScale={{ type: 'band', round: true }}
+        valueFormat=""
+        colors={{ scheme: 'dark2' }}
+        borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        legends={[
+          {
+            dataFrom: 'keys',
+            anchor: 'bottom-right',
+            direction: 'column',
+            justify: false,
+            translateX: 120,
+            translateY: 0,
+            itemsSpacing: 2,
+            itemWidth: 100,
+            itemHeight: 20,
+            itemDirection: 'left-to-right',
+            itemOpacity: 0.85,
+            symbolSize: 20,
+            effects: [
+              {
+                on: 'hover',
+                style: {
+                  itemOpacity: 1,
+                },
+              },
+            ],
+          },
+        ]}
+      />
+    </Box>
+  )
+}
+
+export const MifuneBarChart = (): JSX.Element => {
+  const { query, chartOptions, setChartOptions } = useContext(ChartContext)
+  const { label, count } = chartOptions
 
   return (
     <>
       <ChartWrapper
-        query={query}
         results={[label ?? '', count ?? '']}
         orders={[count ?? '']}
         dataPreparation={(data, scale) =>
@@ -79,8 +81,7 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
             query,
             label: 'Label',
             onChange: (v) => {
-              console.log(`update label:${v}`)
-              setLabel(v)
+              setChartOptions({ ...chartOptions, label: v })
             },
           },
           {
@@ -89,12 +90,10 @@ export const MifuneBarChart = (props: { query: Query }): JSX.Element => {
             fnDefault: 'count',
             fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
             onChange: (v) => {
-              console.log(`update count${v}`)
-              setCount(v)
+              setChartOptions({ ...chartOptions, count: v })
             },
           },
         ]}
-        chart={(data) => buildChart(data)}
       />
     </>
   )

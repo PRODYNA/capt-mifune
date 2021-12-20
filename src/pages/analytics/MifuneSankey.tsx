@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import {
   Data,
   ResponsiveSankey,
@@ -7,13 +7,27 @@ import {
 } from '@nivo/sankey'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
-import { Query } from './QueryBuilder'
+import ChartContext from '../../context/ChartContext'
 
-export const MifuneSankey = (props: { query: Query }): JSX.Element => {
-  const { query } = props
+export const buildSankeyChart = (data: any): JSX.Element => {
+  if (!data) return <></>
+  return (
+    <Box height={window.innerHeight}>
+      <ResponsiveSankey
+        data={data.data}
+        margin={{ top: 40, right: 160, bottom: 100, left: 0 }}
+        align="justify"
+        colors={{ scheme: 'dark2' }}
+      />
+    </Box>
+  )
+}
+
+export const MifuneSankey = (): JSX.Element => {
+  const { query, chartOptions, setChartOptions } = useContext(ChartContext)
+  const { count } = chartOptions
   const [from, setFrom] = useState<string>()
   const [to, setTo] = useState<string>()
-  const [count, setCount] = useState<string>()
 
   const prepareData = (data: any[]): Data | undefined => {
     if (data && from && to && count) {
@@ -44,22 +58,8 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
     return undefined
   }
 
-  const buildChart = (data: any): JSX.Element => {
-    return (
-      <Box height={window.innerHeight}>
-        <ResponsiveSankey
-          data={data.data}
-          margin={{ top: 40, right: 160, bottom: 100, left: 150 }}
-          align="justify"
-          colors={{ scheme: 'dark2' }}
-        />
-      </Box>
-    )
-  }
-
   return (
     <ChartWrapper
-      query={query}
       results={from && to && count ? [from, to, count] : []}
       orders={[]}
       dataPreparation={prepareData}
@@ -71,13 +71,9 @@ export const MifuneSankey = (props: { query: Query }): JSX.Element => {
           label: 'Value',
           fnDefault: 'count',
           fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
-          onChange: (v) => {
-            console.log(v)
-            setCount(v)
-          },
+          onChange: (v) => setChartOptions({ ...chartOptions, count: v }),
         },
       ]}
-      chart={(data) => buildChart(data)}
     />
   )
 }
