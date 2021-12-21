@@ -28,7 +28,7 @@ export function drawNodes<N extends Node | QueryNode>(
       if (type === 'node') {
         return (n as D3Node<Node>).node.domainIds.some(
           (id) => selectedDomainId === id
-        )
+        ) || !selectedDomainId
           ? 1
           : 0.4
       }
@@ -152,7 +152,9 @@ export function drawRelations<R extends Relation | QueryRelation>(
       if (type === 'relation') {
         return (r as D3Relation<Relation>).relation.domainIds.some(
           (id) => id === selectedDomainId
-        )
+        ) || !selectedDomainId
+          ? 1
+          : 0.4
       }
       return (r as D3Relation<QueryRelation>).relation.selected ? 1 : 0.4
     })
