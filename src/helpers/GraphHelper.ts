@@ -194,13 +194,7 @@ export function drawRelations<R extends Relation | QueryRelation>(
   return relation
 }
 
-export function addSvgStyles(
-  svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
-  width: number,
-  height: number
-): void {
-  svg.selectAll('*').remove()
-  svg.append('style').text(`
+export const svgStyle = `  
         .node {
           filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
         }
@@ -220,7 +214,16 @@ export function addSvgStyles(
             text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
             cursor: default;
             pointer-events: none;
-        }
+        }`
+
+export function addSvgStyles(
+  svg: d3.Selection<d3.BaseType, unknown, HTMLElement, any>,
+  width: number,
+  height: number
+): void {
+  svg.selectAll('*').remove()
+  svg.append('style').text(`
+      ${svgStyle}
       `)
   svg.attr('viewBox', `${-width / 2},${-height / 2},${width},${height}`)
 }
