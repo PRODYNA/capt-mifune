@@ -9,6 +9,7 @@ import {
 } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
 import SaveIcon from '@material-ui/icons/Save'
+import AddAPhotoIcon from '@material-ui/icons/AddAPhoto'
 import graphService from '../../api/GraphService'
 import { Domain } from '../../api/model/Model'
 import { SnackbarContext } from '../../context/Snackbar'
@@ -53,10 +54,11 @@ interface IDomainActions {
   domains: Domain[]
   setDomains: Dispatch<SetStateAction<Domain[]>>
   setSelectedDomain: Dispatch<SetStateAction<Domain | undefined>>
+  downloadSVG: () => void
 }
 
 const DomainActions = (props: IDomainActions): JSX.Element => {
-  const { domains, setDomains, setSelectedDomain } = props
+  const { domains, setDomains, setSelectedDomain, downloadSVG } = props
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const classes = useStyles()
 
@@ -96,6 +98,11 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
           }
         >
           <SaveIcon />
+        </Fab>
+      </Tooltip>
+      <Tooltip title="Download Image">
+        <Fab size="large" className={classes.save} onClick={downloadSVG}>
+          <AddAPhotoIcon />
         </Fab>
       </Tooltip>
     </Box>
