@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
-import { BaseType, Selection } from 'd3'
+import { BaseType, Selection, text } from 'd3'
 import { NodeEdit } from './NodeEdit'
 import { Domain, GraphDelta, Node, Relation } from '../../api/model/Model'
 import { RelationEdit } from './RelationEdit'
@@ -21,6 +21,7 @@ import {
   drawNodes,
   drawRelations,
   nodeMouseEvents,
+  svgStyle,
   tick,
 } from '../../helpers/GraphHelper'
 
@@ -192,22 +193,27 @@ export const Graph = (props: IGraph): JSX.Element => {
     ):
       | Selection<BaseType | SVGPathElement, D3Node<Node>, SVGGElement, unknown>
       | undefined => {
-      if (selected && 'node' in selected && selected.node.id) {
-        const selectedNode = selected as D3Node<Node>
+      if (nodes && selectedDomain?.id) {
+        const domainNodes = nodes
+          .filter((n) => n && n.node && n.node.domainIds)
+          .filter((n) => {
+            return n.node.domainIds.includes(selectedDomain?.id ?? '')
+          })
+        if (domainNodes.length <= 0) {
+          return undefined
+        }
+
         return svg
           .append('g')
           .selectAll('path')
-          .data([selectedNode])
+          .data(domainNodes)
           .join('path')
           .attr('id', (d) => d.node.id)
           .attr('stroke-opacity', 0.7)
           .attr('stroke', (d) => d.node.color)
           .attr('fill', (d) => d.node.color)
-          .attr(
-            'stroke-width',
-            selectedNode.node.domainIds.includes(selectedDomain?.id ?? '')
-              ? 20
-              : 0
+          .attr('stroke-width', (n) =>
+            n.node.domainIds.includes(selectedDomain?.id ?? '') ? 20 : 0
           )
           .classed('path', true)
       }
@@ -240,24 +246,32 @@ export const Graph = (props: IGraph): JSX.Element => {
       simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
       selection: any
     ): void => {
+      let source: D3Node<Node>
       const selectionDrag = d3
         .drag()
-        .on('start', () => {
+        .on('start', (e) => {
           simulation.restart()
+          // eslint-disable-next-line prefer-destructuring
+          source = nodes.filter((n) => {
+            if (n.x && n.y) {
+              return (
+                D3Helper.pointDistance({ x: n.x ?? -1, y: n.y ?? -1 }, e) < 20
+              )
+            }
+            return false
+          })[0]
         })
         .on('drag', (e: any, d: unknown): void => {
-          if (selected && 'node' in selected && selected.node.id) {
-            const node: D3Node<Node> = selected as D3Node<Node>
-            const nodeX = node.x ?? 0
-            const nodeY = node.y ?? 0
-            const path = d as Path
-            path.d = D3Helper.selectionPath(
-              nodeX,
-              nodeY,
-              e.x - nodeX,
-              e.y - nodeY
-            )
-          }
+          const nodeX = source.x ?? 0
+          const nodeY = source.y ?? 0
+          const path = d as Path
+          path.d = D3Helper.selectionPath(
+            nodeX,
+            nodeY,
+            e.x - nodeX,
+            e.y - nodeY
+          )
+          // }
           simulation.restart()
         })
         .on('end', (e, d: unknown) => {
@@ -271,8 +285,7 @@ export const Graph = (props: IGraph): JSX.Element => {
             }
             return false
           })[0]
-          if (selected?.kind === 'node' && target && selectedDomain) {
-            const source = selected as D3Node<Node>
+          if (source && target && selectedDomain) {
             createRelation(source, target, selectedDomain)
           }
           simulation.restart()
@@ -331,14 +344,13 @@ export const Graph = (props: IGraph): JSX.Element => {
       )
       const selection = drawSelectionIndicator(svg)
       const node = drawNodes<Node>(svg, nodes, 'node', selectedDomain?.id)
-      const text = drawLabel<Node>(svg, nodes, 'node')
+      const nodeLabels = drawLabel<Node>(svg, nodes, 'node')
       const simulation = buildSimulation<Relation, Node>(
         rels,
         nodes,
         (): void => {
           // todo:
-          if (selection && selected && selected.kind === 'node') {
-            // const selectedNode = selected as D3Node<Node>
+          if (selection) {
             selection.attr('d', (d) => {
               if (d.d) {
                 return d.d
@@ -352,7 +364,7 @@ export const Graph = (props: IGraph): JSX.Element => {
             })
           }
 
-          tick<Node, Relation>(node, text, relation)
+          tick<Node, Relation>(node, nodeLabels, relation)
         }
       )
 
@@ -370,6 +382,37 @@ export const Graph = (props: IGraph): JSX.Element => {
       relationMouseEvents(relation)
     }
   }, [selectedDomain, domains, selected, nodes, relations, color])
+
+  function downloadSVG(): void {
+    console.log('download SVG')
+    if (d3Container.current && nodes) {
+      const svg = d3.select(d3Container.current)
+      const { innerHTML: svgData }: any = svg.node()
+      console.log(svgData)
+      const svgWidth =
+        window.innerWidth - (openSidenav ? DRAWER_WIDTH_OPEN : DRAWER_WIDTH)
+      const svgHeight = window.innerHeight
+      // const svgData = document!.getElementById('svg')!.innerHTML
+      const head = `<svg 
+              viewBox="
+              -${svgWidth / 2} 
+              -${svgHeight / 2} 
+              ${svgWidth} 
+              ${svgHeight}"  
+              title="graph" version="1.1" xmlns="http://www.w3.org/2000/svg">`
+      const style = `<style>${text}</style>`
+      const fullSvg = `${head + svgStyle + svgData}</svg>`
+
+      const element = document.createElement('a')
+      const file = new Blob([fullSvg], {
+        type: 'text/plain',
+      })
+      element.href = URL.createObjectURL(file)
+      element.download = 'graph.svg'
+      document.body.appendChild(element) // Required for this to work in FireFox
+      element.click()
+    }
+  }
 
   return (
     <GraphContext.Provider
@@ -416,6 +459,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         domains={domains}
         setSelectedDomain={setSelectedDomain}
         setDomains={setDomains}
+        downloadSVG={() => downloadSVG()}
       />
     </GraphContext.Provider>
   )
