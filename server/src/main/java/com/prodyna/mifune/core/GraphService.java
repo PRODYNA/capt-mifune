@@ -28,6 +28,7 @@ package com.prodyna.mifune.core;
 
 import static java.util.function.Predicate.not;
 
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prodyna.mifune.core.json.JsonPathEditor;
@@ -96,7 +97,8 @@ public class GraphService {
 
   public void persist() throws IOException {
     var mapper = new ObjectMapper();
-    var json = mapper.writeValueAsString(graph);
+    var json = mapper.writer(new DefaultPrettyPrinter()).writeValueAsString(graph);
+    System.out.println(json);
     Files.write(Path.of(model, graphFile), Collections.singleton(json), StandardCharsets.UTF_8);
   }
 
