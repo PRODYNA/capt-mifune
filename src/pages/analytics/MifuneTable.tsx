@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import {
   Box,
   Paper,
@@ -13,19 +13,15 @@ import {
 import { v4 } from 'uuid'
 import { Add } from '@material-ui/icons'
 import { ChartWrapper } from './ChartWrapper'
-import ChartContext from '../../context/ChartContext'
+import ChartContext, { QueryData } from '../../context/ChartContext'
 import { QueryFunctions } from '../../api/model/Model'
 import CustomButton from '../../components/Button/CustomButton'
 
-export const buildTableChart = (
-  data: {
-    [key: string]: number | string
-  }[]
-): JSX.Element => {
+export const buildTableChart = (data: QueryData): JSX.Element => {
   if (!data || data.length === 0)
     return <Typography variant="overline">No data available</Typography>
   return (
-    <Box mt={3}>
+    <Box mt={3} pb={5}>
       <TableContainer component={Paper}>
         <Table size="small" aria-label="a dense table">
           <TableHead>
@@ -72,12 +68,17 @@ export const MifuneTable = (): JSX.Element => {
         ...results,
         {
           function: QueryFunctions.VALUE,
-          name: `column${results.length + 1}`,
+          name: '',
           parameters: [],
+          uuid: v4(),
         },
       ],
     })
   }
+
+  useEffect(() => {
+    if (results.length === 0) addNewTableColumn()
+  }, [])
 
   return (
     <ChartWrapper
@@ -90,21 +91,22 @@ export const MifuneTable = (): JSX.Element => {
           query,
           label: `Column${index + 1}`,
           onChange: (v) => {
-            const currResult = results.filter(
-              (item) => item.name !== result.name
-            )
-            const mappedResults = [
-              ...currResult,
-              {
-                function: QueryFunctions.VALUE,
-                name: v ?? 'col',
-                parameters: v ? [v] : [],
-              },
-            ]
-            setChartOptions({
-              ...chartOptions,
-              results: mappedResults,
-            })
+            if (v) {
+              const mappedResults = results.map((item) => {
+                return item.uuid === result.uuid
+                  ? {
+                      function: QueryFunctions.VALUE,
+                      name: v,
+                      parameters: [v],
+                      uuid: item.uuid,
+                    }
+                  : item
+              })
+              setChartOptions({
+                ...chartOptions,
+                results: mappedResults,
+              })
+            }
           },
         }
       })}
