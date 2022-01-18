@@ -1,39 +1,43 @@
 import React, { useContext } from 'react'
-import { ResponsiveHeatMap } from '@nivo/heatmap'
+import {
+  DefaultHeatMapDatum,
+  HeatMapSerie,
+  ResponsiveHeatMap,
+} from '@nivo/heatmap'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext from '../../context/ChartContext'
 import { QueryFunctions } from '../../api/model/Model'
 
-export const buildHeatMapChart = (data: any[]): JSX.Element => {
-  if (data && data.length > 0)
-    return (
-      <Box height={300 + data.length * 25}>
-        <ResponsiveHeatMap
-          data={data}
-          axisTop={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: -50,
-            legend: '',
-            legendOffset: 36,
-          }}
-          colors={{
-            type: 'diverging',
-            scheme: 'red_yellow_blue',
-            divergeAt: 0.5,
-            minValue: -100000,
-            maxValue: 100000,
-          }}
-          enableLabels
-          animate={false}
-          margin={{ top: 100, right: 60, bottom: 60, left: 100 }}
-          forceSquare={false}
-          labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
-        />
-      </Box>
-    )
-  return <></>
+export const buildHeatMapChart = (
+  data: HeatMapSerie<DefaultHeatMapDatum, { [key: string]: string | number }>[]
+): JSX.Element => {
+  return (
+    <Box height={300 + data.length * 25}>
+      <ResponsiveHeatMap
+        data={data}
+        axisTop={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: -50,
+          legend: '',
+          legendOffset: 36,
+        }}
+        colors={{
+          type: 'diverging',
+          scheme: 'red_yellow_blue',
+          divergeAt: 0.5,
+          minValue: -100000,
+          maxValue: 100000,
+        }}
+        enableLabels
+        animate={false}
+        margin={{ top: 100, right: 60, bottom: 60, left: 100 }}
+        forceSquare={false}
+        labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
+      />
+    </Box>
+  )
 }
 
 export const MifiuneHeatMap = (): JSX.Element => {
@@ -109,13 +113,13 @@ export const MifiuneHeatMap = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.COUNT,
+          fnDefault: QueryFunctions.VALUE,
           onChange: (v, fn) => {
             const result = results.filter((item) => item.name !== 'value')
             const mappedResults = [
               ...result,
               {
-                function: fn ?? QueryFunctions.COUNT,
+                function: fn ?? QueryFunctions.VALUE,
                 name: 'value',
                 parameters: v ? [v] : [],
               },

@@ -11,6 +11,10 @@ export interface IChartOptions {
   heatMax: number | undefined
 }
 
+export type QueryData = {
+  [key: string]: string | number
+}[]
+
 type ChartContextType = {
   chart: string
   setChart: (v: string) => void
@@ -18,8 +22,8 @@ type ChartContextType = {
   setQuery: (v: Query) => void
   setChartOptions: (v: IChartOptions) => void
   chartOptions: IChartOptions
-  data: any
-  setData: (v: any) => void
+  data: QueryData | undefined
+  setData: (v: QueryData | undefined) => void
 }
 
 const ChartContext = createContext<ChartContextType>({
@@ -36,7 +40,7 @@ const ChartContext = createContext<ChartContextType>({
   },
   setChartOptions: (v: IChartOptions) => {},
   data: [],
-  setData: (v: any) => {},
+  setData: (v: QueryData | undefined) => {},
 })
 
 export default ChartContext
