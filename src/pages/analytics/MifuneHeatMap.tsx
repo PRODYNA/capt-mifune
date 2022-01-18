@@ -26,9 +26,7 @@ export const buildHeatMapChart = (
         colors={{
           type: 'diverging',
           scheme: 'red_yellow_blue',
-          divergeAt: 0.5,
-          minValue: -100000,
-          maxValue: 100000,
+          divergeAt: 0.3,
         }}
         enableLabels
         animate={false}
