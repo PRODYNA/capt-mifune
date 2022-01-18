@@ -109,3 +109,18 @@ export interface Filter {
   property: string
   value: any
 }
+
+export enum QueryFunctions {
+  AVG = 'avg',
+  COUNT = 'count',
+  MAX = 'max',
+  MIN = 'min',
+  SUM = 'sum',
+  VALUE = 'value',
+}
+
+export interface QueryResultDefinition {
+  name: string
+  function: QueryFunctions
+  parameters: string[]
+}
