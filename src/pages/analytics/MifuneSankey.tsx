@@ -1,15 +1,18 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import {
-  Data,
+  DefaultLink,
+  DefaultNode,
   ResponsiveSankey,
-  SankeyDataLink,
-  SankeyDataNode,
+  SankeyDataProps,
 } from '@nivo/sankey'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext from '../../context/ChartContext'
+import { QueryFunctions } from '../../api/model/Model'
 
-export const buildSankeyChart = (data: any): JSX.Element => {
+export const buildSankeyChart = (
+  data: SankeyDataProps<DefaultNode, DefaultLink>
+): JSX.Element => {
   if (!data) return <></>
   return (
     <Box height={window.innerHeight}>
@@ -25,53 +28,103 @@ export const buildSankeyChart = (data: any): JSX.Element => {
 
 export const MifuneSankey = (): JSX.Element => {
   const { query, chartOptions, setChartOptions } = useContext(ChartContext)
-  const { count } = chartOptions
-  const [from, setFrom] = useState<string>()
-  const [to, setTo] = useState<string>()
+  const { order, results } = chartOptions
 
-  const prepareData = (data: any[]): Data | undefined => {
-    if (data && from && to && count) {
-      const nodes: SankeyDataNode[] = data
-        .map((d) => d[from])
-        .concat(data.map((d) => d[to]))
-        .filter((d) => d)
-        .filter((v, i, a) => a.indexOf(v) === i)
-        .map((id) => {
-          return { id }
-        })
-
-      const links: SankeyDataLink[] = data
-        .map((d) => {
-          return {
-            source: d[from],
-            target: d[to],
-            value: d[count],
-          }
-        })
-        .filter((l) => l.source && l.target && l.value)
-
-      if (nodes.length > 1 && links.length > 1)
-        return {
-          data: { nodes, links },
-        }
+  const prepareData = (
+    data: { [key: string]: string | number }[]
+  ): SankeyDataProps<DefaultNode, DefaultLink> | undefined => {
+    if (!data || data.length === 0) {
+      return undefined
     }
-    return undefined
+    const nodes: DefaultNode[] = data
+      .map((d) => d.from)
+      .concat(data.map((d) => d.to))
+      .filter((d) => d)
+      .filter((v, i, a) => a.indexOf(v) === i)
+      .map((id) => {
+        return { id: id as string }
+      })
+
+    const links: DefaultLink[] = data
+      .map((d) => {
+        return {
+          source: d.from as string,
+          target: d.to as string,
+          value: d.value as number,
+        }
+      })
+      .filter((l) => l.source && l.target && l.value)
+
+    return {
+      data: { nodes, links },
+    }
   }
 
   return (
     <ChartWrapper
-      results={from && to && count ? [from, to, count] : []}
-      orders={[]}
+      results={results}
+      orders={[order ?? '']}
       dataPreparation={prepareData}
+      disableScale
       selects={[
-        { query, label: 'From', onChange: setFrom },
-        { query, label: 'To', onChange: setTo },
+        {
+          query,
+          label: 'From',
+          onChange: (v) => {
+            const result = results.filter((item) => item.name !== 'from')
+            const mappedResults = [
+              ...result,
+              {
+                function: QueryFunctions.VALUE,
+                name: 'from',
+                parameters: v ? [v] : [],
+              },
+            ]
+            setChartOptions({
+              ...chartOptions,
+              results: mappedResults,
+            })
+          },
+        },
+        {
+          query,
+          label: 'To',
+          onChange: (v) => {
+            const result = results.filter((item) => item.name !== 'to')
+            const mappedResults = [
+              ...result,
+              {
+                function: QueryFunctions.VALUE,
+                name: 'to',
+                parameters: v ? [v] : [],
+              },
+            ]
+            setChartOptions({
+              ...chartOptions,
+              results: mappedResults,
+            })
+          },
+        },
         {
           query,
           label: 'Value',
-          fnDefault: 'count',
-          fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
-          onChange: (v) => setChartOptions({ ...chartOptions, count: v }),
+          fnDefault: QueryFunctions.COUNT,
+          onChange: (v, fn) => {
+            const result = results.filter((item) => item.name !== 'value')
+            const mappedResults = [
+              ...result,
+              {
+                function: fn ?? QueryFunctions.COUNT,
+                name: 'value',
+                parameters: v ? [v] : [],
+              },
+            ]
+            setChartOptions({
+              ...chartOptions,
+              order: v,
+              results: mappedResults,
+            })
+          },
         },
       ]}
     />

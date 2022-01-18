@@ -3,6 +3,7 @@ import { Box, Container, Fab, Tooltip, Typography } from '@material-ui/core'
 import BarChartIcon from '@material-ui/icons/BarChart'
 import ShuffleIcon from '@material-ui/icons/Shuffle'
 import AppsIcon from '@material-ui/icons/Apps'
+import TableChartOutlinedIcon from '@material-ui/icons/TableChartOutlined'
 import { buildBarChart, MifuneBarChart } from './MifuneBarChart'
 import { buildSankeyChart, MifuneSankey } from './MifuneSankey'
 import { buildHeatMapChart, MifiuneHeatMap } from './MifuneHeatMap'
@@ -10,17 +11,15 @@ import { Query, QueryBuilder } from './QueryBuilder'
 import ChartsNavigation from '../../components/Navigation/ChartsNavigation'
 import { CustomTexts } from '../../utils/CustomTexts'
 import ChartContext, { IChartOptions } from '../../context/ChartContext'
+import { buildTableChart, MifuneTable } from './MifuneTable'
 
 export const Analytics = (): JSX.Element => {
   const [chart, setChart] = useState<string>('BarChart')
   const [query, setQuery] = useState<Query>({ nodes: [], relations: [] })
   const [data, setData] = useState<any>()
   const [chartOptions, setChartOptions] = useState<IChartOptions>({
-    label: undefined,
-    count: undefined,
-    labelX: undefined,
-    labelY: undefined,
-    keys: [],
+    results: [],
+    order: undefined,
     min: undefined,
     max: undefined,
     heatMax: undefined,
@@ -30,27 +29,32 @@ export const Analytics = (): JSX.Element => {
     {
       title: 'Bar Chart',
       icon: <BarChartIcon />,
-      chartOptions: <MifuneBarChart />,
-      build: (): JSX.Element =>
-        buildBarChart(data, chartOptions.label, chartOptions.count),
+      options: <MifuneBarChart />,
+      build: (): JSX.Element => buildBarChart(data),
     },
     {
       title: 'Heatmap',
       icon: <AppsIcon />,
-      chartOptions: <MifiuneHeatMap />,
-      build: (): JSX.Element => buildHeatMapChart(data, chartOptions),
+      options: <MifiuneHeatMap />,
+      build: (): JSX.Element => buildHeatMapChart(data),
     },
     {
       title: 'Sankey',
       icon: <ShuffleIcon />,
-      chartOptions: <MifuneSankey />,
+      options: <MifuneSankey />,
       build: (): JSX.Element => buildSankeyChart(data),
+    },
+    {
+      title: 'Table',
+      icon: <TableChartOutlinedIcon />,
+      options: <MifuneTable />,
+      build: (): JSX.Element => buildTableChart(data),
     },
   ]
 
   const getChartOptions = (): JSX.Element => {
     const selectedChart = charts.find((item) => item.title === chart)
-    return selectedChart?.chartOptions ?? <></>
+    return selectedChart?.options ?? <></>
   }
 
   const buildSelectedChart = (): JSX.Element => {
@@ -71,8 +75,8 @@ export const Analytics = (): JSX.Element => {
                   setData(undefined)
                   setChartOptions({
                     ...chartOptions,
-                    label: undefined,
-                    count: undefined,
+                    results: [],
+                    order: '',
                   })
                 }}
                 color={chart === item.title ? 'primary' : 'default'}
