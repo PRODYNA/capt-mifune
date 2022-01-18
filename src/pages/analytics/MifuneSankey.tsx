@@ -13,7 +13,6 @@ import { QueryFunctions } from '../../api/model/Model'
 export const buildSankeyChart = (
   data: SankeyDataProps<DefaultNode, DefaultLink>
 ): JSX.Element => {
-  if (!data) return <></>
   return (
     <Box height={window.innerHeight}>
       <ResponsiveSankey
@@ -28,7 +27,7 @@ export const buildSankeyChart = (
 
 export const MifuneSankey = (): JSX.Element => {
   const { query, chartOptions, setChartOptions } = useContext(ChartContext)
-  const { order, results } = chartOptions
+  const { results } = chartOptions
 
   const prepareData = (
     data: { [key: string]: string | number }[]
@@ -63,7 +62,7 @@ export const MifuneSankey = (): JSX.Element => {
   return (
     <ChartWrapper
       results={results}
-      orders={[order ?? '']}
+      orders={[]}
       dataPreparation={prepareData}
       disableScale
       selects={[
@@ -108,13 +107,13 @@ export const MifuneSankey = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.COUNT,
+          fnDefault: QueryFunctions.VALUE,
           onChange: (v, fn) => {
             const result = results.filter((item) => item.name !== 'value')
             const mappedResults = [
               ...result,
               {
-                function: fn ?? QueryFunctions.COUNT,
+                function: fn ?? QueryFunctions.VALUE,
                 name: 'value',
                 parameters: v ? [v] : [],
               },

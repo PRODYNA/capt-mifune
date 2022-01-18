@@ -108,14 +108,18 @@ export const Analytics = (): JSX.Element => {
         <Box mt={3} color="text.primary">
           <Typography variant="h5">Analytics</Typography>
           <QueryBuilder onChange={(q) => setQuery(q)} />
-          {data && (
-            <>
-              <Box mt={4}>
+          <Box mt={4}>
+            {data ? (
+              <>
                 <Typography variant="h6">Chart</Typography>
-              </Box>
-              {buildSelectedChart()}
-            </>
-          )}
+                {buildSelectedChart()}
+              </>
+            ) : (
+              <Typography variant="overline">
+                - No data available to show -
+              </Typography>
+            )}
+          </Box>
           <ChartsNavigation>
             {renderChartButtons()}
             {query.nodes.length <= 0 ? (
