@@ -3,21 +3,20 @@ import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext from '../../context/ChartContext'
+import { QueryFunctions } from '../../api/model/Model'
 
 export const buildBarChart = (
-  data: any[],
-  label: string | undefined,
-  count: string | undefined
+  data: { [key: string]: string | number }[]
 ): JSX.Element => {
-  if (!(count && label && data) || data.length < 1) {
+  if (!data || data.length < 1) {
     return <></>
   }
   return (
     <Box height={200 + data.length * 25}>
       <ResponsiveBar
         data={data}
-        keys={[count]}
-        indexBy={label}
+        keys={['value']}
+        indexBy="label"
         layout="horizontal"
         margin={{ top: 50, right: 30, bottom: 150, left: 80 }}
         padding={0.3}
@@ -58,39 +57,59 @@ export const buildBarChart = (
 
 export const MifuneBarChart = (): JSX.Element => {
   const { query, chartOptions, setChartOptions } = useContext(ChartContext)
-  const { label, count } = chartOptions
-
+  const { order, results } = chartOptions
   return (
     <>
       <ChartWrapper
-        results={[label ?? '', count ?? '']}
-        orders={[count ?? '']}
+        results={results}
+        orders={[order ?? '']}
         dataPreparation={(data, scale) =>
-          data
-            .filter((d) => d[label as string])
-            .map((d) => {
-              const item = d
-              item[count as string] = (
-                parseFloat(item[count as string]) / scale
-              ).toFixed(2)
-              return item
-            })
+          data.map((item) => {
+            return {
+              ...item,
+              value: (parseFloat(item.value) / scale).toFixed(2),
+            }
+          })
         }
         selects={[
           {
             query,
             label: 'Label',
             onChange: (v) => {
-              setChartOptions({ ...chartOptions, label: v })
+              const result = results.filter((item) => item.name !== 'label')
+              const mappedResults = [
+                ...result,
+                {
+                  function: QueryFunctions.VALUE,
+                  name: 'label',
+                  parameters: v ? [v] : [],
+                },
+              ]
+              setChartOptions({
+                ...chartOptions,
+                results: mappedResults,
+              })
             },
           },
           {
             query,
             label: 'Value',
-            fnDefault: 'count',
-            fnOptions: ['count', 'sum', 'avg', 'min', 'max'],
-            onChange: (v) => {
-              setChartOptions({ ...chartOptions, count: v })
+            fnDefault: QueryFunctions.COUNT,
+            onChange: (v, fn) => {
+              const result = results.filter((item) => item.name !== 'value')
+              const mappedResults = [
+                ...result,
+                {
+                  function: fn ?? QueryFunctions.COUNT,
+                  name: 'value',
+                  parameters: v ? [v] : [],
+                },
+              ]
+              setChartOptions({
+                ...chartOptions,
+                order: v,
+                results: mappedResults,
+              })
             },
           },
         ]}

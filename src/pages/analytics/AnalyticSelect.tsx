@@ -3,13 +3,15 @@ import { Grid, TableCell, Typography } from '@material-ui/core'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 import { useStyleTable } from '../graph/NodeEdit'
+import { QueryFunctions } from '../../api/model/Model'
 
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
-  const { query, label, fnOptions, fnDefault, onChange, renderAsTable } = props
+  const { query, label, fnDefault, onChange, renderAsTable } = props
   const [variable, setVariable] = useState<string>()
   const [property, setProperty] = useState<string>()
-  const [fn, setFn] = useState<string | undefined>(fnDefault)
+  const [fn, setFn] = useState<QueryFunctions | undefined>(fnDefault)
   const [properties, setProperties] = useState<string[]>()
+  const fnOptions = Object.values(QueryFunctions)
   const classes = useStyleTable()
 
   useEffect(() => {
@@ -27,19 +29,17 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const fireUpdate = (
     newVar: string | undefined,
     newProp: string | undefined,
-    newFn: string | undefined
+    newFn: QueryFunctions | undefined
   ): void => {
-    if (newVar && newProp && newFn) {
-      onChange(`${newVar}.${newProp}[${newFn}]`)
-    } else if (!fnOptions?.length || fnOptions.length <= 0) {
-      onChange(`${newVar}.${newProp}`)
+    if (newVar || newProp) {
+      onChange(`${newVar}.${newProp}`, newFn)
     } else {
-      onChange(undefined)
+      onChange(undefined, newFn)
     }
   }
 
   const buildFnSelect = (): JSX.Element => {
-    if (fn && (fnOptions?.length ?? 0 > 1)) {
+    if (fn) {
       return (
         <>
           <Grid item xs={12} md={2}>
@@ -54,7 +54,7 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
               options={fnOptions ?? []}
               value={fn ?? ''}
               onChangeHandler={(e) => {
-                const newFN = e.target.value as string
+                const newFN = e.target.value
                 setFn(newFN)
                 fireUpdate(variable, property, newFN)
               }}
