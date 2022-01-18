@@ -12,6 +12,7 @@ import {
   Node,
   NodeCreate,
   NodeUpdate,
+  QueryResultDefinition,
   Relation,
   RelationCreate,
   RelationUpdate,
@@ -40,7 +41,7 @@ export class GraphService {
 
   query(
     query: Query,
-    results: string[],
+    results: QueryResultDefinition[],
     orders: string[] = [],
     filters: Filter[] = []
   ): Promise<any[]> {
