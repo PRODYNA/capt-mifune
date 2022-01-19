@@ -80,7 +80,7 @@ export const MifiuneHeatMap = (): JSX.Element => {
               {
                 function: QueryFunctions.VALUE,
                 name: 'labelX',
-                parameters: v ? [v] : [],
+                parameters: v || [],
               },
             ]
             setChartOptions({
@@ -99,7 +99,7 @@ export const MifiuneHeatMap = (): JSX.Element => {
               {
                 function: QueryFunctions.VALUE,
                 name: 'labelY',
-                parameters: v ? [v] : [],
+                parameters: v || [],
               },
             ]
             setChartOptions({
@@ -113,20 +113,22 @@ export const MifiuneHeatMap = (): JSX.Element => {
           label: 'Value',
           fnDefault: QueryFunctions.VALUE,
           onChange: (v, fn) => {
-            const result = results.filter((item) => item.name !== 'value')
-            const mappedResults = [
-              ...result,
-              {
-                function: fn ?? QueryFunctions.VALUE,
-                name: 'value',
-                parameters: v ? [v] : [],
-              },
-            ]
-            setChartOptions({
-              ...chartOptions,
-              order: v,
-              results: mappedResults,
-            })
+            if (v) {
+              const result = results.filter((item) => item.name !== 'value')
+              const mappedResults = [
+                ...result,
+                {
+                  function: fn ?? QueryFunctions.VALUE,
+                  name: 'value',
+                  parameters: v || [],
+                },
+              ]
+              setChartOptions({
+                ...chartOptions,
+                order: v.length > 1 ? '' : v[0],
+                results: mappedResults,
+              })
+            }
           },
         },
       ]}

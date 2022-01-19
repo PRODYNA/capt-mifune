@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@material-ui/core'
-import { v4 } from 'uuid'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext, { QueryData } from '../../context/ChartContext'
 import { QueryFunctions } from '../../api/model/Model'
@@ -77,7 +76,7 @@ export const MifuneBarChart = (): JSX.Element => {
               {
                 function: QueryFunctions.VALUE,
                 name: 'label',
-                parameters: v ? [v] : [],
+                parameters: v || [],
               },
             ]
             setChartOptions({
@@ -91,20 +90,22 @@ export const MifuneBarChart = (): JSX.Element => {
           label: 'Value',
           fnDefault: QueryFunctions.VALUE,
           onChange: (v, fn) => {
-            const result = results.filter((item) => item.name !== 'value')
-            const mappedResults = [
-              ...result,
-              {
-                function: fn ?? QueryFunctions.VALUE,
-                name: 'value',
-                parameters: v ? [v] : [],
-              },
-            ]
-            setChartOptions({
-              ...chartOptions,
-              order: v,
-              results: mappedResults,
-            })
+            if (v) {
+              const result = results.filter((item) => item.name !== 'value')
+              const mappedResults = [
+                ...result,
+                {
+                  function: fn ?? QueryFunctions.VALUE,
+                  name: 'value',
+                  parameters: v || [],
+                },
+              ]
+              setChartOptions({
+                ...chartOptions,
+                order: v[0],
+                results: mappedResults,
+              })
+            }
           },
         },
       ]}

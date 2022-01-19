@@ -38,7 +38,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           [filter]
         )
         .then((res) => {
-          const mappedValues = res.map((val) => val.filter)
+          const mappedValues = Array.from(new Set(res.map((val) => val.filter)))
           setValues(mappedValues)
         })
     }
@@ -51,10 +51,12 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         label="Property"
         query={query}
         onChange={(newFilter) => {
-          if (newFilter) setFilter(newFilter)
+          if (newFilter) {
+            setFilter(newFilter[0])
+            onKeyChange(newFilter[0])
+          }
           setValue(undefined)
           setValues([])
-          onKeyChange(newFilter)
           onValueChange(undefined)
         }}
       />

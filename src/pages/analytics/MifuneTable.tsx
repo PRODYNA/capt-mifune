@@ -96,8 +96,8 @@ export const MifuneTable = (): JSX.Element => {
                 return item.uuid === result.uuid
                   ? {
                       function: QueryFunctions.VALUE,
-                      name: v,
-                      parameters: [v],
+                      name: v[0],
+                      parameters: v,
                       uuid: item.uuid,
                     }
                   : item
