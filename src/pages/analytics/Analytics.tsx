@@ -14,7 +14,7 @@ import ChartContext, { IChartOptions } from '../../context/ChartContext'
 import { buildTableChart, MifuneTable } from './MifuneTable'
 
 export const Analytics = (): JSX.Element => {
-  const [chart, setChart] = useState<string>('BarChart')
+  const [chart, setChart] = useState<string>('Bar')
   const [query, setQuery] = useState<Query>({ nodes: [], relations: [] })
   const [data, setData] = useState<any>()
   const [chartOptions, setChartOptions] = useState<IChartOptions>({
@@ -27,7 +27,7 @@ export const Analytics = (): JSX.Element => {
 
   const charts = [
     {
-      title: 'Bar Chart',
+      title: 'Bar',
       icon: <BarChartIcon />,
       options: <MifuneBarChart />,
       build: (): JSX.Element => buildBarChart(data),
