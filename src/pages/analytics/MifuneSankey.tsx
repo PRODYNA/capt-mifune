@@ -76,7 +76,7 @@ export const MifuneSankey = (): JSX.Element => {
               {
                 function: QueryFunctions.VALUE,
                 name: 'from',
-                parameters: v ? [v] : [],
+                parameters: v || [],
               },
             ]
             setChartOptions({
@@ -95,7 +95,7 @@ export const MifuneSankey = (): JSX.Element => {
               {
                 function: QueryFunctions.VALUE,
                 name: 'to',
-                parameters: v ? [v] : [],
+                parameters: v ? [...v] : [],
               },
             ]
             setChartOptions({
@@ -115,12 +115,12 @@ export const MifuneSankey = (): JSX.Element => {
               {
                 function: fn ?? QueryFunctions.VALUE,
                 name: 'value',
-                parameters: v ? [v] : [],
+                parameters: v || [],
               },
             ]
             setChartOptions({
               ...chartOptions,
-              order: v,
+              order: '',
               results: mappedResults,
             })
           },

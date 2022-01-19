@@ -1,75 +1,79 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Fragment } from 'react'
 import { Grid, TableCell, Typography } from '@material-ui/core'
+import { v4 } from 'uuid'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 import { useStyleTable } from '../graph/NodeEdit'
 import { QueryFunctions } from '../../api/model/Model'
 
+interface Select {
+  uuid: string
+  variable: string
+  property: string
+}
+
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const { query, label, fnDefault, onChange, renderAsTable } = props
-  const [variable, setVariable] = useState<string>()
-  const [property, setProperty] = useState<string>()
+  const initialSelect = {
+    uuid: v4(),
+    variable: '',
+    property: '',
+    properties: [],
+  }
+  const [selects, setSelects] = useState<Select[]>([initialSelect])
   const [fn, setFn] = useState<QueryFunctions | undefined>(fnDefault)
-  const [properties, setProperties] = useState<string[]>()
   const fnOptions = Object.values(QueryFunctions)
   const classes = useStyleTable()
 
   useEffect(() => {
-    const nodeProps = query.nodes
-      .filter((n) => n.varName === variable)
-      .flatMap((n) => n.node.properties)
-      .map((p) => p.name)
-    const relProps = query.relations
-      .filter((n) => n.varName === variable)
-      .flatMap((n) => n.relation.properties)
-      .map((p) => p.name)
-    setProperties(nodeProps.concat(relProps))
-  }, [variable, property, fn])
+    const checkEmpty = selects.some(
+      (select) => select.property === '' || select.variable === ''
+    )
 
-  const fireUpdate = (
-    newVar: string | undefined,
-    newProp: string | undefined,
-    newFn: QueryFunctions | undefined
-  ): void => {
-    if (newVar && newProp) {
-      onChange(`${newVar}.${newProp}`, newFn)
-    } else {
-      onChange(undefined, newFn)
+    if (!checkEmpty) {
+      const mappedSelects = selects.map(
+        (item) => `${item.variable}.${item.property}`
+      )
+      if (mappedSelects.length > 0) {
+        onChange(mappedSelects, fn)
+      } else {
+        onChange(undefined, fn)
+      }
     }
-  }
+  }, [selects, fn])
 
   const buildFnSelect = (): JSX.Element => {
-    if (fn) {
-      return (
-        <>
-          <Grid item xs={12} md={2}>
-            <Typography variant="overline">
-              <b>Function</b>
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={5}>
-            <FormSelect
-              title=""
-              hideLabel
-              options={fnOptions ?? []}
-              value={fn ?? ''}
-              onChangeHandler={(e) => {
-                const newFN = e.target.value
-                setFn(newFN)
-                fireUpdate(variable, property, newFN)
-              }}
-            />
-          </Grid>
-        </>
-      )
-    }
-    return <></>
+    return (
+      <>
+        <Grid item xs={12} md={2}>
+          <Typography variant="overline">
+            <b>Function</b>
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={5}>
+          <FormSelect
+            title=""
+            options={fnOptions ?? []}
+            value={fn ?? ''}
+            onChangeHandler={(e) => {
+              const newFN = e.target.value
+              setFn(newFN)
+              if (newFN === QueryFunctions.HIERARCHY)
+                setSelects([...selects, initialSelect])
+              if (newFN !== QueryFunctions.HIERARCHY && selects.length > 1)
+                setSelects([selects[0]])
+            }}
+          />
+        </Grid>
+        <Grid item md={5} />
+      </>
+    )
   }
 
-  const renderNodeSelect = (): JSX.Element => (
+  const renderNodeSelect = (select: Select): JSX.Element => (
     <FormSelect
       title="Node/Relation"
-      value={variable ?? ''}
+      value={select?.variable ?? ''}
       options={
         query.nodes
           .map((n) => n.varName)
@@ -78,22 +82,40 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
       hideLabel={renderAsTable}
       onChangeHandler={(e) => {
         const newValue = e.target.value as string
-        setVariable(newValue)
-        fireUpdate(newValue, property, fn)
+        const mappedSelect = selects.map((item) =>
+          item.uuid === select?.uuid
+            ? { ...item, variable: newValue, property: '' }
+            : item
+        )
+        setSelects(mappedSelect)
       }}
     />
   )
 
-  const renderPropertySelect = (): JSX.Element => (
+  const getProperties = (select: Select): string[] => {
+    const nodeProps = query.nodes
+      .filter((n) => n.varName === select.variable)
+      .flatMap((n) => n.node.properties)
+      .map((p) => p.name)
+    const relProps = query.relations
+      .filter((n) => n.varName === select.variable)
+      .flatMap((n) => n.relation.properties)
+      .map((p) => p.name)
+    return nodeProps.concat(relProps) ?? []
+  }
+
+  const renderPropertySelect = (select: Select): JSX.Element => (
     <FormSelect
       title="Property"
-      value={property ?? ''}
+      value={select?.property ?? ''}
       hideLabel={renderAsTable}
-      options={properties ?? []}
+      options={getProperties(select)}
       onChangeHandler={(e) => {
         const newValue = e.target.value as string
-        setProperty(newValue)
-        fireUpdate(variable, newValue, fn)
+        const mappedSelect = selects.map((item) =>
+          item.uuid === select?.uuid ? { ...item, property: newValue } : item
+        )
+        setSelects(mappedSelect)
       }}
     />
   )
@@ -101,30 +123,41 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   if (renderAsTable) {
     return (
       <>
-        <TableCell className={classes.tableCell}>
-          {renderNodeSelect()}
-        </TableCell>
-        <TableCell className={classes.tableCell}>
-          {renderPropertySelect()}
-        </TableCell>
+        {selects.map((select) => (
+          <Fragment key={select.uuid}>
+            <TableCell className={classes.tableCell}>
+              {renderNodeSelect(select)}
+            </TableCell>
+            <TableCell className={classes.tableCell}>
+              {renderPropertySelect(select)}
+            </TableCell>
+          </Fragment>
+        ))}
       </>
     )
   }
 
   return (
-    <Grid container spacing={3} alignItems="center">
+    <Grid container spacing={3} alignItems="baseline">
+      {fn && <>{buildFnSelect()}</>}
       <Grid item xs={12} md={2}>
         <Typography variant="overline">
           <b>{label}</b>
         </Typography>
       </Grid>
-      <Grid item xs={12} md={5}>
-        {renderNodeSelect()}
-      </Grid>
-      <Grid item xs={12} md={5}>
-        {renderPropertySelect()}
-      </Grid>
-      {fn && <>{buildFnSelect()}</>}
+      {selects.map((select, index) => (
+        <Fragment key={select.uuid}>
+          {index === selects.length - 1 && fn === QueryFunctions.HIERARCHY && (
+            <Grid item md={2} />
+          )}
+          <Grid item xs={12} md={5}>
+            {renderNodeSelect(select)}
+          </Grid>
+          <Grid item xs={12} md={5}>
+            {renderPropertySelect(select)}
+          </Grid>
+        </Fragment>
+      ))}
     </Grid>
   )
 }

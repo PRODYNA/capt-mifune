@@ -24,7 +24,7 @@ import ChartContext from '../../context/ChartContext'
 export interface SelectProps {
   query: Query
   label: string
-  onChange: (v: string | undefined, fn?: QueryFunctions) => void
+  onChange: (v: string[] | undefined, fn?: QueryFunctions) => void
   fnDefault?: QueryFunctions
   renderAsTable?: boolean
 }
