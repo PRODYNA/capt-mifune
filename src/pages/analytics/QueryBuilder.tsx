@@ -36,6 +36,7 @@ export interface QueryRelation {
   id: string
   varName: string
   relation: Relation
+  depth: '1' | 'n'
   selected: boolean
   sourceId: string
   targetId: string
@@ -54,6 +55,21 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   const handleResize = (): void => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
+  }
+
+  function relationMouseEvents<N extends QueryRelation>(
+    simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
+    relation: any
+  ): void {
+    relation.on('click', (e: any, rel: D3Relation<QueryRelation>) => {
+      if (rel.relation.depth === '1') {
+        // eslint-disable-next-line no-param-reassign
+        rel.relation.depth = 'n'
+      } else {
+        // eslint-disable-next-line no-param-reassign
+        rel.relation.depth = '1'
+      }
+    })
   }
 
   useEffect(() => {
@@ -102,6 +118,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
             ...relationObj,
             sourceId: sourceNode.node.id,
             targetId: d.node.id,
+            depth: '1',
           })
         }
         if (r.sourceId === d.node.node.id) {
@@ -114,6 +131,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
             ...relationObj,
             sourceId: d.node.id,
             targetId: targetNode.node.id,
+            depth: '1',
           })
         }
         return tmpRelations
@@ -194,6 +212,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       nodes,
       (): void => tick<QueryNode, QueryRelation>(node, labels, relation)
     )
+    relationMouseEvents(simulation, relation)
 
     nodeMouseEvents(
       simulation,
