@@ -4,6 +4,8 @@ import BarChartIcon from '@material-ui/icons/BarChart'
 import ShuffleIcon from '@material-ui/icons/Shuffle'
 import AppsIcon from '@material-ui/icons/Apps'
 import TableChartOutlinedIcon from '@material-ui/icons/TableChartOutlined'
+import PublicIcon from '@material-ui/icons/Public'
+import TrackChangesIcon from '@material-ui/icons/TrackChanges'
 import { buildBarChart, MifuneBarChart } from './MifuneBarChart'
 import { buildSankeyChart, MifuneSankey } from './MifuneSankey'
 import { buildHeatMapChart, MifiuneHeatMap } from './MifuneHeatMap'
@@ -12,6 +14,15 @@ import ChartsNavigation from '../../components/Navigation/ChartsNavigation'
 import { CustomTexts } from '../../utils/CustomTexts'
 import ChartContext, { IChartOptions } from '../../context/ChartContext'
 import { buildTableChart, MifuneTable } from './MifuneTable'
+import { buildRadialChart, MifiuneRadialBar } from './MifuneRadialBar'
+import { buildGeoChart, MifuneGeoChart } from './MifuneGeoMap'
+
+interface Chart {
+  title: string
+  icon: JSX.Element
+  options: JSX.Element
+  build: () => JSX.Element
+}
 
 export const Analytics = (): JSX.Element => {
   const [chart, setChart] = useState<string>('Bar')
@@ -25,12 +36,18 @@ export const Analytics = (): JSX.Element => {
     heatMax: undefined,
   })
 
-  const charts = [
+  const charts: Chart[] = [
     {
       title: 'Bar',
       icon: <BarChartIcon />,
       options: <MifuneBarChart />,
       build: (): JSX.Element => buildBarChart(data),
+    },
+    {
+      title: 'RadialBar',
+      icon: <TrackChangesIcon />,
+      options: <MifiuneRadialBar />,
+      build: (): JSX.Element => buildRadialChart(data),
     },
     {
       title: 'Heatmap',
@@ -45,6 +62,12 @@ export const Analytics = (): JSX.Element => {
       build: (): JSX.Element => buildSankeyChart(data),
     },
     {
+      title: 'GeoMap',
+      icon: <PublicIcon />,
+      options: <MifuneGeoChart />,
+      build: (): JSX.Element => buildGeoChart(data),
+    },
+    {
       title: 'Table',
       icon: <TableChartOutlinedIcon />,
       options: <MifuneTable />,
@@ -52,14 +75,9 @@ export const Analytics = (): JSX.Element => {
     },
   ]
 
-  const getChartOptions = (): JSX.Element => {
+  const getSelectedChart = (): Chart | undefined => {
     const selectedChart = charts.find((item) => item.title === chart)
-    return selectedChart?.options ?? <></>
-  }
-
-  const buildSelectedChart = (): JSX.Element => {
-    const selectedChart = charts.find((item) => item.title === chart)
-    return <>{selectedChart?.build()} </> ?? <></>
+    return selectedChart
   }
 
   const renderChartButtons = (): JSX.Element => {
@@ -80,7 +98,10 @@ export const Analytics = (): JSX.Element => {
                   })
                 }}
                 color={chart === item.title ? 'primary' : 'default'}
-                style={{ marginRight: '1rem', boxShadow: 'none' }}
+                style={{
+                  marginRight: '1rem',
+                  boxShadow: 'none',
+                }}
               >
                 {item.icon}
               </Fab>
@@ -108,11 +129,11 @@ export const Analytics = (): JSX.Element => {
         <Box mt={3} color="text.primary">
           <Typography variant="h5">Analytics</Typography>
           <QueryBuilder onChange={(q) => setQuery(q)} />
-          <Box mt={4}>
+          <Box mt={4} pb={8}>
             {data ? (
               <>
                 <Typography variant="h6">Chart</Typography>
-                {buildSelectedChart()}
+                {getSelectedChart()?.build()}
               </>
             ) : (
               <Typography variant="overline">
@@ -129,7 +150,7 @@ export const Analytics = (): JSX.Element => {
                 </Typography>
               </Box>
             ) : (
-              getChartOptions()
+              <>{getSelectedChart()?.options}</>
             )}
           </ChartsNavigation>
         </Box>

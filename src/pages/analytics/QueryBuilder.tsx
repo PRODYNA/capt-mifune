@@ -194,10 +194,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const svgSelect = d3.select(d3Container.current)
     addSvgStyles(svgSelect, width, height)
 
-    if (nodes && nodes?.length <= 0) {
-      console.error('no nodes exist')
-    }
-
     const relation = drawRelations<QueryRelation>(
       svgSelect,
       relations,

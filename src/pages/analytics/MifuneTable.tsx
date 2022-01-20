@@ -89,7 +89,7 @@ export const MifuneTable = (): JSX.Element => {
       selects={results.map((result, index) => {
         return {
           query,
-          label: `Column${index + 1}`,
+          label: `Col${index + 1}`,
           onChange: (v) => {
             if (v) {
               const mappedResults = results.map((item) => {
