@@ -61,6 +61,7 @@ export class GraphService {
             relationId: r.relation.id,
             sourceId: r.sourceId,
             targetId: r.targetId,
+            depth: r.depth,
           }
         }),
         results,
