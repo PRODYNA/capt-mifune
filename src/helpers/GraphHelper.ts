@@ -187,7 +187,8 @@ export function drawRelations<R extends Relation | QueryRelation>(
           (castValue.relation.primary ? '*' : '')
         )
       }
-      return (d as D3Relation<QueryRelation>).relation.varName
+      const queryRel = d as D3Relation<QueryRelation>
+      return `${queryRel.relation.varName} * ${queryRel.relation.depth}`
     })
 
     .attr('class', 'relation-label')
