@@ -26,4 +26,6 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-public record GraphStatistics(Long nodes, Long relations) {}
+import java.util.UUID;
+
+public record ImportStatistic(UUID domainId, long count) {}

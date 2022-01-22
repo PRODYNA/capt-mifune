@@ -1,0 +1,108 @@
+{
+  "domains" : [ {
+    "id" : "2d04404c-6585-4aae-b768-50b14d11c757",
+    "name" : "BOM",
+    "rootNodeId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "file" : "material.csv",
+    "columnMapping" : {
+      "material.contains.material.id" : "componentId",
+      "material.id" : "id",
+      "material.co2" : "co2",
+      "material.name" : "name",
+      "material.contains.amount" : "amount"
+    },
+    "modelValid" : true,
+    "mappingValid" : true
+  }, {
+    "id" : "2e903d0d-176e-4d20-ae48-70a996430384",
+    "name" : "Category",
+    "rootNodeId" : "3847eb47-34b6-4760-aff4-f6da652f3cb5",
+    "file" : "category.csv",
+    "columnMapping" : {
+      "category.inCategory.category.id" : "parentId",
+      "category.name" : "name",
+      "category.id" : "id"
+    },
+    "modelValid" : true,
+    "mappingValid" : true
+  }, {
+    "id" : "9a8adec6-a102-41d4-9d2c-593ddcf49678",
+    "name" : "CategoryMapping",
+    "rootNodeId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "file" : "material_category.csv",
+    "columnMapping" : {
+      "material.inCategory.category.id" : "category",
+      "material.id" : "material"
+    },
+    "modelValid" : true,
+    "mappingValid" : false
+  } ],
+  "nodes" : [ {
+    "id" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "label" : "Material",
+    "domainIds" : [ "9a8adec6-a102-41d4-9d2c-593ddcf49678", "2d04404c-6585-4aae-b768-50b14d11c757" ],
+    "color" : "#20d129",
+    "properties" : [ {
+      "name" : "id",
+      "type" : "string",
+      "primary" : true
+    }, {
+      "name" : "name",
+      "type" : "string",
+      "primary" : false
+    }, {
+      "name" : "co2",
+      "type" : "double",
+      "primary" : false
+    } ]
+  }, {
+    "id" : "3847eb47-34b6-4760-aff4-f6da652f3cb5",
+    "label" : "Category",
+    "domainIds" : [ "2e903d0d-176e-4d20-ae48-70a996430384", "9a8adec6-a102-41d4-9d2c-593ddcf49678" ],
+    "color" : "#2f3cb5",
+    "properties" : [ {
+      "name" : "id",
+      "type" : "string",
+      "primary" : true
+    }, {
+      "name" : "name",
+      "type" : "string",
+      "primary" : false
+    } ]
+  } ],
+  "relations" : [ {
+    "id" : "8da30cda-679d-4ae6-b7eb-475b418a4789",
+    "sourceId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "targetId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "domainIds" : [ "2d04404c-6585-4aae-b768-50b14d11c757" ],
+    "type" : "CONTAINS",
+    "primary" : false,
+    "multiple" : false,
+    "color" : "#20d129",
+    "properties" : [ {
+      "name" : "amount",
+      "type" : "double",
+      "primary" : false
+    } ]
+  }, {
+    "id" : "c21b8813-a729-4cb5-bbb0-7b0305a9191b",
+    "sourceId" : "3847eb47-34b6-4760-aff4-f6da652f3cb5",
+    "targetId" : "3847eb47-34b6-4760-aff4-f6da652f3cb5",
+    "domainIds" : [ "2e903d0d-176e-4d20-ae48-70a996430384" ],
+    "type" : "IN_CATEGORY",
+    "primary" : false,
+    "multiple" : false,
+    "color" : "#2f3cb5",
+    "properties" : [ ]
+  }, {
+    "id" : "5e5f78f2-2fd0-45f2-b56f-825640a64321",
+    "sourceId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "targetId" : "3847eb47-34b6-4760-aff4-f6da652f3cb5",
+    "domainIds" : [ "9a8adec6-a102-41d4-9d2c-593ddcf49678" ],
+    "type" : "IN_CATEGORY",
+    "primary" : false,
+    "multiple" : false,
+    "color" : "#20d129",
+    "properties" : [ ]
+  } ]
+}

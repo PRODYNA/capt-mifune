@@ -26,4 +26,12 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-public record GraphStatistics(Long nodes, Long relations) {}
+public enum QueryFunction {
+  value,
+  min,
+  max,
+  avg,
+  sum,
+  count,
+  hierarchyCalculation
+}
