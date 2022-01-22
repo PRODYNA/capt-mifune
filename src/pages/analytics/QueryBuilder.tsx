@@ -103,7 +103,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       .flatMap((r: Relation): QueryRelation[] => {
         const tmpRelations: QueryRelation[] = []
         const relationObj = {
-          id: v4(),
           varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
           relation: r,
           selected: false,
@@ -116,6 +115,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           possibleNodes.push(sourceNode)
           tmpRelations.push({
             ...relationObj,
+            id: v4(),
             sourceId: sourceNode.node.id,
             targetId: d.node.id,
             depth: '1',
@@ -129,6 +129,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
           possibleNodes.push(targetNode)
           tmpRelations.push({
             ...relationObj,
+            id: v4(),
             sourceId: d.node.id,
             targetId: targetNode.node.id,
             depth: '1',
