@@ -94,9 +94,9 @@ export class GraphService {
     )
   }
 
-  importSource(domainId: string): EventSourcePolyfill {
+  importSource(): EventSourcePolyfill {
     return new EventSourcePolyfill(
-      `${localStorage.getItem(ENV.API_SERVER)}graph/domain/${domainId}/stats`,
+      `${localStorage.getItem(ENV.API_SERVER)}graph/stats/domain`,
       {
         headers: this.header(),
         heartbeatTimeout: 15000,
