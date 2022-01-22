@@ -246,24 +246,24 @@ export const Graph = (props: IGraph): JSX.Element => {
       simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
       selection: any
     ): void => {
-      let source: D3Node<Node>
+      let source: D3Node<Node> | undefined
       const selectionDrag = d3
         .drag()
         .on('start', (e) => {
           simulation.restart()
-          // eslint-disable-next-line prefer-destructuring
-          source = nodes.filter((n) => {
+          source = nodes.find((n) => {
             if (n.x && n.y) {
               return (
-                D3Helper.pointDistance({ x: n.x ?? -1, y: n.y ?? -1 }, e) < 20
+                D3Helper.pointDistance({ x: n.x ?? -1, y: n.y ?? -1 }, e) <
+                n.radius
               )
             }
             return false
-          })[0]
+          })
         })
         .on('drag', (e: any, d: unknown): void => {
-          const nodeX = source.x ?? 0
-          const nodeY = source.y ?? 0
+          const nodeX = source?.x ?? 0
+          const nodeY = source?.y ?? 0
           const path = d as Path
           path.d = D3Helper.selectionPath(
             nodeX,
