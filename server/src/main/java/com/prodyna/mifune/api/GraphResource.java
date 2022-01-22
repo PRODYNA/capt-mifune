@@ -4,7 +4,7 @@ package com.prodyna.mifune.api;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 PRODYNA SE
+ * Copyright (C) 2021 - 2022 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ package com.prodyna.mifune.api;
  * #L%
  */
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prodyna.mifune.core.DeletionService;
 import com.prodyna.mifune.core.GraphService;
@@ -39,6 +40,7 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -134,17 +136,33 @@ public class GraphResource {
   }
 
   @GET
-  @Path("/domain/{id}/count")
-  public Uni<Long> countDomainRootNodes(@PathParam("id") UUID id) {
-    log.infof("count domain %s", id);
+  @Path("/domain/fn/count")
+  public Uni<Map<UUID, Long>> countDomainRootNodes() {
     var session = driver.asyncSession();
     var count =
         session
-            .runAsync(
-                "match(:Domain {id:$id})--(x) return count(x) as count",
-                Map.of("id", id.toString()))
-            .thenCompose(r -> r.singleAsync().thenApply(x -> x.get("count").asLong()))
-            .thenCompose(l -> session.closeAsync().thenApply(x -> l));
+            .runAsync("match(d:Domain)--(x) return distinct d.id as id, count(x) as count")
+            .thenCompose(
+                r ->
+                    r.listAsync(
+                            x ->
+                                new Object() {
+                                  UUID id = UUID.fromString(x.get("id").asString());
+                                  Long count = x.get("count").asLong();
+                                })
+                        .thenCompose(
+                            l ->
+                                session
+                                    .closeAsync()
+                                    .thenApply(
+                                        x -> {
+                                          var map =
+                                              l.stream()
+                                                  .collect(
+                                                      Collectors.toMap(o -> o.id, o -> o.count));
+                                          return map;
+                                        })));
+
     return Uni.createFrom().completionStage(count);
   }
 
@@ -232,31 +250,45 @@ public class GraphResource {
   /**
    * This is used for the counter inside the table of pipelines
    *
-   * @param domainId
    * @return
    */
   @GET
-  @Path("/domain/{domainId}/stats")
+  @Path("domain/fn/statistics")
   @Produces(MediaType.SERVER_SENT_EVENTS)
-  public Multi<String> stats(@PathParam("domainId") UUID domainId) {
+  public Multi<Map<UUID, Long>> stats() {
 
-    var count = this.countDomainRootNodes(domainId).map("%s nodes"::formatted);
+    var count = this.countDomainRootNodes();
     var events =
         eventBus
-            .localConsumer(domainId.toString())
+            .localConsumer("import")
             .bodyStream()
             .toMulti()
             .emitOn(Infrastructure.getDefaultWorkerPool())
-            .map(Long.class::cast)
             .onOverflow()
             .buffer(20)
-            .onOverflow()
-            .dropPreviousItems()
+            .map(
+                s -> {
+                  try {
+                    return new JsonMapper()
+                        .createParser(s.toString())
+                        .readValueAs(ImportStatistic.class);
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                })
             .group()
             .intoLists()
-            .of(1000, Duration.ofMillis(300))
-            .map(l -> l.stream().max(Long::compare).orElse(0L))
-            .map("%s objects imported"::formatted);
-    return Multi.createBy().concatenating().streams(count.toMulti(), events);
+            .of(3000, Duration.ofMillis(300))
+            .map(
+                l ->
+                    l.stream()
+                        .collect(
+                            Collectors.toMap(
+                                ImportStatistic::domainId, ImportStatistic::count, Long::max)));
+    var defaults =
+        graphService.fetchDomains().stream().collect(Collectors.toMap(Domain::getId, a -> 0L));
+    return Multi.createBy()
+        .concatenating()
+        .streams(Uni.createFrom().item(defaults).toMulti(), count.toMulti(), events);
   }
 }

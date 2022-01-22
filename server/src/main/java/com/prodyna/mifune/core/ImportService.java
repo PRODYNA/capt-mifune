@@ -4,7 +4,7 @@ package com.prodyna.mifune.core;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 PRODYNA SE
+ * Copyright (C) 2021 - 2022 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ package com.prodyna.mifune.core;
  * #L%
  */
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
@@ -37,6 +38,7 @@ import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.Domain;
 import com.prodyna.mifune.domain.Graph;
+import com.prodyna.mifune.domain.ImportStatistic;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
@@ -156,7 +158,17 @@ public class ImportService {
         .concatenate()
         .subscribe()
         .with(
-            s -> eventBus.publish(domainId.toString(), s),
+            s -> {
+              try {
+                eventBus.publish(
+                    "import",
+                    new ObjectMapper()
+                        .writer()
+                        .writeValueAsString(new ImportStatistic(domainId, s)));
+              } catch (JsonProcessingException e) {
+                e.printStackTrace();
+              }
+            },
             throwable -> {
               log.error("error in pipeline: " + throwable.getMessage());
               pipelineMap.remove(domainId);

@@ -4,7 +4,7 @@ package com.prodyna.mifune.core.schema;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 PRODYNA SE
+ * Copyright (C) 2021 - 2022 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ package com.prodyna.mifune.core.schema;
 
 import static java.util.function.Predicate.not;
 
+import com.prodyna.mifune.core.CoreFunction;
 import com.prodyna.mifune.domain.Filter;
 import com.prodyna.mifune.domain.Query;
 import com.prodyna.mifune.domain.QueryNode;
@@ -36,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.neo4j.driver.Record;
-import org.neo4j.driver.internal.types.TypeConstructor;
 
 public class CypherQueryBuilder {
 
@@ -45,6 +45,7 @@ public class CypherQueryBuilder {
   private final AtomicInteger counter = new AtomicInteger();
   private final HashMap<String, Object> parameter = new HashMap<>();
   private final Query query;
+  private final List<CoreFunction> results;
 
   public HashMap<String, Object> getParameter() {
     return parameter;
@@ -53,6 +54,12 @@ public class CypherQueryBuilder {
   public CypherQueryBuilder(GraphModel graphModel, Query query) {
     this.graphModel = graphModel;
     this.query = query;
+    this.results =
+        this.query.results().stream()
+            .map(
+                queryResultDefinition ->
+                    CoreFunction.build(graphModel, query, queryResultDefinition))
+            .collect(Collectors.toList());
   }
 
   public String cypher() {
@@ -60,6 +67,8 @@ public class CypherQueryBuilder {
     var cypher = new StringBuilder();
     buildNodeMatch(queryNodeId, cypher, new HashSet<>());
     cypher.append(addFilterStatement());
+    cypher.append("\n");
+    cypher.append(buildSubQueries());
     cypher.append("\n");
     cypher.append(buildDistinct());
     cypher.append("\n");
@@ -103,12 +112,13 @@ public class CypherQueryBuilder {
                           processedIds.add(qr.id());
                           cypher.append(
                               """
-                              match(%s)-[%s:%s]->(%s:%s)
+                              match(%s)-[%s:%s%s]->(%s:%s)
                               """
                                   .formatted(
                                       nodeVar,
                                       generateVar(qr.varName()),
                                       r.getType(),
+                                      "n".equals(qr.depth()) ? "*0.." : "",
                                       generateVar(targetNode.varName()),
                                       graphModel.nodes.get(targetNode.nodeId()).getLabel()));
 
@@ -135,12 +145,13 @@ public class CypherQueryBuilder {
                           processedIds.add(qr.id());
                           cypher.append(
                               """
-                              match(%s)<-[%s:%s]-(%s:%s)
+                              match(%s)<-[%s:%s%s]-(%s:%s)
                               """
                                   .formatted(
                                       nodeVar,
                                       generateVar(qr.varName()),
                                       r.getType(),
+                                      "n".equals(qr.depth()) ? "*0.." : "",
                                       generateVar(sourceNode.varName()),
                                       graphModel.nodes.get(sourceNode.nodeId()).getLabel()));
 
@@ -156,21 +167,11 @@ public class CypherQueryBuilder {
   private String buildResult() {
     var returnStatement =
         this.query.results().stream()
-            .map(
-                r -> {
-                  var baseName = baseName(r);
-                  var propName = propName(r);
-                  var varName = generateVar(r);
-                  return functionName(r)
-                      .map(
-                          fn ->
-                              "%s(%s.%s) as %s"
-                                  .formatted(fn, getVarMap().get(baseName), propName, varName))
-                      .orElseGet(
-                          () ->
-                              "%s.%s as %s"
-                                  .formatted(getVarMap().get(baseName), propName, varName));
-                })
+            .flatMap(
+                r ->
+                    CoreFunction.build(graphModel, query, r)
+                        .results(this::generateVar, getVarMap()::get)
+                        .stream())
             .collect(Collectors.joining(","));
 
     return "return %s".formatted(returnStatement);
@@ -178,12 +179,20 @@ public class CypherQueryBuilder {
 
   private String buildDistinct() {
     var distinctStatement =
-        this.query.results().stream()
-            .map(this::baseName)
+        this.results.stream()
+            .map(CoreFunction::distinctObjects)
+            .flatMap(Collection::stream)
             .map(getVarMap()::get)
             .distinct()
             .collect(Collectors.joining(","));
     return "with distinct %s".formatted(distinctStatement);
+  }
+
+  private String buildSubQueries() {
+    return this.results.stream()
+        .map(cr -> cr.subquery(this::generateVar))
+        .distinct()
+        .collect(Collectors.joining("\n"));
   }
 
   private String buildOrder() {
@@ -227,50 +236,9 @@ public class CypherQueryBuilder {
     return prop;
   }
 
-  private Optional<String> functionName(String jsonPropertyPath) {
-    if (jsonPropertyPath.contains("[")) {
-      return Optional.of(
-          jsonPropertyPath.substring(
-              jsonPropertyPath.lastIndexOf("[") + 1, jsonPropertyPath.lastIndexOf("]")));
-    }
-    return Optional.empty();
-  }
-
   public Map<String, Object> buildResult(Record record) {
-    var row = new HashMap<String, Object>();
-    query
-        .results()
-        .forEach(
-            r -> {
-              var value = record.get(getVarMap().get(r));
-              functionName(r)
-                  .ifPresentOrElse(
-                      fn -> {
-                        var rec =
-                            switch (fn) {
-                              case "count" -> value.asLong(0);
-                              case "sum", "avg", "min", "max" -> value.asDouble(0);
-                              default -> throw new UnsupportedOperationException(
-                                  "function not mapped");
-                            };
-                        row.put(r, rec);
-                      },
-                      () -> {
-                        var type = TypeConstructor.valueOf(value.type().name());
-                        row.put(
-                            r,
-                            switch (type) {
-                              case NULL -> null;
-                              case INTEGER -> value.asInt();
-                              case STRING -> value.asString(null);
-                              case NUMBER -> value.asDouble();
-                              case BOOLEAN -> value.asBoolean();
-                              case FLOAT -> value.asFloat();
-                              default -> throw new UnsupportedOperationException(
-                                  "Unknow type convertion: " + value.type().name());
-                            });
-                      });
-            });
+    var row = new LinkedHashMap<String, Object>();
+    this.results.forEach(r -> row.putAll(r.buildResult(record, getVarMap()::get)));
     return row;
   }
 

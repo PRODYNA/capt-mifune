@@ -4,7 +4,7 @@ package com.prodyna.mifune.domain;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 PRODYNA SE
+ * Copyright (C) 2021 - 2022 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,6 @@ import java.util.List;
 public record Query(
     List<QueryNode> nodes,
     List<QueryRelation> relations,
-    List<String> results,
+    List<QueryResultDefinition> results,
     List<String> orders,
     List<Filter> filters) {}
