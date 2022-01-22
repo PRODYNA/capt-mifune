@@ -16,6 +16,7 @@ import {
 } from '@material-ui/core'
 import DeleteIcon from '@material-ui/icons/Delete'
 import { useTheme } from '@material-ui/core/styles'
+import { EventSourcePolyfill } from 'ng-event-source'
 import { Domain, GraphStatistics } from '../../api/model/Model'
 import graphService from '../../api/GraphService'
 import PipelineRow from './PipelineRow'
@@ -28,6 +29,8 @@ const Pipelines = (): JSX.Element => {
   const [cleanActive, setCleanActive] = useState<boolean>(false)
   const [showProgress, setShowProgress] = useState<boolean>(false)
   const [statistics, setStatistics] = useState<GraphStatistics>()
+  const [messages, setMessages] = useState<any>()
+  const [tmpMessages, setTmpMessages] = useState<any>()
   const tableHeaders = [
     'Show Details',
     'Domain Name',
@@ -53,6 +56,22 @@ const Pipelines = (): JSX.Element => {
       },
     },
   })()
+  let importStatsClient: EventSourcePolyfill
+
+  useEffect(() => {
+    importStatsClient = graphService.importSource()
+    importStatsClient.onmessage = (e) => {
+      const newStats = JSON.parse(e.data)
+      setTmpMessages(newStats)
+    }
+    return function cleanUp() {
+      importStatsClient.close()
+    }
+  }, [cleanActive])
+
+  useEffect(() => {
+    setMessages({ ...messages, ...tmpMessages })
+  }, [tmpMessages])
 
   useEffect(() => {
     graphService.domainsGet().then((d) => setDomains(d))
@@ -123,6 +142,7 @@ const Pipelines = (): JSX.Element => {
             <TableBody>
               {domains?.map((row) => (
                 <PipelineRow
+                  message={messages[row.id]}
                   key={row.id}
                   domain={row}
                   cleanActive={cleanActive}
