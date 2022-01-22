@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext } from 'react'
+import { QueryResultDefinition } from '../api/model/Model'
 import { Query } from '../pages/analytics/QueryBuilder'
 
 export interface IChartOptions {
-  label: string | undefined
-  count: string | undefined
-  labelX: string | undefined
-  labelY: string | undefined
-  keys: string[] | undefined
+  results: QueryResultDefinition[]
+  order: string | undefined
   min: number | undefined
   max: number | undefined
   heatMax: number | undefined
 }
+
+export type QueryData = {
+  [key: string]: string | number
+}[]
 
 type ChartContextType = {
   chart: string
@@ -20,8 +22,8 @@ type ChartContextType = {
   setQuery: (v: Query) => void
   setChartOptions: (v: IChartOptions) => void
   chartOptions: IChartOptions
-  data: any
-  setData: (v: any) => void
+  data: QueryData | undefined
+  setData: (v: QueryData | undefined) => void
 }
 
 const ChartContext = createContext<ChartContextType>({
@@ -30,18 +32,15 @@ const ChartContext = createContext<ChartContextType>({
   query: { nodes: [], relations: [] },
   setQuery: (v: Query) => {},
   chartOptions: {
-    label: undefined,
-    count: undefined,
-    labelX: undefined,
-    labelY: undefined,
-    keys: undefined,
+    results: [],
+    order: undefined,
     min: Number.MIN_VALUE,
     max: Number.MAX_VALUE,
     heatMax: undefined,
   },
   setChartOptions: (v: IChartOptions) => {},
   data: [],
-  setData: (v: any) => {},
+  setData: (v: QueryData | undefined) => {},
 })
 
 export default ChartContext

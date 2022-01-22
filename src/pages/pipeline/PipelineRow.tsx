@@ -1,10 +1,4 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from 'react'
+import React, { Dispatch, SetStateAction, useContext } from 'react'
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import WarningIcon from '@material-ui/icons/Warning'
 import ClearIcon from '@material-ui/icons/Clear'
@@ -22,26 +16,15 @@ import { Translations } from '../../utils/Translations'
 interface IPipelineRow {
   domain: Domain
   cleanActive: boolean
+  message: string
   setShowProgress: Dispatch<SetStateAction<boolean>>
 }
 
 const PipelineRow = (props: IPipelineRow): JSX.Element => {
-  const { domain, cleanActive, setShowProgress } = props
+  const { domain, cleanActive, message, setShowProgress } = props
   const history = useHistory()
-  const [message, setMessage] = useState<string>()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
-
-  useEffect(() => {
-    const sseClient = graphService.importSource(domain.id)
-    sseClient.onmessage = (e) => {
-      setMessage(e.data)
-    }
-
-    return function cleanUp() {
-      sseClient.close()
-    }
-  }, [domain.id, cleanActive])
 
   const valid = (isValid: boolean): JSX.Element => {
     if (isValid) return <DoneIcon htmlColor={theme.palette.success.main} />

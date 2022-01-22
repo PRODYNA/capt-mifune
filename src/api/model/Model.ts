@@ -28,7 +28,7 @@ export interface DomainUpdate {
   name: string
   rootNodeId?: string
   file?: string
-  columnMapping?: any
+  columnMapping?: { [key: string]: string }
 }
 
 export interface Domain {
@@ -107,5 +107,22 @@ export interface Source {
 }
 export interface Filter {
   property: string
-  value: any
+  value: number | string | undefined
+}
+
+export enum QueryFunctions {
+  AVG = 'avg',
+  COUNT = 'count',
+  MAX = 'max',
+  MIN = 'min',
+  SUM = 'sum',
+  VALUE = 'value',
+  HIERARCHY = 'hierarchyCalculation',
+}
+
+export interface QueryResultDefinition {
+  name: string
+  function: QueryFunctions
+  parameters: string[]
+  uuid?: string
 }
