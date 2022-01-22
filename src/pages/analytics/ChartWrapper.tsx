@@ -9,7 +9,11 @@ import {
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import { Add } from '@material-ui/icons'
 import { AnalyticFilter } from './AnalyticFilter'
-import { Filter } from '../../api/model/Model'
+import {
+  Filter,
+  QueryFunctions,
+  QueryResultDefinition,
+} from '../../api/model/Model'
 import graphService from '../../api/GraphService'
 import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
@@ -20,21 +24,23 @@ import ChartContext from '../../context/ChartContext'
 export interface SelectProps {
   query: Query
   label: string
-  onChange: (v: string | undefined) => void
-  fnOptions?: string[]
-  fnDefault?: string
+  onChange: (v: string[] | undefined, fn?: QueryFunctions) => void
+  fnDefault?: QueryFunctions
   renderAsTable?: boolean
 }
 
 interface ChartWrapperProps<T> {
-  results: string[]
+  results: QueryResultDefinition[]
   orders: string[]
   dataPreparation: (data: any[], scale: number) => T | undefined
   selects: SelectProps[]
+  children?: JSX.Element
+  disableScale?: boolean
 }
 
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
-  const { results, orders, dataPreparation, selects } = props
+  const { results, orders, dataPreparation, selects, disableScale, children } =
+    props
   const { setData, query } = useContext(ChartContext)
   const [loading, setLoading] = useState<boolean>(false)
   const [filters, setFilters] = useState<Filter[]>([])
@@ -50,7 +56,6 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
               // eslint-disable-next-line react/no-array-index-key
               <TableRow key={`filter-${i}`}>
                 <AnalyticFilter
-                  query={query}
                   onKeyChange={(k) => {
                     setFilters(() => {
                       filters[i].property = k ?? ''
@@ -118,38 +123,40 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
             />
           </Box>
           <Box bgcolor="#f7f7f7" p={2} my={2}>
+            {children}
             {selects.map((s) => (
               <AnalyticSelect
-                fnOptions={s.fnOptions}
                 fnDefault={s.fnDefault}
                 label={s.label}
                 key={s.label}
                 query={query}
-                onChange={(value) => {
+                onChange={(value, fn) => {
                   setData(undefined)
-                  s.onChange(value)
+                  s.onChange(value, fn)
                 }}
               />
             ))}
-            <Box mt={6} display="flex" justifyContent="space-between">
-              <Typography variant="overline" style={{ marginRight: '1rem' }}>
-                <b>Scale</b>
-              </Typography>
-              <Slider
-                defaultValue={1}
-                step={0.1}
-                marks
-                min={0}
-                max={10}
-                aria-labelledby="non-linear-slider"
-                scale={(x) => (x < 1 ? x * 0.5 : x * 10)}
-                onChange={(
-                  event: ChangeEvent<Record<string, unknown>>,
-                  value: number | number[]
-                ): void => setScale(value as number)}
-                valueLabelDisplay="on"
-              />
-            </Box>
+            {!disableScale && (
+              <Box mt={6} display="flex" justifyContent="space-between">
+                <Typography variant="overline" style={{ marginRight: '1rem' }}>
+                  <b>Scale</b>
+                </Typography>
+                <Slider
+                  defaultValue={1}
+                  step={0.1}
+                  marks
+                  min={0}
+                  max={10}
+                  aria-labelledby="non-linear-slider"
+                  scale={(x) => (x < 1 ? x * 0.5 : x * 10)}
+                  onChange={(
+                    event: ChangeEvent<Record<string, unknown>>,
+                    value: number | number[]
+                  ): void => setScale(value as number)}
+                  valueLabelDisplay="on"
+                />
+              </Box>
+            )}
           </Box>
           <Box
             color="text.primary"

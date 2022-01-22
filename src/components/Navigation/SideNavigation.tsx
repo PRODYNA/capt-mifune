@@ -20,6 +20,7 @@ import { useHistory, useLocation } from 'react-router-dom'
 import UserService from '../../services/UserService'
 import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
+import Logo from '../../assets/Logo.svg'
 
 export const DRAWER_WIDTH = 60
 export const DRAWER_WIDTH_OPEN = 170
@@ -72,6 +73,11 @@ const useStyles = makeStyles((theme: Theme) =>
       '&.Mui-selected': {
         opacity: 1,
       },
+    },
+    logo: {
+      width: '70%',
+      margin: '0 auto',
+      display: 'block',
     },
   })
 )
@@ -128,7 +134,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
         variant="caption"
         className={classes.navTitle}
       >
-        Mifune
+        <img src={Logo} alt="logo" className={classes.logo} />
       </Typography>
       <List>
         {navItems.map(

@@ -12,6 +12,7 @@ import {
   Node,
   NodeCreate,
   NodeUpdate,
+  QueryResultDefinition,
   Relation,
   RelationCreate,
   RelationUpdate,
@@ -40,7 +41,7 @@ export class GraphService {
 
   query(
     query: Query,
-    results: string[],
+    results: QueryResultDefinition[],
     orders: string[] = [],
     filters: Filter[] = []
   ): Promise<any[]> {
@@ -60,6 +61,7 @@ export class GraphService {
             relationId: r.relation.id,
             sourceId: r.sourceId,
             targetId: r.targetId,
+            depth: r.depth,
           }
         }),
         results,
@@ -92,9 +94,9 @@ export class GraphService {
     )
   }
 
-  importSource(domainId: string): EventSourcePolyfill {
+  importSource(): EventSourcePolyfill {
     return new EventSourcePolyfill(
-      `${localStorage.getItem(ENV.API_SERVER)}graph/domain/${domainId}/stats`,
+      `${localStorage.getItem(ENV.API_SERVER)}graph/domain/fn/statistics`,
       {
         headers: this.header(),
         heartbeatTimeout: 15000,
