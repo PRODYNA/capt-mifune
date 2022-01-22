@@ -26,4 +26,6 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-public record GraphStatistics(Long nodes, Long relations) {}
+import java.util.List;
+
+public record QueryResultDefinition(String name, QueryFunction function, List<String> parameters) {}

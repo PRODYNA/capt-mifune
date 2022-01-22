@@ -4,7 +4,7 @@ package com.prodyna.mifune.domain;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 PRODYNA SE
+ * Copyright (C) 2021 - 2022 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,4 +29,4 @@ package com.prodyna.mifune.domain;
 import java.util.UUID;
 
 public record QueryRelation(
-    UUID id, String varName, UUID relationId, UUID sourceId, UUID targetId) {}
+    UUID id, String varName, UUID relationId, UUID sourceId, UUID targetId, String depth) {}

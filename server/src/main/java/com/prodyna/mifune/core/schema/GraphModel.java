@@ -4,7 +4,7 @@ package com.prodyna.mifune.core.schema;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 PRODYNA SE
+ * Copyright (C) 2021 - 2022 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -82,5 +82,16 @@ public class GraphModel {
         .map(Domain::getRootNodeId)
         .map(nodes::get)
         .orElseThrow(NotFoundException::new);
+  }
+
+  public Optional<RelationModel> relationById(UUID relId) {
+    return nodes.values().stream()
+        .flatMap(n -> n.getRelations().stream())
+        .filter(r -> r.getId().equals(relId))
+        .findFirst();
+  }
+
+  public Optional<NodeModel> nodeById(UUID nodeId) {
+    return Optional.ofNullable(nodes.get(nodeId));
   }
 }
