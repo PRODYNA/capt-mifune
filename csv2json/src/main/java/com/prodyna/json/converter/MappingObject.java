@@ -43,6 +43,13 @@ public class MappingObject {
   final LinkedHashMap<String, LinkedHashMap<Integer, MappingObject>> objectFieldArrayValues =
       new LinkedHashMap<>();
 
+  public boolean isEmpty() {
+    return primitiveFieldValues.isEmpty()
+        && primitiveArrayFieldValues.isEmpty()
+        && objectFieldValues.isEmpty()
+        && objectFieldArrayValues.isEmpty();
+  }
+
   public JsonNode toJson(boolean addLines) {
     ObjectMapper mapper = new ObjectMapper();
 
@@ -84,11 +91,19 @@ public class MappingObject {
               });
           objectNode.set(k, array);
         });
-    objectFieldValues.forEach((k, v) -> objectNode.set(k, v.toJson(false)));
+    objectFieldValues.forEach(
+        (k, v) -> {
+          if (!v.isEmpty()) {
+            objectNode.set(k, v.toJson(false));
+          }
+        });
     objectFieldArrayValues.forEach(
         (k, v) -> {
           var array = mapper.createArrayNode();
-          v.values().stream().map(mo -> mo.toJson(false)).forEach(array::add);
+          v.values().stream()
+              .filter(mo -> !mo.isEmpty())
+              .map(mo -> mo.toJson(false))
+              .forEach(array::add);
           objectNode.set(k, array);
         });
 

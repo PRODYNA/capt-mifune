@@ -5,11 +5,10 @@
     "rootNodeId" : "3c82895c-245c-428e-b786-0eb3c220d129",
     "file" : "material.csv",
     "columnMapping" : {
-      "material.contains.material.id" : "componentId",
+      "material.contains[].material.id" : "componentId",
       "material.id" : "id",
       "material.co2" : "co2",
-      "material.name" : "name",
-      "material.contains.amount" : "amount"
+      "material.name" : "name"
     },
     "modelValid" : true,
     "mappingValid" : true
@@ -35,7 +34,7 @@
       "material.id" : "material"
     },
     "modelValid" : true,
-    "mappingValid" : false
+    "mappingValid" : true
   } ],
   "nodes" : [ {
     "id" : "3c82895c-245c-428e-b786-0eb3c220d129",
@@ -77,7 +76,7 @@
     "domainIds" : [ "2d04404c-6585-4aae-b768-50b14d11c757" ],
     "type" : "CONTAINS",
     "primary" : false,
-    "multiple" : false,
+    "multiple" : true,
     "color" : "#20d129",
     "properties" : [ {
       "name" : "amount",

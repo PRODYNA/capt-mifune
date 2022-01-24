@@ -42,8 +42,10 @@ public class JsonConverterUtil {
               var fieldConfig = e.getValue();
               if (fieldConfig.isInt()) {
                 var index = fieldConfig.asInt();
-                var value = line.get(index);
-                hashFields.add(value);
+                if (index < line.size()) {
+                  var value = line.get(index);
+                  hashFields.add(value);
+                }
               } else if (fieldConfig.isTextual()) {
                 var config = fieldConfig.asText();
                 var parts = config.split(":");
@@ -67,16 +69,21 @@ public class JsonConverterUtil {
     return Objects.hash(hashFields.toArray());
   }
 
-  static void mergeModel(JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
+  static MappingObject mergeModel(
+      JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
     var result = new MappingObject();
     int hash = generateHash(model, line);
     var mappingObject = results.computeIfAbsent(hash, x -> result);
     model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
+    return result;
   }
 
   static void mergeField(
       String name, JsonNode fieldConfig, MappingObject mappingObject, List<String> line) {
     if (fieldConfig.isInt()) {
+      if (line.size() <= fieldConfig.asInt()) {
+        return;
+      }
       mappingObject.primitiveFieldValues.putIfAbsent(name, line.get(fieldConfig.asInt()));
     } else if (fieldConfig.isTextual()) {
       handleTypeConfig(name, fieldConfig, mappingObject, line);
@@ -95,7 +102,10 @@ public class JsonConverterUtil {
     if (next.isObject()) {
       var mappingObjectMap =
           mappingObject.objectFieldArrayValues.computeIfAbsent(name, n -> new LinkedHashMap<>());
-      mergeModel(next, mappingObjectMap, line);
+      var mo = mergeModel(next, mappingObjectMap, line);
+      if (mo.isEmpty()) {
+        mappingObject.objectFieldArrayValues.remove(name);
+      }
     } else if (next.isInt()) {
       var list =
           mappingObject.primitiveArrayFieldValues.computeIfAbsent(name, x -> new ArrayList<>());
@@ -125,6 +135,9 @@ public class JsonConverterUtil {
     fieldConfig
         .fields()
         .forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), newMappingObject, line));
+    if (newMappingObject.isEmpty()) {
+      mappingObject.objectFieldValues.remove(name);
+    }
   }
 
   static void handleTypeConfig(
