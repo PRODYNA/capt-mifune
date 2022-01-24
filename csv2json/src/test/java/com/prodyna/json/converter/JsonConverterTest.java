@@ -26,8 +26,7 @@ package com.prodyna.json.converter;
  * #L%
  */
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -117,6 +116,20 @@ class JsonConverterTest {
     assertEquals(2, node.get("subCategories").size());
     assertEquals("elephant", node.get("subCategories").get(0).get("name").asText());
     assertEquals("hippo", node.get("subCategories").get(1).get("name").asText());
+  }
+
+  @Test
+  public void objectEmptyArray() {
+    var model = new ObjectMapper().createObjectNode();
+    model.put("category", 0).putArray("subCategories").addObject().put("name", 1);
+    var csv = List.of(List.of("animal"));
+    var jsonNodes = new JsonConverter().toJson(model, csv);
+    System.out.println(jsonNodes.toPrettyString());
+    assertEquals(jsonNodes.size(), 1);
+    var node = jsonNodes.elements().next();
+    assertTrue(node.get("category").isTextual());
+    assertEquals("animal", node.get("category").asText());
+    assertNull(node.get("subCategories"));
   }
 
   @Test
