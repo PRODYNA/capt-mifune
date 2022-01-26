@@ -1,24 +1,31 @@
-id,name,co2,componentId,amount
-1,Car,10
-1,Car,10,4,4
-1,Car,10,2,1
-1,Car,10,3,1
-3,Body,5,31,1
-3,Body,5,32,1
-3,Body,5,2000,2
-31,Door-Left,20,300,1
-32,Door-Right,20,300,1
-300,Side-Window,5
-2,Motor,7
-2,Motor,7,20,1
-2,Motor,7,21,1
-4,Wheel,15
-20,Frame,5
-20,Frame,5,900,4
-21,Rotor,5,1000,2
-21,Rotor,5,1001,12
-900,Screw,2
-900,Screw,2,1000,1
-1000,Steel,2
-1001,Copper,1
-2000,ColorBlue,1
+id,name,constructionTime
+90000,Cuckoo Clock,45
+00001,House,15
+00002,Front,20
+00003,Door,15
+00004,Window,6
+00005,Roof,4
+00007,Animation Machine,20
+00008,Wheel Tooth 31,12
+00009,Spring,2
+00010,Bird,30
+00011,Small Bird,14
+00012,Wheel Tooth 11,3
+00013,Wheel Tooth 17,5
+00014,Pendulum Clock,15
+00015,Main Clock,60
+00016,Clock Frame,20
+00017,Pinion,2
+00018,Center Wheel,5
+00019,Third Wheel,5
+00020,Hour Hand,15
+00021,Minute Hand,5
+00022,Pendulum,3
+00023,Suspension Spring,3
+00024,Pendulum Rod,5
+00025,Pendulum Bob,23
+00026,Main Wheel,8
+00027,Weight,8
+00028,Chain,9
+00030,Pendulum Frame,12
+20000,Board,1
