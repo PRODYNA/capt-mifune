@@ -61,7 +61,7 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
       <TableCell className={classes.tableCell}>
         <FormSelect
           title="Type"
-          options={['string', 'int', 'double', 'long']}
+          options={['string', 'int', 'double', 'long', 'date']}
           value={value.type}
           fullWidth={false}
           className={classes.spacing}
