@@ -29,6 +29,7 @@ package com.prodyna.mifune.core.schema;
 import static java.util.function.Predicate.not;
 
 import com.prodyna.mifune.domain.Property;
+import com.prodyna.mifune.domain.PropertyType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -132,13 +133,13 @@ public class CypherUpdateBuilder {
               var path = new ArrayList<>(varPath);
               path.add(r.varName());
               subContext.addStatement(
-                  "set %s.%s = coalesce(%s.%s, %s)"
+                  "set %s.%s = coalesce(%s, %s.%s)"
                       .formatted(
                           r.varName(),
                           p.name(),
-                          String.join(".", path),
-                          p.name(),
-                          propertyValue(r.varName(), p)));
+                          propertyValue(String.join(".", path), p),
+                          r.varName(),
+                          p.name()));
             });
     subContext.addStatement("with *");
   }
@@ -274,7 +275,7 @@ public class CypherUpdateBuilder {
   }
 
   private String propertyValue(String nodeVar, Property property) {
-    if (property.type().equals("date")) {
+    if (property.type().equals(PropertyType.DATE)) {
       return "date(%s.%s)".formatted(nodeVar, property.name());
     }
     return "%s.%s".formatted(nodeVar, property.name());

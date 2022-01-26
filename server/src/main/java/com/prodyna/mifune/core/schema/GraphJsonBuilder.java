@@ -106,13 +106,13 @@ public class GraphJsonBuilder {
         .forEach(
             p -> {
               switch (p.type()) {
-                case "string" -> jsonNodes.put(p.name(), "string");
-                case "int" -> jsonNodes.put(p.name(), "int");
-                case "long" -> jsonNodes.put(p.name(), "long");
-                case "double" -> jsonNodes.put(p.name(), "double");
-                case "float" -> jsonNodes.put(p.name(), "float");
-                case "boolean" -> jsonNodes.put(p.name(), "boolean");
-                case "date" -> jsonNodes.put(p.name(), "date");
+                case STRING -> jsonNodes.put(p.name(), "string");
+                case INT -> jsonNodes.put(p.name(), "int");
+                case LONG -> jsonNodes.put(p.name(), "long");
+                case DOUBLE -> jsonNodes.put(p.name(), "double");
+                case FLOAT -> jsonNodes.put(p.name(), "float");
+                case BOOLEAN -> jsonNodes.put(p.name(), "boolean");
+                case DATE -> jsonNodes.put(p.name(), "date");
                 default -> throw new IllegalArgumentException();
               }
             });

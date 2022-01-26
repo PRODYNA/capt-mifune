@@ -26,4 +26,20 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-public record Filter(FilterFunction function, String property, Object value) {}
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum PropertyType {
+  INT("int"),
+  STRING("string"),
+  LONG("long"),
+  DOUBLE("double"),
+  FLOAT("float"),
+  BOOLEAN("boolean"),
+  DATE("date");
+
+  PropertyType(String simpleName) {
+    this.simpleName = simpleName;
+  }
+
+  @JsonValue String simpleName;
+}

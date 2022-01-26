@@ -29,9 +29,7 @@ package com.prodyna.mifune.core.schema;
 import static java.util.function.Predicate.not;
 
 import com.prodyna.mifune.core.CoreFunction;
-import com.prodyna.mifune.domain.Filter;
-import com.prodyna.mifune.domain.Query;
-import com.prodyna.mifune.domain.QueryNode;
+import com.prodyna.mifune.domain.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -209,19 +207,65 @@ public class CypherQueryBuilder {
 
   private String addFilterStatement() {
     var whereClauses = new ArrayList<String>();
-    this.query.filters().stream()
-        .collect(Collectors.toMap(Filter::property, Filter::value))
+    this.query
+        .filters()
         .forEach(
-            (key, value) -> {
+            (filter) -> {
+              propertyForVariable(filter.property());
               var varName = "var_" + counter.incrementAndGet();
+              var propName =
+                  "%s.%s"
+                      .formatted(
+                          getVarMap().get(baseName(filter.property())),
+                          propName(filter.property()));
+              parameter.put(varName, filter.value());
+              var sign =
+                  switch (Optional.ofNullable(filter.function()).orElse(FilterFunction.EQUAL)) {
+                    case EQUAL -> "=";
+                    case LESS -> "<";
+                    case GREATER -> ">";
+                  };
               whereClauses.add(
-                  "%s.%s = $%s".formatted(getVarMap().get(baseName(key)), propName(key), varName));
-              parameter.put(varName, value);
+                  "%s %s %s".formatted(propName, sign, functionValue(filter, varName)));
             });
     return Optional.of(whereClauses)
         .filter(not(Collection::isEmpty))
         .map(c -> "with * where %s".formatted(String.join(" and ", c)))
         .orElse("");
+  }
+
+  private String functionValue(Filter filter, String varName) {
+    var property = propertyForVariable(filter.property());
+    if (property.type().equals(PropertyType.DATE)) {
+      return "date($%s)".formatted(varName);
+    }
+    return "$%s".formatted(varName);
+  }
+
+  private Property propertyForVariable(String property) {
+    var s = baseName(property);
+    var nodeProp =
+        query.nodes().stream()
+            .filter(n -> n.varName().equals(baseName(property)))
+            .map(QueryNode::nodeId)
+            .map(graphModel::nodeById)
+            .flatMap(Optional::stream)
+            .flatMap(nm -> nm.getProperties().stream())
+            .filter(p -> p.name().equals(propName(property)))
+            .findFirst();
+
+    return nodeProp
+        .or(
+            () ->
+                query.relations().stream()
+                    .filter(n -> n.varName().equals(baseName(property)))
+                    .map(QueryRelation::relationId)
+                    .map(graphModel::relationById)
+                    .flatMap(Optional::stream)
+                    .flatMap(nm -> nm.getProperties().stream())
+                    .filter(p -> p.name().equals(propName(property)))
+                    .findFirst())
+        .orElseThrow();
   }
 
   private String baseName(String jsonPropertyPath) {
