@@ -85,6 +85,17 @@ class JsonConverterTest {
   }
 
   @Test
+  public void simpleDate() {
+    JsonNode model = new ObjectMapper().createObjectNode().put("since", "0:date");
+    var csv = List.of(List.of("1990-01-01"));
+    var jsonNodes = new JsonConverter().toJson(model, csv);
+    assertEquals(jsonNodes.size(), 1);
+    var node = jsonNodes.elements().next();
+    assertTrue(node.get("since").isTextual());
+    assertEquals(node.get("since").asText(), "1990-01-01");
+  }
+
+  @Test
   public void stringArray() {
     var model = new ObjectMapper().createObjectNode();
     model.put("category", 0).putArray("subCategories").add(1);

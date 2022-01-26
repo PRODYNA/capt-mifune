@@ -29,6 +29,7 @@ package com.prodyna.json.converter;
 import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,11 +70,9 @@ public class JsonConverterUtil {
                 throw new IllegalArgumentException();
               }
             });
-
   }
 
   static void mergeModel(JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
-
     int hash = generateHash(model, line);
     var result = results.getOrDefault(hash, new MappingObject());
     model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), result, line));
@@ -123,9 +122,15 @@ public class JsonConverterUtil {
       } else if ("int".equals(config.type())) {
         list.add(Integer.parseInt(field));
       } else if ("long".equals(config.type())) {
-        list.add(Integer.parseInt(field));
+        list.add(Long.parseLong(field));
       } else if ("double".equals(config.type())) {
         list.add(Double.parseDouble(field));
+      } else if ("float".equals(config.type())) {
+        list.add(Float.parseFloat(field));
+      } else if ("boolean".equals(config.type())) {
+        list.add(Boolean.parseBoolean(field));
+      } else if ("date".equals(config.type())) {
+        list.add(LocalDate.parse(field));
       }
     }
   }
@@ -160,6 +165,15 @@ public class JsonConverterUtil {
     } else if ("double".equals(config.type())) {
       mappingObject.primitiveFieldValues.putIfAbsent(
           name, field.map(Double::parseDouble).orElse(null));
+    } else if ("float".equals(config.type())) {
+      mappingObject.primitiveFieldValues.putIfAbsent(
+          name, field.map(Float::parseFloat).orElse(null));
+    } else if ("boolean".equals(config.type())) {
+      mappingObject.primitiveFieldValues.putIfAbsent(
+          name, field.map(Boolean::parseBoolean).orElse(null));
+    } else if ("date".equals(config.type())) {
+      mappingObject.primitiveFieldValues.putIfAbsent(
+          name, field.map(LocalDate::parse).orElse(null));
     } else {
       throw new UnsupportedOperationException("type not implemented");
     }
