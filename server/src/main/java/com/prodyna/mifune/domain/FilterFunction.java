@@ -26,4 +26,8 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-public record Filter(FilterFunction function, String property, Object value) {}
+public enum FilterFunction {
+  EQUAL,
+  LESS,
+  GREATER
+}
