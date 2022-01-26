@@ -27,6 +27,8 @@ package com.prodyna.mifune.core;
  */
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
@@ -41,6 +43,7 @@ import com.prodyna.mifune.domain.Graph;
 import com.prodyna.mifune.domain.ImportStatistic;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.groups.MultiFlatten;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.mutiny.subscription.Cancellable;
 import io.vertx.mutiny.core.eventbus.EventBus;
@@ -60,6 +63,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
 import org.reactivestreams.FlowAdapters;
+import org.reactivestreams.Processor;
 
 @ApplicationScoped
 public class ImportService {
@@ -78,7 +82,6 @@ public class ImportService {
   @Inject protected GraphService graphService;
   @Inject protected SourceService sourceService;
 
-  // This Method should be split up into domain import and file import
   public Uni<String> runImport(UUID domainId) {
 
     if (pipelineMap.containsKey(domainId)) {
@@ -99,7 +102,6 @@ public class ImportService {
         .invoke(
             () -> {
               Cancellable cancellable = startImportTask(domainId, domain, graph);
-
               pipelineMap.put(domainId, cancellable);
             })
         .map(x -> "OK");
@@ -107,53 +109,20 @@ public class ImportService {
 
   private Cancellable startImportTask(UUID domainId, Domain domain, Graph graph) {
     GraphModel graphModel = new GraphModel(graph);
-    var counter = new AtomicLong(1L);
     ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
     cleanJsonModel(domain, jsonModel);
     var importFile = Paths.get(uploadDir, domain.getFile());
     var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
     log.info(cypher);
 
-    var publisher =
+    var processor =
         Multi.createFrom()
             .items(fileContentStream(importFile))
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .subscribe()
             .withSubscriber(FlowAdapters.toProcessor(new JsonTransformer(jsonModel, 100)));
 
-    var session = driver.asyncSession();
-    var importTask =
-        Multi.createFrom()
-            .publisher(publisher)
-            .emitOn(Infrastructure.getDefaultWorkerPool())
-            .onItem()
-            .transformToUni(
-                node -> {
-                  var entry = new ObjectMapper().convertValue(node, Map.class);
-                  var s = driver.asyncSession();
-                  return Uni.createFrom()
-                      .completionStage(
-                          s.writeTransactionAsync(
-                                  tx ->
-                                      tx.runAsync(
-                                          cypher,
-                                          Map.of("model", entry, "domainId", domainId.toString())))
-                              .exceptionally(
-                                  e -> {
-                                    log.error(
-                                        " Failed item import in file: "
-                                            + domain.getFile()
-                                            + " on line "
-                                            + counter.get()
-                                            + " Message: "
-                                            + e.getMessage());
-                                    return null;
-                                  })
-                              .thenCompose(x1 -> session.closeAsync())
-                              .thenApply(v -> counter.getAndIncrement()));
-                });
-
-    return importTask
+    return createImportTask(domainId, domain, cypher, processor)
         .withRequests(1)
         .concatenate()
         .subscribe()
@@ -166,16 +135,46 @@ public class ImportService {
                         .writer()
                         .writeValueAsString(new ImportStatistic(domainId, s)));
               } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
               }
             },
             throwable -> {
-              log.error("error in pipeline: " + throwable.getMessage());
+              log.error(throwable.getMessage(), throwable);
               pipelineMap.remove(domainId);
             },
             () -> {
               pipelineMap.remove(domainId);
               log.info("import done ");
+            });
+  }
+
+  private MultiFlatten<JsonNode, Long> createImportTask(
+      UUID domainId, Domain domain, String cypher, Processor<List<String>, JsonNode> publisher) {
+    var counter = new AtomicLong(1L);
+    var session = driver.asyncSession();
+    return Multi.createFrom()
+        .publisher(publisher)
+        .emitOn(Infrastructure.getDefaultWorkerPool())
+        .onItem()
+        .transformToUni(
+            node -> {
+              log.info(node.toString());
+              var entry =
+                  new ObjectMapper()
+                      .convertValue(node, new TypeReference<HashMap<String, Object>>() {});
+              var s = driver.asyncSession();
+              return Uni.createFrom()
+                  .completionStage(
+                      s.runAsync(cypher, Map.of("model", entry, "domainId", domainId.toString()))
+                          .exceptionally(
+                              e -> {
+                                log.errorf(
+                                    " Failed item import in file: %s on lines: %s   msg: %s",
+                                    domain.getFile(), node.get("lines"), e.getMessage(), e);
+                                return null;
+                              })
+                          .thenCompose(x1 -> session.closeAsync())
+                          .thenApply(v -> counter.getAndIncrement()));
             });
   }
 
@@ -205,7 +204,7 @@ public class ImportService {
                       s.writeTransactionAsync(tx -> tx.runAsync(indexCypher))
                           .exceptionally(
                               e -> {
-                                log.error(" Failed creating index: " + e.getMessage());
+                                log.error(" Failed creating index: " + e.getMessage(), e);
                                 return null;
                               })
                           .thenCompose(x1 -> s.closeAsync()));
