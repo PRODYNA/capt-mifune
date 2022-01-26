@@ -32,16 +32,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 
 import com.prodyna.mifune.core.GraphService;
-import com.prodyna.mifune.domain.Domain;
-import com.prodyna.mifune.domain.DomainCreate;
-import com.prodyna.mifune.domain.GraphDelta;
-import com.prodyna.mifune.domain.Node;
-import com.prodyna.mifune.domain.NodeCreate;
-import com.prodyna.mifune.domain.NodeUpdate;
-import com.prodyna.mifune.domain.Property;
-import com.prodyna.mifune.domain.Relation;
-import com.prodyna.mifune.domain.RelationCreate;
-import com.prodyna.mifune.domain.RelationUpdate;
+import com.prodyna.mifune.domain.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.vertx.core.json.JsonObject;
@@ -202,8 +193,8 @@ class GraphResourceTest {
   @Test
   void testMapping() {
     Domain sampleDomain = createSampleDomain();
-    Property name = new Property("name", "string", true);
-    Property other = new Property("other", "string", false);
+    Property name = new Property("name", PropertyType.STRING, true);
+    Property other = new Property("other", PropertyType.STRING, false);
     List<Property> props = List.of(name, other);
 
     Node blaNode = createNodeInDomain(sampleDomain, "Bla");

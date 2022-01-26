@@ -29,9 +29,9 @@ package com.prodyna.mifune.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Property(String name, String type, boolean primary) {
+public record Property(String name, PropertyType type, boolean primary) {
 
-  public Property(String name, String type) {
+  public Property(String name, PropertyType type) {
     this(name, type, false);
   }
 }
