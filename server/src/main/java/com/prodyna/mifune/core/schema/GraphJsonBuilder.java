@@ -107,9 +107,13 @@ public class GraphJsonBuilder {
             p -> {
               switch (p.type()) {
                 case "string" -> jsonNodes.put(p.name(), "string");
+                case "int" -> jsonNodes.put(p.name(), "int");
                 case "long" -> jsonNodes.put(p.name(), "long");
                 case "double" -> jsonNodes.put(p.name(), "double");
+                case "float" -> jsonNodes.put(p.name(), "float");
                 case "boolean" -> jsonNodes.put(p.name(), "boolean");
+                case "date" -> jsonNodes.put(p.name(), "date");
+                default -> throw new IllegalArgumentException();
               }
             });
   }

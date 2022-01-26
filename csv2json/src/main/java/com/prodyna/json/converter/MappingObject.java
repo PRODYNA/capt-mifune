@@ -28,6 +28,7 @@ package com.prodyna.json.converter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,18 +57,20 @@ public class MappingObject {
     var objectNode = mapper.createObjectNode();
     primitiveFieldValues.forEach(
         (k, v) -> {
-          if (v instanceof Integer) {
-            objectNode.put(k, (Integer) v);
-          } else if (v instanceof Double) {
-            objectNode.put(k, (Double) v);
-          } else if (v instanceof String) {
-            objectNode.put(k, (String) v);
-          } else if (v instanceof Long) {
-            objectNode.put(k, (Long) v);
-          } else if (v instanceof Float) {
-            objectNode.put(k, (Float) v);
-          } else if (v instanceof Boolean) {
-            objectNode.put(k, (Boolean) v);
+          if (v instanceof Integer i) {
+            objectNode.put(k, i);
+          } else if (v instanceof Double d) {
+            objectNode.put(k, d);
+          } else if (v instanceof String s) {
+            objectNode.put(k, s);
+          } else if (v instanceof Long l) {
+            objectNode.put(k, l);
+          } else if (v instanceof Float f) {
+            objectNode.put(k, f);
+          } else if (v instanceof Boolean b) {
+            objectNode.put(k, b);
+          } else if (v instanceof LocalDate date) {
+            objectNode.put(k, date.toString());
           } else if (!Objects.isNull(v)) {
             throw new IllegalStateException();
           }
@@ -77,14 +80,18 @@ public class MappingObject {
           var array = mapper.createArrayNode();
           values.forEach(
               v -> {
-                if (v instanceof Integer) {
-                  array.add((Integer) v);
-                } else if (v instanceof Double) {
-                  array.add((Double) v);
-                } else if (v instanceof String) {
-                  array.add((String) v);
-                } else if (v instanceof Float) {
-                  array.add((Float) v);
+                if (v instanceof Integer i) {
+                  array.add(i);
+                } else if (v instanceof Double d) {
+                  array.add(d);
+                } else if (v instanceof String s) {
+                  array.add(s);
+                } else if (v instanceof Float f) {
+                  array.add(f);
+                } else if (v instanceof Long l) {
+                  array.add(l);
+                } else if (v instanceof Boolean b) {
+                  array.add(b);
                 } else {
                   throw new IllegalStateException();
                 }

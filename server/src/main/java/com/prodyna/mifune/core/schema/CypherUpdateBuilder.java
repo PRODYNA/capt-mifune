@@ -132,14 +132,13 @@ public class CypherUpdateBuilder {
               var path = new ArrayList<>(varPath);
               path.add(r.varName());
               subContext.addStatement(
-                  "set %s.%s = coalesce(%s.%s, %s.%s)"
+                  "set %s.%s = coalesce(%s.%s, %s)"
                       .formatted(
                           r.varName(),
                           p.name(),
                           String.join(".", path),
                           p.name(),
-                          r.varName(),
-                          p.name()));
+                          propertyValue(r.varName(), p)));
             });
     subContext.addStatement("with *");
   }
@@ -198,12 +197,11 @@ public class CypherUpdateBuilder {
         .forEach(
             p ->
                 subContext.addStatement(
-                    "set %s.%s = coalesce(%s.%s, %s.%s)"
+                    "set %s.%s = coalesce(%s, %s.%s)"
                         .formatted(
                             r.varName(),
                             p.name(),
-                            String.join(".", contextVarPath),
-                            p.name(),
+                            propertyValue(String.join(".", contextVarPath), p),
                             r.varName(),
                             p.name())));
     subContext.addStatement("with *");
@@ -255,12 +253,11 @@ public class CypherUpdateBuilder {
         .forEach(
             p ->
                 cypherContext.addStatement(
-                    "set %s.%s = coalesce(%s.%s, %s.%s)"
+                    "set %s.%s = coalesce(%s, %s.%s)"
                         .formatted(
                             nodeVar,
                             p.name(),
-                            String.join(".", varPath),
-                            p.name(),
+                            propertyValue(String.join(".", varPath), p),
                             nodeVar,
                             p.name())));
     if (cypherContext.root() && buildDomainLink) {
@@ -276,6 +273,13 @@ public class CypherUpdateBuilder {
     }
   }
 
+  private String propertyValue(String nodeVar, Property property) {
+    if (property.type().equals("date")) {
+      return "date(%s.%s)".formatted(nodeVar, property.name());
+    }
+    return "%s.%s".formatted(nodeVar, property.name());
+  }
+
   private String primaryKeys(List<String> varPath, List<Property> properties) {
     var primaryKeys =
         Optional.ofNullable(properties).stream()
@@ -287,7 +291,7 @@ public class CypherUpdateBuilder {
     }
 
     return primaryKeys.stream()
-        .map(property -> property.name() + ":" + String.join(".", varPath) + "." + property.name())
+        .map(property -> property.name() + ":" + propertyValue(String.join(".", varPath), property))
         .collect(Collectors.joining(",", " {", "}"));
   }
 }
