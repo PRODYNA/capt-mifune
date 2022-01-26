@@ -30,11 +30,18 @@ import static java.util.function.Predicate.not;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JsonConverterUtil {
 
   static int generateHash(JsonNode model, List<String> line) {
-    List<Object> hashFields = new ArrayList<>();
+    var hashList = new ArrayList<>();
+    generateHash(hashList, model, line);
+    var collect = hashList.stream().map(Object::toString).collect(Collectors.joining());
+    return collect.hashCode();
+  }
+
+  static void generateHash(List<Object> hashFields, JsonNode model, List<String> line) {
     model
         .fields()
         .forEachRemaining(
@@ -54,28 +61,25 @@ public class JsonConverterUtil {
                   var field = line.get(index);
                   hashFields.add(field);
                 }
+              } else if (fieldConfig.isObject()) {
+                generateHash(hashFields, fieldConfig, line);
+              } else if (fieldConfig.isArray()) {
+
+              } else {
+                throw new IllegalArgumentException();
               }
             });
 
-    model
-        .fields()
-        .forEachRemaining(
-            f -> {
-              if (f.getValue().isObject()) {
-                hashFields.add(generateHash(f.getValue(), line));
-              }
-            });
-
-    return Objects.hash(hashFields.toArray());
   }
 
-  static MappingObject mergeModel(
-      JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
-    var result = new MappingObject();
+  static void mergeModel(JsonNode model, Map<Integer, MappingObject> results, List<String> line) {
+
     int hash = generateHash(model, line);
-    var mappingObject = results.computeIfAbsent(hash, x -> result);
-    model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), mappingObject, line));
-    return result;
+    var result = results.getOrDefault(hash, new MappingObject());
+    model.fields().forEachRemaining(e -> mergeField(e.getKey(), e.getValue(), result, line));
+    if (!result.isEmpty()) {
+      results.put(hash, result);
+    }
   }
 
   static void mergeField(
@@ -102,10 +106,8 @@ public class JsonConverterUtil {
     if (next.isObject()) {
       var mappingObjectMap =
           mappingObject.objectFieldArrayValues.computeIfAbsent(name, n -> new LinkedHashMap<>());
-      var mo = mergeModel(next, mappingObjectMap, line);
-      if (mo.isEmpty()) {
-        mappingObject.objectFieldArrayValues.remove(name);
-      }
+      mergeModel(next, mappingObjectMap, line);
+
     } else if (next.isInt()) {
       var list =
           mappingObject.primitiveArrayFieldValues.computeIfAbsent(name, x -> new ArrayList<>());
