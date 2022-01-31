@@ -23,11 +23,34 @@
     },
     "modelValid" : true,
     "mappingValid" : true
+  }, {
+    "id" : "dda7c15f-6ba3-4602-9dd9-89db51a24810",
+    "name" : "Category",
+    "rootNodeId" : "c8e719b2-ae53-4996-8c8b-37b068b8b373",
+    "file" : "category.csv",
+    "columnMapping" : {
+      "category.inCategory.category.id" : "parentId",
+      "category.name" : "name",
+      "category.id" : "id"
+    },
+    "modelValid" : true,
+    "mappingValid" : true
+  }, {
+    "id" : "e834ca34-63c1-4c1f-8502-d715b5be1637",
+    "name" : "CategoryMapping",
+    "rootNodeId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "file" : "category-mapping.csv",
+    "columnMapping" : {
+      "material.inCategory[].category.id" : "categoryId",
+      "material.id" : "materialId"
+    },
+    "modelValid" : true,
+    "mappingValid" : true
   } ],
   "nodes" : [ {
     "id" : "3c82895c-245c-428e-b786-0eb3c220d129",
     "label" : "Material",
-    "domainIds" : [ "6e16303a-0f60-468f-a655-6101897f3258", "2d04404c-6585-4aae-b768-50b14d11c757" ],
+    "domainIds" : [ "6e16303a-0f60-468f-a655-6101897f3258", "e834ca34-63c1-4c1f-8502-d715b5be1637", "2d04404c-6585-4aae-b768-50b14d11c757" ],
     "color" : "#20d129",
     "properties" : [ {
       "name" : "id",
@@ -40,6 +63,20 @@
     }, {
       "name" : "timeOfConstruction",
       "type" : "double",
+      "primary" : false
+    } ]
+  }, {
+    "id" : "c8e719b2-ae53-4996-8c8b-37b068b8b373",
+    "label" : "Category",
+    "domainIds" : [ "e834ca34-63c1-4c1f-8502-d715b5be1637", "dda7c15f-6ba3-4602-9dd9-89db51a24810" ],
+    "color" : "#b8b373",
+    "properties" : [ {
+      "name" : "id",
+      "type" : "string",
+      "primary" : true
+    }, {
+      "name" : "name",
+      "type" : "string",
       "primary" : false
     } ]
   } ],
@@ -57,5 +94,25 @@
       "type" : "double",
       "primary" : false
     } ]
+  }, {
+    "id" : "3808282b-0b03-4712-ad2a-5a9ce2b28a9f",
+    "sourceId" : "c8e719b2-ae53-4996-8c8b-37b068b8b373",
+    "targetId" : "c8e719b2-ae53-4996-8c8b-37b068b8b373",
+    "domainIds" : [ "dda7c15f-6ba3-4602-9dd9-89db51a24810" ],
+    "type" : "IN_CATEGORY",
+    "primary" : false,
+    "multiple" : false,
+    "color" : "#b8b373",
+    "properties" : [ ]
+  }, {
+    "id" : "1e7c2931-9edd-47e8-b7da-f2dc0b2b4f35",
+    "sourceId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "targetId" : "c8e719b2-ae53-4996-8c8b-37b068b8b373",
+    "domainIds" : [ "e834ca34-63c1-4c1f-8502-d715b5be1637" ],
+    "type" : "IN_CATEGORY",
+    "primary" : false,
+    "multiple" : true,
+    "color" : "#20d129",
+    "properties" : [ ]
   } ]
 }
