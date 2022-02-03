@@ -2,8 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 import reportWebVitals from './reportWebVitals'
-import HttpService from './services/HttpService'
-import UserService from './services/UserService'
+import HttpService from './openapi/HttpService'
+import UserService from './auth/UserService'
 import MifuneTheme from './components/Theme/MifuneTheme'
 
 export async function loadEnv(): Promise<void> {
