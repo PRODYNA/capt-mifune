@@ -1,0 +1,8 @@
+{
+  "apiPackage": "api",
+  "modelPackage": "models",
+  "typeMappings": {
+    "AnyType": "any"
+  },
+  "withSeparateModelsAndApi": true
+}

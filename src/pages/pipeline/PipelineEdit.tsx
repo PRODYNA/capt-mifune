@@ -2,14 +2,12 @@ import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Grid } from '@material-ui/core'
 import { Domain, Source } from '../../api/model/Model'
-import graphService from '../../api/GraphService'
 import FormSelect from '../../components/Form/FormSelect'
 import FormActions from '../../components/Form/FormActions'
-import HttpService from '../../services/HttpService'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-
-const rest = HttpService.getAxiosClient()
+import { SourceResourceApi, GraphApi } from '../../services'
+import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface DomainEditProps {
   domain: Domain
@@ -17,6 +15,8 @@ interface DomainEditProps {
 
 const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const { domain } = props
+  const graphApi = new GraphApi(AXIOS_CONFIG())
+  const sourceApi = new SourceResourceApi(AXIOS_CONFIG())
   const history = useHistory()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [mapping, setMapping] = useState<{ [key: string]: string }>(
@@ -26,11 +26,12 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const [sources, setSources] = useState<Source[]>([])
 
   useEffect(() => {
-    rest.get<Source[]>('/sources').then((r) => {
-      setSources(r.data)
+    sourceApi.apiSourcesGet().then((r) => {
+      const test = r.data as unknown as Source[]
+      setSources(test)
     })
 
-    graphService.loadDefaultMappingConfig(domain).then((r) => {
+    graphApi.apiGraphDomainDomainIdMappingGet(domain.id).then((r) => {
       setMapping(r.data ?? {})
     })
   }, [domain])
@@ -114,8 +115,8 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   return (
     <form
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        graphService
-          .domainPut(domain.id, {
+        graphApi
+          .apiGraphDomainIdPut(domain.id, {
             ...domain,
             file,
             columnMapping: mapping,
