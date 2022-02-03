@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { AxiosResponse } from 'axios'
 import { EventSourcePolyfill } from 'ng-event-source'
-import HttpService from '../services/HttpService'
+import HttpService from '../openapi/HttpService'
 import {
   Domain,
   DomainCreate,
@@ -17,7 +17,7 @@ import {
   RelationCreate,
   RelationUpdate,
 } from './model/Model'
-import UserService from '../services/UserService'
+import UserService from '../auth/UserService'
 import { ENV } from '../env/Environments'
 import { Query } from '../pages/analytics/QueryBuilder'
 

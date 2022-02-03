@@ -22,6 +22,11 @@
     "downlevelIteration": true
   },
   "include": [
-    "src",
+    "./src/**/*",
+  ],
+  "exclude": [
+    "./public",
+    "./node_modules",
+    "./src/services"
   ]
 }

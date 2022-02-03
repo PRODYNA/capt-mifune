@@ -1,0 +1,804 @@
+---
+openapi: 3.0.3
+info:
+  title: Mifune API
+  version: 1.0.0-SNAPSHOT
+security:
+- access_token: []
+tags:
+- name: admin
+- name: graph
+paths:
+  /api/apocalypse:
+    get:
+      tags:
+      - admin
+      summary: Reset the whole database
+      description: |
+        Remove all nodes and relation and delete each constraint and index
+      responses:
+        "200":
+          description: OK
+          content:
+            text/event-stream:
+              schema:
+                type: array
+                items:
+                  type: string
+  /api/data:
+    post:
+      tags:
+      - Data Resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    type: object
+  /api/data/domain/{domainId}/keys:
+    get:
+      tags:
+      - Data Resource
+      parameters:
+      - name: domainId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /api/graph:
+    get:
+      tags:
+      - graph
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Graph'
+    post:
+      tags:
+      - graph
+      responses:
+        "201":
+          description: Created
+  /api/graph/domain:
+    post:
+      tags:
+      - graph
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DomainCreate'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Domain'
+  /api/graph/domain/fn/count:
+    get:
+      tags:
+      - graph
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  format: int64
+                  type: integer
+  /api/graph/domain/fn/statistics:
+    get:
+      tags:
+      - graph
+      responses:
+        "200":
+          description: OK
+          content:
+            text/event-stream:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties:
+                    format: int64
+                    type: integer
+  /api/graph/domain/{domainId}/clear:
+    delete:
+      tags:
+      - graph
+      parameters:
+      - name: domainId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+  /api/graph/domain/{domainId}/import:
+    get:
+      tags:
+      - graph
+      parameters:
+      - name: domainId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+    delete:
+      tags:
+      - graph
+      parameters:
+      - name: domainId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+  /api/graph/domain/{domainId}/mapping:
+    get:
+      tags:
+      - graph
+      parameters:
+      - name: domainId
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+  /api/graph/domain/{id}:
+    get:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Domain'
+    put:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DomainUpdate'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Domain'
+    delete:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+  /api/graph/domains:
+    get:
+      tags:
+      - graph
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Domain'
+  /api/graph/node:
+    post:
+      tags:
+      - graph
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeCreate'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+  /api/graph/node/{id}:
+    put:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeUpdate'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+    delete:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+  /api/graph/relation:
+    post:
+      tags:
+      - graph
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationCreate'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+  /api/graph/relation/{id}:
+    put:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelationUpdate'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+    delete:
+      tags:
+      - graph
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraphDelta'
+  /api/graph/reset:
+    post:
+      tags:
+      - graph
+      responses:
+        "201":
+          description: Created
+  /api/graph/stats:
+    get:
+      tags:
+      - graph
+      responses:
+        "200":
+          description: OK
+          content:
+            text/event-stream:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GraphStatistics'
+  /api/sources:
+    get:
+      tags:
+      - Source Resource
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+      - Source Resource
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MultipartBody'
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    Domain:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        rootNodeId:
+          $ref: '#/components/schemas/UUID'
+        file:
+          type: string
+        columnMapping:
+          type: object
+          additionalProperties:
+            type: string
+        modelValid:
+          type: boolean
+        mappingValid:
+          type: boolean
+    DomainCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        rootNodeId:
+          $ref: '#/components/schemas/UUID'
+        file:
+          type: string
+        columnMapping:
+          type: object
+          additionalProperties:
+            type: string
+    DomainUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        rootNodeId:
+          $ref: '#/components/schemas/UUID'
+        file:
+          type: string
+        columnMapping:
+          type: object
+          additionalProperties:
+            type: string
+    FileUpload:
+      type: object
+    Filter:
+      type: object
+      properties:
+        function:
+          $ref: '#/components/schemas/FilterFunction'
+        property:
+          type: string
+        value:
+          type: object
+    FilterFunction:
+      enum:
+      - EQUAL
+      - GREATER
+      - LESS
+      type: string
+    Graph:
+      type: object
+      properties:
+        domains:
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        relations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Relation'
+    GraphDelta:
+      type: object
+      properties:
+        trigger:
+          $ref: '#/components/schemas/UUID'
+        changedDomains:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Domain'
+        removedDomains:
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+        changedNodes:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        removedNodes:
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+        changedRelations:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Relation'
+        removedRelations:
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+    GraphStatistics:
+      type: object
+      properties:
+        nodes:
+          format: int64
+          type: integer
+        relations:
+          format: int64
+          type: integer
+    MultipartBody:
+      type: object
+      properties:
+        file:
+          $ref: '#/components/schemas/FileUpload'
+        name:
+          type: string
+    Node:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        label:
+          type: string
+        domainIds:
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+        color:
+          type: string
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    NodeCreate:
+      required:
+      - label
+      type: object
+      properties:
+        label:
+          pattern: \S
+          type: string
+          nullable: false
+        domainIds:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+        color:
+          type: string
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    NodeUpdate:
+      required:
+      - label
+      type: object
+      properties:
+        label:
+          pattern: \S
+          type: string
+          nullable: false
+        domainIds:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+        color:
+          type: string
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    Property:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/PropertyType'
+        primary:
+          type: boolean
+    PropertyType:
+      enum:
+      - BOOLEAN
+      - DATE
+      - DOUBLE
+      - FLOAT
+      - INT
+      - LONG
+      - STRING
+      type: string
+    Query:
+      type: object
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryNode'
+        relations:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryRelation'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueryResultDefinition'
+        orders:
+          type: array
+          items:
+            type: string
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+    QueryFunction:
+      enum:
+      - avg
+      - count
+      - hierarchyCalculation
+      - max
+      - min
+      - sum
+      - value
+      type: string
+    QueryNode:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        varName:
+          type: string
+        nodeId:
+          $ref: '#/components/schemas/UUID'
+    QueryRelation:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        varName:
+          type: string
+        relationId:
+          $ref: '#/components/schemas/UUID'
+        sourceId:
+          $ref: '#/components/schemas/UUID'
+        targetId:
+          $ref: '#/components/schemas/UUID'
+        depth:
+          type: string
+    QueryResultDefinition:
+      type: object
+      properties:
+        name:
+          type: string
+        function:
+          $ref: '#/components/schemas/QueryFunction'
+        parameters:
+          type: array
+          items:
+            type: string
+    Relation:
+      required:
+      - type
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        sourceId:
+          $ref: '#/components/schemas/UUID'
+        targetId:
+          $ref: '#/components/schemas/UUID'
+        domainIds:
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+        type:
+          pattern: \S
+          type: string
+          nullable: false
+        primary:
+          type: boolean
+        multiple:
+          type: boolean
+        color:
+          type: string
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    RelationCreate:
+      required:
+      - type
+      - sourceId
+      - targetId
+      - domainIds
+      type: object
+      properties:
+        type:
+          pattern: \S
+          type: string
+          nullable: false
+        sourceId:
+          allOf:
+          - $ref: '#/components/schemas/UUID'
+          - nullable: false
+        targetId:
+          allOf:
+          - $ref: '#/components/schemas/UUID'
+          - nullable: false
+        domainIds:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+          nullable: false
+        primary:
+          type: boolean
+        multiple:
+          type: boolean
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    RelationUpdate:
+      required:
+      - type
+      - domainIds
+      type: object
+      properties:
+        type:
+          pattern: \S
+          type: string
+          nullable: false
+        domainIds:
+          minItems: 1
+          uniqueItems: true
+          type: array
+          items:
+            format: uuid
+            pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+            type: string
+          nullable: false
+        primary:
+          type: boolean
+        multiple:
+          type: boolean
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Property'
+    UUID:
+      format: uuid
+      pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
+      type: string
+  securitySchemes:
+    access_token:
+      type: http
+      scheme: Bearer
