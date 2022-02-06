@@ -158,7 +158,6 @@ public class ImportService {
         .onItem()
         .transformToUni(
             node -> {
-              log.info(node.toString());
               var entry =
                   new ObjectMapper()
                       .convertValue(node, new TypeReference<HashMap<String, Object>>() {});

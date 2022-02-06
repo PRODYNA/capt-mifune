@@ -98,7 +98,10 @@ public record CypherUpdateContext(
                                     """
                   .formatted(
                       currentCounter,
-                      vars.stream().filter(Objects::nonNull).collect(Collectors.joining(",")),
+                      vars.stream()
+                          .filter(Objects::nonNull)
+                          .distinct()
+                          .collect(Collectors.joining(",")),
                       Optional.of(checks)
                               .filter(Predicate.not(String::isBlank))
                               .map(s -> "with * " + s + "\n")
