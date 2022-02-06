@@ -46,11 +46,35 @@
     },
     "modelValid" : true,
     "mappingValid" : true
+  }, {
+    "id" : "d6ea518f-d1b2-4af1-86b0-126e592ba4eb",
+    "name" : "Supplier",
+    "rootNodeId" : "92b6ca6c-b870-43ed-ab2e-bfaeddc3116f",
+    "file" : null,
+    "columnMapping" : { },
+    "modelValid" : true,
+    "mappingValid" : false
+  }, {
+    "id" : "11a7d977-e4d7-423e-b8c8-15b70416e3c7",
+    "name" : "Country",
+    "rootNodeId" : "0a0d6381-d502-4833-a2ec-3f15cf5b61ea",
+    "file" : null,
+    "columnMapping" : { },
+    "modelValid" : true,
+    "mappingValid" : false
+  }, {
+    "id" : "ffad8ec8-91d0-434e-b881-b1239d30eb5f",
+    "name" : "SupplierMapping",
+    "rootNodeId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "file" : null,
+    "columnMapping" : { },
+    "modelValid" : true,
+    "mappingValid" : false
   } ],
   "nodes" : [ {
     "id" : "3c82895c-245c-428e-b786-0eb3c220d129",
     "label" : "Material",
-    "domainIds" : [ "6e16303a-0f60-468f-a655-6101897f3258", "e834ca34-63c1-4c1f-8502-d715b5be1637", "2d04404c-6585-4aae-b768-50b14d11c757" ],
+    "domainIds" : [ "6e16303a-0f60-468f-a655-6101897f3258", "e834ca34-63c1-4c1f-8502-d715b5be1637", "ffad8ec8-91d0-434e-b881-b1239d30eb5f", "2d04404c-6585-4aae-b768-50b14d11c757" ],
     "color" : "#20d129",
     "properties" : [ {
       "name" : "id",
@@ -70,6 +94,34 @@
     "label" : "Category",
     "domainIds" : [ "e834ca34-63c1-4c1f-8502-d715b5be1637", "dda7c15f-6ba3-4602-9dd9-89db51a24810" ],
     "color" : "#b8b373",
+    "properties" : [ {
+      "name" : "id",
+      "type" : "string",
+      "primary" : true
+    }, {
+      "name" : "name",
+      "type" : "string",
+      "primary" : false
+    } ]
+  }, {
+    "id" : "92b6ca6c-b870-43ed-ab2e-bfaeddc3116f",
+    "label" : "Supplier",
+    "domainIds" : [ "ffad8ec8-91d0-434e-b881-b1239d30eb5f", "d6ea518f-d1b2-4af1-86b0-126e592ba4eb" ],
+    "color" : "#c3116f",
+    "properties" : [ {
+      "name" : "id",
+      "type" : "string",
+      "primary" : true
+    }, {
+      "name" : "name",
+      "type" : "string",
+      "primary" : false
+    } ]
+  }, {
+    "id" : "0a0d6381-d502-4833-a2ec-3f15cf5b61ea",
+    "label" : "Country",
+    "domainIds" : [ "11a7d977-e4d7-423e-b8c8-15b70416e3c7", "d6ea518f-d1b2-4af1-86b0-126e592ba4eb" ],
+    "color" : "#5b61ea",
     "properties" : [ {
       "name" : "id",
       "type" : "string",
@@ -112,6 +164,26 @@
     "type" : "IN_CATEGORY",
     "primary" : false,
     "multiple" : true,
+    "color" : "#20d129",
+    "properties" : [ ]
+  }, {
+    "id" : "d3ea266d-6055-4cf9-84d3-6c9d48b4e84e",
+    "sourceId" : "92b6ca6c-b870-43ed-ab2e-bfaeddc3116f",
+    "targetId" : "0a0d6381-d502-4833-a2ec-3f15cf5b61ea",
+    "domainIds" : [ "d6ea518f-d1b2-4af1-86b0-126e592ba4eb" ],
+    "type" : "IN_COUNTRY",
+    "primary" : false,
+    "multiple" : false,
+    "color" : "#c3116f",
+    "properties" : [ ]
+  }, {
+    "id" : "4dd4fa82-6c5b-409b-8639-52be9148f754",
+    "sourceId" : "3c82895c-245c-428e-b786-0eb3c220d129",
+    "targetId" : "92b6ca6c-b870-43ed-ab2e-bfaeddc3116f",
+    "domainIds" : [ "ffad8ec8-91d0-434e-b881-b1239d30eb5f" ],
+    "type" : "FROM",
+    "primary" : false,
+    "multiple" : false,
     "color" : "#20d129",
     "properties" : [ ]
   } ]
