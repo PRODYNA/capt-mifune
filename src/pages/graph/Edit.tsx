@@ -136,7 +136,7 @@ const Edit = (props: EditProps): JSX.Element => {
           </Tooltip>
         </Box>
         <CustomTable tableHeaders={tableHeaders} label="property-table">
-          {value.properties.map((p, idx) => (
+          {properties.map((p, idx) => (
             // eslint-disable-next-line react/no-array-index-key
             <TableRow key={`${p.name}-${idx}`} className={classes.tableRow}>
               <PropertyEdit
