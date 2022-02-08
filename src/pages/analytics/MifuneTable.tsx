@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core'
 import { v4 } from 'uuid'
 import { Add } from '@material-ui/icons'
-import { ChartWrapper } from './ChartWrapper'
+import { ChartWrapper, SelectProps } from './ChartWrapper'
 import ChartContext, { QueryData } from '../../context/ChartContext'
 import { QueryFunctions } from '../../api/model/Model'
 import CustomButton from '../../components/Button/CustomButton'
@@ -80,36 +80,63 @@ export const MifuneTable = (): JSX.Element => {
     if (results.length === 0) addNewTableColumn()
   }, [])
 
+  const selects: SelectProps[] = results.map((result, index) => {
+    return {
+      query,
+      label: `Col${index + 1}`,
+      onChange: (v) => {
+        if (v) {
+          const mappedResults = results.map((item) => {
+            return item.uuid === result.uuid
+              ? {
+                  function: QueryFunctions.VALUE,
+                  name: v[0],
+                  parameters: v,
+                  uuid: item.uuid,
+                }
+              : item
+          })
+          setChartOptions({
+            ...chartOptions,
+            results: mappedResults,
+          })
+        }
+      },
+    }
+  })
+
   return (
     <ChartWrapper
       disableScale
       results={results}
       orders={[order ?? '']}
       dataPreparation={prepareData}
-      selects={results.map((result, index) => {
-        return {
+      selects={[
+        ...selects,
+        {
           query,
-          label: `Col${index + 1}`,
-          onChange: (v) => {
+          label: 'Value',
+          fnDefault: QueryFunctions.VALUE,
+          onChange: (v, fn) => {
             if (v) {
-              const mappedResults = results.map((item) => {
-                return item.uuid === result.uuid
-                  ? {
-                      function: QueryFunctions.VALUE,
-                      name: v[0],
-                      parameters: v,
-                      uuid: item.uuid,
-                    }
-                  : item
-              })
+              const result = results.filter((item) => item.name !== 'value')
+              const mappedResults = [
+                ...result,
+                {
+                  function: fn ?? QueryFunctions.VALUE,
+                  name: 'value',
+                  parameters: v || [],
+                },
+              ]
               setChartOptions({
                 ...chartOptions,
+                order: v[0],
                 results: mappedResults,
               })
             }
           },
-        }
-      })}
+        },
+      ]}
     >
       <Box textAlign="right" mb={1}>
         <CustomButton
