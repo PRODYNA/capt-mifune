@@ -80,30 +80,32 @@ export const MifuneTable = (): JSX.Element => {
     if (results.length === 0) addNewTableColumn()
   }, [])
 
-  const selects: SelectProps[] = results.map((result, index) => {
-    return {
-      query,
-      label: `Col${index + 1}`,
-      onChange: (v) => {
-        if (v) {
-          const mappedResults = results.map((item) => {
-            return item.uuid === result.uuid
-              ? {
-                  function: QueryFunctions.VALUE,
-                  name: v[0],
-                  parameters: v,
-                  uuid: item.uuid,
-                }
-              : item
-          })
-          setChartOptions({
-            ...chartOptions,
-            results: mappedResults,
-          })
-        }
-      },
-    }
-  })
+  const selects: SelectProps[] = results
+    .filter((item) => item.name !== 'value')
+    .map((result, index) => {
+      return {
+        query,
+        label: `Col${index + 1}`,
+        onChange: (v) => {
+          if (v) {
+            const mappedResults = results.map((item) => {
+              return item.uuid === result.uuid
+                ? {
+                    function: QueryFunctions.VALUE,
+                    name: v[0],
+                    parameters: v,
+                    uuid: item.uuid,
+                  }
+                : item
+            })
+            setChartOptions({
+              ...chartOptions,
+              results: mappedResults,
+            })
+          }
+        },
+      }
+    })
 
   return (
     <ChartWrapper
@@ -123,6 +125,7 @@ export const MifuneTable = (): JSX.Element => {
               const mappedResults = [
                 ...result,
                 {
+                  uuid: v4(),
                   function: fn ?? QueryFunctions.VALUE,
                   name: 'value',
                   parameters: v || [],
