@@ -109,6 +109,7 @@ export class GraphService {
       `${localStorage.getItem(ENV.API_SERVER)}graph/stats`,
       {
         headers: this.header(),
+        heartbeatTimeout: 2000,
       }
     )
   }

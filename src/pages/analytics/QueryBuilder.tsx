@@ -44,7 +44,7 @@ export interface QueryRelation {
 
 export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const { onChange } = props
-  const height = 450
+  const height = 800
   const [width, setWidth] = useState<number>(100)
   const [graph, setGraph] = useState<Graph>()
   const [varCounter, setVarCounter] = useState<Map<string, number>>(new Map())
