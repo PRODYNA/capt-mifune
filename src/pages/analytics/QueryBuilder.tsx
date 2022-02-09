@@ -283,6 +283,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
             customColor={n.color}
             style={{
               marginRight: '1rem',
+              marginBottom: '1rem',
               borderRadius: '5px',
             }}
           />
