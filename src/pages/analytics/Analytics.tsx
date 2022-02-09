@@ -100,6 +100,7 @@ export const Analytics = (): JSX.Element => {
                 color={chart === item.title ? 'primary' : 'default'}
                 style={{
                   marginRight: '1rem',
+                  marginBottom: '1rem',
                   boxShadow: 'none',
                 }}
               >
