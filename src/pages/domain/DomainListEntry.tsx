@@ -165,8 +165,20 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         isExpanded={expanded}
         summary={
           <>
-            <ListItemIcon>{buildBadge()}</ListItemIcon>
-            <ListItemText primary={domain.name} />
+            <ListItemIcon style={{ minWidth: '2rem' }}>
+              {buildBadge()}
+            </ListItemIcon>
+            <span
+              style={{
+                whiteSpace: 'nowrap',
+                width: '140px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                fontSize: 16,
+              }}
+            >
+              {domain.name}
+            </span>
           </>
         }
         actions={
