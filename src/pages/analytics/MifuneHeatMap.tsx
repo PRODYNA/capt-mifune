@@ -12,8 +12,18 @@ import { QueryFunctions } from '../../api/model/Model'
 export const buildHeatMapChart = (
   data: HeatMapSerie<DefaultHeatMapDatum, { [key: string]: string | number }>[]
 ): JSX.Element => {
+  const countY = data
+
+    .map((label) => {
+      return label
+    })
+    .map((item) => item.id)
+    .filter(
+      (value, index, categoryArray) => categoryArray.indexOf(value) === index
+    ).length
+
   return (
-    <Box height={300 + data.length * 25}>
+    <Box height={400 + countY * 25}>
       <ResponsiveHeatMap
         data={data}
         axisTop={{
@@ -30,7 +40,7 @@ export const buildHeatMapChart = (
         }}
         enableLabels
         animate={false}
-        margin={{ top: 100, right: 60, bottom: 60, left: 100 }}
+        margin={{ top: 200, right: 60, bottom: 60, left: 300 }}
         forceSquare={false}
         labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
       />

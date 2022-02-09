@@ -284,10 +284,10 @@ export function buildSimulation<
         .forceLink<D3Node<N>, D3Relation<R>>(d3Relation)
         .id((d) => d.node.id)
         .distance(100)
-        .strength(0.1)
+        .strength(0.2)
     )
-    .force('collision', d3.forceCollide().radius(100).strength(0.8))
+    .force('collision', d3.forceCollide().radius(100).strength(0.4))
     .force('x', d3.forceX().strength(0.1))
-    .force('y', d3.forceY().strength(0.3))
+    .force('y', d3.forceY().strength(0.1))
     .on('tick', onTick)
 }
