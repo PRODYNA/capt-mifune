@@ -120,7 +120,7 @@ public class ImportService {
             .items(fileContentStream(importFile))
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .subscribe()
-            .withSubscriber(FlowAdapters.toProcessor(new JsonTransformer(jsonModel, 100)));
+            .withSubscriber(FlowAdapters.toProcessor(new JsonTransformer(jsonModel, 10_000)));
 
     return createImportTask(domainId, domain, cypher, processor)
         .withRequests(1)

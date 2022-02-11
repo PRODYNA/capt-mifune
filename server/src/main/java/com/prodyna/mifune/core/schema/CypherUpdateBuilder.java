@@ -264,13 +264,12 @@ public class CypherUpdateBuilder {
     if (cypherContext.root() && buildDomainLink) {
       cypherContext.addStatement(
           """
-					merge (domain:Domain {id:$domainId})
-					merge(%s)<-[source:DOMAIN]-(domain)
-					on create set source.lines = $model.lines
-					on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+					merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+//					on create set domain.lines = $model.lines
+//					on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 					with *
 					"""
-              .formatted(nodeVar));
+              .formatted(nodeVar, nodeVar));
     }
   }
 
