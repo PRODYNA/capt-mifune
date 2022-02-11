@@ -141,7 +141,8 @@ public class GraphResource {
     var session = driver.asyncSession();
     var count =
         session
-            .runAsync("match(d:Domain)--(x) return distinct d.id as id, count(x) as count")
+            .runAsync(
+                "match(x)-[domain:DOMAIN]->(x) return distinct domain.id as id, count(distinct x) as count")
             .thenCompose(
                 r ->
                     r.listAsync(
