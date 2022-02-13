@@ -8,6 +8,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
     "@nivo/bar": "^0.79.1",
+    "@nivo/chord": "^0.79.1",
     "@nivo/core": "^0.79.0",
     "@nivo/geo": "^0.79.1",
     "@nivo/heatmap": "^0.79.1",

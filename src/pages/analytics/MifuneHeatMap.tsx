@@ -40,7 +40,7 @@ export const buildHeatMapChart = (
         }}
         enableLabels
         animate={false}
-        margin={{ top: 200, right: 60, bottom: 60, left: 300 }}
+        margin={{ top: 200, right: 120, bottom: 60, left: 300 }}
         forceSquare={false}
         labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
       />
@@ -66,7 +66,7 @@ export const MifiuneHeatMap = (): JSX.Element => {
         data: [
           {
             x: item.labelY,
-            y: item.value,
+            y: (item.value as number).toFixed(2),
           },
         ],
       }
