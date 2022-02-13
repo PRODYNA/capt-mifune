@@ -50,26 +50,36 @@
     "id" : "d6ea518f-d1b2-4af1-86b0-126e592ba4eb",
     "name" : "Supplier",
     "rootNodeId" : "92b6ca6c-b870-43ed-ab2e-bfaeddc3116f",
-    "file" : null,
-    "columnMapping" : { },
+    "file" : "supplier.csv",
+    "columnMapping" : {
+      "supplier.name" : "name",
+      "supplier.inCountry.country.id" : "country",
+      "supplier.id" : "id"
+    },
     "modelValid" : true,
-    "mappingValid" : false
+    "mappingValid" : true
   }, {
     "id" : "11a7d977-e4d7-423e-b8c8-15b70416e3c7",
     "name" : "Country",
     "rootNodeId" : "0a0d6381-d502-4833-a2ec-3f15cf5b61ea",
-    "file" : null,
-    "columnMapping" : { },
+    "file" : "countries.csv",
+    "columnMapping" : {
+      "country.id" : "code2",
+      "country.name" : "name"
+    },
     "modelValid" : true,
-    "mappingValid" : false
+    "mappingValid" : true
   }, {
     "id" : "ffad8ec8-91d0-434e-b881-b1239d30eb5f",
     "name" : "SupplierMapping",
     "rootNodeId" : "3c82895c-245c-428e-b786-0eb3c220d129",
-    "file" : null,
-    "columnMapping" : { },
+    "file" : "supplier-mapping.csv",
+    "columnMapping" : {
+      "material.from.supplier.id" : "supplierId",
+      "material.id" : "materialId"
+    },
     "modelValid" : true,
-    "mappingValid" : false
+    "mappingValid" : true
   } ],
   "nodes" : [ {
     "id" : "3c82895c-245c-428e-b786-0eb3c220d129",
