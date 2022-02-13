@@ -46,9 +46,11 @@ public class CypherUpdateBuilder {
   private final AtomicInteger counter = new AtomicInteger();
   private final Set<String> labels = new HashSet<>();
   private final UUID domainId;
+  private final boolean addLineNumbers;
 
-  public CypherUpdateBuilder(GraphModel graphModel, UUID domainId) {
+  public CypherUpdateBuilder(GraphModel graphModel, UUID domainId, boolean addLineNumbers) {
     this.domainId = domainId;
+    this.addLineNumbers = addLineNumbers;
     var rootNode = graphModel.rootNode(domainId);
     var varPath = new ArrayList<String>();
     varPath.add("$model");
@@ -263,13 +265,18 @@ public class CypherUpdateBuilder {
                             p.name())));
     if (cypherContext.root() && buildDomainLink) {
       cypherContext.addStatement(
-          """
-					merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
-//					on create set domain.lines = $model.lines
-//					on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
-					with *
-					"""
-              .formatted(nodeVar, nodeVar));
+          addLineNumbers
+              ? """
+                                    merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+                                    on create set domain.lines = $model.lines
+                                    on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
+                                    with *
+                                    """
+              : """
+                                    merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+                                    with *
+                                    """
+                  .formatted(nodeVar, nodeVar));
     }
   }
 

@@ -77,9 +77,13 @@ public class ImportService {
   @ConfigProperty(name = "mifune.upload.dir")
   protected String uploadDir;
 
+  @ConfigProperty(name = "mifune.import.lines", defaultValue = "false")
+  protected boolean addLineNumbers;
+
   @Inject protected Driver driver;
 
   @Inject protected GraphService graphService;
+
   @Inject protected SourceService sourceService;
 
   public Uni<String> runImport(UUID domainId) {
@@ -112,7 +116,7 @@ public class ImportService {
     ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
     cleanJsonModel(domain, jsonModel);
     var importFile = Paths.get(uploadDir, domain.getFile());
-    var cypher = new CypherUpdateBuilder(graphModel, domainId).getCypher();
+    var cypher = new CypherUpdateBuilder(graphModel, domainId, addLineNumbers).getCypher();
     log.info(cypher);
 
     var processor =

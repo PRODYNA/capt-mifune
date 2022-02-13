@@ -117,24 +117,28 @@ public class GraphResource {
     graphService.reset();
   }
 
+  @Tag(name = "domain")
   @GET
   @Path("/domains")
   public Multi<Domain> fetchDomains() {
     return Multi.createFrom().iterable(graphService.fetchDomains());
   }
 
+  @Tag(name = "domain")
   @POST
   @Path("/domain")
   public Uni<Domain> createDomain(@Valid DomainCreate model) {
     return Uni.createFrom().item(graphService.createDomain(model));
   }
 
+  @Tag(name = "domain")
   @GET
   @Path("/domain/{id}")
   public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
     return Uni.createFrom().item(graphService.fetchDomain(id));
   }
 
+  @Tag(name = "domain")
   @GET
   @Path("/domain/fn/count")
   public Uni<Map<UUID, Long>> countDomainRootNodes() {
@@ -167,48 +171,56 @@ public class GraphResource {
     return Uni.createFrom().completionStage(count);
   }
 
+  @Tag(name = "domain")
   @PUT
   @Path("/domain/{id}")
   public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
     return Uni.createFrom().item(graphService.updateDomain(id, model));
   }
 
+  @Tag(name = "domain")
   @DELETE
   @Path("/domain/{id}")
   public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
     return Uni.createFrom().item(graphService.deleteDomain(id));
   }
 
+  @Tag(name = "node")
   @POST
   @Path("/node")
   public Uni<GraphDelta> createNode(@Valid NodeCreate model) {
     return Uni.createFrom().item(graphService.createNode(model));
   }
 
+  @Tag(name = "node")
   @PUT
   @Path("/node/{id}")
   public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
     return Uni.createFrom().item(graphService.updateNode(id, model));
   }
 
+  @Tag(name = "node")
   @DELETE
   @Path("/node/{id}")
   public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
     return Uni.createFrom().item(graphService.deleteNode(id));
   }
 
+  @Tag(name = "relation")
   @POST
   @Path("/relation")
   public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
     return Uni.createFrom().item(graphService.createRelation(model));
   }
 
+  @Tag(name = "relation")
   @PUT
   @Path("/relation/{id}")
   public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
     return Uni.createFrom().item(graphService.updateRelation(id, model));
   }
 
+  @Tag(name = "relation")
   @DELETE
   @Path("/relation/{id}")
   public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
@@ -258,7 +270,6 @@ public class GraphResource {
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Multi<Map<UUID, Long>> stats() {
 
-    var count = this.countDomainRootNodes();
     var events =
         eventBus
             .localConsumer("import")
@@ -290,6 +301,10 @@ public class GraphResource {
         graphService.fetchDomains().stream().collect(Collectors.toMap(Domain::getId, a -> 0L));
     return Multi.createBy()
         .concatenating()
-        .streams(Uni.createFrom().item(defaults).toMulti(), count.toMulti(), events);
+        .streams(
+            Uni.createFrom().item(defaults).toMulti(),
+            this.countDomainRootNodes().toMulti(),
+            events,
+            this.countDomainRootNodes().toMulti());
   }
 }
