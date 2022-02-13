@@ -4,6 +4,7 @@ import BarChartIcon from '@material-ui/icons/BarChart'
 import ShuffleIcon from '@material-ui/icons/Shuffle'
 import AppsIcon from '@material-ui/icons/Apps'
 import TableChartOutlinedIcon from '@material-ui/icons/TableChartOutlined'
+import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle'
 import PublicIcon from '@material-ui/icons/Public'
 import TrackChangesIcon from '@material-ui/icons/TrackChanges'
 import { buildBarChart, MifuneBarChart } from './MifuneBarChart'
@@ -16,6 +17,7 @@ import ChartContext, { IChartOptions } from '../../context/ChartContext'
 import { buildTableChart, MifuneTable } from './MifuneTable'
 import { buildRadialChart, MifiuneRadialBar } from './MifuneRadialBar'
 import { buildGeoChart, MifuneGeoChart } from './MifuneGeoMap'
+import { buildChordChart, MifiuneChordChart } from './MifuneChordChart'
 
 interface Chart {
   title: string
@@ -60,6 +62,12 @@ export const Analytics = (): JSX.Element => {
       icon: <ShuffleIcon />,
       options: <MifuneSankey />,
       build: (): JSX.Element => buildSankeyChart(data),
+    },
+    {
+      title: 'Chord',
+      icon: <SwapHorizontalCircleIcon />,
+      options: <MifiuneChordChart />,
+      build: (): JSX.Element => buildChordChart(data),
     },
     {
       title: 'GeoMap',
