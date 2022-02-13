@@ -78,10 +78,9 @@ class GraphModelUpdateTest {
     var updateCypher =
         """
 				merge(var_1:User {id:$model.user.id})
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 				return 'done'
 				""";
@@ -147,10 +146,9 @@ class GraphModelUpdateTest {
         """
 				merge(var_1:User {id:$model.user.id})
 				set var_1.name = coalesce($model.user.name, var_1.name)
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
 					return 1 union
@@ -244,10 +242,9 @@ class GraphModelUpdateTest {
     var updateCypher =
         """
 				merge(var_1:User {id:$model.user.id})
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
 					return 1 union
@@ -348,10 +345,9 @@ class GraphModelUpdateTest {
     var updateCypher =
         """
 				merge(var_1:User {id:$model.user.id})
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
 					return 1 union
@@ -456,10 +452,9 @@ class GraphModelUpdateTest {
     var updateCypher =
         """
 				merge(var_1:User {id:$model.user.id})
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
 					return 1 union
@@ -565,10 +560,9 @@ class GraphModelUpdateTest {
     var updateCypher =
         """
 				merge(var_1:User {id:$model.user.id})
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
 					return 1 union
@@ -664,10 +658,9 @@ class GraphModelUpdateTest {
         """
 				merge(var_2:Month {id:$model.day.in.month.id})
 				merge(var_2)<-[:IN]-(var_1:Day {id:$model.day.id})
-				merge (domain:Domain {id:$domainId})
-				merge(var_1)<-[source:DOMAIN]-(domain)
-				on create set source.lines = $model.lines
-				on match set source.lines = source.lines + [x in $model.lines where not x in source.lines | x]
+				merge(%s)-[domain:DOMAIN {id:$domainId} ]->(%s)
+				on create set domain.lines = $model.lines
+				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 				return 'done'
 				""";
@@ -681,7 +674,7 @@ class GraphModelUpdateTest {
     var internalGraphModel = new GraphModel(graph);
     var jsonBuilder = new GraphJsonBuilder(internalGraphModel, DOMAIN_ID, false);
     assertEquals(node.toPrettyString(), jsonBuilder.getJson().toPrettyString());
-    var builder = new CypherUpdateBuilder(internalGraphModel, DOMAIN_ID);
+    var builder = new CypherUpdateBuilder(internalGraphModel, DOMAIN_ID, true);
     assertEquals(updateCypher.strip(), builder.getCypher());
   }
 }

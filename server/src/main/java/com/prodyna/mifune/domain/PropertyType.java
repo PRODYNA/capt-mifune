@@ -27,19 +27,45 @@ package com.prodyna.mifune.domain;
  */
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+@Schema(
+    enumeration = {
+      PropertyType.Constants.INT,
+      PropertyType.Constants.LONG,
+      PropertyType.Constants.DOUBLE,
+      PropertyType.Constants.FLOAT,
+      PropertyType.Constants.STRING,
+      PropertyType.Constants.BOOLEAN,
+      PropertyType.Constants.DATE,
+    })
 public enum PropertyType {
-  INT("int"),
-  STRING("string"),
-  LONG("long"),
-  DOUBLE("double"),
-  FLOAT("float"),
-  BOOLEAN("boolean"),
-  DATE("date");
+  INT(Constants.INT),
+  LONG(Constants.LONG),
+  DOUBLE(Constants.DOUBLE),
+  FLOAT(Constants.FLOAT),
+  STRING(Constants.STRING),
+  BOOLEAN(Constants.BOOLEAN),
+  DATE(Constants.DATE);
 
   PropertyType(String simpleName) {
     this.simpleName = simpleName;
   }
 
-  @JsonValue String simpleName;
+  private final String simpleName;
+
+  @JsonValue
+  public String getSimpleName() {
+    return simpleName;
+  }
+
+  static class Constants {
+    public static final String STRING = "string";
+    public static final String INT = "int";
+    public static final String LONG = "long";
+    public static final String DOUBLE = "double";
+    public static final String FLOAT = "float";
+    public static final String BOOLEAN = "boolean";
+    public static final String DATE = "date";
+  }
 }
