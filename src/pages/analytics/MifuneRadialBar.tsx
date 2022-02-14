@@ -3,7 +3,7 @@ import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext from '../../context/ChartContext'
-import { QueryFunctions } from '../../api/model/Model'
+import { QueryFunction } from '../../services/models/query-function'
 
 type RadialChartData = { id: string; data: { x: string; y: number }[] }[]
 
@@ -98,7 +98,7 @@ export const MifiuneRadialBar = (): JSX.Element => {
             const mappedResults = [
               ...result,
               {
-                function: QueryFunctions.VALUE,
+                function: QueryFunction.Value,
                 name: 'labelX',
                 parameters: v || [],
               },
@@ -117,7 +117,7 @@ export const MifiuneRadialBar = (): JSX.Element => {
             const mappedResults = [
               ...result,
               {
-                function: QueryFunctions.VALUE,
+                function: QueryFunction.Value,
                 name: 'labelY',
                 parameters: v || [],
               },
@@ -131,14 +131,14 @@ export const MifiuneRadialBar = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.VALUE,
+          fnDefault: QueryFunction.Value,
           onChange: (v, fn) => {
             if (v) {
               const result = results.filter((item) => item.name !== 'value')
               const mappedResults = [
                 ...result,
                 {
-                  function: fn ?? QueryFunctions.VALUE,
+                  function: fn ?? QueryFunction.Value,
                   name: 'value',
                   parameters: v || [],
                 },
