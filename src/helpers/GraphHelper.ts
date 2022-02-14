@@ -213,6 +213,14 @@ export const svgStyle = `
             font-weight: bold;
             pointer-events: none;
             -webkit-font-smoothing: antialiased;
+             text-shadow: 1px 1px 0 #FFF,
+            -1px -1px 0 #FFF,
+            1px -1px 0 #FFF,
+            -1px 1px 0 #FFF,
+            0px 1px 0 #FFF,
+            1px 0px 0 #FFF,
+            0px -1px 0 #FFF,
+            -1px 0px 0 #FFF;
         }
         .node-label {
             font-size: 14px;
@@ -221,6 +229,14 @@ export const svgStyle = `
             cursor: default;
             pointer-events: none;
             -webkit-font-smoothing: antialiased;
+            text-shadow: 1px 1px 0 #FFF,
+            -1px -1px 0 #FFF,
+            1px -1px 0 #FFF,
+            -1px 1px 0 #FFF,
+            0px 1px 0 #FFF,
+            1px 0px 0 #FFF,
+            0px -1px 0 #FFF,
+            -1px 0px 0 #FFF;
         }`
 
 export function addSvgStyles(
