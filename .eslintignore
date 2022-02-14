@@ -1,4 +1,5 @@
 src/*.svg
 src/*.css
+src/services/*
 *.css
 *.svg
