@@ -212,7 +212,6 @@ export const svgStyle = `
             cursor: default;
             font-weight: bold;
             pointer-events: none;
-            text-transform: lowercase;
             -webkit-font-smoothing: antialiased;
         }
         .node-label {
