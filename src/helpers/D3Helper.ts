@@ -27,7 +27,7 @@ export class D3Helper {
     return {
       kind: 'node',
       node,
-      radius: 30,
+      radius: 40,
     }
   }
 
