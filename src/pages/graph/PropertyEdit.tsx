@@ -55,9 +55,10 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           id="node-name"
           value={value.name}
           className={classes.spacing}
-          onChange={(e): void =>
+          onChange={(e): void => {
+            setValue({ ...value, name: e.target.value })
             updateProperty(idx, { ...value, name: e.target.value })
-          }
+          }}
         />
       </TableCell>
       <TableCell className={classes.tableCell}>
@@ -68,17 +69,19 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           fullWidth={false}
           className={classes.spacing}
           hideLabel
-          onChangeHandler={(e): void =>
+          onChangeHandler={(e): void => {
+            setValue({ ...value, type: e.target.value as string })
             updateProperty(idx, { ...value, type: e.target.value as string })
-          }
+          }}
         />
       </TableCell>
       <TableCell className={classes.tableCell}>
         <Checkbox
           checked={value.primary}
-          onChange={(e, checked: boolean): void =>
+          onChange={(e, checked: boolean): void => {
+            setValue({ ...value, primary: checked })
             updateProperty(idx, { ...value, primary: checked })
-          }
+          }}
           name="primary"
         />
       </TableCell>
