@@ -13,12 +13,16 @@ export function drawNodes<N extends Node | QueryNode>(
 ): Selection<BaseType | SVGCircleElement, D3Node<N>, SVGGElement, unknown> {
   return svg
     .append('g')
-    .attr('stroke', '#fff')
-    .attr('stroke-width', 1.5)
     .selectAll('circle')
     .data(data)
     .join('circle')
     .attr('r', (n) => n.radius)
+    .attr('stroke', (n) =>
+      type === 'node'
+        ? (n as D3Node<Node>).node.color || '#fff'
+        : (n as D3Node<QueryNode>).node.node.color || '#fff'
+    )
+    .attr('stroke-width', 2)
     .attr('fill', (n) =>
       type === 'node'
         ? (n as D3Node<Node>).node.color
@@ -173,7 +177,7 @@ export function drawRelations<R extends Relation | QueryRelation>(
 
   selection
     .join('text')
-    .attr('dominant-baseline', 'middle')
+    .attr('dominant-baseline', 'top')
     .append('textPath')
     .attr('startOffset', '50%')
     .attr('text-anchor', 'middle')
@@ -183,8 +187,8 @@ export function drawRelations<R extends Relation | QueryRelation>(
         const castValue = d as D3Relation<Relation>
         return (
           castValue.relation.type +
-          (castValue.relation.multiple ? ' []' : '') +
-          (castValue.relation.primary ? '*' : '')
+          (castValue.relation.multiple ? ' [ ]' : '') +
+          (castValue.relation.primary ? ' *' : '')
         )
       }
       const queryRel = d as D3Relation<QueryRelation>
@@ -197,24 +201,27 @@ export function drawRelations<R extends Relation | QueryRelation>(
 
 export const svgStyle = `  
         .node {
-          filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+          filter: drop-shadow( 3px 3px 3px rgba(0, 0, 0, .2));
         }
         .relation {
-          filter: drop-shadow( 3px 3px 2px rgba(0, 0, 0, .7));
+          filter: drop-shadow( 3px 3px 3px rgba(0, 0, 0, .2));
         }
         .relation-label { 
-            font: bold 13px sans-serif; 
-            fill: white; 
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            font-size: 14px;
+            fill: black; 
             cursor: default;
+            font-weight: bold;
             pointer-events: none;
+            text-transform: lowercase;
+            -webkit-font-smoothing: antialiased;
         }
         .node-label {
-            font: bold 13px sans-serif; 
-            fill: white; 
-            text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            font-size: 14px;
+            fill: black; 
+            font-weight: bold;
             cursor: default;
             pointer-events: none;
+            -webkit-font-smoothing: antialiased;
         }`
 
 export function addSvgStyles(
