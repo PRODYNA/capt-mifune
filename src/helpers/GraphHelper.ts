@@ -177,7 +177,7 @@ export function drawRelations<R extends Relation | QueryRelation>(
 
   selection
     .join('text')
-    .attr('dominant-baseline', 'top')
+    .attr('dominant-baseline', 'middle')
     .append('textPath')
     .attr('startOffset', '50%')
     .attr('text-anchor', 'middle')
