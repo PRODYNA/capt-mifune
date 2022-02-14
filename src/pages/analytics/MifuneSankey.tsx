@@ -8,7 +8,7 @@ import {
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext from '../../context/ChartContext'
-import { QueryFunctions } from '../../api/model/Model'
+import { QueryFunction } from '../../services/models/query-function'
 
 export const buildSankeyChart = (
   data: SankeyDataProps<DefaultNode, DefaultLink>
@@ -74,7 +74,7 @@ export const MifuneSankey = (): JSX.Element => {
             const mappedResults = [
               ...result,
               {
-                function: QueryFunctions.VALUE,
+                function: QueryFunction.Value,
                 name: 'from',
                 parameters: v || [],
               },
@@ -93,7 +93,7 @@ export const MifuneSankey = (): JSX.Element => {
             const mappedResults = [
               ...result,
               {
-                function: QueryFunctions.VALUE,
+                function: QueryFunction.Value,
                 name: 'to',
                 parameters: v ? [...v] : [],
               },
@@ -107,13 +107,13 @@ export const MifuneSankey = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.VALUE,
+          fnDefault: QueryFunction.Value,
           onChange: (v, fn) => {
             const result = results.filter((item) => item.name !== 'value')
             const mappedResults = [
               ...result,
               {
-                function: fn ?? QueryFunctions.VALUE,
+                function: fn ?? QueryFunction.Value,
                 name: 'value',
                 parameters: v || [],
               },

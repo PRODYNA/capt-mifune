@@ -3,8 +3,8 @@ import { ResponsiveChoropleth } from '@nivo/geo'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext, { QueryData } from '../../context/ChartContext'
-import { QueryFunctions } from '../../api/model/Model'
 import countries from '../../utils/Countries.json'
+import { QueryFunction } from '../../services/models/query-function'
 
 export const buildGeoChart = (data: QueryData): JSX.Element => {
   return (
@@ -52,7 +52,7 @@ export const MifuneGeoChart = (): JSX.Element => {
             const mappedResults = [
               ...result,
               {
-                function: QueryFunctions.VALUE,
+                function: QueryFunction.Value,
                 name: 'id',
                 parameters: v || [],
               },
@@ -66,14 +66,14 @@ export const MifuneGeoChart = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.VALUE,
+          fnDefault: QueryFunction.Value,
           onChange: (v, fn) => {
             if (v) {
               const result = results.filter((item) => item.name !== 'value')
               const mappedResults = [
                 ...result,
                 {
-                  function: fn ?? QueryFunctions.VALUE,
+                  function: fn ?? QueryFunction.Value,
                   name: 'value',
                   parameters: v || [],
                 },
