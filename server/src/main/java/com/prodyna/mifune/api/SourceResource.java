@@ -31,6 +31,7 @@ import com.prodyna.mifune.domain.Source;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -61,11 +62,9 @@ public class SourceResource {
   }
 
   @GET
-  public Response sources() throws IOException {
-    var files =
-        sourceService.sources().stream()
-            .map(fileName -> new Source(fileName, sourceService.fileHeader(fileName)))
-            .collect(Collectors.toList());
-    return Response.ok().entity(files).build();
+  public List<Source> sources() throws IOException {
+    return sourceService.sources().stream()
+        .map(fileName -> new Source(fileName, sourceService.fileHeader(fileName)))
+        .collect(Collectors.toList());
   }
 }
