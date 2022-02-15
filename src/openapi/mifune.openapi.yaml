@@ -7,7 +7,10 @@ security:
 - access_token: []
 tags:
 - name: admin
+- name: domain
 - name: graph
+- name: node
+- name: relation
 paths:
   /api/apocalypse:
     get:
@@ -84,7 +87,7 @@ paths:
   /api/graph/domain:
     post:
       tags:
-      - graph
+      - domain
       requestBody:
         content:
           application/json:
@@ -100,7 +103,7 @@ paths:
   /api/graph/domain/fn/count:
     get:
       tags:
-      - graph
+      - domain
       responses:
         "200":
           description: OK
@@ -199,7 +202,7 @@ paths:
   /api/graph/domain/{id}:
     get:
       tags:
-      - graph
+      - domain
       parameters:
       - name: id
         in: path
@@ -215,7 +218,7 @@ paths:
                 $ref: '#/components/schemas/Domain'
     put:
       tags:
-      - graph
+      - domain
       parameters:
       - name: id
         in: path
@@ -236,7 +239,7 @@ paths:
                 $ref: '#/components/schemas/Domain'
     delete:
       tags:
-      - graph
+      - domain
       parameters:
       - name: id
         in: path
@@ -253,7 +256,7 @@ paths:
   /api/graph/domains:
     get:
       tags:
-      - graph
+      - domain
       responses:
         "200":
           description: OK
@@ -266,7 +269,7 @@ paths:
   /api/graph/node:
     post:
       tags:
-      - graph
+      - node
       requestBody:
         content:
           application/json:
@@ -282,7 +285,7 @@ paths:
   /api/graph/node/{id}:
     put:
       tags:
-      - graph
+      - node
       parameters:
       - name: id
         in: path
@@ -303,7 +306,7 @@ paths:
                 $ref: '#/components/schemas/GraphDelta'
     delete:
       tags:
-      - graph
+      - node
       parameters:
       - name: id
         in: path
@@ -320,7 +323,7 @@ paths:
   /api/graph/relation:
     post:
       tags:
-      - graph
+      - relation
       requestBody:
         content:
           application/json:
@@ -336,7 +339,7 @@ paths:
   /api/graph/relation/{id}:
     put:
       tags:
-      - graph
+      - relation
       parameters:
       - name: id
         in: path
@@ -357,7 +360,7 @@ paths:
                 $ref: '#/components/schemas/GraphDelta'
     delete:
       tags:
-      - graph
+      - relation
       parameters:
       - name: id
         in: path
@@ -398,6 +401,12 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Source'
     post:
       tags:
       - Source Resource
@@ -622,13 +631,13 @@ components:
           type: boolean
     PropertyType:
       enum:
-      - BOOLEAN
-      - DATE
-      - DOUBLE
-      - FLOAT
-      - INT
-      - LONG
-      - STRING
+      - int
+      - long
+      - double
+      - float
+      - string
+      - boolean
+      - date
       type: string
     Query:
       type: object
@@ -794,6 +803,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Property'
+    Source:
+      type: object
+      properties:
+        name:
+          type: string
+        header:
+          type: array
+          items:
+            type: string
     UUID:
       format: uuid
       pattern: "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
