@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, createStyles, makeStyles, Typography } from '@material-ui/core'
-import { Domain, GraphDelta } from '../../api/model/Model'
 import { DomainListEntry } from './DomainListEntry'
+import { Domain, GraphDelta } from '../../services/models'
 
 interface DomainListProps {
   domains: Domain[]
@@ -36,17 +36,20 @@ export const DomainList = (props: DomainListProps): JSX.Element => {
           Domain List
         </Typography>
       </Box>
-      {domains
-        .sort((d1, d2) => (d1.name > d2.name ? 1 : -1))
-        .map((d) => (
-          <DomainListEntry
-            key={d.id}
-            domain={d}
-            updateState={updateState}
-            expanded={expanded}
-            toggleAccordion={toggleAccordion}
-          />
-        ))}
+      {domains.length > 0 &&
+        domains
+          .sort((d1, d2) =>
+            (d1.name as string) > (d2.name as string) ? 1 : -1
+          )
+          .map((d) => (
+            <DomainListEntry
+              key={d.id}
+              domain={d}
+              updateState={updateState}
+              expanded={expanded}
+              toggleAccordion={toggleAccordion}
+            />
+          ))}
     </Box>
   )
 }

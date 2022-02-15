@@ -10,10 +10,11 @@ import {
 import AddIcon from '@material-ui/icons/Add'
 import SaveIcon from '@material-ui/icons/Save'
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto'
-import graphService from '../../api/GraphService'
-import { Domain } from '../../api/model/Model'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
+import { Domain } from '../../services/models/domain'
+import AXIOS_CONFIG from '../../openapi/axios-config'
+import { GraphApi, DomainApi } from '../../services'
 
 export const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -60,6 +61,8 @@ interface IDomainActions {
 const DomainActions = (props: IDomainActions): JSX.Element => {
   const { domains, setDomains, setSelectedDomain, downloadSVG } = props
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
+  const domainApi = new DomainApi(AXIOS_CONFIG())
+  const graphApi = new GraphApi(AXIOS_CONFIG())
   const classes = useStyles()
 
   return (
@@ -75,11 +78,11 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
           color="primary"
           className={` ${domains.length === 0 ? classes.animatedBtn : ''}`}
           onClick={() =>
-            graphService
-              .domainPost({ name: `domain_${domains.length}` })
-              .then((domain) => {
-                setDomains(domains.concat(domain))
-                setSelectedDomain(domain)
+            domainApi
+              .apiGraphDomainPost({ name: `domain_${domains.length}` })
+              .then((res) => {
+                setDomains(domains.concat(res.data))
+                setSelectedDomain(res.data)
               })
           }
         >
@@ -91,8 +94,8 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
           size="large"
           className={classes.save}
           onClick={() =>
-            graphService
-              .persistGraph()
+            graphApi
+              .apiGraphPost()
               .then(() => openSnackbar(Translations.SAVE, 'success'))
               .catch((e) => openSnackbarError(e))
           }
