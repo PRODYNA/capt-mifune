@@ -9,23 +9,24 @@ import {
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import { Add } from '@material-ui/icons'
 import { AnalyticFilter } from './AnalyticFilter'
-import {
-  Filter,
-  QueryFunctions,
-  QueryResultDefinition,
-} from '../../api/model/Model'
-import graphService from '../../api/GraphService'
 import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
 import CustomTable from '../../components/Table/CustomTable'
 import CustomButton from '../../components/Button/CustomButton'
 import ChartContext from '../../context/ChartContext'
+import {
+  QueryResultDefinition,
+  QueryFunction,
+  Filter,
+} from '../../services/models'
+import AXIOS_CONFIG from '../../openapi/axios-config'
+import { DataResourceApi } from '../../services'
 
 export interface SelectProps {
   query: Query
   label: string
-  onChange: (v: string[] | undefined, fn?: QueryFunctions) => void
-  fnDefault?: QueryFunctions
+  onChange: (v: string[] | undefined, fn?: QueryFunction) => void
+  fnDefault?: QueryFunction
   renderAsTable?: boolean
 }
 
@@ -41,6 +42,7 @@ interface ChartWrapperProps<T> {
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const { results, orders, dataPreparation, selects, disableScale, children } =
     props
+  const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
   const { setData, query } = useContext(ChartContext)
   const [loading, setLoading] = useState<boolean>(false)
   const [filters, setFilters] = useState<Filter[]>([])
@@ -90,10 +92,31 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
 
   const loadData = (): void => {
     setLoading(true)
-    graphService
-      .query(query, results, orders, filters)
+    dataResourceApi
+      .apiDataPost({
+        nodes: query.nodes.map((n) => {
+          return {
+            id: n.id,
+            nodeId: n.node.id,
+            varName: n.varName,
+          }
+        }),
+        relations: query.relations.map((r) => {
+          return {
+            id: r.id,
+            varName: r.varName,
+            relationId: r.relation.id,
+            sourceId: r.sourceId,
+            targetId: r.targetId,
+            depth: r.depth,
+          }
+        }),
+        results,
+        orders,
+        filters,
+      })
       .then((newData) => {
-        setData(dataPreparation(newData, scale))
+        setData(dataPreparation(newData.data, scale))
         setLoading(false)
         scrollToBottom()
       })
