@@ -1,10 +1,10 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { BaseType, Selection, text } from 'd3'
+import { createWatchProgram } from 'typescript'
 import { NodeEdit } from './NodeEdit'
-import { Domain, GraphDelta, Node, Relation } from '../../api/model/Model'
+import { Domain, GraphDelta, Node, Relation } from '../../services/models'
 import { RelationEdit } from './RelationEdit'
-import graphService from '../../api/GraphService'
 import { DomainList } from '../domain/DomainList'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
 import {
@@ -24,6 +24,8 @@ import {
   svgStyle,
   tick,
 } from '../../helpers/GraphHelper'
+import { GraphApi } from '../../services'
+import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface IGraph {
   openSidenav: boolean
@@ -49,6 +51,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     D3Node<Node> | D3Relation<Relation>
   >()
   const d3Container = useRef(null)
+  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const nodeRadius = (n: D3Node<Node>): number => {
     const isSelected =
@@ -56,7 +59,9 @@ export const Graph = (props: IGraph): JSX.Element => {
     if (isSelected) {
       return 50
     }
-    if (n.node.domainIds.some((id) => id === selectedDomain?.id)) {
+    if (
+      Array.from(n.node.domainIds ?? []).some((id) => id === selectedDomain?.id)
+    ) {
       return 50
     }
     return 40
@@ -70,10 +75,14 @@ export const Graph = (props: IGraph): JSX.Element => {
     if (isSelected) {
       return 14
     }
-    if (rel.relation.domainIds.some((id) => id === selectedDomain?.id)) {
+    if (
+      Array.from(rel.relation.domainIds ?? []).some(
+        (id) => id === selectedDomain?.id
+      )
+    ) {
       return 10
     }
-    return 6
+    return 10
   }
 
   useEffect(() => {
@@ -110,7 +119,10 @@ export const Graph = (props: IGraph): JSX.Element => {
 
   const updateNodes = (graphDelta: GraphDelta): void => {
     let d3Nodes = nodes.filter(
-      (n) => !graphDelta.removedNodes.some((id) => id === n.node.id)
+      (n) =>
+        !Array.from(graphDelta.removedNodes ?? []).some(
+          (id) => id === n.node.id
+        )
     )
     graphDelta.changedNodes?.forEach((cn) => {
       if (d3Nodes.some((n) => n.node.id === cn.id)) {
@@ -125,18 +137,28 @@ export const Graph = (props: IGraph): JSX.Element => {
 
   const updateRelations = (graphDelta: GraphDelta): void => {
     let d3Relations = relations.filter(
-      (r) => !graphDelta.removedRelations.some((id) => id === r.relation.id)
-    )
-    graphDelta.changedRelations.forEach((cr) => {
-      if (d3Relations.some((n) => n.relation.id === cr.id)) {
-        const [changedRelation] = d3Relations.filter(
-          (d3Rel) => d3Rel.relation.id === cr.id
+      (r) =>
+        !Array.from(graphDelta.removedRelations ?? []).some(
+          (id) => id === r.relation.id
         )
-        changedRelation.relation = cr
-      } else {
-        d3Relations = d3Relations.concat(D3Helper.wrapRelation(cr))
-      }
-    })
+    )
+    if (graphDelta)
+      (graphDelta.changedRelations || []).forEach((cr) => {
+        if (d3Relations.some((n) => n.relation.id === cr.id)) {
+          const [changedRelation] = d3Relations.filter(
+            (d3Rel) => d3Rel.relation.id === cr.id
+          )
+          changedRelation.relation = cr
+        } else {
+          d3Relations = d3Relations.concat(
+            D3Helper.wrapRelation({
+              sourceId: cr.sourceId || '',
+              targetId: cr.targetId || '',
+              ...cr,
+            })
+          )
+        }
+      })
     setRelations(d3Relations)
   }
 
@@ -145,25 +167,35 @@ export const Graph = (props: IGraph): JSX.Element => {
       domains
         .filter(
           (d) =>
-            !graphDelta.removedDomains
+            !Array.from(graphDelta.removedDomains ?? [])
               .concat(
-                graphDelta.changedDomains.map(
-                  (changedDomain) => changedDomain.id
+                Array.from(graphDelta.changedDomains ?? []).map(
+                  (changedDomain) => changedDomain.id || ''
                 )
               )
               .some((id) => id === d.id)
         )
-        .concat(graphDelta.changedDomains)
+        .concat(Array.from(graphDelta.changedDomains ?? []))
     )
     updateNodes(graphDelta)
     updateRelations(graphDelta)
   }
 
   useEffect(() => {
-    graphService.graphGet().then((g) => {
-      setNodes(g.nodes.map((n) => D3Helper.wrapNode(n)))
-      setRelations(g.relations.map((n) => D3Helper.wrapRelation(n)))
-      setDomains(g.domains)
+    graphApi.apiGraphGet().then((g) => {
+      const gData = g.data
+      if (gData.nodes) setNodes(gData.nodes.map((n) => D3Helper.wrapNode(n)))
+      if (gData.relations)
+        setRelations(
+          gData.relations.map((n) =>
+            D3Helper.wrapRelation({
+              sourceId: n.sourceId || '',
+              targetId: n.targetId || '',
+              ...n,
+            })
+          )
+        )
+      if (gData.domains) setDomains(gData.domains)
     })
   }, [])
 
@@ -175,7 +207,7 @@ export const Graph = (props: IGraph): JSX.Element => {
     ): void => {
       const rel: Relation = {
         id: '',
-        domainIds: [domain.id],
+        domainIds: [domain.id || ''],
         sourceId: source.node.id,
         targetId: target.node.id,
         multiple: false,
@@ -184,7 +216,11 @@ export const Graph = (props: IGraph): JSX.Element => {
         type: '',
         color: 'red',
       }
-      const d3Relation = D3Helper.wrapRelation(rel)
+      const d3Relation = D3Helper.wrapRelation({
+        sourceId: rel.sourceId || '',
+        targetId: rel.targetId || '',
+        ...rel,
+      })
       setSelected(d3Relation)
     }
 
@@ -197,7 +233,9 @@ export const Graph = (props: IGraph): JSX.Element => {
         const domainNodes = nodes
           .filter((n) => n && n.node && n.node.domainIds)
           .filter((n) => {
-            return n.node.domainIds.includes(selectedDomain?.id ?? '')
+            return Array.from(n.node.domainIds ?? []).includes(
+              selectedDomain?.id ?? ''
+            )
           })
         if (domainNodes.length <= 0) {
           return undefined
@@ -208,12 +246,16 @@ export const Graph = (props: IGraph): JSX.Element => {
           .selectAll('path')
           .data(domainNodes)
           .join('path')
-          .attr('id', (d) => d.node.id)
+          .attr('id', (d: any) => d.node.id)
           .attr('stroke-opacity', 0.7)
-          .attr('stroke', (d) => d.node.color)
-          .attr('fill', (d) => d.node.color)
+          .attr('stroke', (d: any) => d.node.color)
+          .attr('fill', (d: any) => d.node.color)
           .attr('stroke-width', (n) =>
-            n.node.domainIds.includes(selectedDomain?.id ?? '') ? 20 : 0
+            Array.from(n.node.domainIds ?? []).includes(
+              selectedDomain?.id ?? ''
+            )
+              ? 20
+              : 0
           )
           .classed('path', true)
       }
@@ -329,9 +371,9 @@ export const Graph = (props: IGraph): JSX.Element => {
               r.relation.targetId === d3Rel.relation.targetId
           )
           .indexOf(d3Rel)
-
-        // eslint-disable-next-line no-param-reassign
-        d3Rel.firstRender = d3Rel.relation.sourceId > d3Rel.relation.targetId
+        if (d3Rel.relation.sourceId && d3Rel.relation.targetId)
+          // eslint-disable-next-line no-param-reassign
+          d3Rel.firstRender = d3Rel.relation.sourceId > d3Rel.relation.targetId
       })
 
       const relation = drawRelations<Relation>(
