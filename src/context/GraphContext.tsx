@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext, useState } from 'react'
-import { Domain, Relation, Node } from '../api/model/Model'
 import { D3Node, D3Relation } from '../helpers/D3Helper'
+import { Domain, Relation, Node } from '../services/models'
 
 type GraphContextType = {
   selectedDomain: Domain | undefined

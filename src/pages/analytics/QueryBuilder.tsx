@@ -3,8 +3,7 @@ import { Box, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
-import { Graph, Node, Relation } from '../../api/model/Model'
-import graphService from '../../api/GraphService'
+import { Graph, Node, Relation } from '../../services/models'
 import {
   addSvgStyles,
   buildSimulation,
@@ -15,6 +14,8 @@ import {
   tick,
 } from '../../helpers/GraphHelper'
 import CustomButton from '../../components/Button/CustomButton'
+import { GraphApi } from '../../services'
+import AXIOS_CONFIG from '../../openapi/axios-config'
 
 export interface QueryBuilderProps {
   onChange: (query: Query) => void
@@ -52,6 +53,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [nodes, setNodes] = useState<D3Node<QueryNode>[]>([])
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
   const d3Container = useRef(null)
+  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const handleResize = (): void => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
@@ -73,7 +75,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   }
 
   useEffect(() => {
-    graphService.graphGet().then((g): void => setGraph(g))
+    graphApi.apiGraphGet().then((g): void => setGraph(g.data))
     window.addEventListener('resize', handleResize)
     return (): void => {
       window.removeEventListener('resize', handleResize)
@@ -87,7 +89,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   function addPossibleNode(node: Node): D3Node<QueryNode> {
     const qNode: QueryNode = {
       id: v4(),
-      varName: `${node.label}_${varCounter.get(node.label) ?? 1}`,
+      varName: `${node.label}_${varCounter.get(node.label || '') ?? 1}`,
       node,
       selected: false,
     }
@@ -96,47 +98,53 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     return wrapNode
   }
 
+  const getPossibleRelations = (nodeId: string): Relation[] => {
+    return (graph?.relations || []).filter(
+      (r) => r.sourceId === nodeId || r.targetId === nodeId
+    )
+  }
+
   const addPossibleRelations = (d: D3Node<QueryNode>): void => {
     const possibleNodes: D3Node<QueryNode>[] = []
-    const possibleRelations: QueryRelation[] = graphService
-      .possibleRelations(graph!, d.node.node.id)
-      .flatMap((r: Relation): QueryRelation[] => {
-        const tmpRelations: QueryRelation[] = []
-        const relationObj = {
-          varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
-          relation: r,
-          selected: false,
-        }
-        if (r.targetId === d.node.node.id) {
-          const [n] = graph!.nodes.filter(
-            (tempNode: Node): boolean => r.sourceId === tempNode.id
-          )
-          const sourceNode = addPossibleNode(n)
-          possibleNodes.push(sourceNode)
-          tmpRelations.push({
-            ...relationObj,
-            id: v4(),
-            sourceId: sourceNode.node.id,
-            targetId: d.node.id,
-            depth: '1',
-          })
-        }
-        if (r.sourceId === d.node.node.id) {
-          const [n] = graph!.nodes.filter(
-            (tempNode: Node): boolean => r.targetId === tempNode.id
-          )
-          const targetNode = addPossibleNode(n)
-          possibleNodes.push(targetNode)
-          tmpRelations.push({
-            ...relationObj,
-            id: v4(),
-            sourceId: d.node.id,
-            targetId: targetNode.node.id,
-            depth: '1',
-          })
-        }
-        return tmpRelations
-      })
+    const possibleRelations: QueryRelation[] = getPossibleRelations(
+      d.node.node.id || ''
+    ).flatMap((r: Relation): QueryRelation[] => {
+      const tmpRelations: QueryRelation[] = []
+      const relationObj = {
+        varName: `${r.type}_${varCounter.get(r.type) ?? 1}`,
+        relation: r,
+        selected: false,
+      }
+      if (r.targetId === d.node.node.id) {
+        const [n] = (graph?.nodes || []).filter(
+          (tempNode: Node): boolean => r.sourceId === tempNode.id
+        )
+        const sourceNode = addPossibleNode(n)
+        possibleNodes.push(sourceNode)
+        tmpRelations.push({
+          ...relationObj,
+          id: v4(),
+          sourceId: sourceNode.node.id,
+          targetId: d.node.id,
+          depth: '1',
+        })
+      }
+      if (r.sourceId === d.node.node.id) {
+        const [n] = (graph?.nodes || []).filter(
+          (tempNode: Node): boolean => r.targetId === tempNode.id
+        )
+        const targetNode = addPossibleNode(n)
+        possibleNodes.push(targetNode)
+        tmpRelations.push({
+          ...relationObj,
+          id: v4(),
+          sourceId: d.node.id,
+          targetId: targetNode.node.id,
+          depth: '1',
+        })
+      }
+      return tmpRelations
+    })
 
     const activeNodes = nodes
       .filter((n) => n.node.selected)
@@ -180,7 +188,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     )
     activeNodes.forEach((n) =>
       map.set(
-        n.node.node.label,
+        n.node.node.label || '',
         activeNodes.filter((an) => an.node.node.label === n.node.node.label)
           .length + 1
       )
@@ -274,10 +282,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       <Box mt={3} mb={1}>
         <Typography variant="h6">Query Builder</Typography>
       </Box>
-      {graph?.nodes.map(
+      {(graph?.nodes || []).map(
         (n): JSX.Element => (
           <CustomButton
-            title={n.label}
+            title={n.label || ''}
             key={n.id}
             onClick={(): void => addNode(n)}
             customColor={n.color}
