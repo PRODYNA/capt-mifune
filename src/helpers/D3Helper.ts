@@ -62,7 +62,7 @@ export class D3Helper {
     targetY: number
   ): string => {
     if (sourceX === targetX && sourceY === targetY) {
-      const r = 40
+      const r = 50
       return `
             M ${sourceX} ${sourceY}
             m -${r}, 0
@@ -70,7 +70,7 @@ export class D3Helper {
             a ${r},${r} 0 1,0 -${2 * r},0
             `
     }
-    const r = 50
+    const r = 60
     return `
             M ${sourceX} ${sourceY}
             l ${targetX} ${targetY} 
