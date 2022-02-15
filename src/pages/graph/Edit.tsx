@@ -16,7 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import CloseIcon from '@material-ui/icons/Close'
 import AddIcon from '@material-ui/icons/Add'
 import { PropertyEdit } from './PropertyEdit'
-import { Node, Property, Relation } from '../../api/model/Model'
+import { Node, Property, Relation } from '../../services/models'
 import CustomButton from '../../components/Button/CustomButton'
 import CustomTable from '../../components/Table/CustomTable'
 import CustomDialog from '../../components/Dialog/CustomDialog'
@@ -136,7 +136,7 @@ const Edit = (props: EditProps): JSX.Element => {
           </Tooltip>
         </Box>
         <CustomTable tableHeaders={tableHeaders} label="property-table">
-          {value.properties.map((p, idx) => (
+          {(value.properties || []).map((p, idx) => (
             // eslint-disable-next-line react/no-array-index-key
             <TableRow key={`${p.name}-${idx}`} className={classes.tableRow}>
               <PropertyEdit
