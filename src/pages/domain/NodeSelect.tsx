@@ -6,7 +6,7 @@ import {
   SelectProps,
 } from '@material-ui/core'
 import React from 'react'
-import { Node } from '../../api/model/Model'
+import { Node } from '../../services/models'
 
 type NodeSelectProps = SelectProps & {
   nodes: Node[]
