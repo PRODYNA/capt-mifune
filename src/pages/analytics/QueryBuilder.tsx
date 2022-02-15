@@ -92,7 +92,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       selected: false,
     }
     const wrapNode = D3Helper.wrapNode(qNode)
-    wrapNode.radius = 30
+    wrapNode.radius = 40
     return wrapNode
   }
 
@@ -261,7 +261,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       selected: true,
     }
     const newNode = D3Helper.wrapNode(qNode)
-    newNode.radius = 40
+    newNode.radius = 50
     newNode.x = 100
     newNode.y = 100
     setNodes([newNode])

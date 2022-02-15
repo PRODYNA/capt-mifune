@@ -54,12 +54,12 @@ export const Graph = (props: IGraph): JSX.Element => {
     const isSelected =
       selected && 'node' in selected && selected.node.id === n.node.id
     if (isSelected) {
-      return 40
+      return 50
     }
     if (n.node.domainIds.some((id) => id === selectedDomain?.id)) {
-      return 40
+      return 50
     }
-    return 30
+    return 40
   }
 
   const relWidth = (rel: D3Relation<Relation>): number => {
