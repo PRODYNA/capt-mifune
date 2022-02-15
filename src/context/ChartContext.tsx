@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext } from 'react'
-import { QueryResultDefinition } from '../api/model/Model'
 import { Query } from '../pages/analytics/QueryBuilder'
+import { QueryResultDefinition } from '../services/models'
+
+type QueryResultDefinitionExtended = QueryResultDefinition & { uuid?: string }
 
 export interface IChartOptions {
-  results: QueryResultDefinition[]
+  results: QueryResultDefinitionExtended[]
   order: string | undefined
   min: number | undefined
   max: number | undefined

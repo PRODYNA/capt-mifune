@@ -4,7 +4,7 @@ import { v4 } from 'uuid'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 import { useStyleTable } from '../graph/NodeEdit'
-import { QueryFunctions } from '../../api/model/Model'
+import { QueryFunction } from '../../services/models/query-function'
 
 interface Select {
   uuid: string
@@ -21,8 +21,8 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     properties: [],
   }
   const [selects, setSelects] = useState<Select[]>([initialSelect])
-  const [fn, setFn] = useState<QueryFunctions | undefined>(fnDefault)
-  const fnOptions = Object.values(QueryFunctions)
+  const [fn, setFn] = useState<QueryFunction | undefined>(fnDefault)
+  const fnOptions = Object.values(QueryFunction)
   const classes = useStyleTable()
 
   useEffect(() => {
@@ -58,9 +58,12 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
             onChangeHandler={(e) => {
               const newFN = e.target.value
               setFn(newFN)
-              if (newFN === QueryFunctions.HIERARCHY)
+              if (newFN === QueryFunction.HierarchyCalculation)
                 setSelects([...selects, initialSelect])
-              if (newFN !== QueryFunctions.HIERARCHY && selects.length > 1)
+              if (
+                newFN !== QueryFunction.HierarchyCalculation &&
+                selects.length > 1
+              )
                 setSelects([selects[0]])
             }}
           />
@@ -147,9 +150,8 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
       </Grid>
       {selects.map((select, index) => (
         <Fragment key={select.uuid}>
-          {index === selects.length - 1 && fn === QueryFunctions.HIERARCHY && (
-            <Grid item md={2} />
-          )}
+          {index === selects.length - 1 &&
+            fn === QueryFunction.HierarchyCalculation && <Grid item md={2} />}
           <Grid item xs={12} md={5}>
             {renderNodeSelect(select)}
           </Grid>
