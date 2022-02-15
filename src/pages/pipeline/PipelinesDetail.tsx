@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box, Container, Typography } from '@material-ui/core'
-import { Domain } from '../../api/model/Model'
-import graphService from '../../api/GraphService'
 import PipelineEdit from './PipelineEdit'
+import { Domain } from '../../services/models/domain'
+import { DomainApi } from '../../services/api/domain-api'
+import AXIOS_CONFIG from '../../openapi/axios-config'
 
 const PipelinesDetail = (): JSX.Element => {
   const [domain, setDomain] = useState<Domain>()
   const { id } = useParams<{ id: string }>()
+  const domainApi = new DomainApi(AXIOS_CONFIG())
 
   useEffect(() => {
-    graphService.domainGet(id).then((d) => setDomain(d))
+    domainApi.apiGraphDomainIdGet(id).then((d) => setDomain(d.data))
   }, [])
 
   return (
