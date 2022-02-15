@@ -76,7 +76,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     setSelected(
       D3Helper.wrapNode({
         id: '',
-        domainIds: new Set([domain.id ?? '']),
+        domainIds: [domain.id ?? ''],
         color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
         label: '',
         properties: [],
