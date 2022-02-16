@@ -57,7 +57,9 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           filters: [],
         })
         .then((res) => {
-          const mappedValues = res.data.map((val) => val.filter)
+          const mappedValues = res.data.map(
+            (val) => val.filter
+          ) as unknown as any[]
           setValues(Array.from(new Set(mappedValues)))
         })
     }

@@ -1,12 +1,17 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { BaseType, Selection, text } from 'd3'
-import { createWatchProgram } from 'typescript'
 import { NodeEdit } from './NodeEdit'
 import { Domain, GraphDelta, Node, Relation } from '../../services/models'
 import { RelationEdit } from './RelationEdit'
 import { DomainList } from '../domain/DomainList'
-import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
+import {
+  D3Helper,
+  D3Node,
+  D3Relation,
+  NODE_RADIUS,
+  SELECTED_NODE_RADIUS,
+} from '../../helpers/D3Helper'
 import {
   DRAWER_WIDTH,
   DRAWER_WIDTH_OPEN,
@@ -57,14 +62,14 @@ export const Graph = (props: IGraph): JSX.Element => {
     const isSelected =
       selected && 'node' in selected && selected.node.id === n.node.id
     if (isSelected) {
-      return 50
+      return SELECTED_NODE_RADIUS
     }
     if (
       Array.from(n.node.domainIds ?? []).some((id) => id === selectedDomain?.id)
     ) {
-      return 50
+      return SELECTED_NODE_RADIUS
     }
-    return 40
+    return NODE_RADIUS
   }
 
   const relWidth = (rel: D3Relation<Relation>): number => {
