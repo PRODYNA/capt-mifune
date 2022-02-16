@@ -26,4 +26,10 @@ package com.prodyna.mifune.domain;
  * #L%
  */
 
-public record Filter(FilterFunction function, String property, Object value) {}
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+public record Filter(
+    FilterFunction function,
+    String property,
+    @Schema(anyOf = {Integer.class, Long.class, Float.class, Boolean.class, String.class})
+        Object value) {}
