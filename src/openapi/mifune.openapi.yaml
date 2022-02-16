@@ -476,6 +476,15 @@ components:
           type: string
         value:
           type: object
+          anyOf:
+          - format: int32
+            type: integer
+          - format: int64
+            type: integer
+          - format: float
+            type: number
+          - type: boolean
+          - type: string
     FilterFunction:
       enum:
       - EQUAL
