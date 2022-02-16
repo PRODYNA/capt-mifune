@@ -17,13 +17,17 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete'
 import { useTheme } from '@material-ui/core/styles'
 import { EventSourcePolyfill } from 'ng-event-source'
-import graphService from '../../api/GraphService'
 import PipelineRow from './PipelineRow'
 import CustomButton from '../../components/Button/CustomButton'
 import CustomDialog from '../../components/Dialog/CustomDialog'
 import { Domain, GraphStatistics } from '../../services/models'
 import { DomainApi } from '../../services/api'
 import AXIOS_CONFIG from '../../openapi/axios-config'
+import {
+  cleanDatabase,
+  graphStats,
+  importSource,
+} from '../../helpers/EventSourceHelper'
 
 const Pipelines = (): JSX.Element => {
   const domainApi = new DomainApi(AXIOS_CONFIG())
@@ -62,7 +66,7 @@ const Pipelines = (): JSX.Element => {
   let importStatsClient: EventSourcePolyfill
 
   useEffect(() => {
-    importStatsClient = graphService.importSource()
+    importStatsClient = importSource()
     importStatsClient.onmessage = (e) => {
       const newStats = JSON.parse(e.data)
       setTmpMessages(newStats)
@@ -81,7 +85,7 @@ const Pipelines = (): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    const sseClient = graphService.graphStats()
+    const sseClient = graphStats()
     sseClient.onmessage = (e) => {
       setStatistics(JSON.parse(e.data))
     }
@@ -91,7 +95,7 @@ const Pipelines = (): JSX.Element => {
   }, [cleanActive])
 
   const clean = (): void => {
-    const sseClient = graphService.cleanDatabase()
+    const sseClient = cleanDatabase()
     sseClient.onmessage = () => {
       setCleanActive(true)
     }
