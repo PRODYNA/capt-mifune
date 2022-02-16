@@ -99,11 +99,11 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     const nodeProps = query.nodes
       .filter((n) => n.varName === select.variable)
       .flatMap((n) => n.node.properties)
-      .map((p) => p.name)
+      .map((p) => p?.name ?? '')
     const relProps = query.relations
       .filter((n) => n.varName === select.variable)
       .flatMap((n) => n.relation.properties)
-      .map((p) => p.name)
+      .map((p) => p?.name ?? '')
     return nodeProps.concat(relProps) ?? []
   }
 
