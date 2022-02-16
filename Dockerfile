@@ -9,6 +9,7 @@ COPY .eslintignore .
 
 
 RUN yarn install
+RUN yarn generate-backend-api
 COPY public public
 COPY src src
 RUN yarn build
