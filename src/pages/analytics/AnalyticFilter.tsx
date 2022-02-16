@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { IconButton, TableCell, useTheme } from '@material-ui/core'
 import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
-import graphService from '../../api/GraphService'
 import FormSelect from '../../components/Form/FormSelect'
 import { AnalyticSelect } from './AnalyticSelect'
 import { useStyleTable } from '../graph/NodeEdit'
-import { QueryFunctions } from '../../api/model/Model'
 import ChartContext from '../../context/ChartContext'
+import { QueryFunction } from '../../services/models/query-function'
+import AXIOS_CONFIG from '../../openapi/axios-config'
+import { DataResourceApi } from '../../services'
 
 interface AnalyticFilterProps {
   onKeyChange: (key?: string) => void
@@ -22,24 +23,42 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const [values, setValues] = useState<string[]>()
   const theme = useTheme()
   const classes = useStyleTable()
+  const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
 
   useEffect(() => {
     if (filter) {
-      graphService
-        .query(
-          query,
-          [
+      dataResourceApi
+        .apiDataPost({
+          nodes: query.nodes.map((n) => {
+            return {
+              id: n.id,
+              nodeId: n.node.id,
+              varName: n.varName,
+            }
+          }),
+          relations: query.relations.map((r) => {
+            return {
+              id: r.id,
+              varName: r.varName,
+              relationId: r.relation.id,
+              sourceId: r.sourceId,
+              targetId: r.targetId,
+              depth: r.depth,
+            }
+          }),
+          results: [
             {
-              function: QueryFunctions.VALUE,
+              function: QueryFunction.Value,
               name: 'filter',
               parameters: [filter],
             },
           ],
-          [filter]
-        )
+          orders: [filter],
+          filters: [],
+        })
         .then((res) => {
-          const mappedValues = Array.from(new Set(res.map((val) => val.filter)))
-          setValues(mappedValues)
+          const mappedValues = res.data.map((val) => val.filter)
+          setValues(Array.from(new Set(mappedValues)))
         })
     }
   }, [filter])
