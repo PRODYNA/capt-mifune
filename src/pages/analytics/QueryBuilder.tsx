@@ -261,7 +261,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   }, [nodes, relations, selectActive])
 
   const addNode = (node: Node): void => {
-    console.log('add node')
     const qNode: QueryNode = {
       id: v4(),
       varName: `${node.label}_${1}`,
@@ -275,6 +274,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     setNodes([newNode])
     setRelations([])
     updateCounterMap(new Map(), [], [newNode])
+    onChange({
+      nodes: [qNode],
+      relations: [],
+    })
   }
 
   return (
