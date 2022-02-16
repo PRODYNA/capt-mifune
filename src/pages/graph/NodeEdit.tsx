@@ -59,7 +59,6 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
         })
   }
   const onSubmit = (newNode: Node): void => {
-    console.log('in', newNode, { label: newNode.label, ...newNode })
     if (newNode.id && newNode.label)
       nodeApi
         .apiGraphNodeIdPut(newNode.id, { label: newNode.label, ...newNode })
