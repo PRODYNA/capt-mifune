@@ -152,6 +152,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           {propertyType === PropertyType.Boolean && (
             <Checkbox
               checked={(value as boolean) ?? true}
+              // TODO boolean set initalState false
               onChange={(event) => {
                 setValue(event.target.checked)
                 onValueChange(event.target.checked)
