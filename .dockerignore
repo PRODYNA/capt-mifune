@@ -1,13 +1,3 @@
 *
-!Dockerfile
-!src
+!build
 !docker
-!public
-!package.json
-!tsconfig.json
-!yarn.lock
-!.eslintignore
-!.eslintrc.json
-!.prettierignore
-!.prettierrc.json
-!tsconfig.json
