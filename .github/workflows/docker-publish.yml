@@ -30,14 +30,21 @@ jobs:
           node-version: '16'
         env:
           CI: false
+
       - uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'adopt'
+      - uses: actions/cache@v2
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: yarn install
         run: yarn install
       - name: yarn generate api
         run: yarn generate-backend-api
+      - name: env settiings
+        run: export CI=false
       - name: yarn build
         run: yarn build
 
