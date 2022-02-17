@@ -59,7 +59,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)
   }
 
-  function relationMouseEvents<N extends QueryRelation>(
+  function relationMouseEvents(
     simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
     relation: any
   ): void {

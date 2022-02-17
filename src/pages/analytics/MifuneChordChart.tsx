@@ -85,9 +85,9 @@ export const MifiuneChordChart = (): JSX.Element => {
         (value, index, categoryArray) => categoryArray.indexOf(value) === index
       ) as string[]
     const data: number[][] = []
-    labels.forEach((s) => {
+    labels.forEach(() => {
       const subarray: number[] = []
-      labels.forEach((x) => subarray.push(0))
+      labels.forEach(() => subarray.push(0))
       data.push(subarray)
     })
     rawData.forEach((item) => {

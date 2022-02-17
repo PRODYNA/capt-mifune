@@ -13,7 +13,6 @@ const header = (): Record<string, unknown> => {
 }
 
 export const cleanDatabase = (): EventSourcePolyfill => {
-  console.log('create Event Source')
   return new EventSourcePolyfill(
     `${localStorage.getItem(ENV.API_SERVER)}apocalypse`,
     {
