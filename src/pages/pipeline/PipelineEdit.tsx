@@ -1,15 +1,18 @@
 import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Grid } from '@material-ui/core'
-import { Domain, Source } from '../../api/model/Model'
-import graphService from '../../api/GraphService'
 import FormSelect from '../../components/Form/FormSelect'
 import FormActions from '../../components/Form/FormActions'
-import HttpService from '../../services/HttpService'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-
-const rest = HttpService.getAxiosClient()
+import {
+  SourceResourceApi,
+  Source,
+  Domain,
+  GraphApi,
+  DomainApi,
+} from '../../services'
+import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface DomainEditProps {
   domain: Domain
@@ -17,6 +20,9 @@ interface DomainEditProps {
 
 const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const { domain } = props
+  const graphApi = new GraphApi(AXIOS_CONFIG())
+  const sourceApi = new SourceResourceApi(AXIOS_CONFIG())
+  const domainApi = new DomainApi(AXIOS_CONFIG())
   const history = useHistory()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [mapping, setMapping] = useState<{ [key: string]: string }>(
@@ -26,13 +32,13 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const [sources, setSources] = useState<Source[]>([])
 
   useEffect(() => {
-    rest.get<Source[]>('/sources').then((r) => {
+    sourceApi.apiSourcesGet().then((r) => {
       setSources(r.data)
     })
-
-    graphService.loadDefaultMappingConfig(domain).then((r) => {
-      setMapping(r.data ?? {})
-    })
+    if (domain.id)
+      graphApi.apiGraphDomainDomainIdMappingGet(domain.id).then((r) => {
+        setMapping(r.data ?? {})
+      })
   }, [domain])
 
   const getMenuItems = (): string[] => {
@@ -40,8 +46,8 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
       const data = sources.filter((s) => s.name === file)[0]
       if (data) {
         let { header } = data
-        if (!(header.find((h) => h === '') === '')) {
-          header = [''].concat(header)
+        if (!(header?.find((h) => h === '') === '')) {
+          header = [''].concat(header || [])
         }
         return header
       }
@@ -103,7 +109,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
         <FormSelect
           key="FileSelection"
           title="Select file to map"
-          options={[...sources.map((source) => source.name), '']}
+          options={[...sources.map((source) => source.name || ''), '']}
           value={file ?? 'None'}
           onChangeHandler={onFileChangeEventHandler}
         />
@@ -114,17 +120,18 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   return (
     <form
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        graphService
-          .domainPut(domain.id, {
-            ...domain,
-            file,
-            columnMapping: mapping,
-          })
-          .then(() => {
-            openSnackbar(Translations.SAVE, 'success')
-            history.goBack()
-          })
-          .catch((e) => openSnackbarError(e))
+        if (domain.id)
+          domainApi
+            .apiGraphDomainIdPut(domain.id, {
+              ...domain,
+              file,
+              columnMapping: mapping,
+            })
+            .then(() => {
+              openSnackbar(Translations.SAVE, 'success')
+              history.goBack()
+            })
+            .catch((e) => openSnackbarError(e))
         event.preventDefault()
       }}
     >

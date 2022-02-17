@@ -8,10 +8,11 @@ import { useHistory } from 'react-router-dom'
 import StopIcon from '@material-ui/icons/Stop'
 import VisibilityIcon from '@material-ui/icons/Visibility'
 import { useTheme } from '@material-ui/core/styles'
-import graphService from '../../api/GraphService'
-import { Domain } from '../../api/model/Model'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
+import { Domain } from '../../services/models/domain'
+import AXIOS_CONFIG from '../../openapi/axios-config'
+import { GraphApi } from '../../services/api/graph-api'
 
 interface IPipelineRow {
   domain: Domain
@@ -25,38 +26,42 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const history = useHistory()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
+  const graphApi = new GraphApi(AXIOS_CONFIG())
 
-  const valid = (isValid: boolean): JSX.Element => {
+  const valid = (isValid: boolean | undefined): JSX.Element => {
     if (isValid) return <DoneIcon htmlColor={theme.palette.success.main} />
     return <WarningIcon htmlColor={theme.palette.warning.main} />
   }
 
   const runImport = (): void => {
     setShowProgress(true)
-    graphService
-      .domainRunImport(domain.id)
-      .then(() => {
-        openSnackbar(Translations.IMPORT_RUN, 'success')
-        setShowProgress(false)
-      })
-      .catch((e) => {
-        openSnackbarError(e)
-        setShowProgress(false)
-      })
+    if (domain.id)
+      graphApi
+        .apiGraphDomainDomainIdImportGet(domain.id)
+        .then(() => {
+          openSnackbar(Translations.IMPORT_RUN, 'success')
+          setShowProgress(false)
+        })
+        .catch((e) => {
+          openSnackbarError(e)
+          setShowProgress(false)
+        })
   }
 
   const stopImport = (): void => {
-    graphService
-      .domainStopImport(domain.id)
-      .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
-      .catch((e) => openSnackbarError(e))
+    if (domain.id)
+      graphApi
+        .apiGraphDomainDomainIdImportDelete(domain.id)
+        .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
+        .catch((e) => openSnackbarError(e))
   }
 
   const clearDomain = (): void => {
-    graphService
-      .domainClear(domain.id)
-      .then(() => openSnackbar(Translations.DOMAIN_CLEAR, 'success'))
-      .catch((e) => openSnackbarError(e))
+    if (domain.id)
+      graphApi
+        .apiGraphDomainDomainIdClearDelete(domain.id)
+        .then(() => openSnackbar(Translations.DOMAIN_CLEAR, 'success'))
+        .catch((e) => openSnackbarError(e))
   }
 
   return (

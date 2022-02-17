@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
-import UserService from './UserService'
+import UserService from '../auth/UserService'
 import { ENV } from '../env/Environments'
 
 const axiosInstance = axios.create({

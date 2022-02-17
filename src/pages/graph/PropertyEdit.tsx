@@ -9,7 +9,7 @@ import {
   useTheme,
 } from '@material-ui/core'
 import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
-import { Property } from '../../api/model/Model'
+import { Property, PropertyType } from '../../services/models'
 import FormSelect from '../../components/Form/FormSelect'
 
 interface PropertyEditProps {
@@ -64,14 +64,17 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
       <TableCell className={classes.tableCell}>
         <FormSelect
           title="Type"
-          options={['string', 'int', 'double', 'long', 'date']}
+          options={Object.values(PropertyType)}
           value={value.type}
           fullWidth={false}
           className={classes.spacing}
           hideLabel
           onChangeHandler={(e): void => {
-            setValue({ ...value, type: e.target.value as string })
-            updateProperty(idx, { ...value, type: e.target.value as string })
+            setValue({ ...value, type: e.target.value as PropertyType })
+            updateProperty(idx, {
+              ...value,
+              type: e.target.value as PropertyType,
+            })
           }}
         />
       </TableCell>

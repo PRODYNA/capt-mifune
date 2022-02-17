@@ -2,7 +2,7 @@ import { BaseType, Selection } from 'd3'
 import * as d3 from 'd3'
 import { QueryNode, QueryRelation } from '../pages/analytics/QueryBuilder'
 import { D3Helper, D3Node, D3Relation } from './D3Helper'
-import { Node, Relation } from '../api/model/Model'
+import { Node, Relation } from '../services/models'
 import { Force } from '../pages/graph/Graph'
 
 export function drawNodes<N extends Node | QueryNode>(
@@ -25,12 +25,12 @@ export function drawNodes<N extends Node | QueryNode>(
     .attr('stroke-width', 2)
     .attr('fill', (n) =>
       type === 'node'
-        ? (n as D3Node<Node>).node.color
-        : (n as D3Node<QueryNode>).node.node.color
+        ? (n as D3Node<Node>).node.color || ''
+        : (n as D3Node<QueryNode>).node.node.color || ''
     )
     .attr('opacity', (n) => {
       if (type === 'node') {
-        return (n as D3Node<Node>).node.domainIds.some(
+        return Array.from((n as D3Node<Node>).node.domainIds ?? []).some(
           (id) => selectedDomainId === id
         ) || !selectedDomainId
           ? 1
@@ -53,16 +53,16 @@ export function drawLabel<N extends Node | QueryNode>(
     .join('text')
     .text((d) =>
       type === 'node'
-        ? (d as D3Node<Node>).node.label
-        : (d as D3Node<QueryNode>).node.varName
+        ? (d as D3Node<Node>).node.label || ''
+        : (d as D3Node<QueryNode>).node.varName || ''
     )
     .attr('dominant-baseline', 'middle')
     .attr('text-anchor', 'middle')
     .attr('class', 'node-label')
     .attr('background-color', (n) =>
       type === 'node'
-        ? (n as D3Node<Node>).node.color
-        : (n as D3Node<QueryNode>).node.node.color
+        ? (n as D3Node<Node>).node.color || ''
+        : (n as D3Node<QueryNode>).node.node.color || ''
     )
 }
 
@@ -141,8 +141,9 @@ export function drawRelations<R extends Relation | QueryRelation>(
           type === 'relation' ? 'node' : 'queryNode',
           data,
           type === 'relation'
-            ? (rel as D3Relation<Relation>).relation.sourceId
-            : (rel as D3Relation<QueryRelation>).relation.relation.sourceId
+            ? (rel as D3Relation<Relation>).relation.sourceId || ''
+            : (rel as D3Relation<QueryRelation>).relation.relation.sourceId ||
+                ''
         )
       )
   })
@@ -150,13 +151,13 @@ export function drawRelations<R extends Relation | QueryRelation>(
   const selection = svg.append('g').selectAll('path').data(d3Relation)
   const relation = selection
     .join('path')
-    .attr('id', (d) => d.relation.id)
+    .attr('id', (d) => d.relation.id || '')
     .attr('stroke-linecap', 'round')
     .attr('opacity', (r) => {
       if (type === 'relation') {
-        return (r as D3Relation<Relation>).relation.domainIds.some(
-          (id) => id === selectedDomainId
-        ) || !selectedDomainId
+        return Array.from(
+          (r as D3Relation<Relation>).relation.domainIds ?? []
+        ).some((id) => id === selectedDomainId) || !selectedDomainId
           ? 1
           : 0.4
       }
@@ -167,8 +168,8 @@ export function drawRelations<R extends Relation | QueryRelation>(
         type === 'relation' ? 'node' : 'queryNode',
         data,
         type === 'relation'
-          ? (d as D3Relation<Relation>).relation.sourceId
-          : (d as D3Relation<QueryRelation>).relation.relation.sourceId
+          ? (d as D3Relation<Relation>).relation.sourceId || ''
+          : (d as D3Relation<QueryRelation>).relation.relation.sourceId || ''
       )
     )
     .attr('fill', 'transparent')
@@ -304,7 +305,7 @@ export function buildSimulation<
       'link',
       d3
         .forceLink<D3Node<N>, D3Relation<R>>(d3Relation)
-        .id((d) => d.node.id)
+        .id((d) => d.node.id as string)
         .distance(100)
         .strength(0.2)
     )
