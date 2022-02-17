@@ -43,10 +43,10 @@ jobs:
         run: yarn install
       - name: yarn generate api
         run: yarn generate-backend-api
-      - name: env settiings
-        run: export CI=false
       - name: yarn build
         run: yarn build
+        env:
+          CI: false
 
 
 
