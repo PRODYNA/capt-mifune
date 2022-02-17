@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Box, Container, makeStyles, Typography } from '@material-ui/core'
 import CloudUploadIcon from '@material-ui/icons/CloudUpload'
-import HttpService from '../services/HttpService'
+import HttpService from '../openapi/HttpService'
 import CustomButton from '../components/Button/CustomButton'
 import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'

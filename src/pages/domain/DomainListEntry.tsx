@@ -4,7 +4,6 @@ import {
   FormControl,
   IconButton,
   ListItemIcon,
-  ListItemText,
   makeStyles,
   TextField,
   Tooltip,
@@ -16,8 +15,6 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord'
 import Delete from '@material-ui/icons/Delete'
 import Save from '@material-ui/icons/Save'
 import Add from '@material-ui/icons/Add'
-import graphService from '../../api/GraphService'
-import { Domain, GraphDelta } from '../../api/model/Model'
 import { NodeSelect } from './NodeSelect'
 import CustomAccordion from '../../components/Accordion/CustomAccordion'
 import { SnackbarContext } from '../../context/Snackbar'
@@ -25,6 +22,9 @@ import { Translations } from '../../utils/Translations'
 import CustomDialog from '../../components/Dialog/CustomDialog'
 import GraphContext from '../../context/GraphContext'
 import { D3Helper } from '../../helpers/D3Helper'
+import { Domain, GraphDelta } from '../../services/models'
+import { DomainApi } from '../../services/api/domain-api'
+import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface DomainListEntryProps {
   domain: Domain
@@ -48,6 +48,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     setSelectedDomain,
   } = useContext(GraphContext)
   const theme = useTheme()
+  const domainApi = new DomainApi(AXIOS_CONFIG())
 
   const useStyles = makeStyles(() =>
     createStyles({
@@ -63,7 +64,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   const classes = useStyles()
 
   const handleChange = (): void => {
-    toggleAccordion(domain.id)
+    if (domain.id) toggleAccordion(domain.id)
     if (selectedDomain?.id === domain.id) {
       setSelectedDomain(undefined)
     } else {
@@ -75,7 +76,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     setSelected(
       D3Helper.wrapNode({
         id: '',
-        domainIds: [domain.id],
+        domainIds: [domain.id ?? ''],
         color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
         label: '',
         properties: [],
@@ -85,29 +86,33 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   }
 
   const updateDomain = (): void => {
-    graphService
-      .domainPut(domain.id, {
-        ...domain,
-        name,
-        rootNodeId,
-      })
-      .then((res: Domain) => {
-        setDomains(domains.filter((d) => d.id !== res.id).concat(res))
-        setSelectedDomain(res)
-        openSnackbar(Translations.SAVE, 'success')
-      })
-      .catch((e) => openSnackbarError(e))
+    if (domain.id)
+      domainApi
+        .apiGraphDomainIdPut(domain.id, {
+          ...domain,
+          name,
+          rootNodeId,
+        })
+        .then((res) => {
+          setDomains(
+            domains.filter((d) => d.id !== res.data.id).concat(res.data)
+          )
+          setSelectedDomain(res.data)
+          openSnackbar(Translations.SAVE, 'success')
+        })
+        .catch((e) => openSnackbarError(e))
   }
 
   const deleteDomain = (): void => {
-    graphService
-      .domainDelete(domain.id)
-      .then((delta) => {
-        updateState(delta)
-        setSelected(undefined)
-        openSnackbar(Translations.DELETE, 'success')
-      })
-      .catch((e) => openSnackbarError(e))
+    if (domain.id)
+      domainApi
+        .apiGraphDomainIdDelete(domain.id)
+        .then((delta) => {
+          updateState(delta.data)
+          setSelected(undefined)
+          openSnackbar(Translations.DELETE, 'success')
+        })
+        .catch((e) => openSnackbarError(e))
   }
 
   const buildBadge = (): JSX.Element => {
@@ -160,7 +165,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   return (
     <>
       <CustomAccordion
-        id={domain.id}
+        id={domain.id ?? ''}
         title={domain.name}
         isExpanded={expanded}
         summary={
