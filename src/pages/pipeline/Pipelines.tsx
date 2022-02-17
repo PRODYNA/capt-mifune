@@ -29,6 +29,10 @@ import {
   importSource,
 } from '../../helpers/EventSourceHelper'
 
+interface Message {
+  [key: string]: number
+}
+
 const Pipelines = (): JSX.Element => {
   const domainApi = new DomainApi(AXIOS_CONFIG())
   const [domains, setDomains] = useState<Domain[]>()
@@ -36,8 +40,8 @@ const Pipelines = (): JSX.Element => {
   const [cleanActive, setCleanActive] = useState<boolean>(false)
   const [showProgress, setShowProgress] = useState<boolean>(false)
   const [statistics, setStatistics] = useState<GraphStatistics>()
-  const [messages, setMessages] = useState<any>()
-  const [tmpMessages, setTmpMessages] = useState<any>()
+  const [messages, setMessages] = useState<Message>({})
+  const [tmpMessages, setTmpMessages] = useState<Message>({})
   const tableHeaders = [
     'Show Details',
     'Domain Name',
@@ -149,7 +153,7 @@ const Pipelines = (): JSX.Element => {
             <TableBody>
               {domains?.map((row) => (
                 <PipelineRow
-                  message={messages[row.id as string]}
+                  message={messages[row.id as string] ?? ''}
                   key={row.id}
                   domain={row}
                   cleanActive={cleanActive}
