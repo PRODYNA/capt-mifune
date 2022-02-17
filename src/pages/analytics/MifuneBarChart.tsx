@@ -3,7 +3,7 @@ import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@material-ui/core'
 import { ChartWrapper } from './ChartWrapper'
 import ChartContext, { QueryData } from '../../context/ChartContext'
-import { QueryFunctions } from '../../api/model/Model'
+import { QueryFunction } from '../../services/models/query-function'
 
 export const buildBarChart = (data: QueryData): JSX.Element => {
   return (
@@ -74,7 +74,7 @@ export const MifuneBarChart = (): JSX.Element => {
             const mappedResults = [
               ...result,
               {
-                function: QueryFunctions.VALUE,
+                function: QueryFunction.Value,
                 name: 'label',
                 parameters: v || [],
               },
@@ -88,14 +88,14 @@ export const MifuneBarChart = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.VALUE,
+          fnDefault: QueryFunction.Value,
           onChange: (v, fn) => {
             if (v) {
               const result = results.filter((item) => item.name !== 'value')
               const mappedResults = [
                 ...result,
                 {
-                  function: fn ?? QueryFunctions.VALUE,
+                  function: fn ?? QueryFunction.Value,
                   name: 'value',
                   parameters: v || [],
                 },

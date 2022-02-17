@@ -10,7 +10,7 @@ import {
   Select,
 } from '@material-ui/core'
 import React from 'react'
-import { Domain } from '../../api/model/Model'
+import { Domain } from '../../services/models/domain'
 
 export interface DomainSelectProps {
   domains: Domain[]

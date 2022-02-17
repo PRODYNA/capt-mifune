@@ -22,12 +22,16 @@ export interface Point {
   y: number
 }
 
+export const NODE_RADIUS = 40
+export const SELECTED_NODE_RADIUS = 50
+export const REL_NODE_RADIUS = 60
+
 export class D3Helper {
   static wrapNode<T>(node: T): D3Node<T> {
     return {
       kind: 'node',
       node,
-      radius: 40,
+      radius: NODE_RADIUS,
     }
   }
 
@@ -62,7 +66,7 @@ export class D3Helper {
     targetY: number
   ): string => {
     if (sourceX === targetX && sourceY === targetY) {
-      const r = 50
+      const r = SELECTED_NODE_RADIUS
       return `
             M ${sourceX} ${sourceY}
             m -${r}, 0
@@ -70,7 +74,7 @@ export class D3Helper {
             a ${r},${r} 0 1,0 -${2 * r},0
             `
     }
-    const r = 60
+    const r = REL_NODE_RADIUS
     return `
             M ${sourceX} ${sourceY}
             l ${targetX} ${targetY} 

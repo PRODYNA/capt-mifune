@@ -14,8 +14,8 @@ import { v4 } from 'uuid'
 import { Add } from '@material-ui/icons'
 import { ChartWrapper, SelectProps } from './ChartWrapper'
 import ChartContext, { QueryData } from '../../context/ChartContext'
-import { QueryFunctions } from '../../api/model/Model'
 import CustomButton from '../../components/Button/CustomButton'
+import { QueryFunction } from '../../services/models/query-function'
 
 export const buildTableChart = (data: QueryData): JSX.Element => {
   if (!data || data.length === 0)
@@ -67,7 +67,7 @@ export const MifuneTable = (): JSX.Element => {
       results: [
         ...results,
         {
-          function: QueryFunctions.VALUE,
+          function: QueryFunction.Value,
           name: '',
           parameters: [],
           uuid: v4(),
@@ -91,7 +91,7 @@ export const MifuneTable = (): JSX.Element => {
             const mappedResults = results.map((item) => {
               return item.uuid === result.uuid
                 ? {
-                    function: QueryFunctions.VALUE,
+                    function: QueryFunction.Value,
                     name: v[0],
                     parameters: v,
                     uuid: item.uuid,
@@ -118,7 +118,7 @@ export const MifuneTable = (): JSX.Element => {
         {
           query,
           label: 'Value',
-          fnDefault: QueryFunctions.VALUE,
+          fnDefault: QueryFunction.Value,
           onChange: (v, fn) => {
             if (v) {
               const result = results.filter((item) => item.name !== 'value')
@@ -126,7 +126,7 @@ export const MifuneTable = (): JSX.Element => {
                 ...result,
                 {
                   uuid: v4(),
-                  function: fn ?? QueryFunctions.VALUE,
+                  function: fn ?? QueryFunction.Value,
                   name: 'value',
                   parameters: v || [],
                 },

@@ -38,7 +38,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate-backend-api": "rm -rf src/services && openapi-generator-cli generate -i src/openapi/mifune.openapi.yaml -g typescript-axios -o src/services -c src/openapi/openapi-config.json --type-mappings=set=Array"
   },
   "eslintConfig": {
     "extends": [
@@ -59,6 +60,7 @@
     ]
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.4.26",
     "@types/d3": "^6.2.0",
     "@types/react-color": "^3.0.4",
     "@types/react-router-dom": "^5.1.7",
