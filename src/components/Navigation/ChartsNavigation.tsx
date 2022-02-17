@@ -12,7 +12,7 @@ import ArrowLeftIcon from '@material-ui/icons/ArrowLeft'
 import { fontWhite } from '../Theme/CustomColors'
 
 export const DRAWER_BUTTON = 110
-export const DRAWER_WIDTH_OPEN = 620
+export const DRAWER_WIDTH_OPEN = 650
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
