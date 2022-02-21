@@ -7,6 +7,8 @@ import TableChartOutlinedIcon from '@material-ui/icons/TableChartOutlined'
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle'
 import PublicIcon from '@material-ui/icons/Public'
 import TrackChangesIcon from '@material-ui/icons/TrackChanges'
+import ViewModuleIcon from '@material-ui/icons/ViewModule'
+import TimelineIcon from '@material-ui/icons/Timeline'
 import { buildBarChart, MifuneBarChart } from './MifuneBarChart'
 import { buildSankeyChart, MifuneSankey } from './MifuneSankey'
 import { buildHeatMapChart, MifiuneHeatMap } from './MifuneHeatMap'
@@ -18,6 +20,8 @@ import { buildTableChart, MifuneTable } from './MifuneTable'
 import { buildRadialChart, MifiuneRadialBar } from './MifuneRadialBar'
 import { buildGeoChart, MifuneGeoChart } from './MifuneGeoMap'
 import { buildChordChart, MifiuneChordChart } from './MifuneChordChart'
+import { buildLineChart, MifiuneLineChart } from './MifuneLine'
+import { buildTimeRangeChart, MifuneTimeRange } from './MifuneTimeRange'
 
 interface Chart {
   title: string
@@ -74,6 +78,18 @@ export const Analytics = (): JSX.Element => {
       icon: <PublicIcon />,
       options: <MifuneGeoChart />,
       build: (): JSX.Element => buildGeoChart(data),
+    },
+    {
+      title: 'Line',
+      icon: <TimelineIcon />,
+      options: <MifiuneLineChart />,
+      build: (): JSX.Element => buildLineChart(data),
+    },
+    {
+      title: 'TimeRange',
+      icon: <ViewModuleIcon />,
+      options: <MifuneTimeRange />,
+      build: (): JSX.Element => buildTimeRangeChart(data),
     },
     {
       title: 'Table',
