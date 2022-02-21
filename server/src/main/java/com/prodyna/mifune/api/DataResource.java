@@ -34,7 +34,10 @@ import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.Query;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -55,8 +58,6 @@ public class DataResource {
 
   @POST
   public Multi<Map<String, Object>> query(Query query) {
-
-    //
     var graphModel = new GraphModel(graphService.graph());
     var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
     var cypher = cypherQueryBuilder.cypher();

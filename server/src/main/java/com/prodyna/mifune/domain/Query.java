@@ -33,4 +33,6 @@ public record Query(
     List<QueryRelation> relations,
     List<QueryResultDefinition> results,
     List<String> orders,
-    List<Filter> filters) {}
+    List<Filter> filters,
+    Boolean distinct,
+    Long limit) {}
