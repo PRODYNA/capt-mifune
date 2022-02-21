@@ -42,7 +42,19 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
 
   useEffect(() => {
-    if (filter) {
+    if (propertyType === PropertyType.Boolean) {
+      setValue(true)
+      onValueChange(true)
+    }
+  }, [func, propertyType])
+
+  useEffect(() => {
+    if (
+      filter &&
+      func === FilterFunction.Equal &&
+      propertyType &&
+      propertyType !== PropertyType.Boolean
+    ) {
       dataResourceApi
         .apiDataPost({
           nodes: query.nodes.map((n) => {
@@ -81,12 +93,6 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
     }
   }, [filter])
 
-  useEffect(() => {
-    if (func !== FilterFunction.Equal) {
-      if (propertyType === PropertyType.Boolean) setValue(true)
-    }
-  }, [func, propertyType])
-
   return (
     <>
       <AnalyticSelect
@@ -104,19 +110,35 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           onValueChange(undefined)
         }}
       />
-      <TableCell className={classes.tableCell}>
-        <FormSelect
-          title=""
-          hideLabel
-          options={Object.values(FilterFunction) ?? []}
-          value={func ?? ''}
-          onChangeHandler={(event) => {
-            setFunc(event.target.value)
-            onFuncChange(event.target.value)
-          }}
-        />
-      </TableCell>
-      {func === FilterFunction.Equal && (
+      {propertyType !== PropertyType.Boolean ? (
+        <TableCell className={classes.tableCell}>
+          <FormSelect
+            title=""
+            hideLabel
+            options={Object.values(FilterFunction) ?? []}
+            value={func ?? ''}
+            onChangeHandler={(event) => {
+              setFunc(event.target.value)
+              onFuncChange(event.target.value)
+            }}
+          />
+        </TableCell>
+      ) : (
+        <>
+          <TableCell />
+          <TableCell className={classes.tableCell}>
+            <Checkbox
+              checked={(value as boolean) ?? true}
+              onChange={(event) => {
+                setValue(event.target.checked)
+                onValueChange(event.target.checked)
+              }}
+              inputProps={{ 'aria-label': 'primary checkbox' }}
+            />
+          </TableCell>
+        </>
+      )}
+      {func === FilterFunction.Equal && propertyType !== PropertyType.Boolean && (
         <TableCell className={classes.tableCell}>
           <FormSelect
             title=""
@@ -147,17 +169,6 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
                 onValueChange(formatDate)
               }}
               animateYearScrolling
-            />
-          )}
-          {propertyType === PropertyType.Boolean && (
-            <Checkbox
-              checked={(value as boolean) ?? true}
-              // TODO boolean set initalState false
-              onChange={(event) => {
-                setValue(event.target.checked)
-                onValueChange(event.target.checked)
-              }}
-              inputProps={{ 'aria-label': 'primary checkbox' }}
             />
           )}
           {propertyType !== PropertyType.Date &&
