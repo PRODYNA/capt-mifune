@@ -32,6 +32,7 @@ import {
 } from '../../services/models'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { DataResourceApi } from '../../services'
+import { SnackbarContext } from '../../context/Snackbar'
 
 export interface SelectProps {
   query: Query
@@ -58,6 +59,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
     props
   const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
   const { setData, query } = useContext(ChartContext)
+  const { openSnackbarError } = useContext(SnackbarContext)
   const [loading, setLoading] = useState<boolean>(false)
   const [filters, setFilters] = useState<ExtendedFilter[]>([])
   const [scale, setScale] = useState<number>(1)
@@ -159,7 +161,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
         setLoading(false)
         scrollToBottom()
       })
-      .catch((e) => console.error(e))
+      .catch((e) => openSnackbarError(e))
   }
 
   return (
