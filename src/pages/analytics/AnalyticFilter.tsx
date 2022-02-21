@@ -83,6 +83,8 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
           ],
           orders: [filter],
           filters: [],
+          distinct: true,
+          limit: 500,
         })
         .then((res) => {
           const mappedValues = res.data.map(

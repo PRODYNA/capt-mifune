@@ -155,6 +155,8 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
         results,
         orders,
         filters,
+        limit: 1000,
+        distinct: true,
       })
       .then((newData) => {
         setData(dataPreparation(newData.data, scale))
