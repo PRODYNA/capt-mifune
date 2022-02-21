@@ -18,7 +18,7 @@
     "file" : "material.csv",
     "columnMapping" : {
       "material.id" : "id",
-      "material.timeOfConstruction" : "constructionTime",
+      "material.constructionTime" : "constructionTime",
       "material.name" : "name"
     },
     "modelValid" : true,
@@ -52,6 +52,7 @@
     "rootNodeId" : "92b6ca6c-b870-43ed-ab2e-bfaeddc3116f",
     "file" : "supplier.csv",
     "columnMapping" : {
+      "supplier.since" : "since",
       "supplier.name" : "name",
       "supplier.inCountry.country.id" : "country",
       "supplier.id" : "id"
@@ -95,7 +96,7 @@
       "type" : "string",
       "primary" : false
     }, {
-      "name" : "timeOfConstruction",
+      "name" : "constructionTime",
       "type" : "double",
       "primary" : false
     } ]
@@ -125,6 +126,10 @@
     }, {
       "name" : "name",
       "type" : "string",
+      "primary" : false
+    }, {
+      "name" : "since",
+      "type" : "date",
       "primary" : false
     } ]
   }, {

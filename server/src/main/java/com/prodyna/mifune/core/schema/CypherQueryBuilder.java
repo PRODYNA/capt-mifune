@@ -73,6 +73,8 @@ public class CypherQueryBuilder {
     cypher.append(buildResult());
     cypher.append("\n");
     cypher.append(buildOrder());
+    cypher.append("\n");
+    cypher.append(buildLimit());
     return cypher.toString();
   }
 
@@ -172,7 +174,10 @@ public class CypherQueryBuilder {
                         .stream())
             .collect(Collectors.joining(","));
 
-    return "return %s".formatted(returnStatement);
+    return "return %s %s"
+        .formatted(
+            Optional.ofNullable(query.distinct()).orElse(Boolean.FALSE) ? "distinct" : "",
+            returnStatement);
   }
 
   private String buildDistinct() {
@@ -202,6 +207,13 @@ public class CypherQueryBuilder {
     return Optional.of(orders)
         .filter(not(String::isBlank))
         .map("order by %s"::formatted)
+        .orElse("");
+  }
+
+  private String buildLimit() {
+    return Optional.ofNullable(query.limit())
+        .or(() -> Optional.of(10_000L))
+        .map("limit %s"::formatted)
         .orElse("");
   }
 

@@ -106,9 +106,8 @@ public interface CoreFunction {
             case NULL -> null;
             case INTEGER -> value.asInt();
             case STRING -> value.asString(null);
-            case NUMBER -> value.asDouble();
+            case NUMBER, FLOAT -> value.asDouble();
             case BOOLEAN -> value.asBoolean();
-            case FLOAT -> value.asFloat();
             case DATE -> value.asLocalDate();
             default -> throw new UnsupportedOperationException(
                 "Unknow type convertion: " + value.type().name());
