@@ -61,9 +61,14 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   function relationMouseEvents(
     simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
-    relation: any
+    relation: d3.Selection<
+      d3.BaseType | SVGPathElement,
+      D3Relation<QueryRelation>,
+      SVGGElement,
+      unknown
+    >
   ): void {
-    relation.on('click', (e: any, rel: D3Relation<QueryRelation>) => {
+    relation.on('click', (e: unknown, rel: D3Relation<QueryRelation>) => {
       if (rel.relation.depth === '1') {
         // eslint-disable-next-line no-param-reassign
         rel.relation.depth = 'n'
@@ -222,7 +227,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     nodeMouseEvents(
       simulation,
       node,
-      (event: any, d3Node: D3Node<QueryNode>): void => {
+      (event: unknown, d3Node: D3Node<QueryNode>): void => {
         if (d3Node.node.selected) {
           setSelectActive(true)
           addPossibleRelations(d3Node)
