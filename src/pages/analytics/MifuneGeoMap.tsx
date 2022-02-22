@@ -46,7 +46,7 @@ export const MifuneGeoChart = (): JSX.Element => {
       selects={[
         {
           query,
-          label: 'Label',
+          label: 'Country',
           onChange: (v) => {
             const result = results.filter((item) => item.name !== 'label')
             const mappedResults = [
