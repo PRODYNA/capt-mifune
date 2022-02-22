@@ -62,10 +62,10 @@ export const MifiuneHeatMap = (): JSX.Element => {
     }
     return data.map((item) => {
       return {
-        id: item.labelX,
+        id: item.labelY,
         data: [
           {
-            x: item.labelY,
+            x: item.labelX,
             y: (item.value as number).toFixed(2),
           },
         ],
