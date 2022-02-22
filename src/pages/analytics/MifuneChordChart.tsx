@@ -12,7 +12,7 @@ interface ChordData {
 
 export const buildChordChart = (chordData: ChordData): JSX.Element => {
   return (
-    <Box height={800} width={800}>
+    <Box height={800}>
       <ResponsiveChord
         data={chordData.data}
         keys={chordData.labels}
