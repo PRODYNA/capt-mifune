@@ -52,7 +52,7 @@ export const MifuneTimeRange = (): JSX.Element => {
       selects={[
         {
           query,
-          label: 'Label',
+          label: 'Date',
           onChange: (v) => {
             const result = results.filter((item) => item.name !== 'label')
             const mappedResults = [
