@@ -4,11 +4,12 @@ import BarChartIcon from '@material-ui/icons/BarChart'
 import ShuffleIcon from '@material-ui/icons/Shuffle'
 import AppsIcon from '@material-ui/icons/Apps'
 import TableChartOutlinedIcon from '@material-ui/icons/TableChartOutlined'
-import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle'
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz'
 import PublicIcon from '@material-ui/icons/Public'
 import TrackChangesIcon from '@material-ui/icons/TrackChanges'
-import ViewModuleIcon from '@material-ui/icons/ViewModule'
+import ViewComfyIcon from '@material-ui/icons/ViewComfy'
 import TimelineIcon from '@material-ui/icons/Timeline'
+import LandscapeIcon from '@material-ui/icons/Landscape'
 import { buildBarChart, MifuneBarChart } from './MifuneBarChart'
 import { buildSankeyChart, MifuneSankey } from './MifuneSankey'
 import { buildHeatMapChart, MifiuneHeatMap } from './MifuneHeatMap'
@@ -20,8 +21,9 @@ import { buildTableChart, MifuneTable } from './MifuneTable'
 import { buildRadialChart, MifiuneRadialBar } from './MifuneRadialBar'
 import { buildGeoChart, MifuneGeoChart } from './MifuneGeoMap'
 import { buildChordChart, MifiuneChordChart } from './MifuneChordChart'
-import { buildLineChart, MifiuneLineChart } from './MifuneLine'
+import { buildLineChart, MifuneLineChart } from './MifuneLine'
 import { buildTimeRangeChart, MifuneTimeRange } from './MifuneTimeRange'
+import { buildAreaBump, MifuneAreaBump } from './MifuneAreaBump'
 
 interface Chart {
   title: string
@@ -69,7 +71,7 @@ export const Analytics = (): JSX.Element => {
     },
     {
       title: 'Chord',
-      icon: <SwapHorizontalCircleIcon />,
+      icon: <SwapHorizIcon />,
       options: <MifiuneChordChart />,
       build: (): JSX.Element => buildChordChart(data),
     },
@@ -82,12 +84,18 @@ export const Analytics = (): JSX.Element => {
     {
       title: 'Line',
       icon: <TimelineIcon />,
-      options: <MifiuneLineChart />,
+      options: <MifuneLineChart />,
       build: (): JSX.Element => buildLineChart(data),
     },
     {
+      title: 'AreaBump',
+      icon: <LandscapeIcon />,
+      options: <MifuneAreaBump />,
+      build: (): JSX.Element => buildAreaBump(data),
+    },
+    {
       title: 'TimeRange',
-      icon: <ViewModuleIcon />,
+      icon: <ViewComfyIcon />,
       options: <MifuneTimeRange />,
       build: (): JSX.Element => buildTimeRangeChart(data),
     },
