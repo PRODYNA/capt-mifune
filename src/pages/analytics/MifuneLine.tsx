@@ -9,18 +9,40 @@ type LineChartData = { id: string; data: { x: string; y: number }[] }[]
 
 export const buildLineChart = (data: LineChartData): JSX.Element => {
   return (
-    <Box height={300 + data.length * 25}>
+    <Box height={600}>
       <ResponsiveLine
         data={data}
-        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-        xScale={{ type: 'point' }}
-        yScale={{
-          type: 'linear',
-          min: 'auto',
-          max: 'auto',
-          stacked: true,
-          reverse: false,
+        margin={{ top: 50, right: 230, bottom: 100, left: 60 }}
+        tooltip={(id): JSX.Element => (
+          <>
+            <span>
+              <b>{id.point.id}</b>
+            </span>
+            <br />
+            <span>x: {id.point.x}</span>
+            <br />
+            <span>y: {id.point.y}</span>
+          </>
+        )}
+        enablePoints={false}
+        axisTop={null}
+        axisRight={null}
+        axisBottom={{
+          tickRotation: -50,
         }}
+        axisLeft={{
+          tickSize: 5,
+          tickPadding: 5,
+          tickRotation: 0,
+          legend: '',
+          legendOffset: -40,
+        }}
+        pointSize={10}
+        pointColor={{ theme: 'background' }}
+        pointBorderWidth={2}
+        pointBorderColor={{ from: 'serieColor' }}
+        pointLabelYOffset={-12}
+        useMesh
         legends={[
           {
             anchor: 'bottom-right',
@@ -52,7 +74,7 @@ export const buildLineChart = (data: LineChartData): JSX.Element => {
   )
 }
 
-export const MifiuneLineChart = (): JSX.Element => {
+export const MifuneLineChart = (): JSX.Element => {
   const { query, chartOptions, setChartOptions } = useContext(ChartContext)
   const { results, order } = chartOptions
 
@@ -65,29 +87,42 @@ export const MifiuneLineChart = (): JSX.Element => {
       return undefined
     }
 
-    const mappedData: LineChartData = []
+    const groupDataById: LineChartData = []
+    const xLabels: string[] = Array.from(
+      new Set(data.map((item) => item.labelX.toString()))
+    )
 
     data.forEach((item) => {
-      const exists = mappedData.findIndex((x) => x.id === item.labelX)
+      const exists = groupDataById.findIndex((x) => x.id === item.name)
       const values = {
-        x: item.labelY as string,
-        y: item.value as number,
+        x: item.labelX as string,
+        y: item.labelY as number,
       }
 
       if (exists !== -1) {
-        mappedData[exists] = {
-          id: mappedData[exists].id,
-          data: [...mappedData[exists].data, values],
+        groupDataById[exists] = {
+          id: groupDataById[exists].id,
+          data: [...groupDataById[exists].data, values],
         }
       } else
-        mappedData.push({
-          id: item.labelX as string,
+        groupDataById.push({
+          id: item.name as string,
           data: [values],
         })
     })
 
-    mappedData.forEach((item) =>
-      item.data.sort((a: any, b: any) => {
+    const mergedData = groupDataById.map((item) => {
+      return {
+        ...item,
+        data: xLabels.map((labelX) => {
+          const findX = item.data.find((i) => i.x === labelX)
+          return findX || { x: labelX, y: 0 }
+        }),
+      }
+    })
+
+    mergedData.forEach((item) =>
+      item.data.sort((a, b) => {
         if (a.x < b.x) {
           return -1
         }
@@ -97,7 +132,7 @@ export const MifiuneLineChart = (): JSX.Element => {
         return 0
       })
     )
-    return mappedData
+    return mergedData
   }
 
   return (
@@ -107,6 +142,25 @@ export const MifiuneLineChart = (): JSX.Element => {
       orders={[order ?? '']}
       dataPreparation={dataPreparation}
       selects={[
+        {
+          query,
+          label: 'Name',
+          onChange: (v) => {
+            const result = results.filter((item) => item.name !== 'name')
+            const mappedResults = [
+              ...result,
+              {
+                function: QueryFunction.Value,
+                name: 'name',
+                parameters: v || [],
+              },
+            ]
+            setChartOptions({
+              ...chartOptions,
+              results: mappedResults,
+            })
+          },
+        },
         {
           query,
           label: 'X',
@@ -129,34 +183,15 @@ export const MifiuneLineChart = (): JSX.Element => {
         {
           query,
           label: 'Y',
-          onChange: (v) => {
-            const result = results.filter((item) => item.name !== 'labelY')
-            const mappedResults = [
-              ...result,
-              {
-                function: QueryFunction.Value,
-                name: 'labelY',
-                parameters: v || [],
-              },
-            ]
-            setChartOptions({
-              ...chartOptions,
-              results: mappedResults,
-            })
-          },
-        },
-        {
-          query,
-          label: 'Value',
           fnDefault: QueryFunction.Value,
           onChange: (v, fn) => {
             if (v) {
-              const result = results.filter((item) => item.name !== 'value')
+              const result = results.filter((item) => item.name !== 'labelY')
               const mappedResults = [
                 ...result,
                 {
                   function: fn ?? QueryFunction.Value,
-                  name: 'value',
+                  name: 'labelY',
                   parameters: v || [],
                 },
               ]
