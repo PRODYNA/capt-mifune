@@ -6,9 +6,9 @@ import {
   SankeyDataProps,
 } from '@nivo/sankey'
 import { Box } from '@material-ui/core'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
 export const buildSankeyChart = (
   data: SankeyDataProps<DefaultNode, DefaultLink>

@@ -1,34 +1,56 @@
 import React, { useContext } from 'react'
-import { ResponsiveChoropleth } from '@nivo/geo'
+import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@material-ui/core'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext, { QueryData } from '../../context/ChartContext'
-import countries from '../../utils/Countries.json'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext, { QueryData } from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
-export const buildGeoChart = (data: QueryData): JSX.Element => {
+export const buildBarChart = (data: QueryData): JSX.Element => {
   return (
-    <Box height={400}>
-      <ResponsiveChoropleth
+    <Box height={200 + data.length * 25}>
+      <ResponsiveBar
         data={data}
-        features={countries.features}
+        keys={['value']}
+        indexBy="label"
+        layout="horizontal"
         margin={{ top: 50, right: 30, bottom: 150, left: 80 }}
-        colors="nivo"
-        domain={[0, 1000000]}
-        unknownColor="#666666"
-        label="properties.name"
-        projectionTranslation={[0.5, 0.5]}
-        projectionRotation={[0, 0, 0]}
-        enableGraticule
-        graticuleLineColor="#ffffff"
-        borderWidth={0.5}
-        borderColor="#152538"
+        padding={0.3}
+        valueScale={{ type: 'linear' }}
+        indexScale={{ type: 'band', round: true }}
+        valueFormat=""
+        colors={{ scheme: 'dark2' }}
+        borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        legends={[
+          {
+            dataFrom: 'keys',
+            anchor: 'bottom-right',
+            direction: 'column',
+            justify: false,
+            translateX: 120,
+            translateY: 0,
+            itemsSpacing: 2,
+            itemWidth: 100,
+            itemHeight: 20,
+            itemDirection: 'left-to-right',
+            itemOpacity: 0.85,
+            symbolSize: 20,
+            effects: [
+              {
+                on: 'hover',
+                style: {
+                  itemOpacity: 1,
+                },
+              },
+            ],
+          },
+        ]}
       />
     </Box>
   )
 }
 
-export const MifuneGeoChart = (): JSX.Element => {
+export const MifuneBarChart = (): JSX.Element => {
   const { query, chartOptions, setChartOptions } = useContext(ChartContext)
   const { order, results } = chartOptions
   return (
@@ -46,14 +68,14 @@ export const MifuneGeoChart = (): JSX.Element => {
       selects={[
         {
           query,
-          label: 'Country',
+          label: 'Label',
           onChange: (v) => {
             const result = results.filter((item) => item.name !== 'label')
             const mappedResults = [
               ...result,
               {
                 function: QueryFunction.Value,
-                name: 'id',
+                name: 'label',
                 parameters: v || [],
               },
             ]
