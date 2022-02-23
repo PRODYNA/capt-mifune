@@ -12,10 +12,10 @@ import {
 } from '@material-ui/core'
 import { v4 } from 'uuid'
 import { Add } from '@material-ui/icons'
-import { ChartWrapper, SelectProps } from './ChartWrapper'
-import ChartContext, { QueryData } from '../../context/ChartContext'
-import CustomButton from '../../components/Button/CustomButton'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper, SelectProps } from '../ChartWrapper'
+import ChartContext, { QueryData } from '../../../context/ChartContext'
+import CustomButton from '../../../components/Button/CustomButton'
+import { QueryFunction } from '../../../services/models/query-function'
 
 export const buildTableChart = (data: QueryData): JSX.Element => {
   if (!data || data.length === 0)

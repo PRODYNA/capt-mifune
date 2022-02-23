@@ -5,9 +5,9 @@ import {
   ResponsiveHeatMap,
 } from '@nivo/heatmap'
 import { Box } from '@material-ui/core'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
 export const buildHeatMapChart = (
   data: HeatMapSerie<DefaultHeatMapDatum, { [key: string]: string | number }>[]
