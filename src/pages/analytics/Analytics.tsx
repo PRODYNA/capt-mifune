@@ -4,20 +4,26 @@ import BarChartIcon from '@material-ui/icons/BarChart'
 import ShuffleIcon from '@material-ui/icons/Shuffle'
 import AppsIcon from '@material-ui/icons/Apps'
 import TableChartOutlinedIcon from '@material-ui/icons/TableChartOutlined'
-import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle'
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz'
 import PublicIcon from '@material-ui/icons/Public'
 import TrackChangesIcon from '@material-ui/icons/TrackChanges'
-import { buildBarChart, MifuneBarChart } from './MifuneBarChart'
-import { buildSankeyChart, MifuneSankey } from './MifuneSankey'
-import { buildHeatMapChart, MifiuneHeatMap } from './MifuneHeatMap'
+import ViewComfyIcon from '@material-ui/icons/ViewComfy'
+import TimelineIcon from '@material-ui/icons/Timeline'
+import LandscapeIcon from '@material-ui/icons/Landscape'
+import { buildBarChart, MifuneBarChart } from './charts/MifuneBarChart'
+import { buildSankeyChart, MifuneSankey } from './charts/MifuneSankey'
+import { buildHeatMapChart, MifiuneHeatMap } from './charts/MifuneHeatMap'
 import { Query, QueryBuilder } from './QueryBuilder'
 import ChartsNavigation from '../../components/Navigation/ChartsNavigation'
 import { CustomTexts } from '../../utils/CustomTexts'
 import ChartContext, { IChartOptions } from '../../context/ChartContext'
-import { buildTableChart, MifuneTable } from './MifuneTable'
-import { buildRadialChart, MifiuneRadialBar } from './MifuneRadialBar'
-import { buildGeoChart, MifuneGeoChart } from './MifuneGeoMap'
-import { buildChordChart, MifiuneChordChart } from './MifuneChordChart'
+import { buildTableChart, MifuneTable } from './charts/MifuneTable'
+import { buildRadialChart, MifiuneRadialBar } from './charts/MifuneRadialBar'
+import { buildGeoChart, MifuneGeoChart } from './charts/MifuneGeoMap'
+import { buildChordChart, MifiuneChordChart } from './charts/MifuneChordChart'
+import { buildLineChart, MifuneLineChart } from './charts/MifuneLine'
+import { buildTimeRangeChart, MifuneTimeRange } from './charts/MifuneTimeRange'
+import { buildAreaBump, MifuneAreaBump } from './charts/MifuneAreaBump'
 
 interface Chart {
   title: string
@@ -65,7 +71,7 @@ export const Analytics = (): JSX.Element => {
     },
     {
       title: 'Chord',
-      icon: <SwapHorizontalCircleIcon />,
+      icon: <SwapHorizIcon />,
       options: <MifiuneChordChart />,
       build: (): JSX.Element => buildChordChart(data),
     },
@@ -74,6 +80,24 @@ export const Analytics = (): JSX.Element => {
       icon: <PublicIcon />,
       options: <MifuneGeoChart />,
       build: (): JSX.Element => buildGeoChart(data),
+    },
+    {
+      title: 'Line',
+      icon: <TimelineIcon />,
+      options: <MifuneLineChart />,
+      build: (): JSX.Element => buildLineChart(data),
+    },
+    {
+      title: 'AreaBump',
+      icon: <LandscapeIcon />,
+      options: <MifuneAreaBump />,
+      build: (): JSX.Element => buildAreaBump(data),
+    },
+    {
+      title: 'TimeRange',
+      icon: <ViewComfyIcon />,
+      options: <MifuneTimeRange />,
+      build: (): JSX.Element => buildTimeRangeChart(data),
     },
     {
       title: 'Table',

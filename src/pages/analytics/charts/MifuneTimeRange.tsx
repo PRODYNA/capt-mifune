@@ -1,48 +1,32 @@
 import React, { useContext } from 'react'
-import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@material-ui/core'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext, { QueryData } from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import { CalendarDatum, ResponsiveTimeRange } from '@nivo/calendar'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
-export const buildBarChart = (data: QueryData): JSX.Element => {
+export const buildTimeRangeChart = (data: CalendarDatum[]): JSX.Element => {
   return (
-    <Box height={200 + data.length * 25}>
-      <ResponsiveBar
+    <Box height={400}>
+      <ResponsiveTimeRange
         data={data}
-        keys={['value']}
-        indexBy="label"
-        layout="horizontal"
-        margin={{ top: 50, right: 30, bottom: 150, left: 80 }}
-        padding={0.3}
-        valueScale={{ type: 'linear' }}
-        indexScale={{ type: 'band', round: true }}
-        valueFormat=""
-        colors={{ scheme: 'dark2' }}
-        borderColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
-        labelTextColor={{ from: 'color', modifiers: [['darker', 1.6]] }}
+        emptyColor="#eeeeee"
+        margin={{ top: 40, right: 40, bottom: 100, left: 40 }}
+        dayBorderWidth={2}
+        dayBorderColor="#ffffff"
         legends={[
           {
-            dataFrom: 'keys',
             anchor: 'bottom-right',
-            direction: 'column',
+            direction: 'row',
             justify: false,
-            translateX: 120,
-            translateY: 0,
-            itemsSpacing: 2,
-            itemWidth: 100,
-            itemHeight: 20,
-            itemDirection: 'left-to-right',
-            itemOpacity: 0.85,
+            itemCount: 4,
+            itemWidth: 42,
+            itemHeight: 36,
+            itemsSpacing: 14,
+            itemDirection: 'right-to-left',
+            translateX: -60,
+            translateY: -60,
             symbolSize: 20,
-            effects: [
-              {
-                on: 'hover',
-                style: {
-                  itemOpacity: 1,
-                },
-              },
-            ],
           },
         ]}
       />
@@ -50,7 +34,7 @@ export const buildBarChart = (data: QueryData): JSX.Element => {
   )
 }
 
-export const MifuneBarChart = (): JSX.Element => {
+export const MifuneTimeRange = (): JSX.Element => {
   const { query, chartOptions, setChartOptions } = useContext(ChartContext)
   const { order, results } = chartOptions
   return (
@@ -68,14 +52,14 @@ export const MifuneBarChart = (): JSX.Element => {
       selects={[
         {
           query,
-          label: 'Label',
+          label: 'Date',
           onChange: (v) => {
             const result = results.filter((item) => item.name !== 'label')
             const mappedResults = [
               ...result,
               {
                 function: QueryFunction.Value,
-                name: 'label',
+                name: 'day',
                 parameters: v || [],
               },
             ]

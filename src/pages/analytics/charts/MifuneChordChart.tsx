@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
 import { Box } from '@material-ui/core'
 import { ResponsiveChord } from '@nivo/chord'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
 interface ChordData {
   labels: string[]
@@ -12,7 +12,7 @@ interface ChordData {
 
 export const buildChordChart = (chordData: ChordData): JSX.Element => {
   return (
-    <Box height={800} width={800}>
+    <Box height={800}>
       <ResponsiveChord
         data={chordData.data}
         keys={chordData.labels}
@@ -85,9 +85,9 @@ export const MifiuneChordChart = (): JSX.Element => {
         (value, index, categoryArray) => categoryArray.indexOf(value) === index
       ) as string[]
     const data: number[][] = []
-    labels.forEach((s) => {
+    labels.forEach(() => {
       const subarray: number[] = []
-      labels.forEach((x) => subarray.push(0))
+      labels.forEach(() => subarray.push(0))
       data.push(subarray)
     })
     rawData.forEach((item) => {

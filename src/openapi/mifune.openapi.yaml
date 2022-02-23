@@ -671,6 +671,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Filter'
+        distinct:
+          type: boolean
+        limit:
+          format: int64
+          type: integer
     QueryFunction:
       enum:
       - avg
