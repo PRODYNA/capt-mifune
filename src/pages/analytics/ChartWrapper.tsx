@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useContext, useState } from 'react'
+import React, {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useState,
+} from 'react'
 import {
   Box,
   CircularProgress,
@@ -8,6 +14,9 @@ import {
 } from '@material-ui/core'
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import { Add } from '@material-ui/icons'
+import { v4 } from 'uuid'
+import { MuiPickersUtilsProvider } from '@material-ui/pickers'
+import DateFnsUtils from '@date-io/date-fns'
 import { AnalyticFilter } from './AnalyticFilter'
 import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
@@ -18,14 +27,18 @@ import {
   QueryResultDefinition,
   QueryFunction,
   Filter,
+  FilterFunction,
+  PropertyType,
 } from '../../services/models'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { DataResourceApi } from '../../services'
+import { SnackbarContext } from '../../context/Snackbar'
 
 export interface SelectProps {
   query: Query
   label: string
   onChange: (v: string[] | undefined, fn?: QueryFunction) => void
+  setPropertyType?: Dispatch<SetStateAction<PropertyType | undefined>>
   fnDefault?: QueryFunction
   renderAsTable?: boolean
 }
@@ -39,45 +52,73 @@ interface ChartWrapperProps<T> {
   disableScale?: boolean
 }
 
+export type ExtendedFilter = Filter & { uuid?: string }
+
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const { results, orders, dataPreparation, selects, disableScale, children } =
     props
   const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
   const { setData, query } = useContext(ChartContext)
+  const { openSnackbarError } = useContext(SnackbarContext)
   const [loading, setLoading] = useState<boolean>(false)
-  const [filters, setFilters] = useState<Filter[]>([])
+  const [filters, setFilters] = useState<ExtendedFilter[]>([])
   const [scale, setScale] = useState<number>(1)
-  const tableHeaders = ['Node', 'Property', 'Value', ' ']
+  const tableHeaders = ['Node', 'Property', 'Func', 'Value', ' ']
 
   const filterElements = (): JSX.Element => {
     return (
       <>
-        <CustomTable tableHeaders={tableHeaders} label="property-table">
-          {filters.map((f, i) => {
-            return (
-              // eslint-disable-next-line react/no-array-index-key
-              <TableRow key={`filter-${i}`}>
-                <AnalyticFilter
-                  onKeyChange={(k) => {
-                    setFilters(() => {
-                      filters[i].property = k ?? ''
-                      return filters
-                    })
-                  }}
-                  onValueChange={(k) => {
-                    setFilters(() => {
-                      filters[i].value = k ?? ''
-                      return filters
-                    })
-                  }}
-                  onDelete={() => {
-                    setFilters(filters.filter((item, j) => i !== j))
-                  }}
-                />
-              </TableRow>
-            )
-          })}
-        </CustomTable>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <CustomTable tableHeaders={tableHeaders} label="property-table">
+            {filters.map((f) => {
+              return (
+                <TableRow key={`filter-${f.uuid}`}>
+                  <AnalyticFilter
+                    onKeyChange={(k) => {
+                      setFilters((prevState) =>
+                        prevState.map((item) =>
+                          item.uuid === f.uuid
+                            ? {
+                                ...item,
+                                property: k,
+                              }
+                            : item
+                        )
+                      )
+                    }}
+                    onValueChange={(k) => {
+                      setFilters((prevState) =>
+                        prevState.map((item) =>
+                          item.uuid === f.uuid
+                            ? {
+                                ...item,
+                                value: k,
+                              }
+                            : item
+                        )
+                      )
+                    }}
+                    onFuncChange={(k) => {
+                      setFilters((prevState) =>
+                        prevState.map((item) =>
+                          item.uuid === f.uuid
+                            ? {
+                                ...item,
+                                function: k,
+                              }
+                            : item
+                        )
+                      )
+                    }}
+                    onDelete={() => {
+                      setFilters(filters.filter((item) => item.uuid !== f.uuid))
+                    }}
+                  />
+                </TableRow>
+              )
+            })}
+          </CustomTable>
+        </MuiPickersUtilsProvider>
       </>
     )
   }
@@ -114,13 +155,15 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
         results,
         orders,
         filters,
+        limit: 1000,
+        distinct: true,
       })
       .then((newData) => {
         setData(dataPreparation(newData.data, scale))
         setLoading(false)
         scrollToBottom()
       })
-      .catch((e) => console.error(e))
+      .catch((e) => openSnackbarError(e))
   }
 
   return (
@@ -195,7 +238,15 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
               size="small"
               title="Add Filter"
               onClick={(): void =>
-                setFilters([...filters, { property: '', value: undefined }])
+                setFilters([
+                  ...filters,
+                  {
+                    property: undefined,
+                    value: undefined,
+                    function: FilterFunction.Equal,
+                    uuid: v4(),
+                  },
+                ])
               }
             />
           </Box>

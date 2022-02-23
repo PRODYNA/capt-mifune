@@ -69,7 +69,7 @@ export function drawLabel<N extends Node | QueryNode>(
 export function nodeMouseEvents<N extends Node | QueryNode>(
   simulation: d3.Simulation<d3.SimulationNodeDatum, undefined>,
   node: any,
-  onClick: (e: any, d: D3Node<N>) => void
+  onClick: (e: unknown, d: D3Node<N>) => void
 ): void {
   const dragstart = (): void => {}
   const dragged = (

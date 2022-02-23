@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
 import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { Box } from '@material-ui/core'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
 type RadialChartData = { id: string; data: { x: string; y: number }[] }[]
 
