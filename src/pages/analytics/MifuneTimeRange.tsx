@@ -7,7 +7,7 @@ import { QueryFunction } from '../../services/models/query-function'
 
 export const buildTimeRangeChart = (data: CalendarDatum[]): JSX.Element => {
   return (
-    <Box height={200 + data.length * 25}>
+    <Box height={400}>
       <ResponsiveTimeRange
         data={data}
         emptyColor="#eeeeee"
