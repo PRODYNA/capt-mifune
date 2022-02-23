@@ -5,20 +5,21 @@ import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
 import { useStyleTable } from '../graph/NodeEdit'
 import { QueryFunction } from '../../services/models/query-function'
+import { Property } from '../../services'
 
 interface Select {
   uuid: string
   variable: string
-  property: string
+  property: Property | undefined
 }
 
 export const AnalyticSelect = (props: SelectProps): JSX.Element => {
-  const { query, label, fnDefault, onChange, renderAsTable } = props
+  const { query, label, fnDefault, onChange, setPropertyType, renderAsTable } =
+    props
   const initialSelect = {
     uuid: v4(),
     variable: '',
-    property: '',
-    properties: [],
+    property: undefined,
   }
   const [selects, setSelects] = useState<Select[]>([initialSelect])
   const [fn, setFn] = useState<QueryFunction | undefined>(fnDefault)
@@ -27,12 +28,12 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
 
   useEffect(() => {
     const checkEmpty = selects.some(
-      (select) => select.property === '' || select.variable === ''
+      (select) => select.property?.name === '' || select.variable === ''
     )
 
     if (!checkEmpty) {
       const mappedSelects = selects.map(
-        (item) => `${item.variable}.${item.property}`
+        (item) => `${item.variable}.${item.property?.name}`
       )
       if (mappedSelects.length > 0) {
         onChange(mappedSelects, fn)
@@ -87,7 +88,11 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
         const newValue = e.target.value as string
         const mappedSelect = selects.map((item) =>
           item.uuid === select?.uuid
-            ? { ...item, variable: newValue, property: '' }
+            ? {
+                ...item,
+                variable: newValue,
+                property: undefined,
+              }
             : item
         )
         setSelects(mappedSelect)
@@ -107,16 +112,42 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
     return nodeProps.concat(relProps) ?? []
   }
 
+  const getProperty = (
+    varName: string,
+    property: string
+  ): Property | undefined => {
+    const findNode = query.nodes.find((q) => q.varName === varName)
+    const findRel = query.relations.find((q) => q.varName === varName)
+    let findProp
+    if (findNode)
+      findProp = (findNode.node?.properties || []).find(
+        (t) => t.name === property
+      )
+    if (findRel) {
+      findProp = (findRel.relation?.properties || []).find(
+        (t) => t.name === property
+      )
+    }
+    if (setPropertyType) setPropertyType(findProp?.type ?? undefined)
+    return findProp ?? undefined
+  }
+
   const renderPropertySelect = (select: Select): JSX.Element => (
     <FormSelect
       title="Property"
-      value={select?.property ?? ''}
+      value={select?.property?.name ?? ''}
       hideLabel={renderAsTable}
       options={getProperties(select)}
       onChangeHandler={(e) => {
         const newValue = e.target.value as string
+
         const mappedSelect = selects.map((item) =>
-          item.uuid === select?.uuid ? { ...item, property: newValue } : item
+          item.uuid === select?.uuid
+            ? {
+                ...item,
+                property: getProperty(select.variable, newValue),
+              }
+            : item
         )
         setSelects(mappedSelect)
       }}

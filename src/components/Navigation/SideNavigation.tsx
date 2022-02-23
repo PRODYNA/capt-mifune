@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { Dispatch, SetStateAction, useContext } from 'react'
 import {
   List,
   ListItem,
@@ -21,6 +21,7 @@ import UserService from '../../auth/UserService'
 import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
 import Logo from '../../assets/Logo.svg'
+import { SnackbarContext } from '../../context/Snackbar'
 
 export const DRAWER_WIDTH = 60
 export const DRAWER_WIDTH_OPEN = 170
@@ -98,6 +99,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
   const history = useHistory()
   const { pathname } = useLocation()
   const classes = useStyles()
+  const { openSnackbar } = useContext(SnackbarContext)
   const navItems: INavItems[] = [
     { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
     { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
@@ -112,12 +114,8 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
       UserService.doLogout({
         redirectUri: localStorage.getItem('ROOT_URL'),
       })
-        .then((success: any) => {
-          console.log('--> log: logout success ', success)
-        })
-        .catch((error: any) => {
-          console.log('--> log: logout error ', error)
-        })
+        .then(() => openSnackbar('logout success', 'success'))
+        .catch(() => openSnackbar('logout error', 'error'))
     },
   }
 

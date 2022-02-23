@@ -17,7 +17,7 @@ import { GraphApi } from '../../services/api/graph-api'
 interface IPipelineRow {
   domain: Domain
   cleanActive: boolean
-  message: string
+  message: number
   setShowProgress: Dispatch<SetStateAction<boolean>>
 }
 

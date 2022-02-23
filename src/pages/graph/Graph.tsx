@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
-import { BaseType, Selection, text } from 'd3'
+import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
 import { Domain, GraphDelta, Node, Relation } from '../../services/models'
 import { RelationEdit } from './RelationEdit'
@@ -447,7 +447,6 @@ export const Graph = (props: IGraph): JSX.Element => {
               ${svgWidth} 
               ${svgHeight}"  
               title="graph" version="1.1" xmlns="http://www.w3.org/2000/svg">`
-      const style = `<style>${text}</style>`
       const fullSvg = `${head + svgStyle + svgData}</svg>`
 
       const element = document.createElement('a')
