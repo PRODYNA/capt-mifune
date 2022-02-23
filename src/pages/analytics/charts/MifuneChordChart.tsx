@@ -1,9 +1,9 @@
 import React, { useContext } from 'react'
 import { Box } from '@material-ui/core'
 import { ResponsiveChord } from '@nivo/chord'
-import { ChartWrapper } from './ChartWrapper'
-import ChartContext from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import { ChartWrapper } from '../ChartWrapper'
+import ChartContext from '../../../context/ChartContext'
+import { QueryFunction } from '../../../services/models/query-function'
 
 interface ChordData {
   labels: string[]
