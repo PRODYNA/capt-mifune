@@ -440,7 +440,7 @@ export const Graph = (props: IGraph): JSX.Element => {
               )
             })
           }
-          tick<Node, Relation>(node, nodeLabels, relation)
+          tick<Node, Relation>(node, nodeLabels, relation, width, height)
         }
       )
 

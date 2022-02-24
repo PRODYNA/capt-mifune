@@ -220,7 +220,8 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const simulation = buildSimulation<QueryRelation, QueryNode>(
       relations,
       nodes,
-      (): void => tick<QueryNode, QueryRelation>(node, labels, relation)
+      (): void =>
+        tick<QueryNode, QueryRelation>(node, labels, relation, width, height)
     )
     relationMouseEvents(simulation, relation)
 
