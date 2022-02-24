@@ -50,6 +50,7 @@ export const Graph = (props: IGraph): JSX.Element => {
   const [height, setHeight] = useState<number>(600)
   const [selectedDomain, setSelectedDomain] = useState<Domain>()
   const [domains, setDomains] = useState<Domain[]>([])
+  const [hideDomains, setHideDomains] = useState<string[]>([])
   const [nodes, setNodes] = useState<D3Node<Node>[]>([])
   const [relations, setRelations] = useState<D3Relation<Relation>[]>([])
   const [selected, setSelected] = useState<
@@ -387,11 +388,18 @@ export const Graph = (props: IGraph): JSX.Element => {
         rels,
         nodes,
         'relation',
-        selectedDomain?.id
+        selectedDomain?.id,
+        hideDomains
       )
       const selection = drawSelectionIndicator(svg)
-      const node = drawNodes<Node>(svg, nodes, 'node', selectedDomain?.id)
-      const nodeLabels = drawLabel<Node>(svg, nodes, 'node')
+      const node = drawNodes<Node>(
+        svg,
+        nodes,
+        'node',
+        selectedDomain?.id,
+        hideDomains
+      )
+      const nodeLabels = drawLabel<Node>(svg, nodes, 'node', hideDomains)
       const simulation = buildSimulation<Relation, Node>(
         rels,
         nodes,
@@ -428,7 +436,7 @@ export const Graph = (props: IGraph): JSX.Element => {
       relationDrawEvents(simulation, selection)
       relationMouseEvents(relation)
     }
-  }, [selectedDomain, domains, selected, nodes, relations, color])
+  }, [selectedDomain, domains, selected, nodes, relations, color, hideDomains])
 
   function downloadSVG(): void {
     console.log('download SVG')
@@ -465,8 +473,10 @@ export const Graph = (props: IGraph): JSX.Element => {
       value={{
         selectedDomain,
         setSelectedDomain,
+        hideDomains,
         domains,
         setDomains,
+        setHideDomains,
         selected,
         setSelected: (v): void => setSelected(v),
         nodes,
