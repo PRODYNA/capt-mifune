@@ -29,14 +29,14 @@ export function drawNodes<N extends Node | QueryNode>(
         : (n as D3Node<QueryNode>).node.node.color || ''
     )
     .attr('opacity', (n) => {
-      if (
-        Array.from((n as D3Node<Node>).node.domainIds ?? []).every(
+      if (type === 'node') {
+        return Array.from((n as D3Node<Node>).node.domainIds ?? []).some(
           (id) => selectedDomainId === id
-        ) ||
-        !selectedDomainId
-      )
-        return 1
-      return 0.4
+        ) || !selectedDomainId
+          ? 1
+          : 0.4
+      }
+      return (n as D3Node<QueryNode>).node.selected ? 1 : 0.4
     })
     .classed('node', true)
 }
@@ -155,14 +155,11 @@ export function drawRelations<R extends Relation | QueryRelation>(
     .attr('stroke-linecap', 'round')
     .attr('opacity', (r) => {
       if (type === 'relation') {
-        if (
-          Array.from(
-            (r as D3Relation<Relation>).relation.domainIds ?? []
-          ).every((id) => id === selectedDomainId) ||
-          !selectedDomainId
-        )
-          return 1
-        return 0.4
+        return Array.from(
+          (r as D3Relation<Relation>).relation.domainIds ?? []
+        ).some((id) => id === selectedDomainId) || !selectedDomainId
+          ? 1
+          : 0.4
       }
       return (r as D3Relation<QueryRelation>).relation.selected ? 1 : 0.4
     })
