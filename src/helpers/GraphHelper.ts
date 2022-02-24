@@ -9,23 +9,12 @@ export function drawNodes<N extends Node | QueryNode>(
   svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
   data: D3Node<N>[],
   type: 'node' | 'queryNode',
-  selectedDomainId?: N extends Node ? string : undefined,
-  hideDomains?: string[]
+  selectedDomainId?: N extends Node ? string : undefined
 ): Selection<BaseType | SVGCircleElement, D3Node<N>, SVGGElement, unknown> {
-  let visibleNodes
-  if (hideDomains && hideDomains.length > 0 && type === 'node') {
-    visibleNodes = [...data].filter(
-      (n) =>
-        !((n as D3Node<Node>).node.domainIds ?? []).every((id) =>
-          hideDomains?.includes(id)
-        )
-    )
-  }
-
   return svg
     .append('g')
     .selectAll('circle')
-    .data(visibleNodes ?? data)
+    .data(data)
     .join('circle')
     .attr('r', (n) => n.radius)
     .attr('stroke', (n) =>
@@ -40,13 +29,6 @@ export function drawNodes<N extends Node | QueryNode>(
         : (n as D3Node<QueryNode>).node.node.color || ''
     )
     .attr('opacity', (n) => {
-      // if (type === 'node') {
-      //   if (
-      //     Array.from((n as D3Node<Node>).node.domainIds ?? []).every((id) =>
-      //       hideDomains?.includes(id)
-      //     )
-      //   )
-      //     return 0
       if (
         Array.from((n as D3Node<Node>).node.domainIds ?? []).every(
           (id) => selectedDomainId === id
@@ -62,49 +44,26 @@ export function drawNodes<N extends Node | QueryNode>(
 export function drawLabel<N extends Node | QueryNode>(
   svg: d3.Selection<d3.BaseType, unknown, HTMLElement, undefined>,
   data: D3Node<N>[],
-  type: 'node' | 'queryNode',
-  hideDomains?: string[]
+  type: 'node' | 'queryNode'
 ): Selection<BaseType | SVGTextElement, D3Node<N>, SVGGElement, unknown> {
-  let visibleNodes
-  if (hideDomains && hideDomains.length > 0 && type === 'node') {
-    visibleNodes = [...data].filter(
-      (n) =>
-        !((n as D3Node<Node>).node.domainIds ?? []).every((id) =>
-          hideDomains?.includes(id)
-        )
+  return svg
+    .append('g')
+    .selectAll('text')
+    .data(data)
+    .join('text')
+    .text((d) =>
+      type === 'node'
+        ? (d as D3Node<Node>).node.label || ''
+        : (d as D3Node<QueryNode>).node.varName || ''
     )
-  }
-  return (
-    svg
-      .append('g')
-      .selectAll('text')
-      .data(visibleNodes ?? data)
-      .join('text')
-      .text((d) =>
-        type === 'node'
-          ? (d as D3Node<Node>).node.label || ''
-          : (d as D3Node<QueryNode>).node.varName || ''
-      )
-      .attr('dominant-baseline', 'middle')
-      .attr('text-anchor', 'middle')
-      // .attr('opacity', (n) => {
-      //   if (type === 'node') {
-      //     if (
-      //       Array.from((n as D3Node<Node>).node.domainIds ?? []).every((id) =>
-      //         hideDomains?.includes(id)
-      //       )
-      //     )
-      //       return 0
-      //   }
-      //   return 1
-      // })
-      .attr('class', 'node-label')
-      .attr('background-color', (n) =>
-        type === 'node'
-          ? (n as D3Node<Node>).node.color || ''
-          : (n as D3Node<QueryNode>).node.node.color || ''
-      )
-  )
+    .attr('dominant-baseline', 'middle')
+    .attr('text-anchor', 'middle')
+    .attr('class', 'node-label')
+    .attr('background-color', (n) =>
+      type === 'node'
+        ? (n as D3Node<Node>).node.color || ''
+        : (n as D3Node<QueryNode>).node.node.color || ''
+    )
 }
 
 export function nodeMouseEvents<N extends Node | QueryNode>(
@@ -157,24 +116,14 @@ export function drawRelations<R extends Relation | QueryRelation>(
   d3Relation: D3Relation<R>[],
   data: D3Node<R extends Relation ? Node : QueryNode>[],
   type: 'relation' | 'queryRelation',
-  selectedDomainId?: R extends Relation ? string : undefined,
-  hideDomains?: string[]
+  selectedDomainId?: R extends Relation ? string : undefined
 ): d3.Selection<
   d3.BaseType | SVGPathElement,
   D3Relation<R>,
   SVGGElement,
   unknown
 > {
-  let visibleRelations: D3Relation<R>[] | undefined
-  if (hideDomains && hideDomains.length > 0 && type === 'relation') {
-    visibleRelations = [...relations].filter(
-      (r) =>
-        !((r as D3Relation<Relation>).relation.domainIds ?? []).every((id) =>
-          hideDomains?.includes(id)
-        )
-    )
-  }
-  ;(visibleRelations ?? relations).forEach((rel) => {
+  relations.forEach((rel) => {
     svg
       .append('defs')
       .append('marker')
@@ -199,22 +148,13 @@ export function drawRelations<R extends Relation | QueryRelation>(
       )
   })
 
-  const selection = svg
-    .append('g')
-    .selectAll('path')
-    .data(visibleRelations ?? d3Relation)
+  const selection = svg.append('g').selectAll('path').data(d3Relation)
   const relation = selection
     .join('path')
     .attr('id', (d) => d.relation.id || '')
     .attr('stroke-linecap', 'round')
     .attr('opacity', (r) => {
       if (type === 'relation') {
-        // if (
-        //   Array.from(
-        //     (r as D3Relation<Relation>).relation.domainIds ?? []
-        //   ).every((id) => hideDomains?.includes(id))
-        // )
-        //   return 0
         if (
           Array.from(
             (r as D3Relation<Relation>).relation.domainIds ?? []
@@ -249,10 +189,6 @@ export function drawRelations<R extends Relation | QueryRelation>(
     .text((d) => {
       if (type === 'relation') {
         const castValue = d as D3Relation<Relation>
-        if (
-          castValue.relation.domainIds?.every((id) => hideDomains?.includes(id))
-        )
-          return null
         return (
           castValue.relation.type +
           (castValue.relation.multiple ? ' [ ]' : '') +
@@ -360,37 +296,18 @@ export function buildSimulation<
   R extends Relation | QueryRelation,
   N extends Node | QueryNode
 >(
-  d3Relation: D3Relation<R>[],
+  d3Relations: D3Relation<R>[],
   data: D3Node<N>[],
-  onTick: () => void,
-  hideDomains?: string[]
+  onTick: () => void
 ): d3.Simulation<d3.SimulationNodeDatum, undefined> {
-  let visibleRelations: D3Relation<R>[] | undefined
-  if (hideDomains && hideDomains.length > 0) {
-    visibleRelations = [...d3Relation].filter(
-      (r) =>
-        !((r as D3Relation<Relation>).relation.domainIds ?? []).every((id) =>
-          hideDomains?.includes(id)
-        )
-    )
-  }
-  let visibleNodes: D3Node<N>[] | undefined
-  if (hideDomains && hideDomains.length > 0) {
-    visibleNodes = [...data].filter(
-      (r) =>
-        !((r as D3Node<Node>).node.domainIds ?? []).every((id) =>
-          hideDomains?.includes(id)
-        )
-    )
-  }
   return d3
     .forceSimulation()
-    .nodes(visibleNodes ?? data)
+    .nodes(data)
     .force('charge', d3.forceManyBody().strength(0.1))
     .force(
       'link',
       d3
-        .forceLink<D3Node<N>, D3Relation<R>>(visibleRelations ?? d3Relation)
+        .forceLink<D3Node<N>, D3Relation<R>>(d3Relations)
         .id((d) => d.node.id as string)
         .distance(100)
         .strength(0.2)
