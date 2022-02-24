@@ -1,7 +1,7 @@
-import { BaseType, Selection } from 'd3'
+import { BaseType, Selection, timer } from 'd3'
 import * as d3 from 'd3'
 import { QueryNode, QueryRelation } from '../pages/analytics/QueryBuilder'
-import { D3Helper, D3Node, D3Relation } from './D3Helper'
+import { D3Helper, D3Node, D3Relation, NODE_RADIUS } from './D3Helper'
 import { Node, Relation } from '../services/models'
 import { Force } from '../pages/graph/Graph'
 
@@ -71,7 +71,9 @@ export function nodeMouseEvents<N extends Node | QueryNode>(
   node: any,
   onClick: (e: unknown, d: D3Node<N>) => void
 ): void {
-  const dragstart = (): void => {}
+  const dragstart = (): void => {
+    simulation.alphaTarget(0.5).restart()
+  }
   const dragged = (
     event: { x: number; y: number },
     d: Force | unknown
@@ -79,7 +81,7 @@ export function nodeMouseEvents<N extends Node | QueryNode>(
     const force = d as Force
     force.fx = event.x
     force.fy = event.y
-    simulation.alphaTarget(0.3).restart()
+    simulation.alphaTarget(0.7).restart()
   }
   const dragend = (): void => {
     simulation.stop()
@@ -273,10 +275,38 @@ export function tick<
     D3Relation<R>,
     SVGGElement,
     unknown
-  >
+  >,
+  width: number,
+  height: number
 ): void {
-  node.attr('cx', (d) => d.x ?? null).attr('cy', (d) => d.y ?? null)
-  labels.attr('x', (d) => d.x ?? null).attr('y', (d) => d.y ?? null)
+  const xrange = width / 2
+  const yrange = height / 2
+  node
+    .attr('cx', (d) =>
+      d.x
+        ? Math.min(xrange, Math.max(xrange * -1, d.x) + NODE_RADIUS) -
+          NODE_RADIUS
+        : null
+    )
+    .attr('cy', (d) =>
+      d.y
+        ? Math.min(yrange, Math.max(yrange * -1, d.y) + NODE_RADIUS) -
+          NODE_RADIUS
+        : null
+    )
+  labels
+    .attr('x', (d) =>
+      d.x
+        ? Math.min(xrange, Math.max(xrange * -1, d.x) + NODE_RADIUS) -
+          NODE_RADIUS
+        : null
+    )
+    .attr('y', (d) =>
+      d.y
+        ? Math.min(yrange, Math.max(yrange * -1, d.y) + NODE_RADIUS) -
+          NODE_RADIUS
+        : null
+    )
   relation
     .attr('d', (rel) => {
       return D3Helper.buildRelationPath(rel)
@@ -297,20 +327,24 @@ export function buildSimulation<
   data: D3Node<N>[],
   onTick: () => void
 ): d3.Simulation<d3.SimulationNodeDatum, undefined> {
-  return d3
-    .forceSimulation()
-    .nodes(data)
-    .force('charge', d3.forceManyBody().strength(0.1))
-    .force(
-      'link',
-      d3
-        .forceLink<D3Node<N>, D3Relation<R>>(d3Relations)
-        .id((d) => d.node.id as string)
-        .distance(100)
-        .strength(0.2)
-    )
-    .force('collision', d3.forceCollide().radius(100).strength(0.2))
-    .force('x', d3.forceX().strength(0.3))
-    .force('y', d3.forceY().strength(0.3))
-    .on('tick', onTick)
+  const simulation = d3.forceSimulation().nodes(data)
+  const linkForce = d3
+    .forceLink<D3Node<N>, D3Relation<R>>(d3Relations)
+    .id((d) => {
+      return d.node.id as string
+    })
+    .distance(150)
+    .strength(0.3)
+
+  const manyBody = d3.forceManyBody().strength(-100)
+  const collideForce = d3.forceCollide().radius(100).strength(0.1)
+  const centerForce = d3.forceCenter(0, 0).strength(0.1)
+
+  simulation
+    .force('body', manyBody)
+    .force('center', centerForce)
+    .force('collide', collideForce)
+    .force('links', linkForce)
+
+  return simulation.on('tick', onTick)
 }
