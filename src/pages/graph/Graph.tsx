@@ -334,7 +334,7 @@ export const Graph = (props: IGraph): JSX.Element => {
           return false
         })
       })
-      .on('drag', (e: any, d: unknown): void => {
+      .on('drag', (e, d: unknown): void => {
         const nodeX = source?.x ?? 0
         const nodeY = source?.y ?? 0
         const path = d as Path
