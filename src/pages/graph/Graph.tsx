@@ -279,10 +279,10 @@ export const Graph = (props: IGraph): JSX.Element => {
         .selectAll('path')
         .data(domainNodes)
         .join('path')
-        .attr('id', (d: any) => d.node.id)
+        .attr('id', (d: D3Node<Node>) => d.node.id ?? '')
         .attr('stroke-opacity', 0.7)
-        .attr('stroke', (d: any) => d.node.color)
-        .attr('fill', (d: any) => d.node.color)
+        .attr('stroke', (d: D3Node<Node>) => d.node.color ?? '#6d6a6e')
+        .attr('fill', (d: D3Node<Node>) => d.node.color ?? '#6d6a6e')
         .attr('stroke-width', (n) =>
           Array.from(n.node.domainIds ?? []).includes(selectedDomain?.id ?? '')
             ? 20
