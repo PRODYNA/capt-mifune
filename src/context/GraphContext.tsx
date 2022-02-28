@@ -7,7 +7,9 @@ type GraphContextType = {
   selectedDomain: Domain | undefined
   setSelectedDomain: (v: Domain | undefined) => void
   domains: Domain[]
+  hideDomains: string[]
   setDomains: (v: Domain[]) => void
+  setHideDomains: (v: string[]) => void
   selected: D3Node<Node> | D3Relation<Relation> | undefined
   setSelected: (v: D3Node<Node> | D3Relation<Relation> | undefined) => void
   nodes: D3Node<Node>[]
@@ -20,7 +22,9 @@ const GraphContext = createContext<GraphContextType>({
   selectedDomain: undefined,
   setSelectedDomain: (v: Domain | undefined) => {},
   domains: [],
+  hideDomains: [],
   setDomains: (v: Domain[]) => {},
+  setHideDomains: (v: string[]) => {},
   selected: undefined,
   setSelected: (v: D3Node<Node> | D3Relation<Relation> | undefined) => {},
   nodes: [],

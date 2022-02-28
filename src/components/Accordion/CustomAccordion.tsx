@@ -11,7 +11,7 @@ const Accordion = withStyles((theme: Theme) => ({
     border: 'unset',
     padding: 0,
     boxShadow: 'none',
-    maxWidth: 220,
+    minWidth: 250,
     width: '100%',
     marginBottom: '0.5rem',
     '&:not(:last-child)': {
