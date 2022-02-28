@@ -71,9 +71,7 @@ export function nodeMouseEvents<N extends Node | QueryNode>(
   node: any,
   onClick: (e: unknown, d: D3Node<N>) => void
 ): void {
-  const dragstart = (): void => {
-    simulation.alphaTarget(0.5).restart()
-  }
+  const dragstart = (): void => {}
   const dragged = (
     event: { x: number; y: number },
     d: Force | unknown
@@ -81,7 +79,7 @@ export function nodeMouseEvents<N extends Node | QueryNode>(
     const force = d as Force
     force.fx = event.x
     force.fy = event.y
-    simulation.alphaTarget(0.7).restart()
+    simulation.alphaTarget(0.5).restart()
   }
   const dragend = (): void => {
     simulation.stop()
@@ -325,7 +323,8 @@ export function buildSimulation<
 >(
   d3Relations: D3Relation<R>[],
   data: D3Node<N>[],
-  onTick: () => void
+  onTick: () => void,
+  enableCenter = true
 ): d3.Simulation<d3.SimulationNodeDatum, undefined> {
   const simulation = d3.forceSimulation().nodes(data)
   const linkForce = d3
@@ -334,17 +333,20 @@ export function buildSimulation<
       return d.node.id as string
     })
     .distance(150)
-    .strength(0.3)
 
-  const manyBody = d3.forceManyBody().strength(-100)
-  const collideForce = d3.forceCollide().radius(100).strength(0.1)
+  const manyBody = d3.forceManyBody().strength(1)
+  const collideForce = d3.forceCollide().radius(90).strength(0.3)
   const centerForce = d3.forceCenter(0, 0).strength(0.1)
+  if (enableCenter) {
+    simulation.force('center', centerForce)
+  }
 
   simulation
     .force('body', manyBody)
-    .force('center', centerForce)
     .force('collide', collideForce)
     .force('links', linkForce)
-
+    .alphaDecay(0.08)
+    .alphaTarget(0)
+    .alpha(1)
   return simulation.on('tick', onTick)
 }
