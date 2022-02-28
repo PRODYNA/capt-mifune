@@ -101,7 +101,14 @@
 
 <!-- GETTING STARTED -->
 
-##  Getting Started
+##  Getting Started 
+
+### Backend
+See installation instructions for backend here [mifune-server](https://github.com/PRODYNA/capt-mifune-server)
+
+See installation instructions for sample data here [mifune-samples](https://github.com/PRODYNA/capt-mifune-local)
+
+### Frontend
 
 This gives you instructions on setting up your project locally.
 
