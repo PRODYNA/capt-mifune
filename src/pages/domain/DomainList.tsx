@@ -13,7 +13,7 @@ const useStyles = makeStyles(() =>
     root: {
       position: 'absolute',
       top: 25,
-      right: 20,
+      right: 50,
       zIndex: 100,
       width: 220,
     },

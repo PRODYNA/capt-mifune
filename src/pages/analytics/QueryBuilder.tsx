@@ -220,7 +220,9 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     const simulation = buildSimulation<QueryRelation, QueryNode>(
       relations,
       nodes,
-      (): void => tick<QueryNode, QueryRelation>(node, labels, relation)
+      (): void =>
+        tick<QueryNode, QueryRelation>(node, labels, relation, width, height),
+      false
     )
     relationMouseEvents(simulation, relation)
 
@@ -234,6 +236,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
         } else {
           // eslint-disable-next-line no-param-reassign
           d3Node.node.selected = true
+          // eslint-disable-next-line no-param-reassign
+          d3Node.fx = d3Node.x
+          // eslint-disable-next-line no-param-reassign
+          d3Node.fy = d3Node.y
           setSelectActive(false)
           const activeNodes = nodes.filter((n) => n.node.selected)
           setNodes(activeNodes)
@@ -256,11 +262,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
             relations: activeRelations.map((r) => r.relation),
           })
         }
-        if (!graph) {
-          return
-        }
-
-        simulation.alphaTarget(0.3).restart()
       }
     )
   }, [nodes, relations, selectActive])
@@ -274,8 +275,10 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     }
     const newNode = D3Helper.wrapNode(qNode)
     newNode.radius = 50
-    newNode.x = 100
-    newNode.y = 100
+    newNode.x = 0
+    newNode.y = 0
+    newNode.fx = 0
+    newNode.fy = 0
     setNodes([newNode])
     setRelations([])
     updateCounterMap(new Map(), [], [newNode])
