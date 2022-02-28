@@ -15,6 +15,8 @@ import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord'
 import Delete from '@material-ui/icons/Delete'
 import Save from '@material-ui/icons/Save'
 import Add from '@material-ui/icons/Add'
+import Visibility from '@material-ui/icons/Visibility'
+import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import { NodeSelect } from './NodeSelect'
 import CustomAccordion from '../../components/Accordion/CustomAccordion'
 import { SnackbarContext } from '../../context/Snackbar'
@@ -37,6 +39,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   const { domain, expanded, toggleAccordion, updateState } = props
   const [name, setName] = useState(domain.name)
   const [rootNodeId, setRootNodeId] = useState(domain.rootNodeId)
+  const [isVisible, setIsVisible] = useState<boolean>(true)
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [showModal, setShowModal] = useState<boolean>(false)
   const {
@@ -44,6 +47,8 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     domains,
     selectedDomain,
     setDomains,
+    hideDomains,
+    setHideDomains,
     setSelected,
     setSelectedDomain,
   } = useContext(GraphContext)
@@ -69,6 +74,15 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
       setSelectedDomain(undefined)
     } else {
       setSelectedDomain(domain)
+    }
+  }
+
+  const hideSelectedDomain = (): void => {
+    const findDomain = hideDomains.find((item) => item === domain.id)
+    if (!findDomain) setHideDomains([...hideDomains, domain.id as string])
+    else {
+      const filterDomains = hideDomains.filter((d) => d !== domain.id)
+      setHideDomains(filterDomains)
     }
   }
 
@@ -172,6 +186,16 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
           <>
             <ListItemIcon style={{ minWidth: '2rem' }}>
               {buildBadge()}
+            </ListItemIcon>
+            <ListItemIcon
+              style={{ minWidth: '2rem' }}
+              onClick={(e): void => {
+                e.stopPropagation()
+                setIsVisible(!isVisible)
+                hideSelectedDomain()
+              }}
+            >
+              {isVisible ? <Visibility /> : <VisibilityOff />}
             </ListItemIcon>
             <span
               style={{
