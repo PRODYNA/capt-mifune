@@ -51,7 +51,7 @@ import org.neo4j.driver.Driver;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Path("/graph")
+@Path("/api/graph")
 @Tag(name = "graph")
 public class GraphResource {
 
