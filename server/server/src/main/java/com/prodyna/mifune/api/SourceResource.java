@@ -46,7 +46,7 @@ import org.jboss.resteasy.reactive.MultipartForm;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Path("/sources")
+@Path("/api/sources")
 public class SourceResource {
 
   @ConfigProperty(name = "mifune.upload.dir")

@@ -88,6 +88,25 @@
       <artifactId>quarkus-neo4j</artifactId>
     </dependency>
   </dependencies>
+  <profiles>
+    <profile>
+      <id>prod</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <resources>
+          <resource>
+            <directory>../../ui/build</directory>
+            <targetPath>META-INF/resources</targetPath>
+          </resource>
+          <resource>
+            <directory>src/main/resources</directory>
+          </resource>
+        </resources>
+      </build>
+    </profile>
+  </profiles>
   <build>
     <plugins>
       <plugin>

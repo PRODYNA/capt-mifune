@@ -3,7 +3,7 @@ import { ENV } from '../env/Environments'
 import { Configuration } from '../services'
 
 const AXIOS_CONFIG = (): Configuration => {
-  const basePath = 'http://localhost:8081'
+  const basePath = 'http://localhost:8080'
   const apiKey = undefined
   const username = undefined
   const password = undefined

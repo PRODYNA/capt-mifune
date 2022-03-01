@@ -47,7 +47,7 @@ import org.neo4j.driver.Driver;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Path("/data")
+@Path("/api/data")
 public class DataResource {
 
   @Inject protected Logger log;
