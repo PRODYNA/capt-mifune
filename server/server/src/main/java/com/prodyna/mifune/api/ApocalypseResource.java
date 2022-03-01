@@ -37,7 +37,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
 
-@Path("/apocalypse")
+@Path("/api/apocalypse")
 @Tag(name = "admin")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
