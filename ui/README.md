@@ -45,13 +45,9 @@
     </ul>
     </li>
     <li><a href="#keycloak">Keycloak</a></li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
     <li><a href="#project-structure">Project Structure</a></li>
     <li><a href="#available-scripts">Available Scripts</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -60,28 +56,6 @@
 ##  About The Project
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-
-**Features:**
-
-* **Create your graph model**
-  * Create and define your domains through graph modelling in the frontend
-  * Define nodes and relations inside your graph model
-  * Define properties with keys and different data types
-  * Upload your CSV files through pipeline jobs
-    *   run imports
-    *   stop imorts
-    *   reset database
-    *   clear domains
-  * Map you CSV data with your created graph model
-  * Save your graph model
-  * Create a screenshot of your graph model
-
-* **Analyze your graph model**
-  * Create custom queries with the "Query Builder"   
-  * Choose between various charts
-  * Filter inside your query data
-
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -102,11 +76,6 @@
 <!-- GETTING STARTED -->
 
 ##  Getting Started 
-
-### Backend
-See installation instructions for backend here [mifune-server](https://github.com/PRODYNA/capt-mifune-server)
-
-See installation instructions for sample data here [mifune-samples](https://github.com/PRODYNA/capt-mifune-local)
 
 ### Frontend
 
@@ -182,24 +151,6 @@ You can go to http://localhost:8888/auth/realms/mifune/account/ for user account
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-##  Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-<!-- ROADMAP -->
-
-##  Roadmap
-
-- [ ] ...
-
-See the [open issues](https://github.com/PRODYNA/capt-mifune-ui/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->
 
@@ -311,20 +262,6 @@ If you aren’t satisfied with the build tool and configuration choices, you can
 Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
 You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-<!-- ACKNOWLEDGMENTS -->
-
-##  Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Img Shields](https://shields.io)
-
-* [GitHub Pages](https://pages.github.com)
-
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
