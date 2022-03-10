@@ -13,7 +13,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/PRODYNA/capt-mifune-ui/">
-    <img src="./ui/src/assets/Logo-dark.svg?raw=true" alt="Logo" width="150">
+    <img src="./docs/Logo-dark.svg?raw=true" alt="Logo" width="150">
   </a>
   <h3 align="center">Captain Mifune</h3>
   <p align="center">
