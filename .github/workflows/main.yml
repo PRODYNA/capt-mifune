@@ -3,8 +3,7 @@ name: Docker
 on:
   push:
     # Publish `master` as Docker `latest` image.
-    branches:
-      - master
+    branches: [ main ]
 
 env:
   IMAGE_NAME: capt-mifune
@@ -20,7 +19,6 @@ jobs:
           node-version: '16'
         env:
           CI: false
-
       - uses: actions/setup-java@v2
         with:
           java-version: '17'
