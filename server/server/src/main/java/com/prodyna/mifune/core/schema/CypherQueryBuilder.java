@@ -112,7 +112,7 @@ public class CypherQueryBuilder {
                           processedIds.add(qr.id());
                           cypher.append(
                               """
-                              match(%s)-[%s:%s%s]->(%s:%s)
+                              ,(%s)-[%s:%s%s]->(%s:%s)
                               """
                                   .formatted(
                                       nodeVar,
