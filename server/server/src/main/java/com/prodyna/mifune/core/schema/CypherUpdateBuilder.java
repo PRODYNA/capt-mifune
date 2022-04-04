@@ -116,7 +116,13 @@ public class CypherUpdateBuilder {
       buildSubContext(
           newPath, subContext, toNode, toNodeVarName, true, labels.add(toNode.getLabel()));
       subContext.addStatement(
-          "merge(%s)-[%s:%s]->(%s)".formatted(nodeVar, r.varName(), r.getType(), toNodeVarName));
+          "merge(%s)-[%s:%s%s]->(%s)"
+              .formatted(
+                  nodeVar,
+                  r.varName(),
+                  r.getType(),
+                  primaryKeys(newPath, r.getProperties()),
+                  toNodeVarName));
     } else {
 
       var newPath = new ArrayList<>(varPath);
@@ -124,8 +130,14 @@ public class CypherUpdateBuilder {
       buildSubContext(
           newPath, subContext, toNode, toNodeVarName, true, labels.add(toNode.getLabel()));
       subContext.addStatement(
-          "merge(%s)-[%s:%s]->(%s:%s)"
-              .formatted(nodeVar, r.varName(), r.getType(), toNodeVarName, toNode.getLabel()));
+          "merge(%s)-[%s:%s%s]->(%s:%s)"
+              .formatted(
+                  nodeVar,
+                  r.varName(),
+                  r.getType(),
+                  primaryKeys(newPath, r.getProperties()),
+                  toNodeVarName,
+                  toNode.getLabel()));
     }
     Optional.ofNullable(r.getProperties()).stream()
         .flatMap(Collection::stream)

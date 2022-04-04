@@ -20,7 +20,7 @@
     <quarkus-plugin.version>2.7.1.Final</quarkus-plugin.version>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-    <quarkus.platform.version>2.7.1.Final</quarkus.platform.version>
+    <quarkus.platform.version>2.7.5.Final</quarkus.platform.version>
     <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
   </properties>
   <dependencyManagement>
@@ -87,6 +87,11 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-neo4j</artifactId>
     </dependency>
+<!--    <dependency>-->
+<!--      <groupId>io.quarkus</groupId>-->
+<!--      <artifactId>quarkus-test-security</artifactId>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
   </dependencies>
   <profiles>
     <profile>
@@ -98,10 +103,10 @@
         <resources>
           <resource>
             <directory>../../ui/build</directory>
-            <targetPath>META-INF/resources</targetPath>
+            <targetPath>META-INF/resources/ui</targetPath>
           </resource>
           <resource>
-            <directory>src/main/resources</directory>
+            <directory>src/main/resources/ui</directory>
           </resource>
         </resources>
       </build>
