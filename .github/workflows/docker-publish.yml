@@ -2,15 +2,9 @@ name: Docker
 
 on:
   push:
+    # Publish `master` as Docker `latest` image.
     branches:
       - master
-
-#    # Publish `v1.2.3` tags as releases.
-#    tags:
-#      - v*
-
-  # Run tests for any PRs.
-  pull_request:
 
 env:
   IMAGE_NAME: capt-mifune
@@ -37,11 +31,10 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: yarn install
         run: yarn --cwd ui install
-
       - name: yarn generate api
-        run: yarn generate-backend-api
+        run: yarn --cwd ui generate-backend-api
       - name: yarn build
-        run: yarn --cwd ui build
+        run: yarn --cwd ui  build
         env:
           CI: false
 
