@@ -87,31 +87,8 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-neo4j</artifactId>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>io.quarkus</groupId>-->
-<!--      <artifactId>quarkus-test-security</artifactId>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
-  </dependencies>
-  <profiles>
-    <profile>
-      <id>prod</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <resources>
-          <resource>
-            <directory>../../ui/build</directory>
-            <targetPath>META-INF/resources/ui</targetPath>
-          </resource>
-          <resource>
-            <directory>src/main/resources/ui</directory>
-          </resource>
-        </resources>
-      </build>
-    </profile>
-  </profiles>
+ </dependencies>
+
   <build>
     <plugins>
       <plugin>
