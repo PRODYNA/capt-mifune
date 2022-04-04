@@ -35,6 +35,8 @@ jobs:
         run: yarn --cwd ui  build
         env:
           CI: false
+      - name: run maven
+        run:  mvn -f server/pom.xml clean install
 
 
 
