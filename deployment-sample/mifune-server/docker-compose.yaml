@@ -1,0 +1,42 @@
+version: "3"
+services:
+  keycloak:
+    image: "quay.io/keycloak/keycloak:15.0.2"
+    environment:
+      KEYCLOAK_USER: "admin"
+      KEYCLOAK_PASSWORD: "admin"
+      KEYCLOAK_IMPORT: "/tmp/realm-export.json"
+    ports:
+      - "8888:8080"
+    volumes:
+      - "../keycloak/realm-export.json:/tmp/realm-export.json:z"
+  neo4j:
+    image: "neo4j:4.4.5-community"
+    environment:
+      NEO4J_AUTH: "neo4j/password"
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+  mifune:
+    image: "prodyna/capt-mifune:latest"
+    ports:
+      - "8080:8080"
+    environment:
+      MIFUNE_ROOT_PATH_API: "http://localhost:8080/api/"
+      MIFUNE_ROOT_PATH_UI: "http://localhost:8080/ui/"
+      NEO4J_URI: "bolt://neo4j:7687"
+      NEO4J_USERNAME: "neo4j"
+      NEO4J_PASSWORD: "password"
+      MIFUNE_AUTH_SERVER_URL: "http://localhost:8888/auth"
+      MIFUNE_AUTH_SERVER_URL_INTERNAL: "http://keycloak:8080/auth"
+      MIFUNE_AUTH_REALM: "mifune"
+      MIFUNE_AUTH_SERVER_CLIENT_ID: "mifune-server"
+      MIFUNE_AUTH_SERVER_CLIENT_SECRET: "5cde3846-af25-4817-9aa4-e8ca7b083fc7"
+      MIFUNE_AUTH_UI_PUBLIC_CLIENT: "mifune-app"
+      # need if issuer url not match in .well-known, possible when keycloak run in the same docker-compose
+      QUARKUS_OIDC_TOKEN_ISSUER: "http://localhost:8888/auth/realms/mifune"
+
+    volumes:
+      - ../../server/server/src/test/resources/samples/bom/:/upload/:z
+      - ../../server/server/src/test/resources/samples/bom/:/model/:z
+
