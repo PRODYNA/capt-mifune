@@ -59,7 +59,7 @@ class GraphResourceTest {
         .when()
         .body(req)
         .contentType(ContentType.JSON)
-        .post("/graph/domain")
+        .post("/api/graph/domain")
         .then()
         .statusCode(200)
         .body("name", equalTo("sample"));
@@ -73,7 +73,7 @@ class GraphResourceTest {
         .when()
         .body(updateReq)
         .contentType(ContentType.JSON)
-        .put("/graph/domain/%s".formatted(sampleDomain.getId()))
+        .put("/api/graph/domain/%s".formatted(sampleDomain.getId()))
         .then()
         .statusCode(200)
         .body("name", equalTo("newName"));
@@ -84,7 +84,7 @@ class GraphResourceTest {
     Domain sampleDomain = createSampleDomain();
     given()
         .when()
-        .delete("/graph/domain/%s".formatted(sampleDomain.getId()))
+        .delete("/api/graph/domain/%s".formatted(sampleDomain.getId()))
         .then()
         .statusCode(200);
   }
@@ -93,12 +93,11 @@ class GraphResourceTest {
   void createNode() {
     var sampleDomain = createSampleDomain();
     var nodeCreate = new NodeCreate("Person", sampleDomain.getId());
-
     given()
         .when()
         .body(nodeCreate)
         .contentType(ContentType.JSON)
-        .post("/graph/node")
+        .post("/api/graph/node")
         .then()
         .statusCode(200)
         .log()
@@ -117,7 +116,7 @@ class GraphResourceTest {
         .when()
         .body(nodeUpdate)
         .contentType(ContentType.JSON)
-        .put("/graph/node/%s".formatted(node.getId()))
+        .put("/api/graph/node/%s".formatted(node.getId()))
         .then()
         .statusCode(200)
         .body("changedNodes", hasSize(1))
@@ -131,7 +130,7 @@ class GraphResourceTest {
     Node node = createNodeInDomain(sampleDomain, "Person");
     given()
         .when()
-        .delete("/graph/node/%s".formatted(node.getId()))
+        .delete("/api/graph/node/%s".formatted(node.getId()))
         .then()
         .statusCode(200)
         .body("removedNodes", hasSize(1))
@@ -151,7 +150,7 @@ class GraphResourceTest {
         .when()
         .body(relationCreate)
         .contentType(ContentType.JSON)
-        .post("/graph/relation")
+        .post("/api/graph/relation")
         .then()
         .statusCode(200)
         .body("changedRelations", hasSize(1));
@@ -168,7 +167,7 @@ class GraphResourceTest {
         .when()
         .body(relUpdate)
         .contentType(ContentType.JSON)
-        .put("/graph/relation/%s".formatted(relation.getId()))
+        .put("/api/graph/relation/%s".formatted(relation.getId()))
         .then()
         .statusCode(200)
         .body("changedRelations", hasSize(1))
@@ -183,7 +182,7 @@ class GraphResourceTest {
     Relation relation = buildRelationBetweenNodes(personNode, carNode, "HAS_CAR");
     given()
         .when()
-        .delete("/graph/relation/%s".formatted(relation.getId()))
+        .delete("/api/graph/relation/%s".formatted(relation.getId()))
         .then()
         .body("removedRelations", hasSize(1))
         .body("removedRelations[0]", equalTo(relation.getId().toString()))
@@ -232,7 +231,7 @@ class GraphResourceTest {
                   """);
     given()
         .when()
-        .get("/graph/domain/%s/mapping".formatted(updatedDomain.getId()))
+        .get("/api/graph/domain/%s/mapping".formatted(updatedDomain.getId()))
         .then()
         .statusCode(200)
         .body(is(jo.toString()));
@@ -244,7 +243,7 @@ class GraphResourceTest {
         .when()
         .body(req)
         .contentType(ContentType.JSON)
-        .post("/graph/domain")
+        .post("/api/graph/domain")
         .then()
         .statusCode(200)
         .body("name", equalTo("sample"))
@@ -257,7 +256,7 @@ class GraphResourceTest {
         .when()
         .body(domain)
         .contentType(ContentType.JSON)
-        .put("/graph/domain/%s".formatted(domain.getId()))
+        .put("/api/graph/domain/%s".formatted(domain.getId()))
         .then()
         .statusCode(200)
         .body("name", equalTo("sample"))
@@ -272,7 +271,7 @@ class GraphResourceTest {
         .when()
         .body(nodeCreate)
         .contentType(ContentType.JSON)
-        .post("/graph/node")
+        .post("/api/graph/node")
         .then()
         .statusCode(200)
         .body("changedNodes[0].label", equalTo(label))
@@ -291,7 +290,7 @@ class GraphResourceTest {
         .when()
         .body(nodeUpdate)
         .contentType(ContentType.JSON)
-        .put("/graph/node/{nodeID}", sampleNode.getId())
+        .put("/api/graph/node/{nodeID}", sampleNode.getId())
         .then()
         .statusCode(200)
         .extract()
@@ -310,7 +309,7 @@ class GraphResourceTest {
         .when()
         .body(relationCreate)
         .contentType(ContentType.JSON)
-        .post("/graph/relation")
+        .post("/api/graph/relation")
         .then()
         .statusCode(200)
         .body("changedRelations", hasSize(1))
