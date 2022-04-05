@@ -66,11 +66,10 @@ public class UIResource {
 
     var requestHandler =
         vertxStaticContent.map(StaticHandler::create).orElseGet(StaticHandler::create);
+    router.get("/").handler(rc -> rc.redirect("/ui/"));
     router.get("/ui/env.json").handler(r -> r.end(env()));
     router.get("/ui/keycloak.json").handler(r -> r.end(keycloak()));
-
     router.route("/ui/*").handler(requestHandler);
-
     router
         .route("/ui/*")
         .handler(

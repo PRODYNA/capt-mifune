@@ -2,6 +2,7 @@
 
 ## Components
 ###  [Keycloak](http://localhost:8888)
+  - <span style="color:red">DO NOT USE THE EXPORTED REALM WITHOUT CHANGE THE KEYS</span>
   - We start Keycloak simply with an H2 Database (for your own happiness please don't use it for production)
   - We initialize Keycloak with an exported realm (mifune) with client for front and backend
   - Admin login is setup over env variables (admin/admin)
