@@ -18,7 +18,7 @@ services:
       - "7474:7474"
       - "7687:7687"
   mifune:
-    image: "prodyna/capt-mifune:latest"
+    image: "ghcr.io/prodyna/capt-mifune:latest"
     ports:
       - "8080:8080"
     environment:
