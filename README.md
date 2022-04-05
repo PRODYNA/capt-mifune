@@ -88,15 +88,12 @@
 
 ##  Getting Started 
 
-build container
-```bash
-./build.sh
-```
+You will find some sample docker-compose setups
+### [Local](./deployment-sample/mifune-local/README.md)
+Local docker-compose setup without security
+### [Server](./deployment-sample/mifune-local/README.md)
+Sample config with [Keycloak](https://www.keycloak.org/) as OIDC Provider
 
-run local with docker-compose
-```bash
-cd ./deploytment-sample/mifune-local
-docker-compose up
 ```
 
 
