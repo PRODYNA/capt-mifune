@@ -18,6 +18,6 @@ services:
       - "../../server/server/src/test/resources/samples/bom/:/model/:z"
     environment:
       QUARKUS_PROFILE: "local"
-      MIFUNE_ROOT_PATH_API: "http://localhost:8080/api/"
-      MIFUNE_ROOT_PATH_UI: "http://localhost:8080/ui/"
+      MIFUNE_ROOT_PATH_API: "http://localhost:8080"
+      MIFUNE_ROOT_PATH_UI: "http://localhost:8080"
       QUARKUS_NEO4J_URI: "bolt://neo4j:7687"
