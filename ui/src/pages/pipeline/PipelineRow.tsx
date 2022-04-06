@@ -69,7 +69,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
       <TableRow key={domain.id}>
         <TableCell
           align="left"
-          onClick={() => history.push(`/pipeline/${domain.id}`)}
+          onClick={() => history.push(`/ui/pipeline/${domain.id}`)}
         >
           <IconButton size="small">
             <VisibilityIcon htmlColor={theme.palette.grey[700]} />
