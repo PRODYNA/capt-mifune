@@ -3,7 +3,7 @@ import { ENV } from '../env/Environments'
 import { Configuration } from '../services'
 
 const AXIOS_CONFIG = (): Configuration => {
-  const basePath = 'http://localhost:8080'
+  const basePath = localStorage.getItem(ENV.API_SERVER) ?? undefined
   const apiKey = undefined
   const username = undefined
   const password = undefined
