@@ -94,10 +94,6 @@ Local docker-compose setup without security
 ### [Server](./deployment-sample/mifune-local/README.md)
 Sample config with [Keycloak](https://www.keycloak.org/) as OIDC Provider
 
-```
-
-
-
 ##  Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
