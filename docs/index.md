@@ -91,9 +91,9 @@
 ###  Getting Started 
 
 You will find some sample docker-compose setups
-### [Local](../deployment-sample/mifune-local/README.md)
+### [Local](https://github.com/PRODYNA/capt-mifune/tree/main/deployment-sample/mifune-local)
 Local docker-compose setup without security
-### [Server](../deployment-sample/mifune-local/README.md)
+### [Server](https://github.com/PRODYNA/capt-mifune/tree/main/deployment-sample/mifune-server)
 Sample config with [Keycloak](https://www.keycloak.org/) as OIDC Provider
 
 ###  Usage
@@ -179,7 +179,7 @@ Use this space to list resources you find helpful and would like to give credit 
 
 [license-shield]: https://img.shields.io/github/license/PRODYNA/capt-mifune.svg?style=for-the-badge
 
-[license-url]: ./LICENSE
+[license-url]: https://github.com/PRODYNA/capt-mifune/blob/main/LICENSE
 
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 
