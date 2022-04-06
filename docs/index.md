@@ -16,7 +16,7 @@
   </a>
   <h3 align="center">Captain Mifune</h3>
   <p align="center">
-    <b>Rapid prototyping Neo4j graphs</b>
+    <b>A graphical data-domain modeling and a bulk data importer tool for Neo4j</b>
   <br />
   <a href="https://github.com/PRODYNA/capt-mifune/issues">Report Bug</a>
   ·
