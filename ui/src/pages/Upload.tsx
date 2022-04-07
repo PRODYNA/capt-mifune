@@ -46,7 +46,7 @@ const FileUpload = (): JSX.Element => {
               data.append('name', file.file.name)
               data.append('file', file.file)
               rest
-                .post('/sources', data, {})
+                .post('/api/sources', data, {})
                 .then((): void =>
                   openSnackbar(Translations.UPLOAD_SUCCESS, 'success')
                 )
