@@ -1,11 +1,14 @@
 import React, { useContext, useState } from 'react'
 import { Box, Container, makeStyles, Typography } from '@material-ui/core'
 import CloudUploadIcon from '@material-ui/icons/CloudUpload'
+import { AxiosRequestConfig } from 'axios'
 import HttpService from '../openapi/HttpService'
 import CustomButton from '../components/Button/CustomButton'
 import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'
 import { CustomTexts } from '../utils/CustomTexts'
+import AXIOS_CONFIG from '../openapi/axios-config'
+import UserService from '../auth/UserService'
 
 const rest = HttpService.getAxiosClient()
 
@@ -46,7 +49,11 @@ const FileUpload = (): JSX.Element => {
               data.append('name', file.file.name)
               data.append('file', file.file)
               rest
-                .post('/sources', data, {})
+                .post('/api/sources', data, {
+                  headers: {
+                    Authorization: `Bearer ${UserService.getToken()}`,
+                  },
+                })
                 .then((): void =>
                   openSnackbar(Translations.UPLOAD_SUCCESS, 'success')
                 )

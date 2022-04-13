@@ -1,8 +1,0 @@
-{
-    "realm": "$OIDC_REALM",
-    "auth-server-url": "$OIDC_REDIRECT_URI",
-    "ssl-required": "external",
-    "resource": "$OIDC_CLIENT",
-    "public-client": true,
-    "confidential-port": 0
-}

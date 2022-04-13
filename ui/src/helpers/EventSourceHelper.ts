@@ -14,7 +14,7 @@ const header = (): Record<string, unknown> => {
 
 export const cleanDatabase = (): EventSourcePolyfill => {
   return new EventSourcePolyfill(
-    `${localStorage.getItem(ENV.API_SERVER)}apocalypse`,
+    `${localStorage.getItem(ENV.API_SERVER)}/api/apocalypse`,
     {
       headers: header(),
       heartbeatTimeout: 2000,
@@ -24,7 +24,7 @@ export const cleanDatabase = (): EventSourcePolyfill => {
 
 export const importSource = (): EventSourcePolyfill => {
   return new EventSourcePolyfill(
-    `${localStorage.getItem(ENV.API_SERVER)}graph/domain/fn/statistics`,
+    `${localStorage.getItem(ENV.API_SERVER)}/api/graph/domain/fn/statistics`,
     {
       headers: header(),
       heartbeatTimeout: 15000,
@@ -34,7 +34,7 @@ export const importSource = (): EventSourcePolyfill => {
 
 export const graphStats = (): EventSourcePolyfill => {
   return new EventSourcePolyfill(
-    `${localStorage.getItem(ENV.API_SERVER)}graph/stats`,
+    `${localStorage.getItem(ENV.API_SERVER)}/api/graph/stats`,
     {
       headers: header(),
       heartbeatTimeout: 2000,

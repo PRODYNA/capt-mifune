@@ -10,13 +10,14 @@ services:
       NEO4J_dbms_memory_pagecache_size: 2G
       NEO4J_dbms_memory_heap_max__size: 2G
   mifune:
-    image: prodyna/capt-mifune:latest
+    image: "ghcr.io/prodyna/capt-mifune:latest"
     ports:
       - "8080:8080"
     volumes:
-      - ../../server/server/src/test/resources/samples/bom/:/upload/:z
-      - ../../server/server/src/test/resources/samples/bom/:/model/:z
+      - "../../server/server/src/test/resources/samples/bom/:/upload/:z"
+      - "../../server/server/src/test/resources/samples/bom/:/model/:z"
     environment:
-      QUARKUS_PROFILE: local
-      QUARKUS_NEO4J_URI: bolt://neo4j:7687
-      QUARKUS_LOG_LEVEL: INFO
+      QUARKUS_PROFILE: "local"
+      MIFUNE_ROOT_PATH_API: "http://localhost:8080"
+      MIFUNE_ROOT_PATH_UI: "http://localhost:8080"
+      QUARKUS_NEO4J_URI: "bolt://neo4j:7687"

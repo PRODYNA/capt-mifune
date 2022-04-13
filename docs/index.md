@@ -5,7 +5,6 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
 <!-- PROJECT LOGO -->
@@ -13,17 +12,19 @@
 <br />
 <div align="center">
   <a href="https://github.com/PRODYNA/capt-mifune/">
-    <img src="./ui/src/assets/Logo-dark.svg?raw=true" alt="Logo" width="150">
+    <img src="https://raw.githubusercontent.com/PRODYNA/capt-mifune/main/ui/src/assets/Logo-dark.svg?raw=true" alt="Logo" width="150">
   </a>
   <h3 align="center">Captain Mifune</h3>
   <p align="center">
-    <b>Rapid prototyping Neo4j graphs</b>
+    <b>A graphical data-domain modeling and a bulk data importer tool for Neo4j</b>
   <br />
   <a href="https://github.com/PRODYNA/capt-mifune/issues">Report Bug</a>
   ·
   <a href="https://github.com/PRODYNA/capt-mifune/issues">Request Feature</a>
   </p>
 </div>
+
+## Welcome to Captain Mifune
 
 <!-- TABLE OF CONTENTS -->
 
@@ -49,7 +50,7 @@
 
 <!-- ABOUT THE PROJECT -->
 
-##  About The Project
+###  About The Project
   
 **Features:**
 
@@ -86,15 +87,15 @@
 
 <!-- GETTING STARTED -->
 
-##  Getting Started 
+###  Getting Started 
 
 You will find some sample docker-compose setups
-### [Local](./deployment-sample/mifune-local/README.md)
+### [Local](https://github.com/PRODYNA/capt-mifune/tree/main/deployment-sample/mifune-local)
 Local docker-compose setup without security
-### [Server](./deployment-sample/mifune-local/README.md)
+### [Server](https://github.com/PRODYNA/capt-mifune/tree/main/deployment-sample/mifune-server)
 Sample config with [Keycloak](https://www.keycloak.org/) as OIDC Provider
 
-##  Usage
+###  Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
@@ -103,7 +104,7 @@ Use this space to show useful examples of how a project can be used. Additional 
 
 <!-- ROADMAP -->
 
-##  Roadmap
+###  Roadmap
 
 - [ ] ...
 
@@ -113,7 +114,7 @@ See the [open issues](https://github.com/PRODYNA/capt-mifune/issues) for a full 
 
 <!-- CONTRIBUTING -->
 
-##  Contributing
+###  Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -135,7 +136,7 @@ Don't forget to give the project a star! Thanks again!
 
 <!-- LICENSE -->
 
-##  License
+###  License
 
 Distributed under the MIT License. See [LICENSE](./LICENSE) for more information.
 
@@ -144,7 +145,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for more information
 
 <!-- ACKNOWLEDGMENTS -->
 
-##  Acknowledgments
+###  Acknowledgments
 
 Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
@@ -177,7 +178,7 @@ Use this space to list resources you find helpful and would like to give credit 
 
 [license-shield]: https://img.shields.io/github/license/PRODYNA/capt-mifune.svg?style=for-the-badge
 
-[license-url]: ./LICENSE
+[license-url]: https://github.com/PRODYNA/capt-mifune/blob/main/LICENSE
 
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 
