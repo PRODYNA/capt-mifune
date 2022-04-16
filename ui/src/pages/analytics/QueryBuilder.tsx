@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Box, Typography } from '@material-ui/core'
+import { Box, Chip, Collapse, Switch, Typography } from '@material-ui/core'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
@@ -52,6 +52,8 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [selectActive, setSelectActive] = useState<boolean>(false)
   const [nodes, setNodes] = useState<D3Node<QueryNode>[]>([])
   const [relations, setRelations] = useState<D3Relation<QueryRelation>[]>([])
+  const [showQuery, setShowQuery] = useState<boolean>(true)
+
   const d3Container = useRef(null)
   const graphApi = new GraphApi(AXIOS_CONFIG())
 
@@ -168,14 +170,13 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
 
   function cleanNodes(): void {
     const activeNodes = nodes.filter((n) => n.node.selected)
-    setNodes(activeNodes)
-    setRelations(
-      relations.filter(
-        (r) =>
-          activeNodes.some((n) => n.node.id === r.relation.targetId) &&
-          activeNodes.some((n) => n.node.id === r.relation.sourceId)
-      )
+    const activeRel = relations.filter(
+      (r) =>
+        activeNodes.some((n) => n.node.id === r.relation.targetId) &&
+        activeNodes.some((n) => n.node.id === r.relation.sourceId)
     )
+    setNodes([...activeNodes])
+    setRelations([...activeRel])
   }
 
   function updateCounterMap(
@@ -288,41 +289,89 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
     })
   }
 
+  const deleteNode = (node: Node): void => {
+    const filterNodes = nodes.filter((n) => n.node.id !== node.id)
+    const filterRelations = relations.filter(
+      (r) => node.id !== r.relation.targetId && node.id !== r.relation.sourceId
+    )
+    setNodes(filterNodes)
+    setRelations(filterRelations)
+
+    onChange({
+      nodes: filterNodes.map((n) => n.node),
+      relations: filterRelations.map((r) => r.relation),
+    })
+  }
+
   return (
     <Box id="query-builder" width="100%">
-      <Box mt={3} mb={1}>
-        <Typography variant="h6">Query Builder</Typography>
-      </Box>
-      {(graph?.nodes || []).map(
-        (n): JSX.Element => (
-          <CustomButton
-            title={n.label || ''}
-            key={n.id}
-            onClick={(): void => addNode(n)}
-            customColor={n.color}
-            style={{
-              marginRight: '1rem',
-              marginBottom: '1rem',
-              borderRadius: '5px',
-            }}
-          />
-        )
-      )}
-      <Box mt={2}>
-        <svg
-          onClick={(): void => {
-            cleanNodes()
-            setSelectActive(false)
-          }}
-          width={width}
-          height={height}
-          ref={d3Container}
-          style={{
-            borderRadius: '5px',
-            border: `2px dashed lightGrey`,
-          }}
+      <Box mt={3} mb={2} display="flex" alignItems="center">
+        <Typography variant="button">Query Builder</Typography>
+        <Switch
+          checked={showQuery}
+          onChange={(): void => setShowQuery(!showQuery)}
+          name="showQuery"
+          color="primary"
         />
       </Box>
+      <Collapse in={showQuery}>
+        {(graph?.nodes || []).map(
+          (n): JSX.Element => (
+            <CustomButton
+              title={n.label || ''}
+              key={n.id}
+              onClick={(): void => addNode(n)}
+              customColor={n.color}
+              style={{
+                marginRight: '1rem',
+                marginBottom: '1rem',
+                borderRadius: '5px',
+              }}
+            />
+          )
+        )}
+
+        <Box my={3}>
+          <Typography variant="button">Removable Nodes</Typography>
+          <Box mt={1}>
+            {nodes
+              .filter((n) => n.node.selected)
+              .filter((node) => {
+                const findRelations = relations.filter(
+                  (rel) =>
+                    rel.relation.sourceId === node.node.id ||
+                    rel.relation.targetId === node.node.id
+                )
+                return findRelations.length <= 1
+              })
+              .map((n) => (
+                <Chip
+                  key={n.node.id}
+                  label={n.node.varName}
+                  onDelete={(): void => deleteNode(n.node)}
+                  color="primary"
+                  variant="outlined"
+                  style={{ marginRight: '0.5rem' }}
+                />
+              ))}
+          </Box>
+        </Box>
+        <Box mt={2}>
+          <svg
+            onClick={(): void => {
+              cleanNodes()
+              setSelectActive(false)
+            }}
+            width={width}
+            height={height}
+            ref={d3Container}
+            style={{
+              borderRadius: '5px',
+              border: `2px dashed lightGrey`,
+            }}
+          />
+        </Box>
+      </Collapse>
     </Box>
   )
 }

@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/PRODYNA/capt-mifune-ui/">
-    <img src="./src/assets/Logo-dark.svg?raw=true" alt="Logo" width="150">
+    <img src="../docs/Logo-dark.svg?raw=true" alt="Logo" width="150">
   </a>
   <h3 align="center">Captain Mifune</h3>
   <p align="center">
@@ -32,7 +32,6 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-    <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
       </ul>
@@ -50,14 +49,6 @@
     <li><a href="#available-scripts">Available Scripts</a></li>
   </ol>
 </details>
-
-<!-- ABOUT THE PROJECT -->
-
-##  About The Project
-
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-<p align="right">(<a href="#top">back to top</a>)</p>
 
 ###  Built With
 ![React.js](https://img.shields.io/badge/React.js-v17.0.1-blue)
