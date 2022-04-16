@@ -26,7 +26,6 @@ package com.prodyna.mifune.config;
  * #L%
  */
 
-import io.quarkus.arc.profile.UnlessBuildProfile;
 import io.quarkus.security.spi.runtime.AuthorizationController;
 import javax.annotation.Priority;
 import javax.enterprise.context.ApplicationScoped;
@@ -36,10 +35,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @Alternative
 @Priority(Interceptor.Priority.LIBRARY_AFTER)
-@UnlessBuildProfile("test")
 @ApplicationScoped
 public class DisabledAuthController extends AuthorizationController {
-  @ConfigProperty(name = "disable.authorization", defaultValue = "false")
+  @ConfigProperty(name = "mifune.disable.authorization", defaultValue = "false")
   boolean disableAuthorization;
 
   @Override

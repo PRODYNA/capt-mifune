@@ -14,8 +14,8 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - "../../server/server/src/test/resources/samples/bom/:/upload/:z"
-      - "../../server/server/src/test/resources/samples/bom/:/model/:z"
+      - "../../graph-sample/bom/:/upload/:z"
+      - "../../graph-sample/bom/:/model/:z"
     environment:
       QUARKUS_PROFILE: "local"
       MIFUNE_ROOT_PATH_API: "http://localhost:8080"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Box } from '@material-ui/core'
-import { Switch, Route } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
+import { OidcSecure } from '@axa-fr/react-oidc-context'
 import { Analytics } from '../pages/analytics/Analytics'
 import { Graph } from '../pages/graph/Graph'
 import Sidenavigation from '../components/Navigation/SideNavigation'
@@ -14,8 +15,8 @@ import ErrorBoundary from '../components/Error/ErrorBoundaries'
 const MifuneRouter = (): JSX.Element => {
   const [openSidenav, setOpenSidenav] = useState(false)
 
-  return (
-    <SnackbarProvider>
+  function getContent(): JSX.Element {
+    return (
       <>
         <Sidenavigation
           openSidenav={openSidenav}
@@ -51,8 +52,17 @@ const MifuneRouter = (): JSX.Element => {
           </Switch>
         </Box>
       </>
-    </SnackbarProvider>
-  )
+    )
+  }
+
+  function getOidcSecure(content: JSX.Element = getContent()): JSX.Element {
+    if (window.env.oidc.disabled) {
+      return content
+    }
+    return <OidcSecure>{content}</OidcSecure>
+  }
+
+  return <SnackbarProvider>{getOidcSecure(getContent())}</SnackbarProvider>
 }
 
 export default MifuneRouter
