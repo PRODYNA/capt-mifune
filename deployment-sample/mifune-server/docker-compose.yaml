@@ -35,8 +35,6 @@ services:
       MIFUNE_AUTH_UI_PUBLIC_CLIENT: "mifune-app"
       # need if issuer url not match in .well-known, possible when keycloak run in the same docker-compose
       QUARKUS_OIDC_TOKEN_ISSUER: "http://localhost:8888/auth/realms/mifune"
-
     volumes:
-      - ../../server/server/src/test/resources/samples/bom/:/upload/:z
-      - ../../server/server/src/test/resources/samples/bom/:/model/:z
-
+      - "../../graph-sample/bom/:/upload/:z"
+      - "../../graph-sample/bom/:/model/:z"
