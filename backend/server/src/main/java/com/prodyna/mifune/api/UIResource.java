@@ -38,11 +38,11 @@ import org.jboss.logging.Logger;
 @ApplicationScoped
 public class UIResource {
 
-  @ConfigProperty(name = "mifune.auth.realm")
-  protected String authRealm;
-
   @ConfigProperty(name = "mifune.auth.server.url")
   protected String authServerUrl;
+
+  @ConfigProperty(name = "mifune.auth.realm")
+  protected String authRealm;
 
   @ConfigProperty(name = "mifune.auth.ui.public.client")
   protected String authPublicClient;
@@ -53,8 +53,8 @@ public class UIResource {
   @ConfigProperty(name = "mifune.root.path.ui")
   protected String uiRootPath;
 
-  @ConfigProperty(name = "quarkus.oidc.enabled")
-  protected boolean oidcEnabled;
+  @ConfigProperty(name = "mifune.disable.authorization")
+  protected boolean authDisabled;
 
   @ConfigProperty(name = "vertx.static.content")
   protected Optional<String> vertxStaticContent;
@@ -67,8 +67,7 @@ public class UIResource {
     var requestHandler =
         vertxStaticContent.map(StaticHandler::create).orElseGet(StaticHandler::create);
     router.get("/").handler(rc -> rc.redirect("/ui/"));
-    router.get("/ui/env.json").handler(r -> r.end(env()));
-    router.get("/ui/keycloak.json").handler(r -> r.end(keycloak()));
+    router.get("/ui/env.js").handler(r -> r.end(envJS()));
     router.route("/ui/*").handler(requestHandler);
     router
         .route("/ui/*")
@@ -79,28 +78,33 @@ public class UIResource {
             });
   }
 
-  public String env() {
+  public String envJS() {
     return """
-            {
-              "API_SERVER": "%s",
-              "ROOT_URL": "%s",
-              "LOGIN_REQUIRED": %s
+            window.env = {
+              local: false,
+              api: {
+                basePath: 'UI_ROOT_PATH',
+                apiBasePath: 'API_ROOT_PATH',
+              },
+              oidc: {
+                disabled: OIDC_ENABLED,
+                provider: {
+                  authority: 'AUTH_SERVER_URL/realms/REALM',
+                  clientId: 'UI_CLIENT_ID',
+                  redirectUri: 'UI_ROOT_PATH/ui/auth',
+                  responseType: 'code',
+                  silentRedirectUri: 'UI_ROOT_PATH/ui/auth/silent',
+                  scope:
+                    'openid',
+                },
+              },
             }
             """
-        .formatted(apiRootPath, uiRootPath, oidcEnabled);
-  }
-
-  public String keycloak() {
-    return """
-            {
-            "realm":"%s",
-            "auth-server-url":"%s",
-            "resource":"%s",
-            "public-client":true,
-            "ssl-required":"external",
-            "confidential-port":0
-            }
-            """
-        .formatted(authRealm, authServerUrl, authPublicClient);
+        .replaceAll("REALM", authRealm)
+        .replaceAll("OIDC_ENABLED", Boolean.toString(authDisabled))
+        .replaceAll("AUTH_SERVER_URL", authServerUrl)
+        .replaceAll("API_ROOT_PATH", apiRootPath)
+        .replaceAll("UI_ROOT_PATH", uiRootPath)
+        .replaceAll("UI_CLIENT_ID", authPublicClient);
   }
 }

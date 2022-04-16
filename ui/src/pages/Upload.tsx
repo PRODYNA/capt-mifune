@@ -1,16 +1,12 @@
 import React, { useContext, useState } from 'react'
 import { Box, Container, makeStyles, Typography } from '@material-ui/core'
 import CloudUploadIcon from '@material-ui/icons/CloudUpload'
-import { AxiosRequestConfig } from 'axios'
-import HttpService from '../openapi/HttpService'
 import CustomButton from '../components/Button/CustomButton'
 import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'
 import { CustomTexts } from '../utils/CustomTexts'
 import AXIOS_CONFIG from '../openapi/axios-config'
-import UserService from '../auth/UserService'
-
-const rest = HttpService.getAxiosClient()
+import { SourceResourceApi } from '../services'
 
 const useStyle = makeStyles({
   content: {
@@ -28,6 +24,7 @@ const FileUpload = (): JSX.Element => {
   const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(
     undefined
   )
+  const sourceResourceApi = new SourceResourceApi(AXIOS_CONFIG())
 
   return (
     <Container>
@@ -45,15 +42,8 @@ const FileUpload = (): JSX.Element => {
           if (file) {
             const fileSize = (file.file.size / (1024 * 1024)).toFixed(2)
             if (fileSize < '10') {
-              const data = new FormData()
-              data.append('name', file.file.name)
-              data.append('file', file.file)
-              rest
-                .post('/api/sources', data, {
-                  headers: {
-                    Authorization: `Bearer ${UserService.getToken()}`,
-                  },
-                })
+              sourceResourceApi
+                .apiSourcesPost(file.file, file.file.name)
                 .then((): void =>
                   openSnackbar(Translations.UPLOAD_SUCCESS, 'success')
                 )

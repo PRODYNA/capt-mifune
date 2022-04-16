@@ -1,5 +1,0 @@
-export enum ENV {
-  API_SERVER = 'API_SERVER',
-  ROOT_URL = 'ROOT_URL',
-  LOGIN_REQUIRED = 'LOGIN_REQUIRED',
-}
