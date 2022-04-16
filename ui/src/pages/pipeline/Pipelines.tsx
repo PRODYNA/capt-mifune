@@ -23,17 +23,14 @@ import CustomDialog from '../../components/Dialog/CustomDialog'
 import { Domain, GraphStatistics } from '../../services/models'
 import { DomainApi } from '../../services/api'
 import AXIOS_CONFIG from '../../openapi/axios-config'
-import {
-  cleanDatabase,
-  graphStats,
-  importSource,
-} from '../../helpers/EventSourceHelper'
+import { EventApiImpl } from '../../helpers/event-api'
 
 interface Message {
   [key: string]: number
 }
 
 const Pipelines = (): JSX.Element => {
+  const eventApi = new EventApiImpl(AXIOS_CONFIG())
   const domainApi = new DomainApi(AXIOS_CONFIG())
   const [domains, setDomains] = useState<Domain[]>()
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -70,7 +67,7 @@ const Pipelines = (): JSX.Element => {
   let importStatsClient: EventSourcePolyfill
 
   useEffect(() => {
-    importStatsClient = importSource()
+    importStatsClient = eventApi.importSource()
     importStatsClient.onmessage = (e) => {
       const newStats = JSON.parse(e.data)
       setTmpMessages(newStats)
@@ -89,7 +86,7 @@ const Pipelines = (): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    const sseClient = graphStats()
+    const sseClient = eventApi.graphStats()
     sseClient.onmessage = (e) => {
       setStatistics(JSON.parse(e.data))
     }
@@ -99,7 +96,7 @@ const Pipelines = (): JSX.Element => {
   }, [cleanActive])
 
   const clean = (): void => {
-    const sseClient = cleanDatabase()
+    const sseClient = eventApi.cleanDatabase()
     sseClient.onmessage = () => {
       setCleanActive(true)
     }
@@ -142,9 +139,9 @@ const Pipelines = (): JSX.Element => {
             <TableHead>
               <TableRow key="table-header">
                 {tableHeaders.map(
-                  (header: string): JSX.Element => (
-                    <TableCell key={header}>
-                      <Typography variant="body2">{header}</Typography>
+                  (tableHeader: string): JSX.Element => (
+                    <TableCell key={tableHeader}>
+                      <Typography variant="body2">{tableHeader}</Typography>
                     </TableCell>
                   )
                 )}

@@ -17,7 +17,7 @@ import PieChartIcon from '@material-ui/icons/PieChart'
 import RotateRightIcon from '@material-ui/icons/RotateRight'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import { useHistory, useLocation } from 'react-router-dom'
-import UserService from '../../auth/UserService'
+import { useOidc } from '@axa-fr/react-oidc-context'
 import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
 import Logo from '../../assets/Logo.svg'
@@ -100,6 +100,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
   const { pathname } = useLocation()
   const classes = useStyles()
   const { openSnackbar } = useContext(SnackbarContext)
+  const { logout } = useOidc()
   const navItems: INavItems[] = [
     { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
     { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
@@ -111,15 +112,11 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
     title: 'Logout',
     icon: <ExitToAppIcon />,
     onClick: () => {
-      UserService.doLogout({
-        redirectUri: localStorage.getItem('ROOT_URL'),
-      })
-        .then(() => openSnackbar('logout success', 'success'))
-        .catch(() => openSnackbar('logout error', 'error'))
+      logout()
     },
   }
 
-  if (UserService.loginRequired()) navItems.push(logoutItem)
+  if (!useOidc().isAuthenticated) navItems.push(logoutItem)
 
   return (
     <Drawer
