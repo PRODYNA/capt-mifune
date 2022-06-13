@@ -34,7 +34,7 @@ jobs:
         env:
           CI: false
       - name: run maven
-        run:  mvn -f backend/server/pom.xml clean install
+        run:  mvn -f backend/pom.xml clean install
 
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
