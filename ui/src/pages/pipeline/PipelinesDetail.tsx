@@ -12,7 +12,7 @@ const PipelinesDetail = (): JSX.Element => {
   const domainApi = new DomainApi(AXIOS_CONFIG())
 
   useEffect(() => {
-    domainApi.apiGraphDomainIdGet(id).then((d) => setDomain(d.data))
+    domainApi.apiGraphDomainIdGet(id!).then((d) => setDomain(d.data))
   }, [])
 
   return (

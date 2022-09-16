@@ -16,7 +16,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import PieChartIcon from '@material-ui/icons/PieChart'
 import RotateRightIcon from '@material-ui/icons/RotateRight'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useOidc } from '@axa-fr/react-oidc'
 import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
@@ -99,7 +99,7 @@ interface INavItems {
 
 const Sidenavigation = (props: ISidenav): JSX.Element => {
   const { openSidenav, setOpenSidenav } = props
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
   const classes = useStyles()
   const { openSnackbar } = useContext(SnackbarContext)
@@ -117,7 +117,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
         button
         key={item.title}
         onClick={() => {
-          if (item.path) history.push(item.path)
+          if (item.path) navigate(item.path)
           if (item.onClick) item.onClick()
         }}
         className={classes.listItem}

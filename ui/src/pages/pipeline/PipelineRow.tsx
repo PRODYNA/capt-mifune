@@ -4,7 +4,7 @@ import WarningIcon from '@material-ui/icons/Warning'
 import ClearIcon from '@material-ui/icons/Clear'
 import DoneIcon from '@material-ui/icons/Done'
 import { IconButton, TableCell, TableRow } from '@material-ui/core'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import StopIcon from '@material-ui/icons/Stop'
 import VisibilityIcon from '@material-ui/icons/Visibility'
 import { useTheme } from '@material-ui/core/styles'
@@ -23,7 +23,7 @@ interface IPipelineRow {
 
 const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const { domain, cleanActive, message, setShowProgress } = props
-  const history = useHistory()
+  const navigate = useNavigate()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
   const graphApi = new GraphApi(AXIOS_CONFIG())
@@ -69,7 +69,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
       <TableRow key={domain.id}>
         <TableCell
           align="left"
-          onClick={() => history.push(`/ui/pipeline/${domain.id}`)}
+          onClick={() => navigate(`/ui/pipeline/${domain.id}`)}
         >
           <IconButton size="small">
             <VisibilityIcon htmlColor={theme.palette.grey[700]} />

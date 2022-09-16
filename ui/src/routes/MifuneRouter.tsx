@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Box } from '@material-ui/core'
-import { Route, Switch } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { OidcSecure } from '@axa-fr/react-oidc'
 import { Analytics } from '../pages/analytics/Analytics'
 import { Graph } from '../pages/graph/Graph'
@@ -23,33 +23,49 @@ const MifuneRouter = (): JSX.Element => {
           setOpenSidenav={setOpenSidenav}
         />
         <Box position="relative" height="100vh">
-          <Switch>
-            <Route path={ROOT_PATH} exact>
-              <ErrorBoundary>
-                <Graph openSidenav={openSidenav} />
-              </ErrorBoundary>
-            </Route>
-            <Route path={ANALYTCIS}>
-              <ErrorBoundary>
-                <Analytics />
-              </ErrorBoundary>
-            </Route>
-            <Route path={UPLOAD}>
-              <ErrorBoundary>
-                <Upload />
-              </ErrorBoundary>
-            </Route>
-            <Route path={`${PIPELINE}/:id`}>
-              <ErrorBoundary>
-                <PipelinesDetail />
-              </ErrorBoundary>
-            </Route>
-            <Route path={PIPELINES} exact>
-              <ErrorBoundary>
-                <Pipelines />
-              </ErrorBoundary>
-            </Route>
-          </Switch>
+          <Routes>
+            <Route
+              errorElement={<ErrorBoundary />}
+              path={ROOT_PATH}
+              element={
+                <ErrorBoundary>
+                  <Graph openSidenav={openSidenav} />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path={ANALYTCIS}
+              element={
+                <ErrorBoundary>
+                  <Analytics />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path={UPLOAD}
+              element={
+                <ErrorBoundary>
+                  <Upload />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path={`${PIPELINE}/:id`}
+              element={
+                <ErrorBoundary>
+                  <PipelinesDetail />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path={PIPELINES}
+              element={
+                <ErrorBoundary>
+                  <Pipelines />
+                </ErrorBoundary>
+              }
+            />
+          </Routes>
         </Box>
       </>
     )

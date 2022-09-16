@@ -1,5 +1,5 @@
 import React, { FormEvent, useContext, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Grid } from '@material-ui/core'
 import FormSelect from '../../components/Form/FormSelect'
 import FormActions from '../../components/Form/FormActions'
@@ -23,7 +23,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const graphApi = new GraphApi(AXIOS_CONFIG())
   const sourceApi = new SourceResourceApi(AXIOS_CONFIG())
   const domainApi = new DomainApi(AXIOS_CONFIG())
-  const history = useHistory()
+  const navigate = useNavigate()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [mapping, setMapping] = useState<{ [key: string]: string }>(
     domain.columnMapping ?? {}
@@ -129,7 +129,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
             })
             .then(() => {
               openSnackbar(Translations.SAVE, 'success')
-              history.goBack()
+              navigate(-1)
             })
             .catch((e) => openSnackbarError(e))
         event.preventDefault()
@@ -145,7 +145,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
       <FormActions
         saveText="Save"
         cancelText="Cancel"
-        onCancelEvent={() => history.push('/pipelines')}
+        onCancelEvent={() => navigate(-1)}
       />
     </form>
   )
