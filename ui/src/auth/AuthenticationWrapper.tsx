@@ -1,4 +1,4 @@
-import { OidcProvider } from '@axa-fr/react-oidc-context'
+import { OidcProvider } from '@axa-fr/react-oidc'
 import React, { FC } from 'react'
 import ErrorMessage from '../components/Error/ErrorMessage'
 import LoadingAnimation from '../components/Loading/LoadingAnimation'

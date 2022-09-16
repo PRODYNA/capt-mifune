@@ -50,14 +50,15 @@
   </ol>
 </details>
 
-###  Built With
+### Built With
+
 ![React.js](https://img.shields.io/badge/React.js-v17.0.1-blue)
 ![Typescript](https://img.shields.io/badge/Typscript-v4.3.5-blue)
 
 ![Openapi-generator](https://img.shields.io/badge/Openapi--generator-v2.3.26-yellow)
 ![Axios](https://img.shields.io/badge/Axios-v0.21.1-orange)
 ![Keycloak](https://img.shields.io/badge/Keycloak-v15.0.2-red)
-  
+
 ![D3.js](https://img.shields.io/badge/D3.js-v6.3.1-green)
 ![Material-ui](https://img.shields.io/badge/Material--ui-v4.12.3-green)
 ![Nivo](https://img.shields.io/badge/Nivo-v0.79.0-green)
@@ -66,7 +67,7 @@
 
 <!-- GETTING STARTED -->
 
-##  Getting Started 
+## Getting Started
 
 ### Frontend
 
@@ -74,10 +75,10 @@ This gives you instructions on setting up your project locally.
 
 To get a local copy up and running follow these simple steps.
 
-###  Prerequisites
+### Prerequisites
 
-* node
-* npm 
+- node
+- npm
 
 ```sh
 
@@ -85,11 +86,10 @@ npm install npm@latest -g
 
 ```
 
-
-
-###  Installation
+### Installation
 
 1. Clone the repo
+
 ```sh
 
 git clone https://github.com/your_username_/Project-Name.git
@@ -97,11 +97,13 @@ git clone https://github.com/your_username_/Project-Name.git
 ```
 
 2. Install NPM packages
+
 ```sh
 
 yarn install
 
 ```
+
 3. Generate Backend
 
 ```sh
@@ -142,10 +144,9 @@ You can go to http://localhost:8888/auth/realms/mifune/account/ for user account
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
 <!-- CONTRIBUTING -->
 
-##  Contributing
+## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -167,12 +168,11 @@ Don't forget to give the project a star! Thanks again!
 
 <!-- LICENSE -->
 
-##  License
+## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 ## Project structure
 
@@ -186,15 +186,15 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
       | auth // keycloak setup
 
-      | components // reusable components 
+      | components // reusable components
 
-      | context // react context for sharing state over multiple components 
+      | context // react context for sharing state over multiple components
 
       | helpers // helper functions
 
-      | openapi // configs to generated backend apis and models in typescript 
+      | openapi // configs to generated backend apis and models in typescript
 
-        | axios-config 
+        | axios-config
 
       | pages // application view
 
@@ -209,7 +209,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
       | utils // custom translations and texts
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 ## Available Scripts
 
@@ -228,11 +227,9 @@ You will also see any lint errors in the console.
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-
 ### `yarn generate-backend-api`
 
 Openapi-generator generates all available api endpoints and models for this project in typescript to the `services` folder
-
 
 ### `yarn build`
 
@@ -256,32 +253,20 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
 <!-- MARKDOWN LINKS & IMAGES -->
 
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/PRODYNA/capt-mifune-ui.svg?style=for-the-badge
-
 [contributors-url]: https://github.com/PRODYNA/capt-mifune-ui/graphs/contributors
-
 [forks-shield]: https://img.shields.io/github/forks/PRODYNA/capt-mifune-ui.svg?style=for-the-badge
-
 [forks-url]: https://github.com/PRODYNA/capt-mifune-ui/network/members
-
 [stars-shield]: https://img.shields.io/github/stars/PRODYNA/capt-mifune-ui.svg?style=for-the-badge
-
 [stars-url]: https://github.com/PRODYNA/capt-mifune-ui/stargazers
-
 [issues-shield]: https://img.shields.io/github/issues/PRODYNA/capt-mifune-ui.svg?style=for-the-badge
-
 [issues-url]: https://github.com/PRODYNA/capt-mifune-ui/issues
-
 [license-shield]: https://img.shields.io/github/license/PRODYNA/capt-mifune-ui.svg?style=for-the-badge
-
 [license-url]: ./LICENSE
-
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-
 [linkedin-url]: https://www.linkedin.com/company/prodyna/mycompany/
-
 [product-screenshot]: images/screenshot.png
