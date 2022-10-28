@@ -74,10 +74,11 @@ public class ApocalypseResource {
     Supplier<CompletionStage<Long>> dropIndex =
         () ->
             session
-                .runAsync("""
-				call db.indexes() yield name
-				return name
-				""")
+                .runAsync(
+                    """
+                        show index yield name
+                        return name
+                        """)
                 .thenCompose(
                     cursor ->
                         cursor.forEachAsync(
@@ -90,7 +91,7 @@ public class ApocalypseResource {
         () ->
             session
                 .runAsync("""
-				call db.constraints() yield name
+				show constraints yield name
 				return name
 				""")
                 .thenCompose(

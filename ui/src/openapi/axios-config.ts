@@ -1,4 +1,4 @@
-import { useOidcAccessToken } from '@axa-fr/react-oidc-context'
+import { useOidcAccessToken } from '@axa-fr/react-oidc'
 import { Configuration } from '../services'
 import API_BASE_PATH from './api-base-path'
 

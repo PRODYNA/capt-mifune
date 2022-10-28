@@ -7,5 +7,5 @@ cd .. || exit
 cd ./backend || exit
 ./mvnw -f pom.xml clean install -DskipTests
 cd .. || exit
-docker build -t prodyna/capt-mifune:latest .
+docker build -t ghcr.io/prodyna/capt-mifune:latest .
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { CompactPicker } from 'react-color'
+import { HexColorPicker } from 'react-colorful'
 import { IconButton, makeStyles } from '@material-ui/core'
 
 interface ColorPickerProps {
@@ -53,45 +53,11 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
       {show ? (
         <div className={classes.popover}>
           <div className={classes.cover} onClick={handleClose} />
-          <CompactPicker
+          <HexColorPicker
             color={hex}
             onChange={(e) => {
-              onChange(e.hex)
-              setShow(false)
+              onChange(e)
             }}
-            colors={[
-              '#6d6a6e',
-              '#a7abb5',
-              '#7f5539',
-              '#9c6644',
-              '#bb8588',
-              '#d7c5a9',
-              '#d8a48f',
-              '#0077b6',
-              '#4e8ed8',
-              '#219ebc',
-              '#00b4d8',
-              '#55c7e3',
-              '#8ecae6',
-              '#a2d2ff',
-              '#bde0fe',
-              '#90cb91',
-              '#589480',
-              '#538d22',
-              '#73a942',
-              '#8bc34a',
-              '#aad576',
-              '#cfa2c8',
-              '#d37a98',
-              '#f7bbca',
-              '#f88ba5',
-              '#ee6c4d',
-              '#f38d68',
-              '#f79d65',
-              '#fabc2a',
-              '#ffc455',
-              '#ffd97d',
-            ]}
           />
         </div>
       ) : null}

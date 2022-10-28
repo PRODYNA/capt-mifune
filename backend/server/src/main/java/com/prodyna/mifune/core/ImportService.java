@@ -62,6 +62,7 @@ import javax.ws.rs.BadRequestException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.reactive.RxSession;
 import org.reactivestreams.FlowAdapters;
 import org.reactivestreams.Processor;
 
@@ -85,6 +86,10 @@ public class ImportService {
   @Inject protected GraphService graphService;
 
   @Inject protected SourceService sourceService;
+
+  static Uni<Void> sessionFinalizer(RxSession session) {
+    return Uni.createFrom().publisher(session.close());
+  }
 
   public Uni<String> runImport(UUID domainId) {
 
@@ -155,7 +160,6 @@ public class ImportService {
   private MultiFlatten<JsonNode, Long> createImportTask(
       UUID domainId, Domain domain, String cypher, Processor<List<String>, JsonNode> publisher) {
     var counter = new AtomicLong(1L);
-    var session = driver.asyncSession();
     return Multi.createFrom()
         .publisher(publisher)
         .emitOn(Infrastructure.getDefaultWorkerPool())
@@ -165,19 +169,36 @@ public class ImportService {
               var entry =
                   new ObjectMapper()
                       .convertValue(node, new TypeReference<HashMap<String, Object>>() {});
-              var s = driver.asyncSession();
               return Uni.createFrom()
-                  .completionStage(
-                      s.runAsync(cypher, Map.of("model", entry, "domainId", domainId.toString()))
-                          .exceptionally(
-                              e -> {
-                                log.errorf(
-                                    " Failed item import in file: %s on lines: %s   msg: %s",
-                                    domain.getFile(), node.get("lines"), e.getMessage(), e);
-                                return null;
-                              })
-                          .thenCompose(x1 -> session.closeAsync())
-                          .thenApply(v -> counter.getAndIncrement()));
+                  .emitter(
+                      emitter ->
+                          Multi.createFrom()
+                              .resource(
+                                  driver::rxSession,
+                                  session ->
+                                      session.writeTransaction(
+                                          tx ->
+                                              tx.run(
+                                                      cypher,
+                                                      Map.of(
+                                                          "model",
+                                                          entry,
+                                                          "domainId",
+                                                          domainId.toString()))
+                                                  .records()))
+                              .withFinalizer(ImportService::sessionFinalizer)
+                              .map(v -> counter.getAndIncrement())
+                              .onFailure()
+                              .invoke(
+                                  (throwable) ->
+                                      log.errorf(
+                                          " Failed item import in file: %s on lines: %s   msg: %s",
+                                          domain.getFile(),
+                                          node.get("lines"),
+                                          throwable.getMessage(),
+                                          throwable))
+                              .subscribe()
+                              .with(emitter::complete));
             });
   }
 

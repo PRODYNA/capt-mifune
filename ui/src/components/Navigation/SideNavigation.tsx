@@ -16,12 +16,14 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import PieChartIcon from '@material-ui/icons/PieChart'
 import RotateRightIcon from '@material-ui/icons/RotateRight'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import { useHistory, useLocation } from 'react-router-dom'
-import { useOidc } from '@axa-fr/react-oidc-context'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useOidc } from '@axa-fr/react-oidc'
 import { fontWhite } from '../Theme/CustomColors'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
 import Logo from '../../assets/Logo.svg'
 import { SnackbarContext } from '../../context/Snackbar'
+import LogoutItem from './LogoutItem'
+import oidcConfig from '../../auth/oidcConfig'
 
 export const DRAWER_WIDTH = 60
 export const DRAWER_WIDTH_OPEN = 170
@@ -87,6 +89,7 @@ interface ISidenav {
   openSidenav: boolean
   setOpenSidenav: Dispatch<SetStateAction<boolean>>
 }
+
 interface INavItems {
   title: string
   icon: JSX.Element
@@ -96,11 +99,11 @@ interface INavItems {
 
 const Sidenavigation = (props: ISidenav): JSX.Element => {
   const { openSidenav, setOpenSidenav } = props
-  const history = useHistory()
+  const navigate = useNavigate()
   const { pathname } = useLocation()
   const classes = useStyles()
   const { openSnackbar } = useContext(SnackbarContext)
-  const { logout } = useOidc()
+  // const { logout } = useOidc()
   const navItems: INavItems[] = [
     { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
     { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
@@ -108,15 +111,30 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
     { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
   ]
 
-  const logoutItem = {
-    title: 'Logout',
-    icon: <ExitToAppIcon />,
-    onClick: () => {
-      logout()
-    },
+  function buildNavItem(item: INavItems): JSX.Element {
+    return (
+      <ListItem
+        button
+        key={item.title}
+        onClick={() => {
+          if (item.path) navigate(item.path)
+          if (item.onClick) item.onClick()
+        }}
+        className={classes.listItem}
+        selected={(item.path && pathname === item.path) || false}
+      >
+        <ListItemIcon className={classes.icon}>{item.icon}</ListItemIcon>
+        <ListItemText primary={item.title} />
+      </ListItem>
+    )
   }
 
-  if (!useOidc().isAuthenticated) navItems.push(logoutItem)
+  function buildLogout(): JSX.Element {
+    if (oidcConfig.disabled) {
+      return <></>
+    }
+    return <LogoutItem className={classes.listItem} iconClass={classes.icon} />
+  }
 
   return (
     <Drawer
@@ -132,23 +150,8 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
         <img src={Logo} alt="logo" className={classes.logo} />
       </Typography>
       <List>
-        {navItems.map(
-          (item): JSX.Element => (
-            <ListItem
-              button
-              key={item.title}
-              onClick={() => {
-                if (item.path) history.push(item.path)
-                if (item.onClick) item.onClick()
-              }}
-              className={classes.listItem}
-              selected={(item.path && pathname === item.path) || false}
-            >
-              <ListItemIcon className={classes.icon}>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.title} />
-            </ListItem>
-          )
-        )}
+        {navItems.map((item) => buildNavItem(item))}
+        {buildLogout()}
       </List>
       <ChevronRightIcon
         className={classes.toggleIcon}

@@ -54,7 +54,7 @@ const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
   }
 
   const openSnackbarError = (e: AxiosError): void => {
-    const { response } = e
+    const { response }: any = e
     if (response?.data.message) setText(response?.data.message)
     else setText(Translations.UNKNOWN_ERROR)
     setSeverity('error')
