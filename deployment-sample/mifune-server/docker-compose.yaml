@@ -11,7 +11,7 @@ services:
     volumes:
       - "../keycloak/realm-export.json:/tmp/realm-export.json:z"
   neo4j:
-    image: "neo4j:4.4.5-community"
+    image: "neo4j:5.1.0-community"
     environment:
       NEO4J_AUTH: "neo4j/password"
     ports:
