@@ -82,7 +82,7 @@ public record CypherUpdateContext(
           if (!c.existChecks.isEmpty()) {
             checks =
                 c.existChecks.stream()
-                    .map("exists(%s)"::formatted)
+                    .map("%s is not null"::formatted)
                     .collect(Collectors.joining(" and ", "where 1=1 and ", ""));
           }
 
@@ -90,10 +90,10 @@ public record CypherUpdateContext(
           var subContext =
               """
                                     call {
-                                    return %s union
+                                    return 1 as result_%s union
                                     with %s
                                     %s
-                                    return %s
+                                    return 1 as result_%s
                                     }
                                     """
                   .formatted(

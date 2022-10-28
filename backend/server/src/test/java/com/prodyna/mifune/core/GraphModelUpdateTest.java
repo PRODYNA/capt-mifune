@@ -151,7 +151,7 @@ class GraphModelUpdateTest {
 				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
-					return 1 union
+					return 1 as result_1 union
 					with var_1
 					unwind $model.user.friend as var_2
 					merge(var_3:User {id:var_2.user.id})
@@ -159,7 +159,7 @@ class GraphModelUpdateTest {
 					merge(var_1)-[friend:FRIEND]->(var_3)
 					set friend.since = coalesce(var_2.since, friend.since)
 					with *
-					return 1
+					return 1 as result_1
 					}
 				return 'done'
 				 """;
@@ -247,13 +247,13 @@ class GraphModelUpdateTest {
 				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
-					return 1 union
+					return 1 as result_1 union
 					with var_1
-					with * where 1=1 and exists($model.user.hasCar.car.id)
+					with * where 1=1 and $model.user.hasCar.car.id is not null
 					merge(var_2:Car {id:$model.user.hasCar.car.id})
 					merge(var_1)-[hasCar:HAS_CAR]->(var_2)
 					with *
-					return 1
+					return 1 as result_1
 					}
 				return 'done'
 				""";
@@ -350,14 +350,14 @@ class GraphModelUpdateTest {
 				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
-					return 1 union
+					return 1 as result_1 union
 					with var_1
-					with * where 1=1 and exists($model.user.hasCar.car.id)
+					with * where 1=1 and $model.user.hasCar.car.id is not null
 					merge(var_2:Car {id:$model.user.hasCar.car.id})
 					merge(var_1)-[hasCar:HAS_CAR]->(var_2)
 					set hasCar.since = coalesce($model.user.hasCar.since, hasCar.since)
 					with *
-					return 1
+					return 1 as result_1
 					}
 				return 'done'
 				""";
@@ -457,14 +457,14 @@ class GraphModelUpdateTest {
 				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
-					return 1 union
+					return 1 as result_1 union
 					with var_1
 					unwind $model.user.hasCar as var_2
 					merge(var_3:Car {id:var_2.car.id})
 					merge(var_1)-[hasCar:HAS_CAR]->(var_3)
 					set hasCar.since = coalesce(var_2.since, hasCar.since)
 					with *
-					return 1
+					return 1 as result_1
 					}
 				return 'done'
 				""";
@@ -565,13 +565,13 @@ class GraphModelUpdateTest {
 				on match set domain.lines = domain.lines + [x in $model.lines where not x in domain.lines | x]
 				with *
 					call {
-					return 1 union
+					return 1 as result_1 union
 					with var_1
 					unwind $model.user.hasCar as var_2
 					merge(var_3:Car {id:var_2.car.id})
 					merge(var_1)-[hasCar:HAS_CAR {since:var_2.since}]->(var_3)
 					with *
-					return 1
+					return 1 as result_1
 					}
 				return 'done'
 				  """;
