@@ -4,7 +4,7 @@ package com.prodyna.mifune.domain;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@ package com.prodyna.mifune.domain;
  */
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record NodeUpdate(

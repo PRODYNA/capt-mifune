@@ -4,7 +4,7 @@ package com.prodyna.mifune.api;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,8 @@ import com.prodyna.mifune.domain.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.vertx.core.json.JsonObject;
+import jakarta.inject.Inject;
 import java.util.List;
-import javax.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

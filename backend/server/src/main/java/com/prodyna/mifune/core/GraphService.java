@@ -4,7 +4,7 @@ package com.prodyna.mifune.core;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,12 @@ import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.*;
 import io.quarkus.runtime.StartupEvent;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -44,12 +50,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response.Status;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -458,10 +458,7 @@ public class GraphService {
         graph.getRelations().stream()
             .filter(r -> r.getId().equals(id))
             .findFirst()
-            .orElseThrow(
-                () -> {
-                  throw new ClientErrorException(Status.NOT_FOUND);
-                });
+            .orElseThrow(NotFoundException::new);
     graph.getRelations().remove(removed);
 
     return new GraphDelta(
@@ -526,10 +523,7 @@ public class GraphService {
     return graph.getNodes().stream()
         .filter(n -> n.getId().equals(id))
         .findFirst()
-        .orElseThrow(
-            () -> {
-              throw new ClientErrorException(Status.NOT_FOUND);
-            });
+        .orElseThrow(NotFoundException::new);
   }
 
   private void checkNodeIds(UUID... nodeIds) {

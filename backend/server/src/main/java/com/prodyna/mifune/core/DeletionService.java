@@ -4,7 +4,7 @@ package com.prodyna.mifune.core;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,13 +30,13 @@ import com.prodyna.mifune.domain.Domain;
 import com.prodyna.mifune.domain.Graph;
 import com.prodyna.mifune.domain.Node;
 import com.prodyna.mifune.domain.Relation;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.async.ResultCursor;
 

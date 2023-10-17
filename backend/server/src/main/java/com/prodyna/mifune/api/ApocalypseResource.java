@@ -4,7 +4,7 @@ package com.prodyna.mifune.api;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@ package com.prodyna.mifune.api;
  */
 
 import io.smallrye.mutiny.Multi;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;

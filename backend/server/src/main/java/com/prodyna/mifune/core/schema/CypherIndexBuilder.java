@@ -4,7 +4,7 @@ package com.prodyna.mifune.core.schema;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ public class CypherIndexBuilder {
     for (Property prop : props) {
       propStrings.add("n.%s".formatted(prop.name()));
     }
-    if (propStrings.size() < 1) {
+    if (propStrings.isEmpty()) {
       return null;
     }
     result = String.join(",", propStrings);

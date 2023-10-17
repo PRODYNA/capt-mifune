@@ -4,7 +4,7 @@ package com.prodyna.mifune.api;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,16 +34,18 @@ import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.domain.Query;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.reactive.ReactiveResult;
+import org.neo4j.driver.reactive.ReactiveSession;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -63,9 +65,10 @@ public class DataResource {
     var cypher = cypherQueryBuilder.cypher();
     log.info("run cypher");
     log.info(cypher);
-    var session = driver.rxSession();
+    var session = driver.session(ReactiveSession.class);
     return Multi.createFrom()
-        .publisher(session.run(cypher, cypherQueryBuilder.getParameter()).records())
+        .publisher(session.run(cypher, cypherQueryBuilder.getParameter()))
+        .flatMap(ReactiveResult::records)
         .map(cypherQueryBuilder::buildResult)
         .onCompletion()
         .invoke(session::close);

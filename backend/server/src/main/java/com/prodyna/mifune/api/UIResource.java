@@ -4,7 +4,7 @@ package com.prodyna.mifune.api;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,10 @@ package com.prodyna.mifune.api;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import java.util.Optional;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -68,14 +68,15 @@ public class UIResource {
         vertxStaticContent.map(StaticHandler::create).orElseGet(StaticHandler::create);
     router.get("/").handler(rc -> rc.redirect("/ui/"));
     router.get("/ui/env.js").handler(r -> r.end(envJS()));
-    router.route("/ui/*").handler(requestHandler);
-    router
-        .route("/ui/*")
-        .handler(
-            rc -> {
-              logger.info("reroute to index %s".formatted(rc.normalizedPath()));
-              rc.reroute("/ui/index.html");
-            });
+    //    router.route("/ui/*").handler(requestHandler);
+    //    router
+    //        .route("/ui/*")
+    //        .handler(
+    //            rc -> {
+    //              logger.info("reroute to index %s".formatted(rc.normalizedPath()));
+    //              rc.reroute("/ui/index.html");
+    //            })
+    ;
   }
 
   public String envJS() {

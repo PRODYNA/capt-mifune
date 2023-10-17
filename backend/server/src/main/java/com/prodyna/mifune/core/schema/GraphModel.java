@@ -4,7 +4,7 @@ package com.prodyna.mifune.core.schema;
  * #%L
  * prodyna-mifune-parent
  * %%
- * Copyright (C) 2021 - 2022 PRODYNA SE
+ * Copyright (C) 2021 - 2023 PRODYNA SE
  * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,9 +28,9 @@ package com.prodyna.mifune.core.schema;
 
 import com.prodyna.mifune.domain.Domain;
 import com.prodyna.mifune.domain.Graph;
+import jakarta.ws.rs.NotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.ws.rs.NotFoundException;
 
 public class GraphModel {
 
