@@ -1,23 +1,21 @@
-import { Dispatch, SetStateAction, useContext } from 'react'
+import { useContext } from 'react'
 import { Tooltip, Fab, Box } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SaveIcon from '@mui/icons-material/Save'
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import { Domain } from '../../services/models/domain'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { GraphApi, DomainApi } from '../../services'
+import { GraphContext } from '../../context/GraphContext'
 
 interface IDomainActions {
-  domains: Domain[]
-  setDomains: Dispatch<SetStateAction<Domain[]>>
-  setSelectedDomain: Dispatch<SetStateAction<Domain | undefined>>
   downloadSVG: () => void
 }
 
 const DomainActions = (props: IDomainActions): JSX.Element => {
-  const { domains, setDomains, setSelectedDomain, downloadSVG } = props
+  const { downloadSVG } = props
+  const { domains, setDomains, setSelectedDomain } = useContext(GraphContext)
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const domainApi = new DomainApi(AXIOS_CONFIG())
   const graphApi = new GraphApi(AXIOS_CONFIG())

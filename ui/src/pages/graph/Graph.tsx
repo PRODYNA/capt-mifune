@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
@@ -17,7 +17,6 @@ import {
   DRAWER_WIDTH_OPEN,
 } from '../../components/Navigation/SideNavigation'
 import DomainActions from '../domain/DomainActions'
-import GraphContext from '../../context/GraphContext'
 import {
   addSvgStyles,
   buildSimulation,
@@ -31,6 +30,7 @@ import {
 } from '../../helpers/GraphHelper'
 import { GraphApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
+import { GraphContext } from '../../context/GraphContext'
 
 interface IGraph {
   openSidenav: boolean
@@ -46,16 +46,20 @@ interface Path {
 
 export const Graph = (props: IGraph): JSX.Element => {
   const { openSidenav } = props
+  const {
+    selectedDomain,
+    domains,
+    setDomains,
+    hideDomains,
+    nodes,
+    setNodes,
+    relations,
+    setRelations,
+    selected,
+    setSelected,
+  } = useContext(GraphContext)
   const [width, setWidth] = useState<number>(800)
   const [height, setHeight] = useState<number>(600)
-  const [selectedDomain, setSelectedDomain] = useState<Domain>()
-  const [domains, setDomains] = useState<Domain[]>([])
-  const [hideDomains, setHideDomains] = useState<string[]>([])
-  const [nodes, setNodes] = useState<D3Node<Node>[]>([])
-  const [relations, setRelations] = useState<D3Relation<Relation>[]>([])
-  const [selected, setSelected] = useState<
-    D3Node<Node> | D3Relation<Relation>
-  >()
   const d3Container = useRef(null)
   const graphApi = new GraphApi(AXIOS_CONFIG())
 
@@ -488,22 +492,7 @@ export const Graph = (props: IGraph): JSX.Element => {
   }
 
   return (
-    <GraphContext.Provider
-      value={{
-        selectedDomain,
-        setSelectedDomain,
-        hideDomains,
-        domains,
-        setDomains,
-        setHideDomains,
-        selected,
-        setSelected: (v): void => setSelected(v),
-        nodes,
-        setNodes: (v): void => setNodes(v),
-        relations,
-        setRelations,
-      }}
-    >
+    <>
       <DomainList domains={domains} updateState={updateState} />
       {selected?.kind === 'node' && (
         <NodeEdit
@@ -530,12 +519,7 @@ export const Graph = (props: IGraph): JSX.Element => {
         height={window.innerHeight}
         ref={d3Container}
       />
-      <DomainActions
-        domains={domains}
-        setSelectedDomain={setSelectedDomain}
-        setDomains={setDomains}
-        downloadSVG={() => downloadSVG()}
-      />
-    </GraphContext.Provider>
+      <DomainActions downloadSVG={() => downloadSVG()} />
+    </>
   )
 }

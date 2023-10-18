@@ -73,6 +73,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@openapitools/openapi-generator-cli": "^2.5.2",
     "@types/d3": "^7.4.0",
     "@types/react-router-dom": "^5.1.7",

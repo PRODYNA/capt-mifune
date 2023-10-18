@@ -5,7 +5,7 @@ import { DomainSelect } from './DomainSelect'
 import Edit from './Edit'
 import CustomTable from '../../components/Table/CustomTable'
 import { tableStyles } from './NodeEdit'
-import GraphContext from '../../context/GraphContext'
+import { GraphContext } from '../../context/GraphContext'
 import { RelationApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
