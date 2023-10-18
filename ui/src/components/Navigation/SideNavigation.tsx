@@ -97,9 +97,13 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
         '&.closed': {
           width: DRAWER_WIDTH,
           transition: 'all ease-in-out 0.4s',
+
           '& .MuiPaper-root': {
             width: DRAWER_WIDTH,
             transition: 'all ease-in-out 0.4s',
+          },
+          '& + .MuiBox-root': {
+            width: `calc(100% - ${DRAWER_WIDTH}px)`,
           },
         },
         '&.open': {
@@ -109,6 +113,9 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
           '& .MuiPaper-root': {
             transition: 'all ease-in-out 0.4s',
             width: DRAWER_WIDTH_OPEN,
+          },
+          '& + .MuiBox-root': {
+            width: `calc(100% - ${DRAWER_WIDTH_OPEN}px)`,
           },
         },
       }}
