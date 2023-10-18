@@ -26,7 +26,7 @@ package com.prodyna.mifune.api;
  * #L%
  */
 
-import com.prodyna.mifune.core.SourceService;
+import com.prodyna.mifune.core.source.SourceService;
 import com.prodyna.mifune.domain.Source;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;

@@ -27,10 +27,11 @@ package com.prodyna.mifune.api;
  */
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.prodyna.mifune.core.GraphService;
-import com.prodyna.mifune.core.json.JsonPathEditor;
+import com.prodyna.mifune.core.data.StatisticService;
+import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.core.schema.CypherQueryBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
+import com.prodyna.mifune.csv2json.JsonPathEditor;
 import com.prodyna.mifune.domain.Query;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -52,39 +53,19 @@ import org.neo4j.driver.reactive.ReactiveSession;
 @Path("/api/data")
 public class DataResource {
 
-  @Inject protected Logger log;
-
   @Inject protected GraphService graphService;
 
-  @Inject protected Driver driver;
+  @Inject
+  protected StatisticService statisticService;
 
   @POST
   public Multi<Map<String, Object>> query(Query query) {
-    var graphModel = new GraphModel(graphService.graph());
-    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
-    var cypher = cypherQueryBuilder.cypher();
-    log.info("run cypher");
-    log.info(cypher);
-    var session = driver.session(ReactiveSession.class);
-    return Multi.createFrom()
-        .publisher(session.run(cypher, cypherQueryBuilder.getParameter()))
-        .flatMap(ReactiveResult::records)
-        .map(cypherQueryBuilder::buildResult)
-        .onCompletion()
-        .invoke(session::close);
+    return statisticService.query(query);
   }
 
   @GET
   @Path("/domain/{domainId}/keys")
   public Uni<List<String>> createJsonModel(@PathParam("domainId") UUID id) {
-    ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-    var result =
-        paths.stream()
-            .map(s -> s.replaceAll("\\[", ""))
-            .map(s -> s.replaceAll("]", ""))
-            .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
-            .collect(Collectors.toList());
-    return Uni.createFrom().item(result);
+    return Uni.createFrom().item(graphService.createJsonModelKeys(id));
   }
 }

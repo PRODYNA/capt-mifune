@@ -1,4 +1,4 @@
-package com.prodyna.mifune.core;
+package com.prodyna.mifune.core.source;
 
 /*-
  * #%L

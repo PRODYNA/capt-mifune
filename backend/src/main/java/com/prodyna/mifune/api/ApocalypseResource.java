@@ -36,6 +36,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.async.AsyncSession;
 
 @Path("/api/apocalypse")
 @Tag(name = "admin")
@@ -57,7 +58,7 @@ public class ApocalypseResource {
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Multi<String> apocalypseNow() {
     log.info("apocalypse starts now");
-    var session = driver.asyncSession();
+    var session = driver.session(AsyncSession.class);
 
     Supplier<CompletionStage<Long>> deleteAndCountRel =
         () ->

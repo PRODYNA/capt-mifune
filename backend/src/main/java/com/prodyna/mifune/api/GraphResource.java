@@ -27,11 +27,10 @@ package com.prodyna.mifune.api;
  */
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prodyna.mifune.core.DeletionService;
-import com.prodyna.mifune.core.GraphService;
 import com.prodyna.mifune.core.ImportService;
-import com.prodyna.mifune.core.json.JsonPathEditor;
+import com.prodyna.mifune.core.data.StatisticService;
+import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.domain.*;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -46,8 +45,6 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.logging.Logger;
-import org.neo4j.driver.Driver;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,16 +52,12 @@ import org.neo4j.driver.Driver;
 @Tag(name = "graph")
 public class GraphResource {
 
-  @Inject protected Logger log;
-
   @Inject protected GraphService graphService;
   @Inject protected ImportService importService;
-
   @Inject protected DeletionService deletionService;
-
   @Inject protected EventBus eventBus;
 
-  @Inject Driver driver;
+  @Inject protected StatisticService statisticService;
 
   @GET
   public Uni<Graph> loadGraph() {
@@ -75,34 +68,7 @@ public class GraphResource {
   @Path("/stats")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Multi<GraphStatistics> graphStats() {
-    return Multi.createFrom()
-        .ticks()
-        .every(Duration.ofSeconds(15))
-        .onItem()
-        .transformToUniAndConcatenate(
-            t -> {
-              var session = driver.asyncSession();
-              var stats =
-                  session
-                      .readTransactionAsync(
-                          tx ->
-                              tx.runAsync(
-                                      """
-                             call {match (a) return count(a) as nodes}
-                             call {match ()-[r]->() return count(r) as relations}
-                             return nodes, relations
-                             """)
-                                  .thenCompose(
-                                      fn ->
-                                          fn.singleAsync()
-                                              .thenApply(
-                                                  r ->
-                                                      new GraphStatistics(
-                                                          r.get("nodes").asLong(),
-                                                          r.get("relations").asLong()))))
-                      .thenCompose(c -> session.closeAsync().thenApply(v -> c));
-              return Uni.createFrom().completionStage(stats);
-            });
+    return statisticService.graphStats();
   }
 
   @POST
@@ -142,33 +108,7 @@ public class GraphResource {
   @GET
   @Path("/domain/fn/count")
   public Uni<Map<UUID, Long>> countDomainRootNodes() {
-    var session = driver.asyncSession();
-    var count =
-        session
-            .runAsync(
-                "match(x)-[domain:DOMAIN]->(x) return distinct domain.id as id, count(distinct x) as count")
-            .thenCompose(
-                r ->
-                    r.listAsync(
-                            x ->
-                                new Object() {
-                                  UUID id = UUID.fromString(x.get("id").asString());
-                                  Long count = x.get("count").asLong();
-                                })
-                        .thenCompose(
-                            l ->
-                                session
-                                    .closeAsync()
-                                    .thenApply(
-                                        x -> {
-                                          var map =
-                                              l.stream()
-                                                  .collect(
-                                                      Collectors.toMap(o -> o.id, o -> o.count));
-                                          return map;
-                                        })));
-
-    return Uni.createFrom().completionStage(count);
+    return statisticService.countDomainRootNodes();
   }
 
   @Tag(name = "domain")
@@ -230,15 +170,7 @@ public class GraphResource {
   @GET
   @Path("/domain/{domainId}/mapping")
   public Uni<Map<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
-    ObjectNode jsonModel = graphService.buildDomainJsonModel(id);
-    var mapping =
-        Optional.ofNullable(graphService.fetchDomain(id).getColumnMapping()).orElse(Map.of());
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
-    var hashmap =
-        new TreeMap<String, String>(
-            Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s));
-    paths.forEach(path -> hashmap.put(path, mapping.getOrDefault(path, null)));
-    return Uni.createFrom().item(hashmap);
+    return graphService.createJsonModel(id);
   }
 
   @GET
@@ -288,7 +220,7 @@ public class GraphResource {
                 })
             .group()
             .intoLists()
-            .of(3000, Duration.ofMillis(300))
+            .of(3000, Duration.ofMillis(500))
             .map(
                 l ->
                     l.stream()

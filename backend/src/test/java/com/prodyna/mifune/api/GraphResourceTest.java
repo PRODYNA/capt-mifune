@@ -31,7 +31,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 
-import com.prodyna.mifune.core.GraphService;
+import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.domain.*;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;

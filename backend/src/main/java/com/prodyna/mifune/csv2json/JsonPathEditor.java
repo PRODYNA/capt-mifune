@@ -1,4 +1,4 @@
-package com.prodyna.mifune.core.json;
+package com.prodyna.mifune.csv2json;
 
 /*-
  * #%L
@@ -57,16 +57,19 @@ public class JsonPathEditor {
         }
       }
     }
-    if (node.isArray()) {
-      ((ArrayNode) node).removeAll();
-      ((ArrayNode) node).add(value);
+    Result result = new Result(node, part);
+    if (result.node().isArray()) {
+      ((ArrayNode) result.node()).removeAll();
+      ((ArrayNode) result.node()).add(value);
 
-    } else if (node.isObject()) {
-      ((ObjectNode) node).put(part, value);
+    } else if (result.node().isObject()) {
+      ((ObjectNode) result.node()).put(result.part(), value);
     } else {
       throw new IllegalArgumentException("Path not valid");
     }
   }
+
+  private record Result(JsonNode node, String part) {}
 
   public JsonNode value(JsonNode node, String jsonPath) {
     String[] parts = jsonPath.split("\\.");

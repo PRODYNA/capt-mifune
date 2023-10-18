@@ -1,4 +1,4 @@
-package com.prodyna.mifune.core;
+package com.prodyna.mifune.core.graph;
 
 /*-
  * #%L
@@ -31,16 +31,20 @@ import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.prodyna.mifune.core.json.JsonPathEditor;
+import com.prodyna.mifune.core.DeletionService;
 import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
+import com.prodyna.mifune.core.source.SourceService;
+import com.prodyna.mifune.csv2json.JsonPathEditor;
 import com.prodyna.mifune.domain.*;
 import io.quarkus.runtime.StartupEvent;
+import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -515,6 +519,18 @@ public class GraphService {
     return new GraphJsonBuilder(graphModel, id, false).getJson();
   }
 
+  public List<String> createJsonModelKeys(UUID id) {
+    ObjectNode jsonModel = buildDomainJsonModel(id);
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    var result =
+            paths.stream()
+                    .map(s -> s.replaceAll("\\[", ""))
+                    .map(s -> s.replaceAll("]", ""))
+                    .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
+                    .collect(Collectors.toList());
+    return result;
+  }
+
   public void reset() {
     this.graph = new Graph();
   }
@@ -531,5 +547,16 @@ public class GraphService {
     if (!existingNodeIds.containsAll(Arrays.asList(nodeIds))) {
       throw new ClientErrorException(Status.NOT_FOUND);
     }
+  }
+
+  public Uni<Map<String, String>> createJsonModel(UUID id) {
+    ObjectNode jsonModel = buildDomainJsonModel(id);
+    var mapping = Optional.ofNullable(fetchDomain(id).getColumnMapping()).orElse(Map.of());
+    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    var hashmap =
+        new TreeMap<String, String>(
+            Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s));
+    paths.forEach(path -> hashmap.put(path, mapping.getOrDefault(path, null)));
+    return Uni.createFrom().item(hashmap);
   }
 }

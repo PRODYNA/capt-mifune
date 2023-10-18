@@ -37,7 +37,7 @@ public abstract class DataBaseService {
     //        .failWith(NotFoundException::new);
   }
 
-  <T> Multi<T> multiRead(
+  public <T> Multi<T> multiRead(
       String cypher, Map<String, Object> parameter, Function<Record, T> buildModel) {
 
     // Create a stream from a resource we can close in a finalizer...
@@ -58,7 +58,7 @@ public abstract class DataBaseService {
     return Multi.createFrom().publisher(session.close()).collect().first().replaceWithVoid();
   }
 
-  <T> Multi<T> multiWrite(
+  public <T> Multi<T> multiWrite(
       String cypher, Multi<Map<String, Object>> parameters, Function<Record, T> buildModel) {
     return parameters.flatMap(
         p ->
@@ -67,6 +67,25 @@ public abstract class DataBaseService {
                     () -> driver.session(ReactiveSession.class),
                     session ->
                         session.executeWrite(
+                            tx -> {
+                              var result = tx.run(new Query(cypher, p));
+                              return Multi.createFrom()
+                                  .publisher(result)
+                                  .flatMap(ReactiveResult::records);
+                            }))
+                .withFinalizer(DataBaseService::sessionFinalizer)
+                .map(buildModel));
+  }
+
+  public <T> Multi<T> multiRead(
+      String cypher, Multi<Map<String, Object>> parameters, Function<Record, T> buildModel) {
+    return parameters.flatMap(
+        p ->
+            Multi.createFrom()
+                .resource(
+                    () -> driver.session(ReactiveSession.class),
+                    session ->
+                        session.executeRead(
                             tx -> {
                               var result = tx.run(new Query(cypher, p));
                               return Multi.createFrom()
