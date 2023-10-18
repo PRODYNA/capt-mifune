@@ -19,7 +19,7 @@ export class EventApiImpl implements EventApi {
       `${window.env.api.apiBasePath}/api/apocalypse`,
       {
         headers: this.configuration?.baseOptions.headers,
-        heartbeatTimeout: 2000,
+        heartbeatTimeout: 5000,
       }
     )
   }
@@ -29,7 +29,7 @@ export class EventApiImpl implements EventApi {
       `${window.env.api.apiBasePath}/api/graph/stats`,
       {
         headers: this.configuration?.baseOptions.headers,
-        heartbeatTimeout: 2000,
+        heartbeatTimeout: 10000,
       }
     )
   }

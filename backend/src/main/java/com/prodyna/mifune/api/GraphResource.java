@@ -45,12 +45,16 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/api/graph")
 @Tag(name = "graph")
 public class GraphResource {
+
+  private static final Logger LOG = LoggerFactory.getLogger(GraphResource.class.getName());
 
   @Inject protected GraphService graphService;
   @Inject protected ImportService importService;
@@ -226,12 +230,18 @@ public class GraphResource {
                     l.stream()
                         .collect(
                             Collectors.toMap(
-                                ImportStatistic::domainId, ImportStatistic::count, Long::max)));
+                                ImportStatistic::domainId, ImportStatistic::count, Long::max)))
+                .filter(m -> !m.isEmpty());
+
+    var fallback = countDomainRootNodes().memoize().atLeast(Duration.ofSeconds(10)).toMulti();
 
     return events
         .ifNoItem()
         .after(Duration.ofSeconds(1))
-        .recoverWithMulti(
-            () -> countDomainRootNodes().memoize().atLeast(Duration.ofSeconds(15)).toMulti());
+        .recoverWithMulti(fallback)
+            .map(m -> {
+              LOG.info("stats {}", m);
+              return m;
+            });
   }
 }
