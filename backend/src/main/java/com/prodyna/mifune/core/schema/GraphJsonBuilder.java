@@ -60,7 +60,6 @@ public class GraphJsonBuilder {
       node.getRelations().stream()
           .filter(r -> r.getDomainIds().contains(domainId))
           .filter(r -> r.getTo().getDomainIds().contains(domainId))
-          //              .filter(r -> !varPath.contains(r.getTo().varName()))
           .forEach(r -> buildRelation(contextVarPath, currentNode, r));
     }
   }

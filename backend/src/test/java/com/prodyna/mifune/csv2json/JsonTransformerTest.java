@@ -34,14 +34,14 @@ import org.junit.jupiter.api.Test;
 
 class JsonTransformerTest {
 
-  private static final ObjectMapper objMapper = new ObjectMapper();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Test
   public void test() throws InterruptedException {
     var publisher = new SubmissionPublisher<List<String>>();
-    var model = objMapper.createObjectNode();
+    var model = objectMapper.createObjectNode();
     model.put("name", 0).putArray("number").addObject().put("number", 1);
-    var transformer = new JsonTransformer(model, 5);
+    var transformer = new JsonTransformer(objectMapper, model, 5);
     publisher.subscribe(transformer);
     var subscriber = new PrintSubscriber<>();
     transformer.subscribe(subscriber);

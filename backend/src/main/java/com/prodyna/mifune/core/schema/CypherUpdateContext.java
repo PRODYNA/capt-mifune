@@ -75,9 +75,6 @@ public record CypherUpdateContext(
     vars.add(this.rootVar);
     vars.addAll(this.variables);
     var statements = new ArrayList<>(this.statements);
-    if (!subContexts.isEmpty()) {
-      statements.add("with *");
-    }
 
     subContexts.forEach(
         c -> {

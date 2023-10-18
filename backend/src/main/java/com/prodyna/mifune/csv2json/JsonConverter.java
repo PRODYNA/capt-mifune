@@ -39,6 +39,12 @@ import java.util.stream.Stream;
 
 public class JsonConverter {
 
+  private final ObjectMapper objectMapper;
+
+  public JsonConverter(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
+
   public ArrayNode toJson(JsonNode model, Collection<List<String>> lines) {
     return toJson(model, lines.stream());
   }
@@ -46,8 +52,8 @@ public class JsonConverter {
   public ArrayNode toJson(JsonNode model, Stream<List<String>> lines) {
     Map<Integer, MappingObject> objectMap = new HashMap<>();
     lines.forEach(line -> mergeModel(model, objectMap, line));
-    var arrayNode = new ObjectMapper().createArrayNode();
-    objectMap.values().stream().map(mo -> mo.toJson(true)).forEach(arrayNode::add);
+    var arrayNode = objectMapper.createArrayNode();
+    objectMap.values().stream().map(mo -> mo.toJson(objectMapper, true)).forEach(arrayNode::add);
     return arrayNode;
   }
 }

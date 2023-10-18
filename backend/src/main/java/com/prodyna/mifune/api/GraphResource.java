@@ -26,7 +26,7 @@ package com.prodyna.mifune.api;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prodyna.mifune.core.DeletionService;
 import com.prodyna.mifune.core.ImportService;
 import com.prodyna.mifune.core.data.StatisticService;
@@ -62,6 +62,8 @@ public class GraphResource {
   @Inject protected EventBus eventBus;
 
   @Inject protected StatisticService statisticService;
+
+  @Inject ObjectMapper objectMapper;
 
   @GET
   public Uni<Graph> loadGraph() {
@@ -213,18 +215,18 @@ public class GraphResource {
             .toMulti()
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .onOverflow()
-            .buffer(20)
+            .buffer(1000)
             .map(
                 s -> {
-                  try (var parser = new JsonMapper().createParser(s.toString())) {
-                    return parser.readValueAs(ImportStatistic.class);
+                  try {
+                    return objectMapper.reader().readValue(s.toString(), ImportStatistic.class);
                   } catch (IOException e) {
                     throw new RuntimeException(e);
                   }
                 })
             .group()
             .intoLists()
-            .of(3000, Duration.ofMillis(500))
+            .of(1000, Duration.ofMillis(500))
             .map(
                 l ->
                     l.stream()

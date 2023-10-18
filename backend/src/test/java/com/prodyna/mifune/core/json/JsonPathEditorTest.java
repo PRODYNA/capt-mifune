@@ -35,9 +35,11 @@ import org.junit.jupiter.api.Test;
 
 class JsonPathEditorTest {
 
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
   @Test
   public void test() throws JsonProcessingException {
-    JsonPathEditor editor = new JsonPathEditor();
+    JsonPathEditor editor = new JsonPathEditor(objectMapper);
     String json =
         """
 				{
@@ -62,7 +64,7 @@ class JsonPathEditorTest {
 
   @Test
   public void extractKeys() throws IOException {
-    JsonPathEditor editor = new JsonPathEditor();
+    JsonPathEditor editor = new JsonPathEditor(objectMapper);
     String json =
         """
 				{
@@ -82,7 +84,7 @@ class JsonPathEditorTest {
 
   @Test
   public void remove() throws IOException {
-    JsonPathEditor editor = new JsonPathEditor();
+    JsonPathEditor editor = new JsonPathEditor(objectMapper);
     String json =
         """
 				{

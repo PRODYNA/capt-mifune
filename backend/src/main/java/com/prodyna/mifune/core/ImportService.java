@@ -82,6 +82,8 @@ public class ImportService extends DataBaseService {
 
   @Inject protected SourceService sourceService;
 
+  @Inject ObjectMapper objectMapper;
+
   public ImportService() {
     super(null);
   }
@@ -131,7 +133,7 @@ public class ImportService extends DataBaseService {
             .items(fileContentStream(importFile))
             .emitOn(Infrastructure.getDefaultWorkerPool())
             .subscribe()
-            .withSubscriber(new JsonTransformer(jsonModel, 500));
+            .withSubscriber(new JsonTransformer(objectMapper, jsonModel, 500));
 
     return createImportTask(domainId, cypher, jsonTransformer)
         .subscribe()
@@ -140,9 +142,7 @@ public class ImportService extends DataBaseService {
               try {
                 eventBus.publish(
                     "import",
-                    new ObjectMapper()
-                        .writer()
-                        .writeValueAsString(new ImportStatistic(domainId, s)));
+                    objectMapper.writer().writeValueAsString(new ImportStatistic(domainId, s)));
               } catch (JsonProcessingException e) {
                 log.error(e.getMessage(), e);
               }
@@ -166,8 +166,8 @@ public class ImportService extends DataBaseService {
                 entry ->
                     Map.of(
                         "model",
-                        new ObjectMapper()
-                            .convertValue(entry, new TypeReference<HashMap<String, Object>>() {}),
+                        objectMapper.convertValue(
+                            entry, new TypeReference<HashMap<String, Object>>() {}),
                         "domainId",
                         domainId.toString()));
     return multiWrite(cypher, parameter, r -> counter.getAndIncrement());
@@ -189,7 +189,7 @@ public class ImportService extends DataBaseService {
   }
 
   private void cleanJsonModel(Domain domain, ObjectNode jsonModel) {
-    JsonPathEditor jsonPathEditor = new JsonPathEditor();
+    JsonPathEditor jsonPathEditor = new JsonPathEditor(objectMapper);
     var header = sourceService.fileHeader(domain.getFile());
     List<String> existingPath = jsonPathEditor.extractFieldPaths(jsonModel);
     existingPath.forEach(

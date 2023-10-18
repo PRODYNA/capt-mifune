@@ -73,6 +73,8 @@ public class GraphService {
 
   @Inject protected DeletionService deletionService;
 
+  @Inject ObjectMapper objectMapper;
+
   Graph graph = new Graph();
 
   void onStart(@Observes StartupEvent ev) {
@@ -83,7 +85,7 @@ public class GraphService {
 
       try {
         var json = Files.readString(modelPath);
-        this.graph = new ObjectMapper().readerFor(Graph.class).readValue(json);
+        this.graph = objectMapper.readerFor(Graph.class).readValue(json);
       } catch (IOException e) {
         log.error("fail to parse graph model", e);
       }
@@ -99,8 +101,7 @@ public class GraphService {
   }
 
   public void persist() throws IOException {
-    var mapper = new ObjectMapper();
-    var json = mapper.writer(new DefaultPrettyPrinter()).writeValueAsString(graph);
+    var json = objectMapper.writer(new DefaultPrettyPrinter()).writeValueAsString(graph);
     System.out.println(json);
     Files.write(Path.of(model, graphFile), Collections.singleton(json), StandardCharsets.UTF_8);
   }
@@ -181,7 +182,7 @@ public class GraphService {
 
     Map<String, String> mapping = d.getColumnMapping();
     ObjectNode jsonModel = new GraphJsonBuilder(new GraphModel(graph), d.getId(), true).getJson();
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    List<String> paths = new JsonPathEditor(objectMapper).extractFieldPaths(jsonModel);
     d.setMappingValid(mapping.keySet().containsAll(paths));
   }
 
@@ -520,7 +521,7 @@ public class GraphService {
 
   public List<String> createJsonModelKeys(UUID id) {
     ObjectNode jsonModel = buildDomainJsonModel(id);
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    List<String> paths = new JsonPathEditor(objectMapper).extractFieldPaths(jsonModel);
     var result =
         paths.stream()
             .map(s -> s.replaceAll("\\[", ""))
@@ -551,7 +552,7 @@ public class GraphService {
   public Uni<Map<String, String>> createJsonModel(UUID id) {
     ObjectNode jsonModel = buildDomainJsonModel(id);
     var mapping = Optional.ofNullable(fetchDomain(id).getColumnMapping()).orElse(Map.of());
-    List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
+    List<String> paths = new JsonPathEditor(objectMapper).extractFieldPaths(jsonModel);
     var hashmap =
         new TreeMap<String, String>(
             Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s));

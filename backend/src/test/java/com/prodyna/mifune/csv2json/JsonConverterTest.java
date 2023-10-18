@@ -35,12 +35,14 @@ import org.junit.jupiter.api.Test;
 
 class JsonConverterTest {
 
+  ObjectMapper objectMapper = new ObjectMapper();
+
   @Test
   public void simpleString() {
 
     JsonNode model = new ObjectMapper().createObjectNode().put("sport", 0);
     var csv = List.of(List.of("JuJutsu"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertTrue(node.get("sport").isTextual());
@@ -52,7 +54,7 @@ class JsonConverterTest {
     var model = new ObjectMapper().createObjectNode();
     model.put("sport", 0).putObject("trainer").put("name", 1).put("age", "2:int");
     var csv = List.of(List.of("JuJutsu", "Kay", "35"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertTrue(node.get("sport").isTextual());
@@ -66,7 +68,7 @@ class JsonConverterTest {
   public void simpleInt() {
     JsonNode model = new ObjectMapper().createObjectNode().put("age", "0:int");
     var csv = List.of(List.of("1"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertTrue(node.get("age").isInt());
@@ -77,7 +79,7 @@ class JsonConverterTest {
   public void simpleDouble() {
     JsonNode model = new ObjectMapper().createObjectNode().put("age", "0:double");
     var csv = List.of(List.of("1"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertTrue(node.get("age").isDouble());
@@ -88,7 +90,7 @@ class JsonConverterTest {
   public void simpleDate() {
     JsonNode model = new ObjectMapper().createObjectNode().put("since", "0:date");
     var csv = List.of(List.of("1990-01-01"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertTrue(node.get("since").isTextual());
@@ -101,7 +103,7 @@ class JsonConverterTest {
     model.put("category", 0).putArray("subCategories").add(1);
     System.out.println(model.toPrettyString());
     var csv = List.of(List.of("animal", "elephant"), List.of("animal", "hippo"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     System.out.println(jsonNodes.toPrettyString());
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
@@ -118,7 +120,7 @@ class JsonConverterTest {
     var model = new ObjectMapper().createObjectNode();
     model.put("category", 0).putArray("subCategories").addObject().put("name", 1);
     var csv = List.of(List.of("animal", "elephant"), List.of("animal", "hippo"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     System.out.println(jsonNodes.toPrettyString());
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
@@ -134,13 +136,13 @@ class JsonConverterTest {
     var model = new ObjectMapper().createObjectNode();
     model.put("category", 0).putArray("subCategories").addObject().put("name", 1);
     var csv = List.of(List.of("animal"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     System.out.println(jsonNodes.toPrettyString());
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertTrue(node.get("category").isTextual());
     assertEquals("animal", node.get("category").asText());
-    assertNull(node.get("subCategories"));
+    assertEquals(0, node.get("subCategories").size());
   }
 
   @Test
@@ -148,7 +150,7 @@ class JsonConverterTest {
     var model = new ObjectMapper().createObjectNode();
     model.put("id", 0).putArray("values").add("1:int");
     var csv = List.of(List.of("abc", "1"), List.of("abc", "2"));
-    var jsonNodes = new JsonConverter().toJson(model, csv);
+    var jsonNodes = new JsonConverter(objectMapper).toJson(model, csv);
     assertEquals(jsonNodes.size(), 1);
     var node = jsonNodes.elements().next();
     assertEquals("abc", node.get("id").asText());

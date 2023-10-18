@@ -30,6 +30,7 @@ import static com.prodyna.mifune.csv2json.JsonConverterUtil.generateHash;
 import static com.prodyna.mifune.csv2json.JsonConverterUtil.mergeField;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JsonTransformer extends SubmissionPublisher<JsonNode>
     implements Flow.Processor<List<String>, JsonNode> {
 
+  private final ObjectMapper objectMapper;
+
   private final int bufferSize;
   private final JsonNode model;
   private Subscription subscription;
@@ -49,8 +52,9 @@ public class JsonTransformer extends SubmissionPublisher<JsonNode>
   private final LinkedList<Integer> lastAccessOrder = new LinkedList<>();
   private final AtomicInteger counter = new AtomicInteger(1);
 
-  public JsonTransformer(JsonNode model, int bufferSize) {
+  public JsonTransformer(ObjectMapper objectMapper, JsonNode model, int bufferSize) {
     super();
+    this.objectMapper = objectMapper;
     this.model = model;
     this.bufferSize = bufferSize;
   }
@@ -84,7 +88,7 @@ public class JsonTransformer extends SubmissionPublisher<JsonNode>
       if (cacheCounter >= bufferSize) {
         var lastObject = cache.remove(lastAccessOrder.removeLast());
         cacheCounter -= lastObject.lineCounter;
-        var item = lastObject.toJson(true);
+        var item = lastObject.toJson(objectMapper, true);
         submit(item);
       }
     } catch (Throwable e) {
@@ -95,7 +99,7 @@ public class JsonTransformer extends SubmissionPublisher<JsonNode>
 
   @Override
   public void onError(Throwable t) {
-    t.printStackTrace();
+    super.closeExceptionally(t);
   }
 
   @Override
@@ -103,7 +107,7 @@ public class JsonTransformer extends SubmissionPublisher<JsonNode>
     lastAccessOrder.forEach(
         hash -> {
           var mappingObject = cache.remove(hash);
-          var item = mappingObject.toJson(true);
+          var item = mappingObject.toJson(objectMapper, true);
           submit(item);
         });
     close();

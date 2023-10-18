@@ -29,10 +29,7 @@ package com.prodyna.mifune.csv2json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class MappingObject {
 
@@ -51,10 +48,8 @@ public class MappingObject {
         && objectFieldArrayValues.isEmpty();
   }
 
-  public JsonNode toJson(boolean addLines) {
-    ObjectMapper mapper = new ObjectMapper();
-
-    var objectNode = mapper.createObjectNode();
+  public JsonNode toJson(ObjectMapper objectMapper, boolean addLines) {
+    var objectNode = objectMapper.createObjectNode();
     primitiveFieldValues.forEach(
         (k, v) -> {
           if (v instanceof Integer i) {
@@ -77,7 +72,7 @@ public class MappingObject {
         });
     primitiveArrayFieldValues.forEach(
         (k, values) -> {
-          var array = mapper.createArrayNode();
+          var array = objectMapper.createArrayNode();
           values.forEach(
               v -> {
                 if (v instanceof Integer i) {
@@ -101,21 +96,21 @@ public class MappingObject {
     objectFieldValues.forEach(
         (k, v) -> {
           if (!v.isEmpty()) {
-            objectNode.set(k, v.toJson(false));
+            objectNode.set(k, v.toJson(objectMapper, false));
           }
         });
     objectFieldArrayValues.forEach(
         (k, v) -> {
-          var array = mapper.createArrayNode();
+          var array = objectMapper.createArrayNode();
           v.values().stream()
               .filter(mo -> !mo.isEmpty())
-              .map(mo -> mo.toJson(false))
+              .map(mo -> mo.toJson(objectMapper, false))
               .forEach(array::add);
           objectNode.set(k, array);
         });
 
     if (addLines) {
-      var lineArray = mapper.createArrayNode();
+      var lineArray = objectMapper.createArrayNode();
       fromLines.forEach(lineArray::add);
       objectNode.set("lines", lineArray);
     }
@@ -124,6 +119,13 @@ public class MappingObject {
 
   @Override
   public String toString() {
-    return toJson(false).toPrettyString();
+    return new StringJoiner(", ", MappingObject.class.getSimpleName() + "[", "]")
+        .add("lineCounter=" + lineCounter)
+        .add("fromLines=" + fromLines)
+        .add("primitiveFieldValues=" + primitiveFieldValues)
+        .add("primitiveArrayFieldValues=" + primitiveArrayFieldValues)
+        .add("objectFieldValues=" + objectFieldValues)
+        .add("objectFieldArrayValues=" + objectFieldArrayValues)
+        .toString();
   }
 }

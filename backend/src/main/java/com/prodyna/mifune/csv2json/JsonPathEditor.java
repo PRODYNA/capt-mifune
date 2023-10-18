@@ -38,7 +38,11 @@ import java.util.stream.Collectors;
 
 public class JsonPathEditor {
 
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
+
+  public JsonPathEditor(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
 
   public void update(JsonNode node, String jsonPath, String value) {
     String[] parts = jsonPath.split("\\.");
