@@ -40,7 +40,7 @@ export const buildHeatMapChart = (
         }}
         enableLabels
         animate={false}
-        margin={{ top: 200, right: 120, bottom: 60, left: 300 }}
+        margin={{ top: 200, right: 120, bottom: 60, left: 200 }}
         forceSquare={false}
         labelTextColor={{ from: 'color', modifiers: [['darker', 1.8]] }}
       />
