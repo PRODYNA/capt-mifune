@@ -44,7 +44,6 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -523,11 +522,11 @@ public class GraphService {
     ObjectNode jsonModel = buildDomainJsonModel(id);
     List<String> paths = new JsonPathEditor().extractFieldPaths(jsonModel);
     var result =
-            paths.stream()
-                    .map(s -> s.replaceAll("\\[", ""))
-                    .map(s -> s.replaceAll("]", ""))
-                    .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
-                    .collect(Collectors.toList());
+        paths.stream()
+            .map(s -> s.replaceAll("\\[", ""))
+            .map(s -> s.replaceAll("]", ""))
+            .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
+            .collect(Collectors.toList());
     return result;
   }
 

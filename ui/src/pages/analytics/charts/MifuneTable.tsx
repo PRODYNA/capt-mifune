@@ -91,11 +91,11 @@ export const MifuneTable = (): JSX.Element => {
             const mappedResults = results.map((item) => {
               return item.uuid === result.uuid
                 ? {
-                  function: QueryFunction.Value,
-                  name: v[0],
-                  parameters: v,
-                  uuid: item.uuid,
-                }
+                    function: QueryFunction.Value,
+                    name: v[0],
+                    parameters: v,
+                    uuid: item.uuid,
+                  }
                 : item
             })
             setChartOptions({

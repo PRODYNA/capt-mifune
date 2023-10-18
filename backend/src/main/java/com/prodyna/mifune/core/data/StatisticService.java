@@ -13,22 +13,21 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.reactive.ReactiveResult;
-import org.neo4j.driver.reactive.ReactiveSession;
 
 @ApplicationScoped
 public class StatisticService extends DataBaseService {
 
-    private final GraphService graphService;
-    public StatisticService() {
-        super(null);
-        this.graphService = null;
-    }
+  private final GraphService graphService;
 
-    protected StatisticService(Driver driver, GraphService graphService) {
+  public StatisticService() {
+    super(null);
+    this.graphService = null;
+  }
+
+  protected StatisticService(Driver driver, GraphService graphService) {
     super(driver);
-        this.graphService = graphService;
-    }
+    this.graphService = graphService;
+  }
 
   public Multi<GraphStatistics> graphStats() {
     return super.multiRead(
@@ -54,10 +53,11 @@ public class StatisticService extends DataBaseService {
         .asMap(o -> o.id, o -> o.count);
   }
 
-    public Multi<Map<String, Object>> query(Query query) {
-        var graphModel = new GraphModel(graphService.graph());
-        var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
-        var cypher = cypherQueryBuilder.cypher();
-        return super.multiRead(cypher, cypherQueryBuilder.getParameter(), cypherQueryBuilder::buildResult);
-    }
+  public Multi<Map<String, Object>> query(Query query) {
+    var graphModel = new GraphModel(graphService.graph());
+    var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
+    var cypher = cypherQueryBuilder.cypher();
+    return super.multiRead(
+        cypher, cypherQueryBuilder.getParameter(), cypherQueryBuilder::buildResult);
+  }
 }

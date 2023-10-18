@@ -26,27 +26,17 @@ package com.prodyna.mifune.api;
  * #L%
  */
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.prodyna.mifune.core.data.StatisticService;
 import com.prodyna.mifune.core.graph.GraphService;
-import com.prodyna.mifune.core.schema.CypherQueryBuilder;
-import com.prodyna.mifune.core.schema.GraphModel;
-import com.prodyna.mifune.csv2json.JsonPathEditor;
 import com.prodyna.mifune.domain.Query;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import org.jboss.logging.Logger;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.reactive.ReactiveResult;
-import org.neo4j.driver.reactive.ReactiveSession;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -55,8 +45,7 @@ public class DataResource {
 
   @Inject protected GraphService graphService;
 
-  @Inject
-  protected StatisticService statisticService;
+  @Inject protected StatisticService statisticService;
 
   @POST
   public Multi<Map<String, Object>> query(Query query) {

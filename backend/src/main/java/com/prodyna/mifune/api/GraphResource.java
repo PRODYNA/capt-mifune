@@ -227,14 +227,11 @@ public class GraphResource {
                         .collect(
                             Collectors.toMap(
                                 ImportStatistic::domainId, ImportStatistic::count, Long::max)));
-    var defaults =
-        graphService.fetchDomains().stream().collect(Collectors.toMap(Domain::getId, a -> 0L));
-    return Multi.createBy()
-        .concatenating()
-        .streams(
-            Uni.createFrom().item(defaults).toMulti(),
-            this.countDomainRootNodes().toMulti(),
-            events,
-            this.countDomainRootNodes().toMulti());
+
+    return events
+        .ifNoItem()
+        .after(Duration.ofSeconds(1))
+        .recoverWithMulti(
+            () -> countDomainRootNodes().memoize().atLeast(Duration.ofSeconds(15)).toMulti());
   }
 }

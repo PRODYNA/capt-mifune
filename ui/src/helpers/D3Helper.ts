@@ -17,6 +17,7 @@ export interface D3Relation<T> extends d3.SimulationLinkDatum<D3Node<any>> {
   firstRender?: boolean
   width: number
 }
+
 export interface Point {
   x: number
   y: number
