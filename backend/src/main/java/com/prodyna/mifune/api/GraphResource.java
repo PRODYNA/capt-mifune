@@ -231,15 +231,16 @@ public class GraphResource {
                         .collect(
                             Collectors.toMap(
                                 ImportStatistic::domainId, ImportStatistic::count, Long::max)))
-                .filter(m -> !m.isEmpty());
+            .filter(m -> !m.isEmpty());
 
-    var fallback = countDomainRootNodes().memoize().atLeast(Duration.ofSeconds(10)).toMulti();
+    var fallback = Multi.createFrom().uni(countDomainRootNodes().memoize().indefinitely());
 
     return events
         .ifNoItem()
-        .after(Duration.ofSeconds(1))
+        .after(Duration.ofSeconds(10))
         .recoverWithMulti(fallback)
-            .map(m -> {
+        .map(
+            m -> {
               LOG.info("stats {}", m);
               return m;
             });

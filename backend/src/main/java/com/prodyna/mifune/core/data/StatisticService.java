@@ -10,13 +10,12 @@ import com.prodyna.mifune.domain.Query;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import jakarta.inject.Inject;
 import org.neo4j.driver.Driver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,7 @@ public class StatisticService extends DataBaseService {
   public Uni<Map<UUID, Long>> countDomainRootNodes() {
     LOG.info("countDomainRootNodes");
     var domainIds =
-            graphService.fetchDomains().stream().map(Domain::getId).collect(Collectors.toSet());
+        graphService.fetchDomains().stream().map(Domain::getId).collect(Collectors.toSet());
     return super.multiRead(
             "match(x)-[domain:DOMAIN]->(x) return distinct domain.id as id, count(distinct x) as count",
             Map.of(),
@@ -65,10 +64,11 @@ public class StatisticService extends DataBaseService {
                 })
         .collect()
         .asMap(o -> o.id, o -> o.count)
-            .map(m -> {
+        .map(
+            m -> {
               HashMap<UUID, Long> result = new HashMap<>(m);
-                domainIds.forEach(id -> result.putIfAbsent(id, 0L));
-                return result;
+              domainIds.forEach(id -> result.putIfAbsent(id, 0L));
+              return result;
             });
   }
 
