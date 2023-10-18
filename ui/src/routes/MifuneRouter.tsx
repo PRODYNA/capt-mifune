@@ -11,6 +11,7 @@ import SnackbarProvider from '../context/Snackbar'
 import Upload from '../pages/Upload'
 import { ANALYTCIS, PIPELINE, PIPELINES, ROOT_PATH, UPLOAD } from './routes'
 import ErrorBoundary from '../components/Error/ErrorBoundaries'
+import ChartProvider from '../context/ChartContext'
 
 const MifuneRouter = (): JSX.Element => {
   const [openSidenav, setOpenSidenav] = useState(false)
@@ -48,7 +49,9 @@ const MifuneRouter = (): JSX.Element => {
               path={ANALYTCIS}
               element={
                 <ErrorBoundary>
-                  <Analytics />
+                  <ChartProvider>
+                    <Analytics />
+                  </ChartProvider>
                 </ErrorBoundary>
               }
             />

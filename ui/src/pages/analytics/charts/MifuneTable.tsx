@@ -13,7 +13,7 @@ import {
 import { v4 } from 'uuid'
 import { Add } from '@mui/icons-material'
 import { ChartWrapper, SelectProps } from '../ChartWrapper'
-import ChartContext, { QueryData } from '../../../context/ChartContext'
+import { ChartContext, QueryData } from '../../../context/ChartContext'
 import CustomButton from '../../../components/Button/CustomButton'
 import { QueryFunction } from '../../../services/models/query-function'
 

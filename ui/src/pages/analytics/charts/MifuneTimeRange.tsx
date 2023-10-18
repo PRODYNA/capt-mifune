@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { Box } from '@mui/material'
 import { CalendarDatum, ResponsiveTimeRange } from '@nivo/calendar'
 import { ChartWrapper } from '../ChartWrapper'
-import ChartContext from '../../../context/ChartContext'
+import { ChartContext } from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'
 
 export const buildTimeRangeChart = (data: CalendarDatum[]): JSX.Element => {

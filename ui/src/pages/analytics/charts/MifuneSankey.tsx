@@ -7,7 +7,7 @@ import {
 } from '@nivo/sankey'
 import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
-import ChartContext from '../../../context/ChartContext'
+import { ChartContext } from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'
 
 export const buildSankeyChart = (

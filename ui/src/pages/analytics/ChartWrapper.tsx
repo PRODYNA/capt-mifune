@@ -20,7 +20,7 @@ import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
 import CustomTable from '../../components/Table/CustomTable'
 import CustomButton from '../../components/Button/CustomButton'
-import ChartContext from '../../context/ChartContext'
+import { ChartContext } from '../../context/ChartContext'
 import {
   QueryResultDefinition,
   QueryFunction,
@@ -75,9 +75,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
                     prevState.map((item) =>
                       item.uuid === f.uuid
                         ? {
-                            ...item,
-                            property: k,
-                          }
+                          ...item,
+                          property: k,
+                        }
                         : item
                     )
                   )
@@ -87,9 +87,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
                     prevState.map((item) =>
                       item.uuid === f.uuid
                         ? {
-                            ...item,
-                            value: k,
-                          }
+                          ...item,
+                          value: k,
+                        }
                         : item
                     )
                   )
@@ -99,9 +99,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
                     prevState.map((item) =>
                       item.uuid === f.uuid
                         ? {
-                            ...item,
-                            function: k,
-                          }
+                          ...item,
+                          function: k,
+                        }
                         : item
                     )
                   )

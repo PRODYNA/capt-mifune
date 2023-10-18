@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext, useState } from 'react'
 import { D3Node, D3Relation } from '../helpers/D3Helper'

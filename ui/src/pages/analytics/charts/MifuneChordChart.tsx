@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { Box } from '@mui/material'
 import { ResponsiveChord } from '@nivo/chord'
 import { ChartWrapper } from '../ChartWrapper'
-import ChartContext from '../../../context/ChartContext'
+import { ChartContext } from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'
 
 interface ChordData {

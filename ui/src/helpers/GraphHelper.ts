@@ -71,6 +71,7 @@ export function nodeMouseEvents<N extends Node | QueryNode>(
   node: any,
   onClick: (e: unknown, d: D3Node<N>) => void
 ): void {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const dragstart = (): void => {}
   const dragged = (
     event: { x: number; y: number },

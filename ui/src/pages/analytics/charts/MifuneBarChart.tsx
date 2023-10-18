@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
-import ChartContext, { QueryData } from '../../../context/ChartContext'
+import { ChartContext, QueryData } from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'
 
 export const buildBarChart = (data: QueryData): JSX.Element => {

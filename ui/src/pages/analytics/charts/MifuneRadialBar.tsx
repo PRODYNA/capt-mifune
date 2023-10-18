@@ -2,10 +2,10 @@ import React, { useContext } from 'react'
 import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
-import ChartContext from '../../../context/ChartContext'
+import { ChartContext } from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'
 
-type RadialChartData = { id: string; data: { x: string; y: number }[] }[]
+export type RadialChartData = { id: string; data: { x: string; y: number }[] }[]
 
 export const buildRadialChart = (data: RadialChartData): JSX.Element => {
   return (

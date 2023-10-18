@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { Box } from '@mui/material'
 import { ResponsiveAreaBump } from '@nivo/bump'
 import { ChartWrapper } from '../ChartWrapper'
-import ChartContext from '../../../context/ChartContext'
+import { ChartContext } from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'
 
 type AreamBump = { id: string; data: { x: string; y: number }[] }[]
