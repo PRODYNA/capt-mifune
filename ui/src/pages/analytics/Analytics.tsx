@@ -156,7 +156,7 @@ export const Analytics = (): JSX.Element => {
   }
 
   return (
-    <Container>
+    <Box p={5}>
       <Box mt={3} color="text.primary">
         <Typography variant="h5">Analytics</Typography>
         <QueryBuilder onChange={(q) => setQuery(q)} />
@@ -185,6 +185,6 @@ export const Analytics = (): JSX.Element => {
           )}
         </ChartsNavigation>
       </Box>
-    </Container>
+    </Box>
   )
 }
