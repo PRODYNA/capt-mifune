@@ -85,35 +85,30 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
 
   return (
     <Drawer
-      variant="permanent"
       open={openSidenav}
+      variant="permanent"
       className={`${openSidenav ? 'open' : 'closed'}`}
       sx={{
         '& .MuiPaper-root': {
-          width: DRAWER_WIDTH,
           backgroundColor: theme.palette.primary.dark,
           color: theme.palette.common.white,
           overflow: 'hidden',
         },
         '&.closed': {
+          width: DRAWER_WIDTH,
+          transition: 'all ease-in-out 0.4s',
           '& .MuiPaper-root': {
-            transition: 'all ease-in-out 0.4s',
-          },
-          '& + .MuiBox-root': {
-            marginLeft: DRAWER_WIDTH,
-            width: `calc(100% - ${DRAWER_WIDTH}px)`,
+            width: DRAWER_WIDTH,
             transition: 'all ease-in-out 0.4s',
           },
         },
         '&.open': {
+          width: DRAWER_WIDTH_OPEN,
+          transition: 'all ease-in-out 0.4s',
+
           '& .MuiPaper-root': {
             transition: 'all ease-in-out 0.4s',
             width: DRAWER_WIDTH_OPEN,
-          },
-          '& + .MuiBox-root': {
-            marginLeft: DRAWER_WIDTH_OPEN,
-            width: `calc(100% - ${DRAWER_WIDTH_OPEN}px)`,
-            transition: 'all ease-in-out 0.4s',
           },
         },
       }}

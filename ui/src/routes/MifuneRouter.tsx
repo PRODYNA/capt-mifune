@@ -17,7 +17,18 @@ const MifuneRouter = (): JSX.Element => {
 
   function getContent(): JSX.Element {
     return (
-      <>
+      <Box
+        sx={{
+          display: {
+            xs: 'block',
+            md: 'flex',
+          },
+          height: {
+            xs: '100%',
+            md: '100%',
+          },
+        }}
+      >
         <Sidenavigation
           openSidenav={openSidenav}
           setOpenSidenav={setOpenSidenav}
@@ -67,7 +78,7 @@ const MifuneRouter = (): JSX.Element => {
             />
           </Routes>
         </Box>
-      </>
+      </Box>
     )
   }
 
