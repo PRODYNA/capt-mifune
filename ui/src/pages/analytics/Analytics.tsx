@@ -183,7 +183,7 @@ export const Analytics = (): JSX.Element => {
                 </Typography>
               </Box>
             ) : (
-              <>{getSelectedChart()?.options}</>
+              <Box>{getSelectedChart()?.options}</Box>
             )}
           </ChartsNavigation>
         </Box>

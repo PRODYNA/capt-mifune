@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "homepage": "./",
-  "proxy": "http://localhost:8080",
+  "proxy": "http://0.0.0.0:8080",
   "dependencies": {
     "@axa-fr/react-oidc": "^6.5.10",
     "@date-io/date-fns": "2.15.0",

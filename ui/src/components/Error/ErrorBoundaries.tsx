@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import ErrorMessage from './ErrorMessage'
 
 interface ErrorBoundaryState {
@@ -43,6 +43,6 @@ export default class ErrorBoundary extends React.Component<
       )
     }
 
-    return <>{children}</>
+    return children as React.ReactNode
   }
 }
