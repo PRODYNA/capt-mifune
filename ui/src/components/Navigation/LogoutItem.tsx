@@ -1,24 +1,30 @@
 import React from 'react'
-import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import { useOidc } from '@axa-fr/react-oidc'
-import { ListItem, ListItemIcon, ListItemText } from '@material-ui/core'
+import { ListItem, ListItemIcon, ListItemText, useTheme } from '@mui/material'
 
-const LogoutItem = (props: {
-  className: string
-  iconClass: string
-}): JSX.Element => {
+const LogoutItem = (): JSX.Element => {
   const oidc = useOidc()
-  const { className, iconClass } = props
+  const theme = useTheme()
 
   return (
     <ListItem
       button
       key="Logout"
       onClick={() => oidc.logout()}
-      className={className}
+      sx={{
+        opacity: 0.6,
+        '&.Mui-selected': {
+          opacity: 1,
+        },
+      }}
       selected={false}
     >
-      <ListItemIcon className={iconClass}>
+      <ListItemIcon
+        sx={{
+          color: theme.palette.common.white,
+        }}
+      >
         <ExitToAppIcon />
       </ListItemIcon>
       <ListItemText primary="Logout" />

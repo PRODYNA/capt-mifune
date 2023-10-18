@@ -1,11 +1,11 @@
 import React, { useEffect, useState, Fragment } from 'react'
-import { Grid, TableCell, Typography } from '@material-ui/core'
+import { Grid, TableCell, Typography } from '@mui/material'
 import { v4 } from 'uuid'
 import FormSelect from '../../components/Form/FormSelect'
 import { SelectProps } from './ChartWrapper'
-import { useStyleTable } from '../graph/NodeEdit'
 import { QueryFunction } from '../../services/models/query-function'
 import { Property } from '../../services'
+import { tableStyles } from '../graph/NodeEdit'
 
 interface Select {
   uuid: string
@@ -24,7 +24,6 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
   const [selects, setSelects] = useState<Select[]>([initialSelect])
   const [fn, setFn] = useState<QueryFunction | undefined>(fnDefault)
   const fnOptions = Object.values(QueryFunction)
-  const classes = useStyleTable()
 
   useEffect(() => {
     const checkEmpty = selects.some(
@@ -159,10 +158,10 @@ export const AnalyticSelect = (props: SelectProps): JSX.Element => {
       <>
         {selects.map((select) => (
           <Fragment key={select.uuid}>
-            <TableCell className={classes.tableCell}>
+            <TableCell sx={tableStyles.tableCell}>
               {renderNodeSelect(select)}
             </TableCell>
-            <TableCell className={classes.tableCell}>
+            <TableCell sx={tableStyles.tableCell}>
               {renderPropertySelect(select)}
             </TableCell>
           </Fragment>

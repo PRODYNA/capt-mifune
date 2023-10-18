@@ -5,10 +5,10 @@ import {
   DialogContent,
   DialogActions,
   Typography,
-} from '@material-ui/core'
-import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined'
-import CheckIcon from '@material-ui/icons/Check'
-import { useTheme } from '@material-ui/core/styles'
+} from '@mui/material'
+import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined'
+import CheckIcon from '@mui/icons-material/Check'
+import { useTheme } from '@mui/material/styles'
 import CustomButton from '../Button/CustomButton'
 
 interface ICustomDialog {
@@ -41,7 +41,7 @@ const CustomDialog = (props: ICustomDialog): JSX.Element => {
       open={open}
       fullWidth
     >
-      <DialogTitle id="customized-dialog-title" disableTypography>
+      <DialogTitle id="customized-dialog-title">
         <Typography variant="h6">{title}</Typography>
       </DialogTitle>
       <DialogContent>{children}</DialogContent>

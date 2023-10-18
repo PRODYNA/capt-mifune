@@ -1,6 +1,6 @@
 import React, { FormEvent, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Grid } from '@material-ui/core'
+import { Grid } from '@mui/material'
 import FormSelect from '../../components/Form/FormSelect'
 import FormActions from '../../components/Form/FormActions'
 import { SnackbarContext } from '../../context/Snackbar'

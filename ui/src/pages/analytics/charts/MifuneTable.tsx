@@ -9,9 +9,9 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core'
+} from '@mui/material'
 import { v4 } from 'uuid'
-import { Add } from '@material-ui/icons'
+import { Add } from '@mui/icons-material'
 import { ChartWrapper, SelectProps } from '../ChartWrapper'
 import ChartContext, { QueryData } from '../../../context/ChartContext'
 import CustomButton from '../../../components/Button/CustomButton'
@@ -91,11 +91,11 @@ export const MifuneTable = (): JSX.Element => {
             const mappedResults = results.map((item) => {
               return item.uuid === result.uuid
                 ? {
-                    function: QueryFunction.Value,
-                    name: v[0],
-                    parameters: v,
-                    uuid: item.uuid,
-                  }
+                  function: QueryFunction.Value,
+                  name: v[0],
+                  parameters: v,
+                  uuid: item.uuid,
+                }
                 : item
             })
             setChartOptions({

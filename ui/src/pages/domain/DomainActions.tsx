@@ -1,55 +1,13 @@
-import React, { Dispatch, SetStateAction, useContext } from 'react'
-import {
-  Tooltip,
-  Fab,
-  createStyles,
-  makeStyles,
-  Box,
-  Theme,
-} from '@material-ui/core'
-import AddIcon from '@material-ui/icons/Add'
-import SaveIcon from '@material-ui/icons/Save'
-import AddAPhotoIcon from '@material-ui/icons/AddAPhoto'
+import { Dispatch, SetStateAction, useContext } from 'react'
+import { Tooltip, Fab, Box } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import SaveIcon from '@mui/icons-material/Save'
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import { Domain } from '../../services/models/domain'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { GraphApi, DomainApi } from '../../services'
-
-export const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    wrapper: {
-      transform: 'translateX(-50%)',
-    },
-    animatedBtn: {
-      animation: '$pulse-purple 2s infinite',
-    },
-    save: {
-      backgroundColor: theme.palette.success.main,
-      color: 'white',
-      marginLeft: '1rem',
-      '&:hover': {
-        backgroundColor: theme.palette.success.main,
-        color: 'white',
-        opacity: 0.8,
-      },
-    },
-    '@keyframes pulse-purple': {
-      '0%': {
-        transform: 'scale(0.95)',
-        boxShadow: '0 0 0 0 rgba(142, 68, 173, 0.7)',
-      },
-      '70%': {
-        transform: 'scale(1)',
-        boxShadow: '0 0 0 10px rgba(142, 68, 173, 0)',
-      },
-      '100% ': {
-        transform: 'scale(0.95)',
-        boxShadow: '0 0 0 0 rgba(142, 68, 173, 0)',
-      },
-    },
-  })
-)
 
 interface IDomainActions {
   domains: Domain[]
@@ -63,20 +21,38 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const domainApi = new DomainApi(AXIOS_CONFIG())
   const graphApi = new GraphApi(AXIOS_CONFIG())
-  const classes = useStyles()
 
   return (
     <Box
       position="absolute"
       bottom="1rem"
       left="50%"
-      className={classes.wrapper}
+      sx={{
+        transform: 'translateX(-50%)',
+      }}
     >
       <Tooltip title="Create new Domain">
         <Fab
           size="large"
           color="primary"
-          className={` ${domains.length === 0 ? classes.animatedBtn : ''}`}
+          sx={{
+            animation:
+              domains.length === 0 ? '$pulse-purple 2s infinite' : 'unset',
+            '@keyframes pulse-purple': {
+              '0%': {
+                transform: 'scale(0.95)',
+                boxShadow: '0 0 0 0 rgba(142, 68, 173, 0.7)',
+              },
+              '70%': {
+                transform: 'scale(1)',
+                boxShadow: '0 0 0 10px rgba(142, 68, 173, 0)',
+              },
+              '100% ': {
+                transform: 'scale(0.95)',
+                boxShadow: '0 0 0 0 rgba(142, 68, 173, 0)',
+              },
+            },
+          }}
           onClick={() =>
             domainApi
               .apiGraphDomainPost({ name: `domain_${domains.length}` })
@@ -92,7 +68,10 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
       <Tooltip title="Save Graph">
         <Fab
           size="large"
-          className={classes.save}
+          color="success"
+          sx={{
+            ml: '1rem',
+          }}
           onClick={() =>
             graphApi
               .apiGraphPost()
@@ -104,7 +83,7 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
         </Fab>
       </Tooltip>
       <Tooltip title="Download Image">
-        <Fab size="large" className={classes.save} onClick={downloadSVG}>
+        <Fab size="large" color="success" onClick={downloadSVG}>
           <AddAPhotoIcon />
         </Fab>
       </Tooltip>

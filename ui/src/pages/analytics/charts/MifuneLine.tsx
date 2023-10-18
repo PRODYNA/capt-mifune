@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 import { ResponsiveLine } from '@nivo/line'
 import { ChartWrapper } from '../ChartWrapper'
 import ChartContext from '../../../context/ChartContext'

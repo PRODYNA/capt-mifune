@@ -5,14 +5,14 @@ import {
   TableCell,
   TextField,
   useTheme,
-} from '@material-ui/core'
-import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
-import { DatePicker } from '@material-ui/pickers'
+} from '@mui/material'
+import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox'
 import { formatISO } from 'date-fns'
-import { ParsableDate } from '@material-ui/pickers/constants/prop-types'
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import FormSelect from '../../components/Form/FormSelect'
 import { AnalyticSelect } from './AnalyticSelect'
-import { useStyleTable } from '../graph/NodeEdit'
+import { tableStyles } from '../graph/NodeEdit'
 import ChartContext from '../../context/ChartContext'
 import { QueryFunction } from '../../services/models/query-function'
 import AXIOS_CONFIG from '../../openapi/axios-config'
@@ -38,7 +38,6 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   )
   const [values, setValues] = useState<string[]>()
   const theme = useTheme()
-  const classes = useStyleTable()
   const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
 
   useEffect(() => {
@@ -113,7 +112,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         }}
       />
       {propertyType !== PropertyType.Boolean ? (
-        <TableCell className={classes.tableCell}>
+        <TableCell sx={tableStyles.tableCell}>
           <FormSelect
             title=""
             hideLabel
@@ -128,7 +127,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
       ) : (
         <>
           <TableCell />
-          <TableCell className={classes.tableCell}>
+          <TableCell sx={tableStyles.tableCell}>
             <Checkbox
               checked={(value as boolean) ?? true}
               onChange={(event) => {
@@ -141,7 +140,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         </>
       )}
       {func === FilterFunction.Equal && propertyType !== PropertyType.Boolean && (
-        <TableCell className={classes.tableCell}>
+        <TableCell sx={tableStyles.tableCell}>
           <FormSelect
             title=""
             hideLabel
@@ -155,23 +154,37 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
         </TableCell>
       )}
       {func !== FilterFunction.Equal && (
-        <TableCell className={classes.tableCell}>
+        <TableCell sx={tableStyles.tableCell}>
           {propertyType === PropertyType.Date && (
-            <DatePicker
-              autoOk
-              label=""
-              views={['year', 'month', 'date']}
-              value={(value as ParsableDate) ?? null}
-              format="dd.MM.yyyy"
-              onChange={(date) => {
-                const formatDate = formatISO(date as Date, {
+            // <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DesktopDatePicker
+              label="date"
+              views={['year', 'month', 'day']}
+              value={value ?? null}
+              inputFormat="dd.MM.yyyy"
+              onChange={(newVal: Date | null) => {
+                const formatDate = formatISO(newVal as Date, {
                   representation: 'date',
                 })
                 setValue(formatDate)
                 onValueChange(formatDate)
               }}
-              animateYearScrolling
+              renderInput={(inputParams) => (
+                <TextField
+                  name="date"
+                  size="small"
+                  {...inputParams}
+                  sx={{
+                    alignSelf: 'start',
+                    width: {
+                      xs: '100%',
+                      sm: 150,
+                    },
+                  }}
+                />
+              )}
             />
+            // </LocalizationProvider>
           )}
           {propertyType !== PropertyType.Date &&
             propertyType !== PropertyType.Boolean && (

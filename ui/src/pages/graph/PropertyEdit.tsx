@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import {
   Checkbox,
-  createStyles,
   IconButton,
-  makeStyles,
   TableCell,
   TextField,
   useTheme,
-} from '@material-ui/core'
-import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox'
+} from '@mui/material'
+import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox'
 import { Property, PropertyType } from '../../services/models'
 import FormSelect from '../../components/Form/FormSelect'
 
@@ -28,46 +26,38 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
     setValue(property)
   }, [property])
 
-  const useStyles = makeStyles(() =>
-    createStyles({
-      iconButton: {
-        padding: 0,
-        '&.MuiIconButton-root:hover': {
-          backgroundColor: 'inherit',
-          padding: 0,
-        },
-      },
-      spacing: {
-        marginRight: '1rem',
-      },
-      tableCell: {
-        padding: '0 1rem 0 0',
-      },
-    })
-  )
-
-  const classes = useStyles()
-
   return (
     <>
-      <TableCell className={classes.tableCell}>
+      <TableCell
+        sx={{
+          padding: '0 1rem 0 0',
+        }}
+      >
         <TextField
           id="node-name"
           value={value.name}
-          className={classes.spacing}
+          sx={{
+            mr: '1rem',
+          }}
           onChange={(e): void => {
             setValue({ ...value, name: e.target.value })
             updateProperty(idx, { ...value, name: e.target.value })
           }}
         />
       </TableCell>
-      <TableCell className={classes.tableCell}>
+      <TableCell
+        sx={{
+          padding: '0 1rem 0 0',
+        }}
+      >
         <FormSelect
           title="Type"
           options={Object.values(PropertyType)}
           value={value.type}
           fullWidth={false}
-          className={classes.spacing}
+          sx={{
+            padding: '0 1rem 0 0',
+          }}
           hideLabel
           onChangeHandler={(e): void => {
             setValue({ ...value, type: e.target.value as PropertyType })
@@ -78,7 +68,11 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
           }}
         />
       </TableCell>
-      <TableCell className={classes.tableCell}>
+      <TableCell
+        sx={{
+          padding: '0 1rem 0 0',
+        }}
+      >
         <Checkbox
           checked={value.primary}
           onChange={(e, checked: boolean): void => {
@@ -91,7 +85,13 @@ export const PropertyEdit = (props: PropertyEditProps): JSX.Element => {
       <TableCell>
         <IconButton
           onClick={(): void => onDelete(idx)}
-          className={classes.iconButton}
+          sx={{
+            padding: 0,
+            '&.MuiIconButton-root:hover': {
+              backgroundColor: 'inherit',
+              padding: 0,
+            },
+          }}
         >
           <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>

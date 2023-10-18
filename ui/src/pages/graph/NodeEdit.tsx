@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
-import { makeStyles, TableCell, TableRow, TextField } from '@material-ui/core'
+import { TableCell, TableRow, TextField } from '@mui/material'
 import { GraphDelta, Node, Property } from '../../services/models'
 import { DomainSelect } from './DomainSelect'
 import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
@@ -16,7 +16,7 @@ interface NodeEditProps {
   updateState: (graphDelta: GraphDelta) => void
 }
 
-export const useStyleTable = makeStyles(() => ({
+export const tableStyles = {
   tableCell: {
     padding: '0 1rem 0 0',
     verticalAlign: 'bottom',
@@ -29,7 +29,7 @@ export const useStyleTable = makeStyles(() => ({
       padding: 0,
     },
   },
-}))
+}
 
 export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const { node, updateState } = props
@@ -37,7 +37,6 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const [value, setValue] = useState<Node>(node)
   const [properties, setProperties] = useState<Property[]>([])
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const classes = useStyleTable()
   const nodeApi = new NodeApi(AXIOS_CONFIG())
 
   const updateDomain = (newDomainIds: string[]): void => {
@@ -93,8 +92,8 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
     >
       <>
         <CustomTable tableHeaders={['Color', 'Name']} label="domain-table">
-          <TableRow className={classes.tableRow}>
-            <TableCell className={classes.tableCell}>
+          <TableRow sx={tableStyles.tableRow}>
+            <TableCell sx={tableStyles.tableCell}>
               <ColorPicker
                 hex={value.color || '#6d6a6e'}
                 onChange={(hex: string): void => {
@@ -102,7 +101,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
                 }}
               />
             </TableCell>
-            <TableCell className={classes.tableCell}>
+            <TableCell sx={tableStyles.tableCell}>
               <TextField
                 autoComplete="off"
                 id="node-label"

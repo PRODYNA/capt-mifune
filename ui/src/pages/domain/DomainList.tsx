@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, createStyles, makeStyles, Typography } from '@material-ui/core'
+import { Box, Typography } from '@mui/material'
 import { DomainListEntry } from './DomainListEntry'
 import { Domain, GraphDelta } from '../../services/models'
 
@@ -8,21 +8,8 @@ interface DomainListProps {
   updateState: (g: GraphDelta) => void
 }
 
-const useStyles = makeStyles(() =>
-  createStyles({
-    root: {
-      position: 'absolute',
-      top: 25,
-      right: 50,
-      zIndex: 100,
-      width: 220,
-    },
-  })
-)
-
 export const DomainList = (props: DomainListProps): JSX.Element => {
   const { domains, updateState } = props
-  const classes = useStyles()
   const [expanded, setExpanded] = useState<string>('')
 
   const toggleAccordion = (id: string): void => {
@@ -30,7 +17,15 @@ export const DomainList = (props: DomainListProps): JSX.Element => {
   }
 
   return (
-    <Box className={classes.root}>
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 25,
+        right: 50,
+        zIndex: 100,
+        width: 220,
+      }}
+    >
       <Box mb={2}>
         <Typography variant="subtitle2" color="textSecondary">
           Domain List

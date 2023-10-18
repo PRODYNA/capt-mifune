@@ -11,12 +11,10 @@ import {
   Slider,
   TableRow,
   Typography,
-} from '@material-ui/core'
-import PlayArrowIcon from '@material-ui/icons/PlayArrow'
-import { Add } from '@material-ui/icons'
+} from '@mui/material'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import { Add } from '@mui/icons-material'
 import { v4 } from 'uuid'
-import { MuiPickersUtilsProvider } from '@material-ui/pickers'
-import DateFnsUtils from '@date-io/date-fns'
 import { AnalyticFilter } from './AnalyticFilter'
 import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
@@ -67,59 +65,55 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
 
   const filterElements = (): JSX.Element => {
     return (
-      <>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <CustomTable tableHeaders={tableHeaders} label="property-table">
-            {filters.map((f) => {
-              return (
-                <TableRow key={`filter-${f.uuid}`}>
-                  <AnalyticFilter
-                    onKeyChange={(k) => {
-                      setFilters((prevState) =>
-                        prevState.map((item) =>
-                          item.uuid === f.uuid
-                            ? {
-                                ...item,
-                                property: k,
-                              }
-                            : item
-                        )
-                      )
-                    }}
-                    onValueChange={(k) => {
-                      setFilters((prevState) =>
-                        prevState.map((item) =>
-                          item.uuid === f.uuid
-                            ? {
-                                ...item,
-                                value: k,
-                              }
-                            : item
-                        )
-                      )
-                    }}
-                    onFuncChange={(k) => {
-                      setFilters((prevState) =>
-                        prevState.map((item) =>
-                          item.uuid === f.uuid
-                            ? {
-                                ...item,
-                                function: k,
-                              }
-                            : item
-                        )
-                      )
-                    }}
-                    onDelete={() => {
-                      setFilters(filters.filter((item) => item.uuid !== f.uuid))
-                    }}
-                  />
-                </TableRow>
-              )
-            })}
-          </CustomTable>
-        </MuiPickersUtilsProvider>
-      </>
+      <CustomTable tableHeaders={tableHeaders} label="property-table">
+        {filters.map((f) => {
+          return (
+            <TableRow key={`filter-${f.uuid}`}>
+              <AnalyticFilter
+                onKeyChange={(k) => {
+                  setFilters((prevState) =>
+                    prevState.map((item) =>
+                      item.uuid === f.uuid
+                        ? {
+                            ...item,
+                            property: k,
+                          }
+                        : item
+                    )
+                  )
+                }}
+                onValueChange={(k) => {
+                  setFilters((prevState) =>
+                    prevState.map((item) =>
+                      item.uuid === f.uuid
+                        ? {
+                            ...item,
+                            value: k,
+                          }
+                        : item
+                    )
+                  )
+                }}
+                onFuncChange={(k) => {
+                  setFilters((prevState) =>
+                    prevState.map((item) =>
+                      item.uuid === f.uuid
+                        ? {
+                            ...item,
+                            function: k,
+                          }
+                        : item
+                    )
+                  )
+                }}
+                onDelete={() => {
+                  setFilters(filters.filter((item) => item.uuid !== f.uuid))
+                }}
+              />
+            </TableRow>
+          )
+        })}
+      </CustomTable>
     )
   }
 
@@ -215,10 +209,9 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
                   max={10}
                   aria-labelledby="non-linear-slider"
                   scale={(x) => (x < 1 ? x * 0.5 : x * 10)}
-                  onChange={(
-                    event: ChangeEvent<Record<string, unknown>>,
-                    value: number | number[]
-                  ): void => setScale(value as number)}
+                  onChange={(event: Event, value: number | number[]): void =>
+                    setScale(value as number)
+                  }
                   valueLabelDisplay="on"
                 />
               </Box>

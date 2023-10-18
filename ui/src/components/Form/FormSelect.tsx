@@ -4,8 +4,9 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  SelectChangeEvent,
   SelectProps,
-} from '@material-ui/core'
+} from '@mui/material'
 import * as React from 'react'
 
 type IFormSelectProps = SelectProps & {
@@ -23,9 +24,7 @@ const FormSelect: React.FunctionComponent<IFormSelectProps> = ({
   hideLabel,
   onChangeHandler,
 }) => {
-  const handleChange = (
-    event: React.ChangeEvent<{ name?: string | undefined; value: unknown }>
-  ): void => {
+  const handleChange = (event: SelectChangeEvent<string>): void => {
     if (onChangeHandler) {
       onChangeHandler(event)
     }

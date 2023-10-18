@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 import { ResponsiveAreaBump } from '@nivo/bump'
 import { ChartWrapper } from '../ChartWrapper'
 import ChartContext from '../../../context/ChartContext'

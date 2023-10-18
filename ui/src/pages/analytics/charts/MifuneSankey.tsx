@@ -5,7 +5,7 @@ import {
   ResponsiveSankey,
   SankeyDataProps,
 } from '@nivo/sankey'
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
 import ChartContext from '../../../context/ChartContext'
 import { QueryFunction } from '../../../services/models/query-function'

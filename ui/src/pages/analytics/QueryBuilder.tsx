@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Box, Chip, Collapse, Switch, Typography } from '@material-ui/core'
+import { Box, Chip, Collapse, Switch, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'

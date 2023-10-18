@@ -1,10 +1,4 @@
-import {
-  Input,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectProps,
-} from '@material-ui/core'
+import { Input, InputLabel, MenuItem, Select, SelectProps } from '@mui/material'
 import React from 'react'
 import { Node } from '../../services/models'
 

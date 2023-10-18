@@ -1,22 +1,20 @@
 import {
   Box,
-  createStyles,
   FormControl,
   IconButton,
   ListItemIcon,
-  makeStyles,
   TextField,
   Tooltip,
   Typography,
-} from '@material-ui/core'
-import React, { useContext, useState } from 'react'
-import { useTheme } from '@material-ui/core/styles'
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord'
-import Delete from '@material-ui/icons/Delete'
-import Save from '@material-ui/icons/Save'
-import Add from '@material-ui/icons/Add'
-import Visibility from '@material-ui/icons/Visibility'
-import VisibilityOff from '@material-ui/icons/VisibilityOff'
+} from '@mui/material'
+import React, { SyntheticEvent, useContext, useState } from 'react'
+import { useTheme } from '@mui/material/styles'
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
+import Delete from '@mui/icons-material/Delete'
+import Save from '@mui/icons-material/Save'
+import Add from '@mui/icons-material/Add'
+import Visibility from '@mui/icons-material/Visibility'
+import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { NodeSelect } from './NodeSelect'
 import CustomAccordion from '../../components/Accordion/CustomAccordion'
 import { SnackbarContext } from '../../context/Snackbar'
@@ -54,19 +52,6 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   } = useContext(GraphContext)
   const theme = useTheme()
   const domainApi = new DomainApi(AXIOS_CONFIG())
-
-  const useStyles = makeStyles(() =>
-    createStyles({
-      active: {
-        backgroundColor: theme.palette.grey[100],
-      },
-      icon: {
-        fontSize: 20,
-      },
-    })
-  )
-
-  const classes = useStyles()
 
   const handleChange = (): void => {
     if (domain.id) toggleAccordion(domain.id)
@@ -133,7 +118,9 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     return (
       <Tooltip arrow title={domain.modelValid ? 'valid' : 'invalid'}>
         <FiberManualRecordIcon
-          className={classes.icon}
+          sx={{
+            fontSize: 20,
+          }}
           htmlColor={
             domain.modelValid
               ? theme.palette.success.main
@@ -146,7 +133,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
 
   const renderForm = (): JSX.Element => {
     if (domain.id !== selectedDomain?.id) {
-      return <></>
+      return <Box />
     }
 
     return (
@@ -229,7 +216,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
             </Tooltip>
           </>
         }
-        onChange={(event: React.ChangeEvent<Record<string, unknown>>): void => {
+        onChange={(event: SyntheticEvent<Element, Event>): void => {
           event.preventDefault()
           handleChange()
         }}

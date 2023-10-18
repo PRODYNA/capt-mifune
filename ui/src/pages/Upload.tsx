@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
-import { Box, Container, makeStyles, Typography } from '@material-ui/core'
-import CloudUploadIcon from '@material-ui/icons/CloudUpload'
+import { Box, Container, Typography } from '@mui/material'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
 import CustomButton from '../components/Button/CustomButton'
 import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'
@@ -8,18 +8,7 @@ import { CustomTexts } from '../utils/CustomTexts'
 import AXIOS_CONFIG from '../openapi/axios-config'
 import { SourceResourceApi } from '../services'
 
-const useStyle = makeStyles({
-  content: {
-    borderBottom: '1px solid gray',
-    borderTop: '1px solid gray',
-    padding: '0.5rem 0',
-    maxWidth: 500,
-    width: '100%',
-  },
-})
-
 const FileUpload = (): JSX.Element => {
-  const classes = useStyle()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(
     undefined
@@ -53,7 +42,15 @@ const FileUpload = (): JSX.Element => {
         }}
       >
         <Box display="flex" mt={3}>
-          <div className={classes.content}>
+          <Box
+            sx={{
+              borderBottom: '1px solid gray',
+              borderTop: '1px solid gray',
+              padding: '0.5rem 0',
+              maxWidth: 500,
+              width: '100%',
+            }}
+          >
             <input
               accept=".csv"
               type="file"
@@ -63,7 +60,7 @@ const FileUpload = (): JSX.Element => {
                   setFile({ ...file, file: e.target.files[0] })
               }}
             />
-          </div>
+          </Box>
           <Box ml={2}>
             <CustomButton
               title="submit"

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { HexColorPicker } from 'react-colorful'
-import { IconButton, makeStyles } from '@material-ui/core'
+import { Box, IconButton } from '@mui/material'
 
 interface ColorPickerProps {
   hex: string
@@ -20,46 +20,44 @@ export const ColorPicker = (props: ColorPickerProps): JSX.Element => {
     setShow(false)
   }
 
-  const useStyle = makeStyles({
-    button: {
-      margin: 7,
-      backgroundColor: hex,
-    },
-    popover: {
-      boxShadow: '2px 2px 5px black',
-      borderRadius: 10,
-      zIndex: 1000,
-      position: 'absolute',
-      backgroundColor: '#444',
-      padding: 10,
-    },
-    cover: {
-      position: 'fixed',
-      top: '0px',
-      right: '0px',
-      bottom: '0px',
-      left: '0px',
-    },
-  })
-  const classes = useStyle()
-
   return (
     <div className={className}>
       <IconButton
         size="medium"
-        className={classes.button}
+        sx={{
+          margin: 7,
+          backgroundColor: hex,
+        }}
         onClick={handleClick}
       />
       {show ? (
-        <div className={classes.popover}>
-          <div className={classes.cover} onClick={handleClose} />
+        <Box
+          sx={{
+            boxShadow: '2px 2px 5px black',
+            borderRadius: 10,
+            zIndex: 1000,
+            position: 'absolute',
+            backgroundColor: '#444',
+            padding: 10,
+          }}
+        >
+          <Box
+            sx={{
+              position: 'fixed',
+              top: '0px',
+              right: '0px',
+              bottom: '0px',
+              left: '0px',
+            }}
+            onClick={handleClose}
+          />
           <HexColorPicker
             color={hex}
             onChange={(e) => {
               onChange(e)
             }}
           />
-        </div>
+        </Box>
       ) : null}
     </div>
   )

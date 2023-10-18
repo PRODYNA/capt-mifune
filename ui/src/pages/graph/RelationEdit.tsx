@@ -1,10 +1,10 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
-import { Checkbox, TableCell, TableRow, TextField } from '@material-ui/core'
+import { Checkbox, TableCell, TableRow, TextField } from '@mui/material'
 import { GraphDelta, Property, Relation } from '../../services/models'
 import { DomainSelect } from './DomainSelect'
 import Edit from './Edit'
 import CustomTable from '../../components/Table/CustomTable'
-import { useStyleTable } from './NodeEdit'
+import { tableStyles } from './NodeEdit'
 import GraphContext from '../../context/GraphContext'
 import { RelationApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
@@ -19,7 +19,6 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   const { relations, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Relation>(relation)
   const [properties, setProperties] = useState<Property[]>([])
-  const classes = useStyleTable()
   const relationApi = new RelationApi(AXIOS_CONFIG())
 
   const updateType = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -91,13 +90,13 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
           tableHeaders={['Name', 'Multiple', 'Primary']}
           label="relation-table"
         >
-          <TableRow className={classes.tableRow}>
+          <TableRow sx={tableStyles.tableRow}>
             <TableCell
-              className={`${classes.tableCell} ${classes.cellMinWidth}`}
+              sx={{ ...tableStyles.tableCell, ...tableStyles.cellMinWidth }}
             >
               <TextField id="type" value={value.type} onChange={updateType} />
             </TableCell>
-            <TableCell className={classes.tableCell}>
+            <TableCell sx={tableStyles.tableCell}>
               <Checkbox
                 checked={value.multiple}
                 onChange={(e, clicked: boolean) => {
@@ -106,7 +105,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
                 name="multiple"
               />
             </TableCell>
-            <TableCell className={classes.tableCell}>
+            <TableCell sx={tableStyles.tableCell}>
               <Checkbox
                 checked={value.primary}
                 onChange={(e, clicked: boolean) => {

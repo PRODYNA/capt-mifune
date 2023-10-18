@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { ResponsiveChoropleth } from '@nivo/geo'
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
 import ChartContext, { QueryData } from '../../../context/ChartContext'
 import countries from '../../../utils/Countries.json'

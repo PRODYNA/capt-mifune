@@ -1,8 +1,8 @@
 import React from 'react'
-import { Box } from '@material-ui/core'
-import { useTheme } from '@material-ui/core/styles'
-import SaveIcon from '@material-ui/icons/Save'
-import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined'
+import { Box } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import SaveIcon from '@mui/icons-material/Save'
+import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined'
 import CustomButton from '../Button/CustomButton'
 
 interface IFormActions {

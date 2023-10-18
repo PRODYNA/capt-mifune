@@ -6,8 +6,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  makeStyles,
-} from '@material-ui/core'
+} from '@mui/material'
 
 interface ICustomTable {
   tableHeaders: string[]
@@ -18,14 +17,6 @@ interface ICustomTable {
 const CustomTable = (props: ICustomTable): JSX.Element => {
   const { tableHeaders, label, children } = props
 
-  const useStyle = makeStyles(() => ({
-    tableCell: {
-      padding: '0 1rem 0 0',
-    },
-  }))
-
-  const classes = useStyle()
-
   return (
     <TableContainer>
       <Table aria-label={label} size="small">
@@ -33,7 +24,12 @@ const CustomTable = (props: ICustomTable): JSX.Element => {
           <TableRow>
             {tableHeaders.map(
               (header: string): JSX.Element => (
-                <TableCell key={header} className={classes.tableCell}>
+                <TableCell
+                  key={header}
+                  sx={{
+                    padding: '0 1rem 0 0',
+                  }}
+                >
                   {header}
                 </TableCell>
               )

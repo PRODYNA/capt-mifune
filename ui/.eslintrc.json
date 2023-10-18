@@ -14,7 +14,7 @@
     "ecmaFeatures": {
       "jsx": true
     },
-    "ecmaVersion": 12,
+    "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "plugins": ["react", "@typescript-eslint", "react-hooks"],
@@ -27,8 +27,7 @@
       "ignorePackages",
       {
         "ts": "never",
-        "tsx": "never",
-        "js": "never"
+        "tsx": "never"
       }
     ],
     "no-shadow": "off",
@@ -41,20 +40,15 @@
     ],
     "react-hooks/rules-of-hooks": "error",
     "import/prefer-default-export": "off",
-    "react/prop-types": "off",
-    "react/jsx-uses-vars": "error",
-    "react/jsx-uses-react": "error",
-    "no-empty-function": "off",
-    "@typescript-eslint/no-empty-function": "off",
-    "react/function-component-definition": "off",
-    "react/jsx-props-no-spreading": "off",
     "react/require-default-props": "off",
-    "react-hooks/exhaustive-deps": "off",
-    "react/jsx-no-useless-fragment": "off",
+    "react/prop-types": "off",
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/function-component-definition": "off",
     "react/jsx-no-constructed-context-values": "off",
-    "react/no-danger": "off",
-    "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/no-static-element-interactions": "off"
+    "react/jsx-props-no-spreading": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "react/no-unstable-nested-components": "off"
   },
   "settings": {
     "import/resolver": {

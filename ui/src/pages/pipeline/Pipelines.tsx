@@ -4,7 +4,6 @@ import {
   Chip,
   Container,
   LinearProgress,
-  makeStyles,
   Paper,
   Table,
   TableBody,
@@ -13,9 +12,9 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from '@material-ui/core'
-import DeleteIcon from '@material-ui/icons/Delete'
-import { useTheme } from '@material-ui/core/styles'
+} from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
+import { useTheme } from '@mui/material/styles'
 import { EventSourcePolyfill } from 'ng-event-source'
 import PipelineRow from './PipelineRow'
 import CustomButton from '../../components/Button/CustomButton'
@@ -51,19 +50,6 @@ const Pipelines = (): JSX.Element => {
     'ID',
   ]
 
-  const classes = makeStyles({
-    chip: {
-      marginRight: '1rem',
-    },
-    paper: {
-      backgroundColor: 'inherit',
-      border: '1px dashed grey',
-      borderRadius: 0,
-      '& .MuiTableCell-root': {
-        borderBottom: 'unset',
-      },
-    },
-  })()
   let importStatsClient: EventSourcePolyfill
 
   useEffect(() => {
@@ -115,12 +101,16 @@ const Pipelines = (): JSX.Element => {
           <Typography variant="h5">Pipelines</Typography>
           <Box>
             <Chip
-              className={classes.chip}
+              sx={{
+                marginRight: '1rem',
+              }}
               label={`nodes: ${statistics?.nodes}`}
               color="primary"
             />
             <Chip
-              className={classes.chip}
+              sx={{
+                marginRight: '1rem',
+              }}
               label={`relations: ${statistics?.relations}`}
               color="primary"
             />
@@ -134,7 +124,17 @@ const Pipelines = (): JSX.Element => {
           />
         </Box>
         {showProgress && <LinearProgress color="primary" />}
-        <TableContainer component={Paper} className={classes.paper}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            backgroundColor: 'inherit',
+            border: '1px dashed grey',
+            borderRadius: 0,
+            '& .MuiTableCell-root': {
+              borderBottom: 'unset',
+            },
+          }}
+        >
           <Table aria-label="simple table">
             <TableHead>
               <TableRow key="table-header">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, Container, Typography } from '@material-ui/core'
+import { Box, Container, Typography } from '@mui/material'
 import PipelineEdit from './PipelineEdit'
 import { Domain } from '../../services/models/domain'
 import { DomainApi } from '../../services/api/domain-api'

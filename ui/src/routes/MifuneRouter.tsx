@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box } from '@material-ui/core'
+import { Box } from '@mui/material'
 import { Route, Routes } from 'react-router-dom'
 import { OidcSecure } from '@axa-fr/react-oidc'
 import { Analytics } from '../pages/analytics/Analytics'
