@@ -21,7 +21,7 @@
         <quarkus-neo4j.version>3.4.0</quarkus-neo4j.version>
         <jandex-maven-plugin.version>1.2.3</jandex-maven-plugin.version>
         <jackson.version>2.15.2</jackson.version>
-        <opencsv.version>5.7.1</opencsv.version>
+        <opencsv.version>5.8</opencsv.version>
         <license.licenseName>MIT-License</license.licenseName>
         <spotless-maven-plugin.version>2.40.0</spotless-maven-plugin.version>
         <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
