@@ -3,7 +3,7 @@ import { ResponsiveBar } from '@nivo/bar'
 import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
 import { ChartContext, QueryData } from '../../../context/ChartContext'
-import { QueryFunction } from '../../../services/models/query-function'
+import { QueryFunction } from '../../../services'
 
 export const buildBarChart = (data: QueryData): JSX.Element => {
   return (
@@ -56,15 +56,17 @@ export const MifuneBarChart = (): JSX.Element => {
   return (
     <ChartWrapper
       results={results}
-      orders={[order ?? '']}
-      dataPreparation={(data, scale) =>
-        data.map((item) => {
-          return {
-            ...item,
-            value: (parseFloat(item.value) / scale).toFixed(2),
-          }
-        })
-      }
+      orders={order}
+      dataPreparation={(data, scale) => {
+        return data
+          .map((item) => {
+            return {
+              ...item,
+              value: (parseFloat(item.value) / scale).toFixed(2),
+            }
+          })
+          .reverse()
+      }}
       selects={[
         {
           query,
@@ -102,7 +104,7 @@ export const MifuneBarChart = (): JSX.Element => {
               ]
               setChartOptions({
                 ...chartOptions,
-                order: v[0],
+                order: v.map((item) => ({ field: item, direction: 'DESC' })),
                 results: mappedResults,
               })
             }

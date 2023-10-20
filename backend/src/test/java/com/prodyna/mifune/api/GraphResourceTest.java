@@ -100,8 +100,6 @@ class GraphResourceTest {
         .post("/api/graph/node")
         .then()
         .statusCode(200)
-        .log()
-        .body()
         .body("changedNodes[0].label", equalTo("Person"));
   }
 

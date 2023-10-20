@@ -28,6 +28,7 @@ package com.prodyna.mifune.core.schema;
 
 import com.prodyna.mifune.domain.Graph;
 import com.prodyna.mifune.domain.Property;
+import com.prodyna.mifune.domain.Relation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -46,9 +47,24 @@ public class CypherIndexBuilder {
         }
         String propertiesString = getPropertiesString(props);
         if (propertiesString != null) {
-          result.add(
-              "CREATE INDEX IF NOT EXISTS FOR (n:%s) ON (%s)"
-                  .formatted(node.getLabel(), propertiesString));
+          if (graph.getRelations().stream()
+              .filter(r -> r.getSourceId().equals(node.getId()))
+              .filter(Relation::isPrimary)
+              .findAny()
+              .isEmpty()) {
+
+            result.add(
+                """
+                                CREATE CONSTRAINT IF NOT EXISTS FOR (n:%s)
+                                REQUIRE (%s) IS UNIQUE
+                                """
+                    .formatted(node.getLabel(), propertiesString));
+          } else {
+
+            result.add(
+                "CREATE INDEX IF NOT EXISTS FOR (n:%s) ON (%s)"
+                    .formatted(node.getLabel(), propertiesString));
+          }
         }
       }
     }

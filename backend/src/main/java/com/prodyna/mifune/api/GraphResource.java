@@ -27,8 +27,8 @@ package com.prodyna.mifune.api;
  */
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prodyna.mifune.core.DeletionService;
-import com.prodyna.mifune.core.ImportService;
+import com.prodyna.mifune.core.data.DeletionService;
+import com.prodyna.mifune.core.data.ImportService;
 import com.prodyna.mifune.core.data.StatisticService;
 import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.domain.*;
@@ -226,7 +226,7 @@ public class GraphResource {
                 })
             .group()
             .intoLists()
-            .of(1000, Duration.ofMillis(500))
+            .of(5000, Duration.ofMillis(300))
             .map(
                 l ->
                     l.stream()
@@ -235,11 +235,14 @@ public class GraphResource {
                                 ImportStatistic::domainId, ImportStatistic::count, Long::max)))
             .filter(m -> !m.isEmpty());
 
-    var fallback = Multi.createFrom().uni(countDomainRootNodes().memoize().indefinitely());
+    Uni<Map<UUID, Long>> countDomainRootNodes = countDomainRootNodes();
+    var fallback = Multi.createFrom().uni(countDomainRootNodes);
 
-    return events
+    return Multi.createBy()
+        .concatenating()
+        .streams(fallback, events)
         .ifNoItem()
-        .after(Duration.ofSeconds(10))
+        .after(Duration.ofSeconds(5))
         .recoverWithMulti(fallback)
         .map(
             m -> {

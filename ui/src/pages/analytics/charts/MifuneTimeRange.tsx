@@ -40,7 +40,7 @@ export const MifuneTimeRange = (): JSX.Element => {
   return (
     <ChartWrapper
       results={results}
-      orders={[order ?? '']}
+      orders={order}
       dataPreparation={(data, scale) =>
         data.map((item) => {
           return {
@@ -86,7 +86,7 @@ export const MifuneTimeRange = (): JSX.Element => {
               ]
               setChartOptions({
                 ...chartOptions,
-                order: v[0],
+                order: v.map((item) => ({ field: item, direction: 'ASC' })),
                 results: mappedResults,
               })
             }

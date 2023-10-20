@@ -26,17 +26,12 @@ package com.prodyna.mifune.api;
  * #L%
  */
 
+import com.prodyna.mifune.core.data.ApocalypseService;
 import io.smallrye.mutiny.Multi;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.logging.Logger;
-import org.neo4j.driver.Driver;
-import org.neo4j.driver.async.AsyncSession;
 
 @Path("/api/apocalypse")
 @Tag(name = "admin")
@@ -44,9 +39,11 @@ import org.neo4j.driver.async.AsyncSession;
 @Produces(MediaType.APPLICATION_JSON)
 public class ApocalypseResource {
 
-  @Inject protected Logger log;
+  private final ApocalypseService apocalypseService;
 
-  @Inject protected Driver driver;
+  public ApocalypseResource(ApocalypseService apocalypseService) {
+    this.apocalypseService = apocalypseService;
+  }
 
   @GET
   @Operation(
@@ -57,82 +54,6 @@ public class ApocalypseResource {
 			""")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   public Multi<String> apocalypseNow() {
-    log.info("apocalypse starts now");
-    var session = driver.session(AsyncSession.class);
-
-    Supplier<CompletionStage<Long>> deleteAndCountRel =
-        () ->
-            session
-                .runAsync("match()-[r]->() with r limit 10000 delete r return count(r) as count")
-                .thenCompose(r -> r.singleAsync().thenApply(count -> count.get("count").asLong()));
-
-    Supplier<CompletionStage<Long>> deleteAndCountNodes =
-        () ->
-            session
-                .runAsync("match(a) with a limit 10000 detach delete a return count(a) as count")
-                .thenCompose(r -> r.singleAsync().thenApply(count -> count.get("count").asLong()));
-
-    Supplier<CompletionStage<Long>> dropIndex =
-        () ->
-            session
-                .runAsync(
-                    """
-                        show index yield name
-                        return name
-                        """)
-                .thenCompose(
-                    cursor ->
-                        cursor.forEachAsync(
-                            rec ->
-                                session.runAsync(
-                                    "drop index %s".formatted(rec.get("name").asString()))))
-                .thenApply(sr -> (long) sr.counters().indexesRemoved());
-
-    Supplier<CompletionStage<Long>> dropConstraints =
-        () ->
-            session
-                .runAsync("""
-				show constraints yield name
-				return name
-				""")
-                .thenCompose(
-                    cursor ->
-                        cursor.forEachAsync(
-                            rec ->
-                                session.runAsync(
-                                    "drop constraint %s".formatted(rec.get("name").asString()))))
-                .thenApply(sr -> (long) sr.counters().indexesRemoved());
-
-    return Multi.createBy()
-        .repeating()
-        .completionStage(deleteAndCountRel)
-        .whilst(l -> l > 0)
-        .map("%s relations removed"::formatted)
-        .onCompletion()
-        .switchTo(
-            () ->
-                Multi.createBy()
-                    .repeating()
-                    .completionStage(deleteAndCountNodes)
-                    .whilst(l -> l > 0)
-                    .map("%s nodes removed"::formatted))
-        .onCompletion()
-        .switchTo(
-            () ->
-                Multi.createBy()
-                    .repeating()
-                    .completionStage(dropConstraints)
-                    .whilst(l -> l > 0)
-                    .map("%s constraints removed"::formatted))
-        .onCompletion()
-        .switchTo(
-            () ->
-                Multi.createBy()
-                    .repeating()
-                    .completionStage(dropIndex)
-                    .whilst(l -> l > 0)
-                    .map("%s indexes removed"::formatted))
-        .onCompletion()
-        .invoke(session::closeAsync);
+    return apocalypseService.clearDatabase();
   }
 }

@@ -31,7 +31,7 @@ import static java.util.function.Predicate.not;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.prodyna.mifune.core.DeletionService;
+import com.prodyna.mifune.core.data.DeletionService;
 import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.core.source.SourceService;

@@ -106,7 +106,7 @@ export const MifiuneChordChart = (): JSX.Element => {
     <ChartWrapper
       disableScale
       results={results}
-      orders={[order ?? '']}
+      orders={order}
       dataPreparation={dataPreparation}
       selects={[
         {
@@ -164,7 +164,7 @@ export const MifiuneChordChart = (): JSX.Element => {
               ]
               setChartOptions({
                 ...chartOptions,
-                order: v.length > 1 ? '' : v[0],
+                order: v.map((item) => ({ field: item, direction: 'ASC' })),
                 results: mappedResults,
               })
             }

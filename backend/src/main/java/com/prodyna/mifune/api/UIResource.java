@@ -68,15 +68,14 @@ public class UIResource {
         vertxStaticContent.map(StaticHandler::create).orElseGet(StaticHandler::create);
     router.get("/").handler(rc -> rc.redirect("/ui/"));
     router.get("/ui/env.js").handler(r -> r.end(envJS()));
-    //    router.route("/ui/*").handler(requestHandler);
-    //    router
-    //        .route("/ui/*")
-    //        .handler(
-    //            rc -> {
-    //              logger.info("reroute to index %s".formatted(rc.normalizedPath()));
-    //              rc.reroute("/ui/index.html");
-    //            })
-    ;
+    router.route("/ui/*").handler(requestHandler);
+    router
+        .route("/ui/*")
+        .handler(
+            rc -> {
+              logger.info("reroute to index %s".formatted(rc.normalizedPath()));
+              rc.reroute("/ui/index.html");
+            });
   }
 
   public String envJS() {

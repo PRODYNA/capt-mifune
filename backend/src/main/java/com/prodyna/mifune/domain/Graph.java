@@ -29,6 +29,7 @@ package com.prodyna.mifune.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Graph {
@@ -61,6 +62,34 @@ public class Graph {
 
   public void setNodes(List<Node> nodes) {
     this.nodes = nodes;
+  }
+
+  public Node sourceNode(Relation relation) {
+    return getNodes().stream()
+        .filter(n -> n.getId().equals(relation.getSourceId()))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  public Node targetNode(Relation relation) {
+    return getNodes().stream()
+        .filter(n -> n.getId().equals(relation.getTargetId()))
+        .findFirst()
+        .orElseThrow();
+  }
+
+  public List<Node> nodesByDomainId(UUID domainId, boolean unique) {
+    return getNodes().stream()
+        .filter(n -> n.getDomainIds().contains(domainId))
+        .filter(n -> n.getDomainIds().size() <= 1 || !unique)
+        .toList();
+  }
+
+  public List<Relation> relationsByDomainId(UUID domainId, boolean unique) {
+    return getRelations().stream()
+        .filter(n -> n.getDomainIds().contains(domainId))
+        .filter(n -> n.getDomainIds().size() <= 1 || !unique)
+        .toList();
   }
 
   @Override

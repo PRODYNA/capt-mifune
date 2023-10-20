@@ -120,7 +120,7 @@ export const MifuneSankey = (): JSX.Element => {
             ]
             setChartOptions({
               ...chartOptions,
-              order: '',
+              order: [],
               results: mappedResults,
             })
           },

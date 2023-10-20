@@ -1,4 +1,4 @@
-package com.prodyna.mifune.core;
+package com.prodyna.mifune.core.data;
 
 /*-
  * #%L
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVReader;
+import com.prodyna.mifune.core.DataBaseService;
 import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.core.schema.CypherIndexBuilder;
 import com.prodyna.mifune.core.schema.CypherUpdateBuilder;
@@ -45,7 +46,6 @@ import com.prodyna.mifune.domain.ImportStatistic;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
-import io.smallrye.mutiny.subscription.Cancellable;
 import io.vertx.mutiny.core.eventbus.EventBus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -56,17 +56,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
+import org.neo4j.driver.exceptions.ClientException;
 
 @ApplicationScoped
 public class ImportService extends DataBaseService {
 
-  private final Map<UUID, Cancellable> pipelineMap = new HashMap<>();
+  private final Map<UUID, SubmissionPublisher<?>> pipelineMap = new HashMap<>();
 
   @Inject protected Logger log;
 
@@ -84,10 +86,6 @@ public class ImportService extends DataBaseService {
 
   @Inject ObjectMapper objectMapper;
 
-  public ImportService() {
-    super(null);
-  }
-
   @Inject
   public ImportService(Driver driver) {
     super(driver);
@@ -97,7 +95,7 @@ public class ImportService extends DataBaseService {
 
     if (pipelineMap.containsKey(domainId)) {
       log.info("import for domain is running");
-      throw new BadRequestException();
+      throw new BadRequestException("import for domain is running");
     }
 
     log.debug("start import");
@@ -114,13 +112,13 @@ public class ImportService extends DataBaseService {
         .onItem()
         .invoke(
             () -> {
-              Cancellable cancellable = startImportTask(domainId, domain, graph);
-              pipelineMap.put(domainId, cancellable);
+              var publisher = startImportTask(domainId, domain, graph);
+              pipelineMap.put(domainId, publisher);
             })
         .map(x -> "OK");
   }
 
-  private Cancellable startImportTask(UUID domainId, Domain domain, Graph graph) {
+  private SubmissionPublisher<?> startImportTask(UUID domainId, Domain domain, Graph graph) {
     GraphModel graphModel = new GraphModel(graph);
     ObjectNode jsonModel = new GraphJsonBuilder(graphModel, domainId, false).getJson();
     cleanJsonModel(domain, jsonModel);
@@ -135,7 +133,7 @@ public class ImportService extends DataBaseService {
             .subscribe()
             .withSubscriber(new JsonTransformer(objectMapper, jsonModel, 500));
 
-    return createImportTask(domainId, cypher, jsonTransformer)
+    createImportTask(domainId, cypher, jsonTransformer)
         .subscribe()
         .with(
             s -> {
@@ -155,6 +153,7 @@ public class ImportService extends DataBaseService {
               pipelineMap.remove(domainId);
               log.info("import done ");
             });
+    return jsonTransformer;
   }
 
   private Multi<Long> createImportTask(UUID domainId, String cypher, JsonTransformer publisher) {
@@ -173,11 +172,15 @@ public class ImportService extends DataBaseService {
     return multiWrite(cypher, parameter, r -> counter.getAndIncrement());
   }
 
-  private Uni<Void> buildDomain(Domain domain) {
+  private Uni<UUID> buildDomain(Domain domain) {
     return singleWrite(
-        "merge(d:Domain {id:$id}) set d.name = $name",
+        """
+                        merge(domain:Domain {id:$id})
+                        set domain.name = $name
+                        return domain.id as id
+                        """,
         Map.of("id", domain.getId().toString(), "name", domain.getName()),
-        rec -> (Void) null);
+        rec -> UUID.fromString(rec.get("id").asString()));
   }
 
   private Multi<String> buildIndex(UUID domainId, Graph graph) {
@@ -185,7 +188,13 @@ public class ImportService extends DataBaseService {
     return Multi.createFrom()
         .items(indexCyphers.stream())
         .onItem()
-        .transformToUniAndConcatenate(c -> singleWrite(c, Map.of(), x -> c));
+        .transformToUniAndConcatenate(c -> super.singleStatistic(c, Map.of()))
+        .map(
+            resultSummary -> {
+              String summaryString = resultSummary.toString();
+              log.info(summaryString);
+              return summaryString;
+            });
   }
 
   private void cleanJsonModel(Domain domain, ObjectNode jsonModel) {
@@ -222,7 +231,15 @@ public class ImportService extends DataBaseService {
   }
 
   public Uni<String> stopImport(UUID domainId) {
-    Optional.ofNullable(this.pipelineMap.remove(domainId)).ifPresent(Cancellable::cancel);
+    Optional.ofNullable(this.pipelineMap.remove(domainId))
+        .ifPresent(
+            c -> {
+              try {
+                c.close();
+              } catch (ClientException e) {
+                // ignore;
+              }
+            });
     return Uni.createFrom().item("done");
   }
 }

@@ -8,8 +8,7 @@ import {
 } from '@mui/material'
 import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox'
 import { formatISO } from 'date-fns'
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers'
+import { DesktopDatePicker } from '@mui/x-date-pickers'
 import FormSelect from '../../components/Form/FormSelect'
 import { AnalyticSelect } from './AnalyticSelect'
 import { tableStyles } from '../graph/NodeEdit'
@@ -80,7 +79,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
               parameters: [filter],
             },
           ],
-          orders: [filter],
+          orders: [{ field: filter, direction: 'ASC' }],
           filters: [],
           distinct: true,
           limit: 500,

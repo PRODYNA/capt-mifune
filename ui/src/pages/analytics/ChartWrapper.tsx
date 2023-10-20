@@ -16,20 +16,26 @@ import CustomTable from '../../components/Table/CustomTable'
 import CustomButton from '../../components/Button/CustomButton'
 import { ChartContext } from '../../context/ChartContext'
 import {
-  QueryResultDefinition,
-  QueryFunction,
+  DataResourceApi,
+  Direction,
   Filter,
   FilterFunction,
+  OrderField,
   PropertyType,
-} from '../../services/models'
+  QueryFunction,
+  QueryResultDefinition,
+} from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
-import { DataResourceApi } from '../../services'
 import { SnackbarContext } from '../../context/Snackbar'
 
 export interface SelectProps {
   query: Query
   label: string
-  onChange: (v: string[] | undefined, fn?: QueryFunction) => void
+  onChange: (
+    v: string[] | undefined,
+    fn?: QueryFunction,
+    direction?: Direction
+  ) => void
   setPropertyType?: Dispatch<SetStateAction<PropertyType | undefined>>
   fnDefault?: QueryFunction
   renderAsTable?: boolean
@@ -37,7 +43,7 @@ export interface SelectProps {
 
 interface ChartWrapperProps<T> {
   results: QueryResultDefinition[]
-  orders: string[]
+  orders: OrderField[]
   dataPreparation: (data: any[], scale: number) => T | undefined
   selects: SelectProps[]
   children?: JSX.Element

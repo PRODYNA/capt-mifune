@@ -104,12 +104,14 @@ public class JsonTransformer extends SubmissionPublisher<JsonNode>
 
   @Override
   public void onComplete() {
-    lastAccessOrder.forEach(
-        hash -> {
-          var mappingObject = cache.remove(hash);
-          var item = mappingObject.toJson(objectMapper, true);
-          submit(item);
-        });
-    close();
+    if (!isClosed()) {
+      lastAccessOrder.forEach(
+          hash -> {
+            var mappingObject = cache.remove(hash);
+            var item = mappingObject.toJson(objectMapper, true);
+            submit(item);
+          });
+      close();
+    }
   }
 }

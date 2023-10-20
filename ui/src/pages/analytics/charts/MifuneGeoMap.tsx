@@ -4,7 +4,7 @@ import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
 import { ChartContext, QueryData } from '../../../context/ChartContext'
 import countries from '../../../utils/Countries.json'
-import { QueryFunction } from '../../../services/models/query-function'
+import { QueryFunction } from '../../../services'
 
 export const buildGeoChart = (data: QueryData): JSX.Element => {
   return (
@@ -34,7 +34,7 @@ export const MifuneGeoChart = (): JSX.Element => {
   return (
     <ChartWrapper
       results={results}
-      orders={[order ?? '']}
+      orders={order}
       dataPreparation={(data, scale) =>
         data.map((item) => {
           return {
@@ -80,7 +80,7 @@ export const MifuneGeoChart = (): JSX.Element => {
               ]
               setChartOptions({
                 ...chartOptions,
-                order: v[0],
+                order: v.map((item) => ({ field: item, direction: 'ASC' })),
                 results: mappedResults,
               })
             }

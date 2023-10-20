@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { createContext, useState } from 'react'
 import { Query } from '../pages/analytics/QueryBuilder'
-import { QueryResultDefinition } from '../services/models'
+import { OrderField, QueryResultDefinition } from '../services'
 
 type QueryResultDefinitionExtended = QueryResultDefinition & { uuid?: string }
 
 export interface IChartOptions {
   results: QueryResultDefinitionExtended[]
-  order: string | undefined
+  order: OrderField[]
   min: number | undefined
   max: number | undefined
   heatMax: number | undefined
@@ -56,7 +56,7 @@ const ChartProvider = (props: ChartProviderProps): JSX.Element => {
   const [data, setData] = useState<any>()
   const [chartOptions, setChartOptions] = useState<IChartOptions>({
     results: [],
-    order: undefined,
+    order: [],
     min: undefined,
     max: undefined,
     heatMax: undefined,

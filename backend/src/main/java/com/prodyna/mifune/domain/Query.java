@@ -32,7 +32,7 @@ public record Query(
     List<QueryNode> nodes,
     List<QueryRelation> relations,
     List<QueryResultDefinition> results,
-    List<String> orders,
+    List<OrderField> orders,
     List<Filter> filters,
     Boolean distinct,
     Long limit) {}

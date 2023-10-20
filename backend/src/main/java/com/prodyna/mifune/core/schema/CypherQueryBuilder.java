@@ -199,10 +199,15 @@ public class CypherQueryBuilder {
   }
 
   private String buildOrder() {
+
     var orders =
         Optional.ofNullable(this.query.orders()).stream()
             .flatMap(Collection::stream)
-            .map(getVarMap()::get)
+            .map(
+                order ->
+                    "%s %s"
+                        .formatted(
+                            getVarMap().get(order.field()), order.direction().name().toLowerCase()))
             .collect(Collectors.joining(","));
     return Optional.of(orders)
         .filter(not(String::isBlank))

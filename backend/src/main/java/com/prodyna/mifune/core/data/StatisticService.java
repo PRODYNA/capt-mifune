@@ -27,11 +27,6 @@ public class StatisticService extends DataBaseService {
 
   private final GraphService graphService;
 
-  public StatisticService() {
-    super(null);
-    this.graphService = null;
-  }
-
   @Inject
   protected StatisticService(Driver driver, GraphService graphService) {
     super(driver);
@@ -76,7 +71,8 @@ public class StatisticService extends DataBaseService {
     var graphModel = new GraphModel(graphService.graph());
     var cypherQueryBuilder = new CypherQueryBuilder(graphModel, query);
     var cypher = cypherQueryBuilder.cypher();
-    return super.multiRead(
-        cypher, cypherQueryBuilder.getParameter(), cypherQueryBuilder::buildResult);
+    HashMap<String, Object> parameter = cypherQueryBuilder.getParameter();
+    LOG.info("query: {} {}", cypher, parameter);
+    return super.multiRead(cypher, parameter, cypherQueryBuilder::buildResult);
   }
 }

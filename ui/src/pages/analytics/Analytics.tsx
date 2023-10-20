@@ -136,7 +136,7 @@ export const Analytics = (): JSX.Element => {
                   setChartOptions({
                     ...chartOptions,
                     results: [],
-                    order: '',
+                    order: [],
                   })
                 }}
                 color={chart === item.title ? 'primary' : 'default'}

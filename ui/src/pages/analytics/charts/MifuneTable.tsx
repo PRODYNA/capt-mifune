@@ -111,7 +111,7 @@ export const MifuneTable = (): JSX.Element => {
     <ChartWrapper
       disableScale
       results={results}
-      orders={[order ?? '']}
+      orders={order}
       dataPreparation={prepareData}
       selects={[
         ...selects,
@@ -133,7 +133,7 @@ export const MifuneTable = (): JSX.Element => {
               ]
               setChartOptions({
                 ...chartOptions,
-                order: v[0],
+                order: v.map((item) => ({ field: item, direction: 'ASC' })),
                 results: mappedResults,
               })
             }

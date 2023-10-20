@@ -3,7 +3,7 @@ import { ResponsiveRadialBar } from '@nivo/radial-bar'
 import { Box } from '@mui/material'
 import { ChartWrapper } from '../ChartWrapper'
 import { ChartContext } from '../../../context/ChartContext'
-import { QueryFunction } from '../../../services/models/query-function'
+import { QueryFunction } from '../../../services'
 
 export type RadialChartData = { id: string; data: { x: string; y: number }[] }[]
 
@@ -87,7 +87,7 @@ export const MifiuneRadialBar = (): JSX.Element => {
     <ChartWrapper
       disableScale
       results={results}
-      orders={[order ?? '']}
+      orders={order}
       dataPreparation={dataPreparation}
       selects={[
         {
@@ -145,7 +145,7 @@ export const MifiuneRadialBar = (): JSX.Element => {
               ]
               setChartOptions({
                 ...chartOptions,
-                order: v.length > 1 ? '' : v[0],
+                order: v.map((item) => ({ field: item, direction: 'ASC' })),
                 results: mappedResults,
               })
             }
