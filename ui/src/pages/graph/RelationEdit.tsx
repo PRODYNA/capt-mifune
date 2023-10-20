@@ -1,12 +1,11 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { Checkbox, TableCell, TableRow, TextField } from '@mui/material'
-import { GraphDelta, Property, Relation } from '../../services/models'
+import { GraphApi, GraphDelta, Property, Relation } from '../../services'
 import { DomainSelect } from './DomainSelect'
 import Edit from './Edit'
 import CustomTable from '../../components/Table/CustomTable'
 import { tableStyles } from './NodeEdit'
 import { GraphContext } from '../../context/GraphContext'
-import { RelationApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface RelationEditProps {
@@ -19,7 +18,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   const { relations, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Relation>(relation)
   const [properties, setProperties] = useState<Property[]>([])
-  const relationApi = new RelationApi(AXIOS_CONFIG())
+  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const updateType = (event: ChangeEvent<HTMLInputElement>): void => {
     setValue((oldRel) => ({ ...oldRel, type: event.target.value }))
@@ -31,8 +30,8 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
 
   const onCreate = (rel: Relation): void => {
     if (rel.sourceId && rel.domainIds && rel.targetId)
-      relationApi
-        .apiGraphRelationPost({
+      graphApi
+        .createRelation({
           ...rel,
           sourceId: rel.sourceId,
           targetId: rel.targetId,
@@ -51,8 +50,8 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   }
   const onSubmit = (rel: Relation): void => {
     if (rel.id && rel.domainIds)
-      relationApi
-        .apiGraphRelationIdPut(rel.id, { ...rel, domainIds: rel.domainIds })
+      graphApi
+        .updateRelation(rel.id, { ...rel, domainIds: rel.domainIds })
         .then((graphDelta) => {
           updateState(graphDelta.data)
           setSelected(relations.filter((r) => r.relation.id === rel.id)[0])
@@ -60,7 +59,7 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   }
   const onDelete = (rel: Relation): void => {
     if (rel.id)
-      relationApi.apiGraphRelationIdDelete(rel.id).then((graphDelta) => {
+      graphApi.deleteRelation(rel.id).then((graphDelta) => {
         updateState(graphDelta.data)
         setSelected(undefined)
       })

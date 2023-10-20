@@ -27,6 +27,7 @@ package com.prodyna.mifune.core.data;
  */
 
 import com.prodyna.mifune.core.DataBaseService;
+import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.domain.Graph;
 import com.prodyna.mifune.domain.Relation;
 import io.smallrye.mutiny.Multi;
@@ -41,14 +42,18 @@ import org.neo4j.driver.summary.SummaryCounters;
 @ApplicationScoped
 public class DeletionService extends DataBaseService {
 
-  @Inject
-  public DeletionService(Driver driver) {
+    private final GraphService graphService;
+
+    @Inject
+  public DeletionService(Driver driver, GraphService graphService) {
     super(driver);
-  }
+        this.graphService = graphService;
+    }
 
-  public void deleteDomainFromDatabase(UUID domainId, Graph graph) {
+  public void deleteDomainFromDatabase(UUID domainId) {
+      Graph graph = graphService.graph();
 
-    List<Relation> relationsToBeDeleted = graph.relationsByDomainId(domainId, true);
+      List<Relation> relationsToBeDeleted = graph.relationsByDomainId(domainId, true);
 
     Multi<String> deleteRalations =
         Multi.createFrom()

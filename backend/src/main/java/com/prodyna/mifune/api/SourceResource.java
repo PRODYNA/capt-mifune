@@ -42,11 +42,14 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.MultipartForm;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @Path("/api/sources")
+@Tag(name = "source")
 public class SourceResource {
 
   @ConfigProperty(name = "mifune.upload.dir")
@@ -56,12 +59,20 @@ public class SourceResource {
 
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Operation(
+      operationId = "uploadFile",
+      summary = "Upload a file",
+      description = "Upload a file")
   public Response fileUpload(@MultipartForm MultipartBody upload) throws IOException {
     Files.copy(upload.file.uploadedFile(), Paths.get(uploadDir, upload.name));
     return Response.ok().build();
   }
 
   @GET
+  @Operation(
+      operationId = "sources",
+      summary = "List all sources",
+      description = "List all sources")
   public List<Source> sources() throws IOException {
     return sourceService.sources().stream()
         .map(fileName -> new Source(fileName, sourceService.fileHeader(fileName)))

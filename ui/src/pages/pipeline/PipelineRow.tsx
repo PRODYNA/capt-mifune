@@ -10,9 +10,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import { useTheme } from '@mui/material/styles'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import { Domain } from '../../services/models/domain'
+import { DataApi, Domain } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
-import { GraphApi } from '../../services/api/graph-api'
 
 interface IPipelineRow {
   domain: Domain
@@ -26,7 +25,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const navigate = useNavigate()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
-  const graphApi = new GraphApi(AXIOS_CONFIG())
+  const dataApi = new DataApi(AXIOS_CONFIG())
 
   const valid = (isValid: boolean | undefined): JSX.Element => {
     if (isValid) return <DoneIcon htmlColor={theme.palette.success.main} />
@@ -36,8 +35,8 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const runImport = (): void => {
     setShowProgress(true)
     if (domain.id)
-      graphApi
-        .apiGraphDomainDomainIdImportGet(domain.id)
+      dataApi
+        .importDomain(domain.id)
         .then(() => {
           openSnackbar(Translations.IMPORT_RUN, 'success')
           setShowProgress(false)
@@ -50,16 +49,16 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
 
   const stopImport = (): void => {
     if (domain.id)
-      graphApi
-        .apiGraphDomainDomainIdImportDelete(domain.id)
+      dataApi
+        .cancelImport(domain.id)
         .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
         .catch((e) => openSnackbarError(e))
   }
 
   const clearDomain = (): void => {
     if (domain.id)
-      graphApi
-        .apiGraphDomainDomainIdClearDelete(domain.id)
+      dataApi
+        .clearDomain(domain.id)
         .then(() => openSnackbar(Translations.DOMAIN_CLEAR, 'success'))
         .catch((e) => openSnackbarError(e))
   }

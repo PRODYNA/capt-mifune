@@ -26,12 +26,9 @@ package com.prodyna.mifune.core.graph;
  * #L%
  */
 
-import static java.util.function.Predicate.not;
-
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.prodyna.mifune.core.data.DeletionService;
 import com.prodyna.mifune.core.schema.GraphJsonBuilder;
 import com.prodyna.mifune.core.schema.GraphModel;
 import com.prodyna.mifune.core.source.SourceService;
@@ -45,6 +42,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response.Status;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,8 +53,8 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
+
+import static java.util.function.Predicate.not;
 
 @ApplicationScoped
 public class GraphService {
@@ -71,9 +71,7 @@ public class GraphService {
 
   @Inject protected SourceService sourceService;
 
-  @Inject protected DeletionService deletionService;
-
-  @Inject ObjectMapper objectMapper;
+  @Inject protected ObjectMapper objectMapper;
 
   Graph graph = new Graph();
 
@@ -241,8 +239,6 @@ public class GraphService {
    * @return GraphDelta to tell Fronted which nodes and relations are to be deleted
    */
   public GraphDelta deleteDomain(UUID id) {
-    // delete domain from Database
-    deletionService.deleteDomainFromDatabase(id, graph);
 
     var remove = graph.getDomains().removeIf(d -> d.getId().equals(id));
     if (!remove) {
@@ -519,7 +515,7 @@ public class GraphService {
     return new GraphJsonBuilder(graphModel, id, false).getJson();
   }
 
-  public List<String> createJsonModelKeys(UUID id) {
+  public Uni<List<String>> createJsonModelKeys(UUID id) {
     ObjectNode jsonModel = buildDomainJsonModel(id);
     List<String> paths = new JsonPathEditor(objectMapper).extractFieldPaths(jsonModel);
     var result =
@@ -528,7 +524,7 @@ public class GraphService {
             .map(s -> s.replaceAll("]", ""))
             .sorted(Comparator.comparing((String s) -> s.split("\\.").length).thenComparing(s -> s))
             .collect(Collectors.toList());
-    return result;
+    return Uni.createFrom().item(result);
   }
 
   public void reset() {

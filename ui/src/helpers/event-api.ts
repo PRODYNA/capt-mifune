@@ -16,7 +16,7 @@ export class EventApiImpl implements EventApi {
 
   cleanDatabase(): EventSourcePolyfill {
     return new EventSourcePolyfill(
-      `${window.env.api.apiBasePath}/api/apocalypse`,
+      `${window.env.api.apiBasePath}/api/data/apocalypse`,
       {
         headers: this.configuration?.baseOptions.headers,
         heartbeatTimeout: 10000,
@@ -27,7 +27,7 @@ export class EventApiImpl implements EventApi {
 
   graphStats(): EventSourcePolyfill {
     return new EventSourcePolyfill(
-      `${window.env.api.apiBasePath}/api/graph/stats`,
+      `${window.env.api.apiBasePath}/api/statistic/graph/stream`,
       {
         headers: this.configuration?.baseOptions.headers,
         heartbeatTimeout: 30000,
@@ -38,7 +38,7 @@ export class EventApiImpl implements EventApi {
   importSource(): EventSourcePolyfill {
     console.log(this.configuration)
     return new EventSourcePolyfill(
-      `${window.env.api.apiBasePath}/api/graph/domain/fn/statistics`,
+      `${window.env.api.apiBasePath}/api/statistic/domain/stream`,
       {
         headers: this.configuration?.baseOptions.headers,
         heartbeatTimeout: 15000,

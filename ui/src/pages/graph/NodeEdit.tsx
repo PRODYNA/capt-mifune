@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { TableCell, TableRow, TextField } from '@mui/material'
-import { GraphDelta, Node, Property } from '../../services/models'
+import { GraphApi, GraphDelta, Node, Property } from '../../services'
 import { DomainSelect } from './DomainSelect'
 import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
 import CustomTable from '../../components/Table/CustomTable'
@@ -8,7 +8,6 @@ import Edit from './Edit'
 import { GraphContext } from '../../context/GraphContext'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import { NodeApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface NodeEditProps {
@@ -37,7 +36,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const [value, setValue] = useState<Node>(node)
   const [properties, setProperties] = useState<Property[]>([])
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const nodeApi = new NodeApi(AXIOS_CONFIG())
+  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const updateDomain = (newDomainIds: string[]): void => {
     setValue((oldNode) => ({ ...oldNode, domainIds: newDomainIds }))
@@ -50,8 +49,8 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
 
   const onCreate = (newNode: Node): void => {
     if (newNode.label)
-      nodeApi
-        .apiGraphNodePost({ ...newNode, label: newNode.label })
+      graphApi
+        .createNode({ ...newNode, label: newNode.label })
         .then((graphDelta) => {
           updateState(graphDelta.data)
           setSelected(nodes.filter((n) => n.node.id === newNode.id)[0])
@@ -59,8 +58,8 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   }
   const onSubmit = (newNode: Node): void => {
     if (newNode.id && newNode.label)
-      nodeApi
-        .apiGraphNodeIdPut(newNode.id, { label: newNode.label, ...newNode })
+      graphApi
+        .updateNode(newNode.id, { label: newNode.label, ...newNode })
         .then((graphDelta) => {
           updateState(graphDelta.data)
           setSelected(nodes.filter((n) => n.node.id === newNode.id)[0])
@@ -70,7 +69,7 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   }
   const onDelete = (deleted: Node): void => {
     if (deleted.id)
-      nodeApi.apiGraphNodeIdDelete(deleted.id).then((graphDelta) => {
+      graphApi.deleteNode(deleted.id).then((graphDelta) => {
         updateState(graphDelta.data)
         setSelected(undefined)
       })

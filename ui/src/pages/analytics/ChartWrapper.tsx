@@ -16,7 +16,7 @@ import CustomTable from '../../components/Table/CustomTable'
 import CustomButton from '../../components/Button/CustomButton'
 import { ChartContext } from '../../context/ChartContext'
 import {
-  DataResourceApi,
+  DataApi,
   Direction,
   Filter,
   FilterFunction,
@@ -24,6 +24,7 @@ import {
   PropertyType,
   QueryFunction,
   QueryResultDefinition,
+  StatisticApi,
 } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { SnackbarContext } from '../../context/Snackbar'
@@ -50,12 +51,15 @@ interface ChartWrapperProps<T> {
   disableScale?: boolean
 }
 
-export type ExtendedFilter = Filter & { uuid?: string }
+export type ExtendedFilter = Filter & {
+  uuid?: string
+}
 
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const { results, orders, dataPreparation, selects, disableScale, children } =
     props
-  const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
+  const dataResourceApi = new DataApi(AXIOS_CONFIG())
+  const statisticApi = new StatisticApi(AXIOS_CONFIG())
   const { setData, query } = useContext(ChartContext)
   const { openSnackbarError } = useContext(SnackbarContext)
   const [loading, setLoading] = useState<boolean>(false)
@@ -127,8 +131,8 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
 
   const loadData = (): void => {
     setLoading(true)
-    dataResourceApi
-      .apiDataPost({
+    statisticApi
+      .query({
         nodes: query.nodes.map((n) => {
           return {
             id: n.id,

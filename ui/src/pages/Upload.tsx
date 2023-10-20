@@ -6,14 +6,14 @@ import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'
 import { CustomTexts } from '../utils/CustomTexts'
 import AXIOS_CONFIG from '../openapi/axios-config'
-import { SourceResourceApi } from '../services'
+import { SourceApi } from '../services'
 
 const FileUpload = (): JSX.Element => {
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(
     undefined
   )
-  const sourceResourceApi = new SourceResourceApi(AXIOS_CONFIG())
+  const sourceApi = new SourceApi(AXIOS_CONFIG())
 
   return (
     <Container>
@@ -31,8 +31,8 @@ const FileUpload = (): JSX.Element => {
           if (file) {
             const fileSize = (file.file.size / (1024 * 1024)).toFixed(2)
             if (fileSize < '10') {
-              sourceResourceApi
-                .apiSourcesPost(file.file, file.file.name)
+              sourceApi
+                .uploadFile(file.file, file.file.name)
                 .then((): void =>
                   openSnackbar(Translations.UPLOAD_SUCCESS, 'success')
                 )

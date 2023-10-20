@@ -19,8 +19,7 @@ import { EventSourcePolyfill } from 'ng-event-source'
 import PipelineRow from './PipelineRow'
 import CustomButton from '../../components/Button/CustomButton'
 import CustomDialog from '../../components/Dialog/CustomDialog'
-import { Domain, GraphStatistics } from '../../services/models'
-import { DomainApi } from '../../services/api'
+import { Domain, GraphApi, GraphStatistics } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { EventApiImpl } from '../../helpers/event-api'
 
@@ -30,7 +29,7 @@ interface Message {
 
 const Pipelines = (): JSX.Element => {
   const eventApi = new EventApiImpl(AXIOS_CONFIG())
-  const domainApi = new DomainApi(AXIOS_CONFIG())
+  const graphApi = new GraphApi(AXIOS_CONFIG())
   const [domains, setDomains] = useState<Domain[]>()
   const [showModal, setShowModal] = useState<boolean>(false)
   const [cleanActive, setCleanActive] = useState<boolean>(false)
@@ -68,7 +67,7 @@ const Pipelines = (): JSX.Element => {
   }, [tmpMessages])
 
   useEffect(() => {
-    domainApi.apiGraphDomainsGet().then((d) => setDomains(d.data))
+    graphApi.fetchDomains().then((d) => setDomains(d.data))
   }, [])
 
   useEffect(() => {

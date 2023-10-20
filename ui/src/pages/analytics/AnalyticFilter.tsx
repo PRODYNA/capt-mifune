@@ -13,9 +13,13 @@ import FormSelect from '../../components/Form/FormSelect'
 import { AnalyticSelect } from './AnalyticSelect'
 import { tableStyles } from '../graph/NodeEdit'
 import { ChartContext } from '../../context/ChartContext'
-import { QueryFunction } from '../../services/models/query-function'
+import {
+  FilterFunction,
+  PropertyType,
+  QueryFunction,
+  StatisticApi,
+} from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
-import { DataResourceApi, FilterFunction, PropertyType } from '../../services'
 
 interface AnalyticFilterProps {
   onKeyChange: (key?: string) => void
@@ -37,7 +41,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   )
   const [values, setValues] = useState<string[]>()
   const theme = useTheme()
-  const dataResourceApi = new DataResourceApi(AXIOS_CONFIG())
+  const statisticResourceApi = new StatisticApi(AXIOS_CONFIG())
 
   useEffect(() => {
     if (propertyType === PropertyType.Boolean) {
@@ -53,8 +57,8 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
       propertyType &&
       propertyType !== PropertyType.Boolean
     ) {
-      dataResourceApi
-        .apiDataPost({
+      statisticResourceApi
+        .query({
           nodes: query.nodes.map((n) => {
             return {
               id: n.id,

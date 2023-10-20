@@ -5,13 +5,7 @@ import FormSelect from '../../components/Form/FormSelect'
 import FormActions from '../../components/Form/FormActions'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import {
-  SourceResourceApi,
-  Source,
-  Domain,
-  GraphApi,
-  DomainApi,
-} from '../../services'
+import { Domain, GraphApi, Source, SourceApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface DomainEditProps {
@@ -21,8 +15,7 @@ interface DomainEditProps {
 const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const { domain } = props
   const graphApi = new GraphApi(AXIOS_CONFIG())
-  const sourceApi = new SourceResourceApi(AXIOS_CONFIG())
-  const domainApi = new DomainApi(AXIOS_CONFIG())
+  const sourceApi = new SourceApi(AXIOS_CONFIG())
   const navigate = useNavigate()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [mapping, setMapping] = useState<{ [key: string]: string }>(
@@ -32,11 +25,11 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const [sources, setSources] = useState<Source[]>([])
 
   useEffect(() => {
-    sourceApi.apiSourcesGet().then((r) => {
+    sourceApi.sources().then((r) => {
       setSources(r.data)
     })
     if (domain.id)
-      graphApi.apiGraphDomainDomainIdMappingGet(domain.id).then((r) => {
+      graphApi.fetchDomainMapping(domain.id).then((r) => {
         setMapping(r.data ?? {})
       })
   }, [domain])
@@ -121,8 +114,8 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
     <form
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         if (domain.id)
-          domainApi
-            .apiGraphDomainIdPut(domain.id, {
+          graphApi
+            .updateDomain(domain.id, {
               ...domain,
               file,
               columnMapping: mapping,

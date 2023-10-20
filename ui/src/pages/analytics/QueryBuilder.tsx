@@ -3,7 +3,7 @@ import { Box, Chip, Collapse, Switch, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
-import { Graph, Node, Relation } from '../../services/models'
+import { Graph, GraphApi, Node, Relation } from '../../services'
 import {
   addSvgStyles,
   buildSimulation,
@@ -14,7 +14,6 @@ import {
   tick,
 } from '../../helpers/GraphHelper'
 import CustomButton from '../../components/Button/CustomButton'
-import { GraphApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
 export interface QueryBuilderProps {
@@ -82,7 +81,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   }
 
   useEffect(() => {
-    graphApi.apiGraphGet().then((g): void => setGraph(g.data))
+    graphApi.fetchGraph().then((g): void => setGraph(g.data))
     window.addEventListener('resize', handleResize)
     return (): void => {
       window.removeEventListener('resize', handleResize)

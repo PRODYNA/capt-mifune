@@ -1,12 +1,12 @@
 import { useContext } from 'react'
-import { Tooltip, Fab, Box } from '@mui/material'
+import { Box, Fab, Tooltip } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SaveIcon from '@mui/icons-material/Save'
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import AXIOS_CONFIG from '../../openapi/axios-config'
-import { GraphApi, DomainApi } from '../../services'
+import { GraphApi } from '../../services'
 import { GraphContext } from '../../context/GraphContext'
 
 interface IDomainActions {
@@ -17,7 +17,6 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
   const { downloadSVG } = props
   const { domains, setDomains, setSelectedDomain } = useContext(GraphContext)
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const domainApi = new DomainApi(AXIOS_CONFIG())
   const graphApi = new GraphApi(AXIOS_CONFIG())
 
   return (
@@ -52,8 +51,8 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
             },
           }}
           onClick={() =>
-            domainApi
-              .apiGraphDomainPost({ name: `domain_${domains.length}` })
+            graphApi
+              .createDomain({ name: `domain_${domains.length}` })
               .then((res) => {
                 setDomains(domains.concat(res.data))
                 setSelectedDomain(res.data)
@@ -72,7 +71,7 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
           }}
           onClick={() =>
             graphApi
-              .apiGraphPost()
+              .persistGraph()
               .then(() => openSnackbar(Translations.SAVE, 'success'))
               .catch((e) => openSnackbarError(e))
           }

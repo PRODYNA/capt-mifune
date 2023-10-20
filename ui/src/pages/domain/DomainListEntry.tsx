@@ -22,8 +22,7 @@ import { Translations } from '../../utils/Translations'
 import CustomDialog from '../../components/Dialog/CustomDialog'
 import { GraphContext } from '../../context/GraphContext'
 import { D3Helper } from '../../helpers/D3Helper'
-import { Domain, GraphDelta } from '../../services/models'
-import { DomainApi } from '../../services/api/domain-api'
+import { Domain, GraphApi, GraphDelta } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
 interface DomainListEntryProps {
@@ -51,7 +50,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     setSelectedDomain,
   } = useContext(GraphContext)
   const theme = useTheme()
-  const domainApi = new DomainApi(AXIOS_CONFIG())
+  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const handleChange = (): void => {
     if (domain.id) toggleAccordion(domain.id)
@@ -86,8 +85,8 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
 
   const updateDomain = (): void => {
     if (domain.id)
-      domainApi
-        .apiGraphDomainIdPut(domain.id, {
+      graphApi
+        .updateDomain(domain.id, {
           ...domain,
           name,
           rootNodeId,
@@ -104,8 +103,8 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
 
   const deleteDomain = (): void => {
     if (domain.id)
-      domainApi
-        .apiGraphDomainIdDelete(domain.id)
+      graphApi
+        .deleteDomain(domain.id)
         .then((delta) => {
           updateState(delta.data)
           setSelected(undefined)

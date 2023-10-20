@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, Typography } from '@mui/material'
 import { DomainListEntry } from './DomainListEntry'
-import { Domain, GraphDelta } from '../../services/models'
+import { Domain, GraphDelta } from '../../services'
 
 interface DomainListProps {
   domains: Domain[]

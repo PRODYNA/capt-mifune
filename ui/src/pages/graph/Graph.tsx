@@ -2,7 +2,7 @@ import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
-import { Domain, GraphDelta, Node, Relation } from '../../services/models'
+import { Domain, GraphApi, GraphDelta, Node, Relation } from '../../services'
 import { RelationEdit } from './RelationEdit'
 import { DomainList } from '../domain/DomainList'
 import {
@@ -28,7 +28,6 @@ import {
   svgStyle,
   tick,
 } from '../../helpers/GraphHelper'
-import { GraphApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { GraphContext } from '../../context/GraphContext'
 
@@ -40,6 +39,7 @@ export interface Force {
   fx?: number
   fy?: number
 }
+
 interface Path {
   d?: string
 }
@@ -220,7 +220,7 @@ export const Graph = (props: IGraph): JSX.Element => {
   }
 
   useEffect(() => {
-    graphApi.apiGraphGet().then((g) => {
+    graphApi.fetchGraph().then((g) => {
       const gData = g.data
       if (gData.nodes) setNodes(gData.nodes.map((n) => D3Helper.wrapNode(n)))
       if (gData.relations)

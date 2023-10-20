@@ -8,22 +8,23 @@
     "access_token" : [ ]
   } ],
   "tags" : [ {
-    "name" : "admin"
+    "name" : "data"
   }, {
     "name" : "domain"
   }, {
     "name" : "graph"
   }, {
-    "name" : "node"
+    "name" : "source"
   }, {
-    "name" : "relation"
+    "name" : "statistic"
   } ],
   "paths" : {
-    "/api/apocalypse" : {
-      "get" : {
-        "tags" : [ "admin" ],
+    "/api/data/apocalypse" : {
+      "delete" : {
+        "tags" : [ "data" ],
         "summary" : "Reset the whole database",
-        "description" : "Remove all nodes and relation and delete each constraint and index\n",
+        "description" : "Remove all nodes and relation and delete each constraint and index.",
+        "operationId" : "apocalypseNow",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -41,39 +42,12 @@
         }
       }
     },
-    "/api/data" : {
+    "/api/data/domain/{domainId}" : {
       "post" : {
-        "tags" : [ "Data Resource" ],
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/Query"
-              }
-            }
-          }
-        },
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "object",
-                    "additionalProperties" : { }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/data/domain/{domainId}/keys" : {
-      "get" : {
-        "tags" : [ "Data Resource" ],
+        "tags" : [ "data" ],
+        "summary" : "Import a domain",
+        "description" : "Import a domain by its id. The domain must be available in the configured import directory.",
+        "operationId" : "importDomain",
         "parameters" : [ {
           "name" : "domainId",
           "in" : "path",
@@ -88,10 +62,61 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "type" : "string"
-                  }
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "data" ],
+        "summary" : "Clear a domain",
+        "description" : "Clear a domain by its id. All nodes and relations will be removed.",
+        "operationId" : "clearDomain",
+        "parameters" : [ {
+          "name" : "domainId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/data/domain/{domainId}/cancel" : {
+      "post" : {
+        "tags" : [ "data" ],
+        "summary" : "Cancel a running import",
+        "description" : "Cancel a running import by its domain id.",
+        "operationId" : "cancelImport",
+        "parameters" : [ {
+          "name" : "domainId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
                 }
               }
             }
@@ -102,6 +127,9 @@
     "/api/graph" : {
       "get" : {
         "tags" : [ "graph" ],
+        "summary" : "Fetch the whole graph",
+        "description" : "Fetch the whole graph",
+        "operationId" : "fetchGraph",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -117,6 +145,9 @@
       },
       "post" : {
         "tags" : [ "graph" ],
+        "summary" : "Persist the whole graph",
+        "description" : "Persist the whole graph",
+        "operationId" : "persistGraph",
         "responses" : {
           "201" : {
             "description" : "Created"
@@ -126,7 +157,10 @@
     },
     "/api/graph/domain" : {
       "post" : {
-        "tags" : [ "domain" ],
+        "tags" : [ "graph" ],
+        "summary" : "Create a domain",
+        "description" : "Create a domain",
+        "operationId" : "createDomain",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -150,117 +184,30 @@
         }
       }
     },
-    "/api/graph/domain/fn/count" : {
+    "/api/graph/domain/{domainId}/keys" : {
       "get" : {
-        "tags" : [ "domain" ],
+        "tags" : [ "graph" ],
+        "summary" : "Fetch a domain keys",
+        "description" : "Fetch a domain keys",
+        "operationId" : "fetchDomainKeys",
+        "parameters" : [ {
+          "name" : "domainId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/UUID"
+          }
+        } ],
         "responses" : {
           "200" : {
             "description" : "OK",
             "content" : {
               "application/json" : {
-                "schema" : {
-                  "type" : "object",
-                  "additionalProperties" : {
-                    "format" : "int64",
-                    "type" : "integer"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/graph/domain/fn/statistics" : {
-      "get" : {
-        "tags" : [ "graph" ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "text/event-stream" : {
                 "schema" : {
                   "type" : "array",
                   "items" : {
-                    "type" : "object",
-                    "additionalProperties" : {
-                      "format" : "int64",
-                      "type" : "integer"
-                    }
+                    "type" : "string"
                   }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/graph/domain/{domainId}/clear" : {
-      "delete" : {
-        "tags" : [ "graph" ],
-        "parameters" : [ {
-          "name" : "domainId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/UUID"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/graph/domain/{domainId}/import" : {
-      "get" : {
-        "tags" : [ "graph" ],
-        "parameters" : [ {
-          "name" : "domainId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/UUID"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete" : {
-        "tags" : [ "graph" ],
-        "parameters" : [ {
-          "name" : "domainId",
-          "in" : "path",
-          "required" : true,
-          "schema" : {
-            "$ref" : "#/components/schemas/UUID"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "string"
                 }
               }
             }
@@ -271,6 +218,9 @@
     "/api/graph/domain/{domainId}/mapping" : {
       "get" : {
         "tags" : [ "graph" ],
+        "summary" : "Fetch a domain mapping",
+        "description" : "Fetch a domain mapping",
+        "operationId" : "fetchDomainMapping",
         "parameters" : [ {
           "name" : "domainId",
           "in" : "path",
@@ -298,7 +248,10 @@
     },
     "/api/graph/domain/{id}" : {
       "get" : {
-        "tags" : [ "domain" ],
+        "tags" : [ "graph" ],
+        "summary" : "Fetch a domain",
+        "description" : "Fetch a domain",
+        "operationId" : "fetchDomain",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -321,7 +274,10 @@
         }
       },
       "put" : {
-        "tags" : [ "domain" ],
+        "tags" : [ "graph" ],
+        "summary" : "Update a domain",
+        "description" : "Update a domain",
+        "operationId" : "updateDomain",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -353,7 +309,10 @@
         }
       },
       "delete" : {
-        "tags" : [ "domain" ],
+        "tags" : [ "graph" ],
+        "summary" : "Delete a domain",
+        "description" : "Delete a domain",
+        "operationId" : "deleteDomain",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -378,7 +337,10 @@
     },
     "/api/graph/domains" : {
       "get" : {
-        "tags" : [ "domain" ],
+        "tags" : [ "graph" ],
+        "summary" : "Fetch all domains",
+        "description" : "Fetch all domains",
+        "operationId" : "fetchDomains",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -398,7 +360,10 @@
     },
     "/api/graph/node" : {
       "post" : {
-        "tags" : [ "node" ],
+        "tags" : [ "graph" ],
+        "summary" : "Create a node",
+        "description" : "Create a node",
+        "operationId" : "createNode",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -424,7 +389,10 @@
     },
     "/api/graph/node/{id}" : {
       "put" : {
-        "tags" : [ "node" ],
+        "tags" : [ "graph" ],
+        "summary" : "Update a node",
+        "description" : "Update a node",
+        "operationId" : "updateNode",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -456,7 +424,10 @@
         }
       },
       "delete" : {
-        "tags" : [ "node" ],
+        "tags" : [ "graph" ],
+        "summary" : "Delete a node",
+        "description" : "Delete a node",
+        "operationId" : "deleteNode",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -481,7 +452,10 @@
     },
     "/api/graph/relation" : {
       "post" : {
-        "tags" : [ "relation" ],
+        "tags" : [ "graph" ],
+        "summary" : "Create a relation",
+        "description" : "Create a relation",
+        "operationId" : "createRelation",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -507,7 +481,10 @@
     },
     "/api/graph/relation/{id}" : {
       "put" : {
-        "tags" : [ "relation" ],
+        "tags" : [ "graph" ],
+        "summary" : "Update a relation",
+        "description" : "Update a relation",
+        "operationId" : "updateRelation",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -539,7 +516,10 @@
         }
       },
       "delete" : {
-        "tags" : [ "relation" ],
+        "tags" : [ "graph" ],
+        "summary" : "Delete a relation",
+        "description" : "Delete a relation",
+        "operationId" : "deleteRelation",
         "parameters" : [ {
           "name" : "id",
           "in" : "path",
@@ -565,6 +545,9 @@
     "/api/graph/reset" : {
       "post" : {
         "tags" : [ "graph" ],
+        "summary" : "Reset the whole graph",
+        "description" : "Reset the whole graph",
+        "operationId" : "resetGraph",
         "responses" : {
           "201" : {
             "description" : "Created"
@@ -572,29 +555,12 @@
         }
       }
     },
-    "/api/graph/stats" : {
-      "get" : {
-        "tags" : [ "graph" ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "text/event-stream" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/GraphStatistics"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/sources" : {
       "get" : {
-        "tags" : [ "Source Resource" ],
+        "tags" : [ "source" ],
+        "summary" : "List all sources",
+        "description" : "List all sources",
+        "operationId" : "sources",
         "responses" : {
           "200" : {
             "description" : "OK",
@@ -612,7 +578,10 @@
         }
       },
       "post" : {
-        "tags" : [ "Source Resource" ],
+        "tags" : [ "source" ],
+        "summary" : "Upload a file",
+        "description" : "Upload a file",
+        "operationId" : "uploadFile",
         "requestBody" : {
           "content" : {
             "multipart/form-data" : {
@@ -641,6 +610,113 @@
         "responses" : {
           "200" : {
             "description" : "OK"
+          }
+        }
+      }
+    },
+    "/api/statistic" : {
+      "post" : {
+        "tags" : [ "statistic" ],
+        "summary" : "Query the graph",
+        "description" : "Query the graph",
+        "operationId" : "query",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Query"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "additionalProperties" : { }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistic/domain" : {
+      "get" : {
+        "tags" : [ "domain" ],
+        "summary" : "Domain statistics",
+        "description" : "Domain statistics",
+        "operationId" : "domainStatistics",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "additionalProperties" : {
+                    "format" : "int64",
+                    "type" : "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistic/domain/stream" : {
+      "get" : {
+        "tags" : [ "statistic" ],
+        "summary" : "Domain statistics as stream",
+        "description" : "Domain statistics",
+        "operationId" : "domainStatisticsStream",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "type" : "object",
+                    "additionalProperties" : {
+                      "format" : "int64",
+                      "type" : "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/statistic/graph/stream" : {
+      "get" : {
+        "tags" : [ "statistic" ],
+        "summary" : "Graph statistics as stream",
+        "description" : "Graph statistics",
+        "operationId" : "graphStatistics",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "text/event-stream" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/GraphStatistics"
+                  }
+                }
+              }
+            }
           }
         }
       }
