@@ -29,11 +29,7 @@ package com.prodyna.mifune.api;
 import com.prodyna.mifune.core.source.SourceService;
 import com.prodyna.mifune.domain.Source;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
@@ -44,7 +40,6 @@ import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.jboss.resteasy.reactive.MultipartForm;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -59,11 +54,8 @@ public class SourceResource {
 
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Operation(
-      operationId = "uploadFile",
-      summary = "Upload a file",
-      description = "Upload a file")
-  public Response fileUpload(@MultipartForm MultipartBody upload) throws IOException {
+  @Operation(operationId = "uploadFile", summary = "Upload a file", description = "Upload a file")
+  public Response fileUpload(MultipartBody upload) throws IOException {
     Files.copy(upload.file.uploadedFile(), Paths.get(uploadDir, upload.name));
     return Response.ok().build();
   }

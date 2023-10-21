@@ -38,16 +38,15 @@ import io.vertx.mutiny.core.eventbus.EventBus;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -64,11 +63,7 @@ public class StatisticResource {
   @Inject protected StatisticService statisticService;
 
   @POST
-  @Operation(
-          operationId = "query",
-          summary = "Query the graph",
-          description = "Query the graph"
-  )
+  @Operation(operationId = "query", summary = "Query the graph", description = "Query the graph")
   public Multi<Map<String, Object>> query(Query query) {
     return statisticService.query(query);
   }
@@ -77,10 +72,9 @@ public class StatisticResource {
   @Path("/graph/stream")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   @Operation(
-          operationId = "graphStatistics",
-          summary = "Graph statistics as stream",
-          description = "Graph statistics"
-  )
+      operationId = "graphStatistics",
+      summary = "Graph statistics as stream",
+      description = "Graph statistics")
   public Multi<GraphStatistics> graphStatistics() {
     return statisticService.graphStats();
   }
@@ -89,10 +83,9 @@ public class StatisticResource {
   @GET
   @Path("/domain")
   @Operation(
-          operationId = "domainStatistics",
-          summary = "Domain statistics",
-          description = "Domain statistics"
-  )
+      operationId = "domainStatistics",
+      summary = "Domain statistics",
+      description = "Domain statistics")
   public Uni<Map<UUID, Long>> countDomainRootNodes() {
     return statisticService.countDomainRootNodes();
   }
@@ -101,52 +94,51 @@ public class StatisticResource {
   @Path("/domain/stream")
   @Produces(MediaType.SERVER_SENT_EVENTS)
   @Operation(
-          operationId = "domainStatisticsStream",
-          summary = "Domain statistics as stream",
-          description = "Domain statistics"
-  )
+      operationId = "domainStatisticsStream",
+      summary = "Domain statistics as stream",
+      description = "Domain statistics")
   public Multi<Map<UUID, Long>> domainStatistics() {
 
     var events =
-            eventBus
-                    .localConsumer("import")
-                    .bodyStream()
-                    .toMulti()
-                    .emitOn(Infrastructure.getDefaultWorkerPool())
-                    .onOverflow()
-                    .buffer(1000)
-                    .map(
-                            s -> {
-                              try {
-                                return objectMapper.reader().readValue(s.toString(), ImportStatistic.class);
-                              } catch (IOException e) {
-                                throw new RuntimeException(e);
-                              }
-                            })
-                    .group()
-                    .intoLists()
-                    .of(5000, Duration.ofMillis(300))
-                    .map(
-                            l ->
-                                    l.stream()
-                                            .collect(
-                                                    Collectors.toMap(
-                                                            ImportStatistic::domainId, ImportStatistic::count, Long::max)))
-                    .filter(m -> !m.isEmpty());
+        eventBus
+            .localConsumer("import")
+            .bodyStream()
+            .toMulti()
+            .emitOn(Infrastructure.getDefaultWorkerPool())
+            .onOverflow()
+            .buffer(1000)
+            .map(
+                s -> {
+                  try {
+                    return objectMapper.reader().readValue(s.toString(), ImportStatistic.class);
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+                })
+            .group()
+            .intoLists()
+            .of(5000, Duration.ofMillis(300))
+            .map(
+                l ->
+                    l.stream()
+                        .collect(
+                            Collectors.toMap(
+                                ImportStatistic::domainId, ImportStatistic::count, Long::max)))
+            .filter(m -> !m.isEmpty());
 
     Uni<Map<UUID, Long>> countDomainRootNodes = countDomainRootNodes();
     var fallback = Multi.createFrom().uni(countDomainRootNodes);
 
     return Multi.createBy()
-            .concatenating()
-            .streams(fallback, events)
-            .ifNoItem()
-            .after(Duration.ofSeconds(5))
-            .recoverWithMulti(fallback)
-            .map(
-                    m -> {
-                      LOG.info("stats {}", m);
-                      return m;
-                    });
+        .concatenating()
+        .streams(fallback, events)
+        .ifNoItem()
+        .after(Duration.ofSeconds(5))
+        .recoverWithMulti(fallback)
+        .map(
+            m -> {
+              LOG.info("stats {}", m);
+              return m;
+            });
   }
 }

@@ -34,10 +34,9 @@ import io.smallrye.mutiny.Uni;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import java.util.UUID;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-
-import java.util.UUID;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -45,58 +44,52 @@ import java.util.UUID;
 @Tag(name = "data")
 public class DataResource {
 
-    @Inject
-    protected ImportService importService;
+  @Inject protected ImportService importService;
 
-    @Inject
-    protected ApocalypseService apocalypseService;
+  @Inject protected ApocalypseService apocalypseService;
 
-    @Inject
-    protected DeletionService deletionService;
+  @Inject protected DeletionService deletionService;
 
+  @Path("/apocalypse")
+  @GET
+  @Operation(
+      operationId = "apocalypseNow",
+      summary = "Reset the whole database",
+      description = "Remove all nodes and relation and delete each constraint and index.")
+  @Produces(MediaType.SERVER_SENT_EVENTS)
+  public Multi<String> apocalypseNow() {
+    return apocalypseService.clearDatabase();
+  }
 
-    @Path("/apocalypse")
-    @GET
-    @Operation(
-            operationId = "apocalypseNow",
-            summary = "Reset the whole database",
-            description ="Remove all nodes and relation and delete each constraint and index.")
-    @Produces(MediaType.SERVER_SENT_EVENTS)
-    public Multi<String> apocalypseNow() {
-        return apocalypseService.clearDatabase();
-    }
+  @POST
+  @Path("/domain/{domainId}")
+  @Operation(
+      operationId = "importDomain",
+      summary = "Import a domain",
+      description =
+          "Import a domain by its id. The domain must be available in the configured import directory.")
+  public Uni<String> runImport(@PathParam("domainId") UUID domainId) {
+    return importService.runImport(domainId);
+  }
 
+  @POST
+  @Path("/domain/{domainId}/cancel")
+  @Operation(
+      operationId = "cancelImport",
+      summary = "Cancel a running import",
+      description = "Cancel a running import by its domain id.")
+  public Uni<String> stopImport(@PathParam("domainId") UUID domainId) {
+    return importService.stopImport(domainId);
+  }
 
-    @POST
-    @Path("/domain/{domainId}")
-    @Operation(
-            operationId = "importDomain",
-            summary = "Import a domain",
-            description ="Import a domain by its id. The domain must be available in the configured import directory.")
-    public Uni<String> runImport(@PathParam("domainId") UUID domainId) {
-        return importService.runImport(domainId);
-    }
-
-    @POST
-    @Path("/domain/{domainId}/cancel")
-    @Operation(
-            operationId = "cancelImport",
-            summary = "Cancel a running import",
-            description ="Cancel a running import by its domain id.")
-    public Uni<String> stopImport(@PathParam("domainId") UUID domainId) {
-        return importService.stopImport(domainId);
-    }
-
-    @DELETE
-    @Path("/domain/{domainId}")
-    @Operation(
-            operationId = "clearDomain",
-            summary = "Clear a domain",
-            description ="Clear a domain by its id. All nodes and relations will be removed.")
-    public Uni<String> clearDomain(@PathParam("domainId") UUID domainId) {
-        deletionService.deleteDomainFromDatabase(domainId);
-        return Uni.createFrom().item("OK");
-    }
-
-
+  @DELETE
+  @Path("/domain/{domainId}")
+  @Operation(
+      operationId = "clearDomain",
+      summary = "Clear a domain",
+      description = "Clear a domain by its id. All nodes and relations will be removed.")
+  public Uni<String> clearDomain(@PathParam("domainId") UUID domainId) {
+    deletionService.deleteDomainFromDatabase(domainId);
+    return Uni.createFrom().item("OK");
+  }
 }

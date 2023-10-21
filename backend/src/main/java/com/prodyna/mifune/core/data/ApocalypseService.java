@@ -44,9 +44,9 @@ public class ApocalypseService extends DataBaseService {
             .transformToUniAndConcatenate(
                 cypher -> super.singleStatistic(cypher, Map.of()).map(s -> cypher));
 
-    return deleteAll(deleteRel, SummaryCounters::relationshipsDeleted)
+    return deleteAll(deleteRel, "Relations", SummaryCounters::relationshipsDeleted)
         .onCompletion()
-        .switchTo(deleteAll(deleteNodes, SummaryCounters::nodesDeleted))
+        .switchTo(deleteAll(deleteNodes, "Nodes", SummaryCounters::nodesDeleted))
         .onCompletion()
         .switchTo(deleteConstraints)
         .onCompletion()

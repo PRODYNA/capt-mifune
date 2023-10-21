@@ -84,7 +84,7 @@ public class ImportService extends DataBaseService {
 
   @Inject protected SourceService sourceService;
 
-  @Inject ObjectMapper objectMapper;
+  @Inject protected ObjectMapper objectMapper;
 
   @Inject
   public ImportService(Driver driver) {

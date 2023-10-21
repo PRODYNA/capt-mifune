@@ -133,11 +133,12 @@ public abstract class DataBaseService {
 
   protected Multi<String> deleteAll(
       Supplier<Uni<? extends ResultSummary>> uniSupplier,
+      String type,
       Function<SummaryCounters, Integer> counterFn) {
     return Multi.createBy()
         .repeating()
         .uni(uniSupplier)
         .until(r -> counterFn.apply(r.counters()) == 0)
-        .map(r -> "deleted %d".formatted(counterFn.apply(r.counters())));
+        .map(r -> "%s deleted: %d".formatted(type, counterFn.apply(r.counters())));
   }
 }

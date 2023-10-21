@@ -27,7 +27,6 @@ package com.prodyna.mifune.core.source;
  */
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -36,12 +35,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class SourceService {
 
-  @Inject protected Logger logger;
+  private static final Logger LOG = LoggerFactory.getLogger(SourceService.class.getName());
 
   @ConfigProperty(name = "mifune.upload.dir")
   protected String uploadDir;
@@ -57,7 +57,7 @@ public class SourceService {
           .map(String::strip)
           .collect(Collectors.toList());
     } catch (IOException e) {
-      logger.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
       return List.of();
     }
   }

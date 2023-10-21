@@ -34,13 +34,12 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,185 +47,155 @@ import java.util.UUID;
 @Tag(name = "graph")
 public class GraphResource {
 
-    @Inject
-    protected GraphService graphService;
+  @Inject protected GraphService graphService;
 
+  @GET
+  @Operation(
+      operationId = "fetchGraph",
+      summary = "Fetch the whole graph",
+      description = "Fetch the whole graph")
+  public Uni<Graph> fetchGraph() {
+    return Uni.createFrom().item(graphService.graph());
+  }
 
-    @GET
-    @Operation(
-            operationId = "fetchGraph",
-            summary = "Fetch the whole graph",
-            description = "Fetch the whole graph"
-    )
-    public Uni<Graph> fetchGraph() {
-        return Uni.createFrom().item(graphService.graph());
-    }
+  @POST
+  @Operation(
+      operationId = "persistGraph",
+      summary = "Persist the whole graph",
+      description = "Persist the whole graph")
+  public Uni<Void> persistGraph() throws IOException {
+    graphService.persist();
+    return Uni.createFrom().voidItem();
+  }
 
-    @POST
-    @Operation(
-            operationId = "persistGraph",
-            summary = "Persist the whole graph",
-            description = "Persist the whole graph"
-    )
-    public Uni<Void> persistGraph() throws IOException {
-        graphService.persist();
-        return Uni.createFrom().voidItem();
-    }
+  @POST
+  @Path("/reset")
+  @Operation(
+      operationId = "resetGraph",
+      summary = "Reset the whole graph",
+      description = "Reset the whole graph")
+  public void reset() {
+    graphService.reset();
+  }
 
-    @POST
-    @Path("/reset")
-    @Operation(
-            operationId = "resetGraph",
-            summary = "Reset the whole graph",
-            description = "Reset the whole graph"
-    )
-    public void reset() {
-        graphService.reset();
-    }
+  @GET
+  @Path("/domains")
+  @Operation(
+      operationId = "fetchDomains",
+      summary = "Fetch all domains",
+      description = "Fetch all domains")
+  public Multi<Domain> fetchDomains() {
+    return Multi.createFrom().iterable(graphService.fetchDomains());
+  }
 
-    @GET
-    @Path("/domains")
-    @Operation(
-            operationId = "fetchDomains",
-            summary = "Fetch all domains",
-            description = "Fetch all domains"
-    )
-    public Multi<Domain> fetchDomains() {
-        return Multi.createFrom().iterable(graphService.fetchDomains());
-    }
+  @POST
+  @Path("/domain")
+  @Operation(
+      operationId = "createDomain",
+      summary = "Create a domain",
+      description = "Create a domain")
+  public Uni<Domain> createDomain(@Valid DomainCreate model) {
+    return Uni.createFrom().item(graphService.createDomain(model));
+  }
 
-    @POST
-    @Path("/domain")
-    @Operation(
-            operationId = "createDomain",
-            summary = "Create a domain",
-            description = "Create a domain"
-    )
-    public Uni<Domain> createDomain(@Valid DomainCreate model) {
-        return Uni.createFrom().item(graphService.createDomain(model));
-    }
+  @GET
+  @Path("/domain/{id}")
+  @Operation(
+      operationId = "fetchDomain",
+      summary = "Fetch a domain",
+      description = "Fetch a domain")
+  public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.fetchDomain(id));
+  }
 
-    @GET
-    @Path("/domain/{id}")
-    @Operation(
-            operationId = "fetchDomain",
-            summary = "Fetch a domain",
-            description = "Fetch a domain"
-    )
-    public Uni<Domain> fetchDomain(@PathParam("id") UUID id) {
-        return Uni.createFrom().item(graphService.fetchDomain(id));
-    }
+  @PUT
+  @Path("/domain/{id}")
+  @Operation(
+      operationId = "updateDomain",
+      summary = "Update a domain",
+      description = "Update a domain")
+  public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
+    return Uni.createFrom().item(graphService.updateDomain(id, model));
+  }
 
+  @DELETE
+  @Path("/domain/{id}")
+  @Operation(
+      operationId = "deleteDomain",
+      summary = "Delete a domain",
+      description = "Delete a domain")
+  public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.deleteDomain(id));
+  }
 
-    @PUT
-    @Path("/domain/{id}")
-    @Operation(
-            operationId = "updateDomain",
-            summary = "Update a domain",
-            description = "Update a domain"
-    )
-    public Uni<Domain> updateDomain(@PathParam("id") UUID id, @Valid DomainUpdate model) {
-        return Uni.createFrom().item(graphService.updateDomain(id, model));
-    }
+  @POST
+  @Path("/node")
+  @Operation(operationId = "createNode", summary = "Create a node", description = "Create a node")
+  public Uni<GraphDelta> createNode(@Valid NodeCreate model) {
+    return Uni.createFrom().item(graphService.createNode(model));
+  }
 
-    @DELETE
-    @Path("/domain/{id}")
-    @Operation(
-            operationId = "deleteDomain",
-            summary = "Delete a domain",
-            description = "Delete a domain"
-    )
-    public Uni<GraphDelta> deleteDomain(@PathParam("id") UUID id) {
-        return Uni.createFrom().item(graphService.deleteDomain(id));
-    }
+  @PUT
+  @Path("/node/{id}")
+  @Operation(operationId = "updateNode", summary = "Update a node", description = "Update a node")
+  public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
+    return Uni.createFrom().item(graphService.updateNode(id, model));
+  }
 
-    @POST
-    @Path("/node")
-    @Operation(
-            operationId = "createNode",
-            summary = "Create a node",
-            description = "Create a node"
-    )
-    public Uni<GraphDelta> createNode(@Valid NodeCreate model) {
-        return Uni.createFrom().item(graphService.createNode(model));
-    }
+  @DELETE
+  @Path("/node/{id}")
+  @Operation(operationId = "deleteNode", summary = "Delete a node", description = "Delete a node")
+  public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.deleteNode(id));
+  }
 
-    @PUT
-    @Path("/node/{id}")
-    @Operation(
-            operationId = "updateNode",
-            summary = "Update a node",
-            description = "Update a node"
-    )
-    public Uni<GraphDelta> updateNode(@PathParam("id") UUID id, @Valid NodeUpdate model) {
-        return Uni.createFrom().item(graphService.updateNode(id, model));
-    }
+  @POST
+  @Path("/relation")
+  @Operation(
+      operationId = "createRelation",
+      summary = "Create a relation",
+      description = "Create a relation")
+  public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
+    return Uni.createFrom().item(graphService.createRelation(model));
+  }
 
-    @DELETE
-    @Path("/node/{id}")
-    @Operation(
-            operationId = "deleteNode",
-            summary = "Delete a node",
-            description = "Delete a node"
-    )
-    public Uni<GraphDelta> deleteNode(@PathParam("id") UUID id) {
-        return Uni.createFrom().item(graphService.deleteNode(id));
-    }
+  @PUT
+  @Path("/relation/{id}")
+  @Operation(
+      operationId = "updateRelation",
+      summary = "Update a relation",
+      description = "Update a relation")
+  public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
+    return Uni.createFrom().item(graphService.updateRelation(id, model));
+  }
 
-    @POST
-    @Path("/relation")
-    @Operation(
-            operationId = "createRelation",
-            summary = "Create a relation",
-            description = "Create a relation"
-    )
-    public Uni<GraphDelta> createRelation(@Valid RelationCreate model) {
-        return Uni.createFrom().item(graphService.createRelation(model));
-    }
+  @DELETE
+  @Path("/relation/{id}")
+  @Operation(
+      operationId = "deleteRelation",
+      summary = "Delete a relation",
+      description = "Delete a relation")
+  public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
+    return Uni.createFrom().item(graphService.deleteRelation(id));
+  }
 
-    @PUT
-    @Path("/relation/{id}")
-    @Operation(
-            operationId = "updateRelation",
-            summary = "Update a relation",
-            description = "Update a relation"
-    )
-    public Uni<GraphDelta> updateRelation(@PathParam("id") UUID id, @Valid RelationUpdate model) {
-        return Uni.createFrom().item(graphService.updateRelation(id, model));
-    }
+  @GET
+  @Path("/domain/{domainId}/mapping")
+  @Operation(
+      operationId = "fetchDomainMapping",
+      summary = "Fetch a domain mapping",
+      description = "Fetch a domain mapping")
+  public Uni<Map<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
+    return graphService.createJsonModel(id);
+  }
 
-    @DELETE
-    @Path("/relation/{id}")
-    @Operation(
-            operationId = "deleteRelation",
-            summary = "Delete a relation",
-            description = "Delete a relation"
-    )
-    public Uni<GraphDelta> deleteRelation(@PathParam("id") UUID id) {
-        return Uni.createFrom().item(graphService.deleteRelation(id));
-    }
-
-    @GET
-    @Path("/domain/{domainId}/mapping")
-    @Operation(
-            operationId = "fetchDomainMapping",
-            summary = "Fetch a domain mapping",
-            description = "Fetch a domain mapping"
-    )
-    public Uni<Map<String, String>> createJsonModel(@PathParam("domainId") UUID id) {
-        return graphService.createJsonModel(id);
-    }
-
-    @GET
-    @Path("/domain/{domainId}/keys")
-    @Operation(
-            operationId = "fetchDomainKeys",
-            summary = "Fetch a domain keys",
-            description = "Fetch a domain keys"
-    )
-    public Uni<List<String>> createJsonModelKeys(@PathParam("domainId") UUID id) {
-        return graphService.createJsonModelKeys(id);
-    }
-
-
+  @GET
+  @Path("/domain/{domainId}/keys")
+  @Operation(
+      operationId = "fetchDomainKeys",
+      summary = "Fetch a domain keys",
+      description = "Fetch a domain keys")
+  public Uni<List<String>> createJsonModelKeys(@PathParam("domainId") UUID id) {
+    return graphService.createJsonModelKeys(id);
+  }
 }

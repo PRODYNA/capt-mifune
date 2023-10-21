@@ -1,6 +1,6 @@
 import React, { createContext, useState } from 'react'
 import { Snackbar } from '@mui/material'
-import MuiAlert from '@mui/lab/Alert'
+import MuiAlert from '@mui/material/Alert'
 import { AxiosError } from 'axios'
 import { Translations } from '../utils/Translations'
 

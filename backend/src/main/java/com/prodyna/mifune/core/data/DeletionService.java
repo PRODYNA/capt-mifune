@@ -42,18 +42,18 @@ import org.neo4j.driver.summary.SummaryCounters;
 @ApplicationScoped
 public class DeletionService extends DataBaseService {
 
-    private final GraphService graphService;
+  private final GraphService graphService;
 
-    @Inject
+  @Inject
   public DeletionService(Driver driver, GraphService graphService) {
     super(driver);
-        this.graphService = graphService;
-    }
+    this.graphService = graphService;
+  }
 
   public void deleteDomainFromDatabase(UUID domainId) {
-      Graph graph = graphService.graph();
+    Graph graph = graphService.graph();
 
-      List<Relation> relationsToBeDeleted = graph.relationsByDomainId(domainId, true);
+    List<Relation> relationsToBeDeleted = graph.relationsByDomainId(domainId, true);
 
     Multi<String> deleteRalations =
         Multi.createFrom()
@@ -67,6 +67,7 @@ public class DeletionService extends DataBaseService {
                           .formatted(sourceLabel, rel.getType(), targetLabel);
                   return deleteAll(
                       () -> singleStatistic(cypher, Map.of()),
+                      "Relations",
                       SummaryCounters::relationshipsDeleted);
                 });
 
@@ -77,7 +78,9 @@ public class DeletionService extends DataBaseService {
                 node -> {
                   var cypher = "MATCH(n:%s) wtih n limit 1000 delete n".formatted(node.getLabel());
                   return deleteAll(
-                      () -> singleStatistic(cypher, Map.of()), SummaryCounters::nodesDeleted);
+                      () -> singleStatistic(cypher, Map.of()),
+                      "Nodes",
+                      SummaryCounters::nodesDeleted);
                 });
 
     deleteRalations

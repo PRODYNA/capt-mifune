@@ -26,6 +26,8 @@ package com.prodyna.mifune.core.graph;
  * #L%
  */
 
+import static java.util.function.Predicate.not;
+
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -42,9 +44,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response.Status;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,13 +52,14 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static java.util.function.Predicate.not;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class GraphService {
 
-  @Inject protected Logger log;
+  private static final Logger LOG = LoggerFactory.getLogger(GraphService.class.getName());
 
   private static final Pattern COLOR_PATTERN = Pattern.compile("#[0-9,A-F]{6}");
 
@@ -79,16 +79,16 @@ public class GraphService {
 
     var modelPath = Paths.get(model, graphFile);
     if (modelPath.toFile().exists()) {
-      log.infov("load {0}", modelPath.toAbsolutePath());
+      LOG.info("load {}", modelPath.toAbsolutePath());
 
       try {
         var json = Files.readString(modelPath);
         this.graph = objectMapper.readerFor(Graph.class).readValue(json);
       } catch (IOException e) {
-        log.error("fail to parse graph model", e);
+        LOG.error("fail to parse graph model", e);
       }
     } else {
-      log.warnv("no graph model found at {0}", modelPath.toAbsolutePath());
+      LOG.warn("no graph model found at {}", modelPath.toAbsolutePath());
     }
   }
 
@@ -173,7 +173,7 @@ public class GraphService {
         d.getColumnMapping().values().stream()
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()))) {
-      log.debug("validate failed, header not exist in source file");
+      LOG.debug("validate failed, header not exist in source file");
       d.setMappingValid(false);
       return;
     }

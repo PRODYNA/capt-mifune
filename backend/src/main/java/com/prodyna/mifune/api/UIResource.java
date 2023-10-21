@@ -30,13 +30,15 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
 import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class UIResource {
+
+  private static final Logger LOG = LoggerFactory.getLogger(UIResource.class.getName());
 
   @ConfigProperty(name = "mifune.auth.server.url")
   protected String authServerUrl;
@@ -59,10 +61,8 @@ public class UIResource {
   @ConfigProperty(name = "vertx.static.content")
   protected Optional<String> vertxStaticContent;
 
-  @Inject Logger logger;
-
   public void init(@Observes Router router) {
-    logger.info("use vertx root path %s".formatted(vertxStaticContent.orElse("unknown")));
+    LOG.info("use vertx root path %s".formatted(vertxStaticContent.orElse("unknown")));
 
     var requestHandler =
         vertxStaticContent.map(StaticHandler::create).orElseGet(StaticHandler::create);
@@ -73,7 +73,7 @@ public class UIResource {
         .route("/ui/*")
         .handler(
             rc -> {
-              logger.info("reroute to index %s".formatted(rc.normalizedPath()));
+              LOG.info("reroute to index %s".formatted(rc.normalizedPath()));
               rc.reroute("/ui/index.html");
             });
   }
