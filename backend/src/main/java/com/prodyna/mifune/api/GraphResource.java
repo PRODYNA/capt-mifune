@@ -30,7 +30,6 @@ import com.prodyna.mifune.core.graph.GraphService;
 import com.prodyna.mifune.domain.*;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -47,7 +46,11 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Tag(name = "graph")
 public class GraphResource {
 
-  @Inject protected GraphService graphService;
+  private final GraphService graphService;
+
+  public GraphResource(GraphService graphService) {
+    this.graphService = graphService;
+  }
 
   @GET
   @Operation(

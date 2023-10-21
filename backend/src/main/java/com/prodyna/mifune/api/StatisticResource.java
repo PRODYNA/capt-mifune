@@ -35,7 +35,6 @@ import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.vertx.mutiny.core.eventbus.EventBus;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -56,11 +55,18 @@ public class StatisticResource {
 
   private static final Logger LOG = LoggerFactory.getLogger(StatisticResource.class.getName());
 
-  @Inject protected EventBus eventBus;
+  private final EventBus eventBus;
 
-  @Inject protected ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-  @Inject protected StatisticService statisticService;
+  private final StatisticService statisticService;
+
+  public StatisticResource(
+      EventBus eventBus, ObjectMapper objectMapper, StatisticService statisticService) {
+    this.eventBus = eventBus;
+    this.objectMapper = objectMapper;
+    this.statisticService = statisticService;
+  }
 
   @POST
   @Operation(operationId = "query", summary = "Query the graph", description = "Query the graph")

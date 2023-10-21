@@ -28,7 +28,6 @@ package com.prodyna.mifune.api;
 
 import com.prodyna.mifune.core.source.SourceService;
 import com.prodyna.mifune.domain.Source;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -47,10 +46,15 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Tag(name = "source")
 public class SourceResource {
 
-  @ConfigProperty(name = "mifune.upload.dir")
-  protected String uploadDir;
+  private final SourceService sourceService;
 
-  @Inject protected SourceService sourceService;
+  private final String uploadDir;
+
+  public SourceResource(
+      SourceService sourceService, @ConfigProperty(name = "mifune.upload.dir") String uploadDir) {
+    this.sourceService = sourceService;
+    this.uploadDir = uploadDir;
+  }
 
   @POST
   @Consumes(MediaType.MULTIPART_FORM_DATA)

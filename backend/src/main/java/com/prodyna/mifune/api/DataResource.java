@@ -31,7 +31,6 @@ import com.prodyna.mifune.core.data.DeletionService;
 import com.prodyna.mifune.core.data.ImportService;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import java.util.UUID;
@@ -44,11 +43,20 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 @Tag(name = "data")
 public class DataResource {
 
-  @Inject protected ImportService importService;
+  private final ImportService importService;
 
-  @Inject protected ApocalypseService apocalypseService;
+  private final ApocalypseService apocalypseService;
 
-  @Inject protected DeletionService deletionService;
+  private final DeletionService deletionService;
+
+  public DataResource(
+      ImportService importService,
+      ApocalypseService apocalypseService,
+      DeletionService deletionService) {
+    this.importService = importService;
+    this.apocalypseService = apocalypseService;
+    this.deletionService = deletionService;
+  }
 
   @Path("/apocalypse")
   @GET
