@@ -61,16 +61,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
 import org.neo4j.driver.Driver;
-import org.neo4j.driver.exceptions.ClientException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class ImportService extends DataBaseService {
 
-  private final Map<UUID, SubmissionPublisher<?>> pipelineMap = new HashMap<>();
+  private static final Logger LOG = LoggerFactory.getLogger(ImportService.class.getName());
 
-  @Inject protected Logger log;
+  private final Map<UUID, SubmissionPublisher<?>> pipelineMap = new HashMap<>();
 
   @Inject protected EventBus eventBus;
 
@@ -94,14 +94,12 @@ public class ImportService extends DataBaseService {
   public Uni<String> runImport(UUID domainId) {
 
     if (pipelineMap.containsKey(domainId)) {
-      log.info("import for domain is running");
       throw new BadRequestException("import for domain is running");
     }
 
-    log.debug("start import");
-
+    LOG.debug("start import");
     var domain = graphService.fetchDomain(domainId);
-    log.debugf("start import found domain %s", domain.getName());
+    LOG.debug("start import found domain {}", domain.getName());
     var graph = graphService.graph();
 
     return buildIndex(domainId, graph)
@@ -124,7 +122,9 @@ public class ImportService extends DataBaseService {
     cleanJsonModel(domain, jsonModel);
     var importFile = Paths.get(uploadDir, domain.getFile());
     var cypher = new CypherUpdateBuilder(graphModel, domainId, addLineNumbers).getCypher();
-    log.info(cypher);
+    LOG.info(cypher);
+
+    var start = System.currentTimeMillis();
 
     JsonTransformer jsonTransformer =
         Multi.createFrom()
@@ -142,16 +142,16 @@ public class ImportService extends DataBaseService {
                     "import",
                     objectMapper.writer().writeValueAsString(new ImportStatistic(domainId, s)));
               } catch (JsonProcessingException e) {
-                log.error(e.getMessage(), e);
+                LOG.error(e.getMessage(), e);
               }
             },
             throwable -> {
-              log.error(throwable.getMessage(), throwable);
+              LOG.error(throwable.getMessage(), throwable);
               pipelineMap.remove(domainId);
             },
             () -> {
+              LOG.info("import done in {} ms", System.currentTimeMillis() - start);
               pipelineMap.remove(domainId);
-              log.info("import done ");
             });
     return jsonTransformer;
   }
@@ -189,12 +189,7 @@ public class ImportService extends DataBaseService {
         .items(indexCyphers.stream())
         .onItem()
         .transformToUniAndConcatenate(c -> super.singleStatistic(c, Map.of()))
-        .map(
-            resultSummary -> {
-              String summaryString = resultSummary.toString();
-              log.info(summaryString);
-              return summaryString;
-            });
+        .map(Object::toString);
   }
 
   private void cleanJsonModel(Domain domain, ObjectNode jsonModel) {
@@ -214,7 +209,7 @@ public class ImportService extends DataBaseService {
           }
         });
 
-    log.debugf("JsonModel: %s", jsonModel);
+    LOG.debug("JsonModel: {}", jsonModel);
   }
 
   private Stream<List<String>> fileContentStream(Path importFile) {
@@ -231,15 +226,7 @@ public class ImportService extends DataBaseService {
   }
 
   public Uni<String> stopImport(UUID domainId) {
-    Optional.ofNullable(this.pipelineMap.remove(domainId))
-        .ifPresent(
-            c -> {
-              try {
-                c.close();
-              } catch (ClientException e) {
-                // ignore;
-              }
-            });
+    Optional.ofNullable(this.pipelineMap.remove(domainId)).ifPresent(SubmissionPublisher::close);
     return Uni.createFrom().item("done");
   }
 }
