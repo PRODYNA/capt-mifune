@@ -6,10 +6,8 @@ import {
   DialogActions,
   Typography,
 } from '@mui/material'
-import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined'
-import CheckIcon from '@mui/icons-material/Check'
-import { useTheme } from '@mui/material/styles'
-import CustomButton from '../Button/CustomButton'
+import { CustomClearIcon, CustomSaveIcon } from '../Icons/CustomIcons'
+import ActionButtons from '../Button/ActionButtons'
 
 interface ICustomDialog {
   title: string
@@ -17,22 +15,12 @@ interface ICustomDialog {
   setOpen: Dispatch<SetStateAction<boolean>>
   handleSubmit: () => void
   submitBtnText: string
-  submitBtnColor?: string
   children: JSX.Element | JSX.Element[]
 }
 
 const CustomDialog = (props: ICustomDialog): JSX.Element => {
-  const {
-    title,
-    open,
-    setOpen,
-    children,
-    handleSubmit,
-    submitBtnText,
-    submitBtnColor,
-  } = props
+  const { title, open, setOpen, children, handleSubmit, submitBtnText } = props
   const handleClose = (): void => setOpen(false)
-  const theme = useTheme()
 
   return (
     <Dialog
@@ -46,22 +34,12 @@ const CustomDialog = (props: ICustomDialog): JSX.Element => {
       </DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions>
-        <CustomButton
-          type="submit"
-          onClick={handleClose}
-          customColor={theme.palette.secondary.main}
-          startIcon={<ClearOutlinedIcon />}
-          style={{ marginRight: '1rem' }}
-          title="Cancel"
-        />
-        <CustomButton
-          customColor={submitBtnColor || 'secondary'}
-          onClick={(): void => {
+        <ActionButtons
+          handleCancel={handleClose}
+          handleSave={(): void => {
             handleSubmit()
             setOpen(false)
           }}
-          startIcon={<CheckIcon />}
-          title={submitBtnText}
         />
       </DialogActions>
     </Dialog>

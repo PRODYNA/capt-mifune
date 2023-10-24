@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction } from 'react'
 import {
   List,
   ListItem,
@@ -9,16 +9,18 @@ import {
   useTheme,
   Box,
 } from '@mui/material'
-import BubbleChartIcon from '@mui/icons-material/BubbleChart'
-import CloudUpload from '@mui/icons-material/CloudUpload'
-import PieChartIcon from '@mui/icons-material/PieChart'
-import RotateRightIcon from '@mui/icons-material/RotateRight'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ANALYTCIS, PIPELINES, ROOT_PATH, UPLOAD } from '../../routes/routes'
 import Logo from '../../assets/Logo.svg'
 import LogoutItem from './LogoutItem'
 import oidcConfig from '../../auth/oidcConfig'
+import {
+  AnalyticsIcon,
+  GraphIcon,
+  MenuCollapseIcon,
+  PipelineIcon,
+  CustomUploadIcon,
+} from '../Icons/CustomIcons'
 
 export const DRAWER_WIDTH = 60
 export const DRAWER_WIDTH_OPEN = 170
@@ -41,10 +43,10 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
   const theme = useTheme()
   // const { logout } = useOidc()
   const navItems: INavItems[] = [
-    { title: 'Graph', icon: <BubbleChartIcon />, path: ROOT_PATH },
-    { title: 'Upload', icon: <CloudUpload />, path: UPLOAD },
-    { title: 'Pipelines', icon: <RotateRightIcon />, path: PIPELINES },
-    { title: 'Analytics', icon: <PieChartIcon />, path: ANALYTCIS },
+    { title: 'Graph', icon: <GraphIcon />, path: ROOT_PATH },
+    { title: 'Upload', icon: <CustomUploadIcon />, path: UPLOAD },
+    { title: 'Pipelines', icon: <PipelineIcon />, path: PIPELINES },
+    { title: 'Analytics', icon: <AnalyticsIcon />, path: ANALYTCIS },
   ]
 
   function buildNavItem(item: INavItems): JSX.Element {
@@ -144,7 +146,7 @@ const Sidenavigation = (props: ISidenav): JSX.Element => {
         {navItems.map((item) => buildNavItem(item))}
         {buildLogout()}
       </List>
-      <ChevronRightIcon
+      <MenuCollapseIcon
         sx={{
           position: 'absolute',
           bottom: '2rem',

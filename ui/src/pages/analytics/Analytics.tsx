@@ -1,15 +1,5 @@
 import { useContext } from 'react'
 import { Box, Fab, Tooltip, Typography } from '@mui/material'
-import BarChartIcon from '@mui/icons-material/BarChart'
-import ShuffleIcon from '@mui/icons-material/Shuffle'
-import AppsIcon from '@mui/icons-material/Apps'
-import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
-import PublicIcon from '@mui/icons-material/Public'
-import TrackChangesIcon from '@mui/icons-material/TrackChanges'
-import ViewComfyIcon from '@mui/icons-material/ViewComfy'
-import TimelineIcon from '@mui/icons-material/Timeline'
-import LandscapeIcon from '@mui/icons-material/Landscape'
 import { buildBarChart, MifuneBarChart } from './charts/MifuneBarChart'
 import { buildSankeyChart, MifuneSankey } from './charts/MifuneSankey'
 import { buildHeatMapChart, MifiuneHeatMap } from './charts/MifuneHeatMap'
@@ -24,6 +14,18 @@ import { buildLineChart, MifuneLineChart } from './charts/MifuneLine'
 import { buildTimeRangeChart, MifuneTimeRange } from './charts/MifuneTimeRange'
 import { buildAreaBump, MifuneAreaBump } from './charts/MifuneAreaBump'
 import { ChartContext, ChartType } from '../../context/ChartContext'
+import {
+  AreaBumpChartIcon,
+  BarChartIcon,
+  ChordChartIcon,
+  GeoMapChartIcon,
+  HeatmapChartIcon,
+  LineChartIcon,
+  RadialBarChartIcon,
+  SankeyChartIcon,
+  TableChartIcon,
+  TimeRangeChartIcon,
+} from '../../components/Icons/CustomIcons'
 
 interface Chart {
   title: string
@@ -55,63 +57,63 @@ export const Analytics = (): JSX.Element => {
     {
       title: 'RadialBar',
       type: ChartType.RadialBar,
-      icon: <TrackChangesIcon />,
+      icon: <RadialBarChartIcon />,
       options: <MifiuneRadialBar />,
       build: (): JSX.Element => buildRadialChart(data),
     },
     {
       title: 'Heatmap',
       type: ChartType.Heatmap,
-      icon: <AppsIcon />,
+      icon: <HeatmapChartIcon />,
       options: <MifiuneHeatMap />,
       build: (): JSX.Element => buildHeatMapChart(data),
     },
     {
       title: 'Sankey',
       type: ChartType.Sankey,
-      icon: <ShuffleIcon />,
+      icon: <SankeyChartIcon />,
       options: <MifuneSankey />,
       build: (): JSX.Element => buildSankeyChart(data),
     },
     {
       title: 'Chord',
       type: ChartType.Chord,
-      icon: <SwapHorizIcon />,
+      icon: <ChordChartIcon />,
       options: <MifiuneChordChart />,
       build: (): JSX.Element => buildChordChart(data),
     },
     {
       title: 'GeoMap',
       type: ChartType.GeoMap,
-      icon: <PublicIcon />,
+      icon: <GeoMapChartIcon />,
       options: <MifuneGeoChart />,
       build: (): JSX.Element => buildGeoChart(data),
     },
     {
       title: 'Line',
       type: ChartType.Line,
-      icon: <TimelineIcon />,
+      icon: <LineChartIcon />,
       options: <MifuneLineChart />,
       build: (): JSX.Element => buildLineChart(data),
     },
     {
       title: 'AreaBump',
       type: ChartType.AreaBump,
-      icon: <LandscapeIcon />,
+      icon: <AreaBumpChartIcon />,
       options: <MifuneAreaBump />,
       build: (): JSX.Element => buildAreaBump(data),
     },
     {
       title: 'TimeRange',
       type: ChartType.TimeRange,
-      icon: <ViewComfyIcon />,
+      icon: <TimeRangeChartIcon />,
       options: <MifuneTimeRange />,
       build: (): JSX.Element => buildTimeRangeChart(data),
     },
     {
       title: 'Table',
       type: ChartType.Table,
-      icon: <TableChartOutlinedIcon />,
+      icon: <TableChartIcon />,
       options: <MifuneTable />,
       build: (): JSX.Element => buildTableChart(data),
     },
@@ -140,9 +142,9 @@ export const Analytics = (): JSX.Element => {
                   })
                 }}
                 color={chart === item.title ? 'primary' : 'default'}
-                style={{
-                  marginRight: '1rem',
-                  marginBottom: '1rem',
+                sx={{
+                  mr: '1rem',
+                  mb: '1rem',
                   boxShadow: 'none',
                 }}
               >

@@ -1,23 +1,24 @@
-import React, { Dispatch, FormEvent, SetStateAction, useState } from 'react'
-
+import { Dispatch, FormEvent, SetStateAction, useState } from 'react'
 import {
   Box,
+  Button,
   IconButton,
   TableRow,
   Tooltip,
   Typography,
   useTheme,
 } from '@mui/material'
-
-import SaveIcon from '@mui/icons-material/Save'
-import DeleteIcon from '@mui/icons-material/Delete'
-import CloseIcon from '@mui/icons-material/Close'
-import AddIcon from '@mui/icons-material/Add'
 import { PropertyEdit } from './PropertyEdit'
 import { Node, Property, Relation } from '../../services/models'
-import CustomButton from '../../components/Button/CustomButton'
 import CustomTable from '../../components/Table/CustomTable'
 import CustomDialog from '../../components/Dialog/CustomDialog'
+import {
+  CustomAddIcon,
+  CustomCloseIcon,
+  CustomDeleteIcon,
+  CustomSaveIcon,
+} from '../../components/Icons/CustomIcons'
+import { CustomTexts } from '../../utils/CustomTexts'
 
 interface EditProps {
   title: string
@@ -104,7 +105,7 @@ const Edit = (props: EditProps): JSX.Element => {
           </Typography>
           <Tooltip arrow title="Add new Property">
             <IconButton onClick={(): void => addProperty()} size="small">
-              <AddIcon htmlColor={theme.palette.primary.main} />
+              <CustomAddIcon htmlColor={theme.palette.primary.main} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -138,7 +139,7 @@ const Edit = (props: EditProps): JSX.Element => {
       sx={{
         form: {
           maxHeight: '95vh',
-          overflow: 'hidden',
+          overflow: 'scroll',
           height: 'auto',
           maxWidth: 450,
           zIndex: 100,
@@ -156,7 +157,7 @@ const Edit = (props: EditProps): JSX.Element => {
         <Box position="relative">
           <Box position="absolute" top={0} right={0}>
             <IconButton onClick={() => onClose()}>
-              <CloseIcon />
+              <CustomCloseIcon />
             </IconButton>
           </Box>
           <Box px={2} pt={1} pb={2}>
@@ -176,21 +177,25 @@ const Edit = (props: EditProps): JSX.Element => {
             py={1}
             textAlign="right"
           >
-            <CustomButton
-              title="Delete"
+            <Button
               size="small"
               onClick={(): void => setShowModal(true)}
-              startIcon={<DeleteIcon />}
-              style={{ marginRight: '1rem' }}
-              customColor={theme.palette.error.main}
-            />
-            <CustomButton
+              startIcon={<CustomDeleteIcon />}
+              sx={{ mr: '1rem' }}
+              color="error"
+              variant="contained"
+            >
+              {CustomTexts.delete}
+            </Button>
+            <Button
               type="submit"
-              title="Update"
               size="small"
-              startIcon={<SaveIcon />}
-              customColor={theme.palette.success.main}
-            />
+              startIcon={<CustomSaveIcon />}
+              color="success"
+              variant="contained"
+            >
+              {CustomTexts.update}
+            </Button>
           </Box>
         </Box>
       </form>
@@ -199,7 +204,6 @@ const Edit = (props: EditProps): JSX.Element => {
         setOpen={setShowModal}
         title={`Delete ${modalTitle}`}
         submitBtnText="Yes, Delete"
-        submitBtnColor={theme.palette.error.main}
         handleSubmit={(): void => onDelete(value)}
       >
         <Typography variant="body1">

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Chip,
@@ -12,16 +12,17 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Button,
 } from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete'
 import { useTheme } from '@mui/material/styles'
 import { EventSourcePolyfill } from 'ng-event-source'
 import PipelineRow from './PipelineRow'
-import CustomButton from '../../components/Button/CustomButton'
 import CustomDialog from '../../components/Dialog/CustomDialog'
 import { Domain, GraphApi, GraphStatistics } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { EventApiImpl } from '../../helpers/event-api'
+import { CustomDeleteIcon } from '../../components/Icons/CustomIcons'
+import { CustomTexts } from '../../utils/CustomTexts'
 
 interface Message {
   [key: string]: number
@@ -114,13 +115,14 @@ const Pipelines = (): JSX.Element => {
               color="primary"
             />
           </Box>
-          <CustomButton
-            title="Reset Database"
-            type="submit"
-            customColor={theme.palette.error.main}
+          <Button
+            color="error"
+            variant="contained"
             onClick={(): void => setShowModal(true)}
-            startIcon={<DeleteIcon />}
-          />
+            startIcon={<CustomDeleteIcon />}
+          >
+            {CustomTexts.resetDb}
+          </Button>
         </Box>
         {showProgress && <LinearProgress color="primary" />}
         <TableContainer
@@ -163,9 +165,8 @@ const Pipelines = (): JSX.Element => {
       <CustomDialog
         open={showModal}
         setOpen={setShowModal}
-        title="Reset Database"
+        title={CustomTexts.resetDb}
         submitBtnText="Yes, Reset"
-        submitBtnColor={theme.palette.error.main}
         handleSubmit={clean}
       >
         <Typography variant="body1">

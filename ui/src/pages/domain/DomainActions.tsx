@@ -1,13 +1,16 @@
 import { useContext } from 'react'
 import { Box, Fab, Tooltip } from '@mui/material'
-import AddIcon from '@mui/icons-material/Add'
-import SaveIcon from '@mui/icons-material/Save'
-import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { GraphApi } from '../../services'
 import { GraphContext } from '../../context/GraphContext'
+import { CustomTexts } from '../../utils/CustomTexts'
+import {
+  CustomAddIcon,
+  CustomDownloadIcon,
+  CustomSaveIcon,
+} from '../../components/Icons/CustomIcons'
 
 interface IDomainActions {
   downloadSVG: () => void
@@ -28,7 +31,7 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
         transform: 'translateX(-50%)',
       }}
     >
-      <Tooltip title="Create new Domain">
+      <Tooltip title={CustomTexts.createDomain}>
         <Fab
           size="large"
           color="primary"
@@ -59,15 +62,15 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
               })
           }
         >
-          <AddIcon />
+          <CustomAddIcon />
         </Fab>
       </Tooltip>
-      <Tooltip title="Save Graph">
+      <Tooltip title={CustomTexts.saveGraph}>
         <Fab
           size="large"
           color="success"
           sx={{
-            ml: '1rem',
+            mx: '1rem',
           }}
           onClick={() =>
             graphApi
@@ -76,12 +79,12 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
               .catch((e) => openSnackbarError(e))
           }
         >
-          <SaveIcon />
+          <CustomSaveIcon />
         </Fab>
       </Tooltip>
-      <Tooltip title="Download Image">
-        <Fab size="large" color="success" onClick={downloadSVG}>
-          <AddAPhotoIcon />
+      <Tooltip title={CustomTexts.downloadGraph}>
+        <Fab size="large" color="info" onClick={downloadSVG}>
+          <CustomDownloadIcon />
         </Fab>
       </Tooltip>
     </Box>

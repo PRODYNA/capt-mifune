@@ -1,5 +1,5 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Box, Chip, Collapse, Switch, Typography } from '@mui/material'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Box, Button, Chip, Collapse, Switch, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
@@ -13,7 +13,6 @@ import {
   nodeMouseEvents,
   tick,
 } from '../../helpers/GraphHelper'
-import CustomButton from '../../components/Button/CustomButton'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 
 export interface QueryBuilderProps {
@@ -316,17 +315,18 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
       <Collapse in={showQuery}>
         {(graph?.nodes || []).map(
           (n): JSX.Element => (
-            <CustomButton
-              title={n.label || ''}
+            <Button
               key={n.id}
               onClick={(): void => addNode(n)}
-              customColor={n.color}
-              style={{
-                marginRight: '1rem',
-                marginBottom: '1rem',
-                borderRadius: '5px',
+              sx={{
+                bgcolor: n.color,
+                color: 'white',
+                mr: '1rem',
+                mb: '1rem',
               }}
-            />
+            >
+              {n.label || ''}
+            </Button>
           )
         )}
 
@@ -350,7 +350,7 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
                   onDelete={(): void => deleteNode(n.node)}
                   color="primary"
                   variant="outlined"
-                  style={{ marginRight: '0.5rem' }}
+                  sx={{ mr: '0.5rem' }}
                 />
               ))}
           </Box>

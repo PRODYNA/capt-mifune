@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Drawer, Typography, Box, IconButton, useTheme } from '@mui/material'
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft'
+import { CustomLeftIcon } from '../Icons/CustomIcons'
 
 export const DRAWER_BUTTON = 110
 export const DRAWER_WIDTH_OPEN = 650
@@ -65,7 +65,7 @@ const ChartsNavigation = (props: { children: JSX.Element[] }): JSX.Element => {
           },
         }}
       >
-        <ArrowLeftIcon />
+        <CustomLeftIcon />
         <Typography variant="caption">Chart Options</Typography>
       </IconButton>
       <Box

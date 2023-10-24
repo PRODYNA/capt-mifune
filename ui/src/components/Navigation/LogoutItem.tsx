@@ -1,15 +1,19 @@
-import React from 'react'
-import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import { useOidc } from '@axa-fr/react-oidc'
-import { ListItem, ListItemIcon, ListItemText, useTheme } from '@mui/material'
+import {
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  useTheme,
+} from '@mui/material'
+import { LogoutIcon } from '../Icons/CustomIcons'
 
 const LogoutItem = (): JSX.Element => {
   const oidc = useOidc()
   const theme = useTheme()
 
   return (
-    <ListItem
-      button
+    <ListItemButton
       key="Logout"
       onClick={() => oidc.logout()}
       sx={{
@@ -25,10 +29,10 @@ const LogoutItem = (): JSX.Element => {
           color: theme.palette.common.white,
         }}
       >
-        <ExitToAppIcon />
+        <LogoutIcon />
       </ListItemIcon>
       <ListItemText primary="Logout" />
-    </ListItem>
+    </ListItemButton>
   )
 }
 

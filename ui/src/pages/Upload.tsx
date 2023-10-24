@@ -1,12 +1,11 @@
-import React, { useContext, useState } from 'react'
-import { Box, Container, Typography } from '@mui/material'
-import CloudUploadIcon from '@mui/icons-material/CloudUpload'
-import CustomButton from '../components/Button/CustomButton'
+import { useContext, useState } from 'react'
+import { Box, Button, Container, Typography } from '@mui/material'
 import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'
 import { CustomTexts } from '../utils/CustomTexts'
 import AXIOS_CONFIG from '../openapi/axios-config'
 import { SourceApi } from '../services'
+import { CustomUploadIcon } from '../components/Icons/CustomIcons'
 
 const FileUpload = (): JSX.Element => {
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
@@ -62,13 +61,14 @@ const FileUpload = (): JSX.Element => {
             />
           </Box>
           <Box ml={2}>
-            <CustomButton
-              title="submit"
-              type="submit"
+            <Button
               color="secondary"
+              variant="contained"
               disabled={!file}
-              startIcon={<CloudUploadIcon />}
-            />
+              startIcon={<CustomUploadIcon />}
+            >
+              {CustomTexts.uploadFile}
+            </Button>
           </Box>
         </Box>
       </form>

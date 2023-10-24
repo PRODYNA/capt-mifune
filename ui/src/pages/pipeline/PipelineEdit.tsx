@@ -1,12 +1,12 @@
-import React, { FormEvent, useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Grid } from '@mui/material'
 import FormSelect from '../../components/Form/FormSelect'
-import FormActions from '../../components/Form/FormActions'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import { Domain, GraphApi, Source, SourceApi } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
+import ActionButtons from '../../components/Button/ActionButtons'
 
 interface DomainEditProps {
   domain: Domain
@@ -111,23 +111,7 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   }
 
   return (
-    <form
-      onSubmit={(event: FormEvent<HTMLFormElement>) => {
-        if (domain.id)
-          graphApi
-            .updateDomain(domain.id, {
-              ...domain,
-              file,
-              columnMapping: mapping,
-            })
-            .then(() => {
-              openSnackbar(Translations.SAVE, 'success')
-              navigate(-1)
-            })
-            .catch((e) => openSnackbarError(e))
-        event.preventDefault()
-      }}
-    >
+    <>
       <Grid container spacing={3}>
         {children.map((child) => (
           <Grid item xs={12} md={4} key={`child-${child?.key}`}>
@@ -135,12 +119,23 @@ const PipelineEdit = (props: DomainEditProps): JSX.Element => {
           </Grid>
         ))}
       </Grid>
-      <FormActions
-        saveText="Save"
-        cancelText="Cancel"
-        onCancelEvent={() => navigate(-1)}
+      <ActionButtons
+        handleCancel={() => navigate(-1)}
+        handleSave={() => {
+          if (domain.id)
+            graphApi
+              .updateDomain(domain.id, {
+                ...domain,
+                file,
+                columnMapping: mapping,
+              })
+              .then(() => {
+                openSnackbar(Translations.SAVE, 'success')
+              })
+              .catch((e) => openSnackbarError(e))
+        }}
       />
-    </form>
+    </>
   )
 }
 

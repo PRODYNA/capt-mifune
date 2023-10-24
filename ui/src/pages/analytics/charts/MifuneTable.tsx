@@ -1,6 +1,7 @@
 import React, { useContext, useEffect } from 'react'
 import {
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -11,11 +12,11 @@ import {
   Typography,
 } from '@mui/material'
 import { v4 } from 'uuid'
-import { Add } from '@mui/icons-material'
 import { ChartWrapper, SelectProps } from '../ChartWrapper'
 import { ChartContext, QueryData } from '../../../context/ChartContext'
-import CustomButton from '../../../components/Button/CustomButton'
 import { QueryFunction } from '../../../services/models/query-function'
+import { CustomAddIcon } from '../../../components/Icons/CustomIcons'
+import { CustomTexts } from '../../../utils/CustomTexts'
 
 export const buildTableChart = (data: QueryData): JSX.Element => {
   if (!data || data.length === 0)
@@ -142,12 +143,15 @@ export const MifuneTable = (): JSX.Element => {
       ]}
     >
       <Box textAlign="right" mb={1}>
-        <CustomButton
+        <Button
           color="secondary"
           onClick={addNewTableColumn}
-          startIcon={<Add />}
-          title="new Column"
-        />
+          startIcon={<CustomAddIcon />}
+          variant="contained"
+          size="small"
+        >
+          {CustomTexts.newCol}
+        </Button>
       </Box>
     </ChartWrapper>
   )

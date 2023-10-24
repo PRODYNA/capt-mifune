@@ -79,7 +79,7 @@ const SnackbarProvider = (props: SnackbarProviderProps): JSX.Element => {
       value={{ openSnackbar, closeSnackbar, openSnackbarError }}
     >
       <Snackbar
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         open={open}
         autoHideDuration={4000}
         onClose={closeSnackbar}

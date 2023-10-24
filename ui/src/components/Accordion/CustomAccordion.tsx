@@ -1,11 +1,11 @@
 import { AccordionProps } from '@mui/material/Accordion'
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight'
 import {
   Accordion,
   AccordionActions,
   AccordionDetails,
   AccordionSummary,
 } from '@mui/material'
+import { CustomAccordionIcon } from '../Icons/CustomIcons'
 
 type CustomAccordionProps = AccordionProps & {
   children: JSX.Element
@@ -27,7 +27,7 @@ const CustomAccordion = (props: CustomAccordionProps): JSX.Element => {
     >
       <AccordionSummary aria-controls={`${id}-content`} id={`${id}-header`}>
         {summary}
-        <KeyboardArrowRightIcon />
+        <CustomAccordionIcon />
       </AccordionSummary>
       <AccordionDetails>{children}</AccordionDetails>
       <AccordionActions>{actions}</AccordionActions>

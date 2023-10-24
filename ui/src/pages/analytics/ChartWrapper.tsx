@@ -1,19 +1,17 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react'
 import {
   Box,
+  Button,
   CircularProgress,
   Slider,
   TableRow,
   Typography,
 } from '@mui/material'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import { Add } from '@mui/icons-material'
 import { v4 } from 'uuid'
 import { AnalyticFilter } from './AnalyticFilter'
 import { AnalyticSelect } from './AnalyticSelect'
 import { Query } from './QueryBuilder'
 import CustomTable from '../../components/Table/CustomTable'
-import CustomButton from '../../components/Button/CustomButton'
 import { ChartContext } from '../../context/ChartContext'
 import {
   DataApi,
@@ -28,6 +26,11 @@ import {
 } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
 import { SnackbarContext } from '../../context/Snackbar'
+import {
+  CustomAddIcon,
+  CustomPlayIcon,
+} from '../../components/Icons/CustomIcons'
+import { CustomTexts } from '../../utils/CustomTexts'
 
 export interface SelectProps {
   query: Query
@@ -167,90 +170,85 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   return (
     <>
       <Box mb={4} color="text.primary">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            loadData()
-          }}
-        >
-          <Box mt={4} display="flex" justifyContent="space-between">
-            <Typography variant="overline">
-              <b>Chart options</b>
-            </Typography>
-            <CustomButton
-              startIcon={<PlayArrowIcon />}
-              key="submit-button"
-              type="submit"
-              color="primary"
-              size="small"
-              title="Generate Chart"
-            />
-          </Box>
-          <Box bgcolor="#f7f7f7" p={2} my={2}>
-            {children}
-            {selects.map((s) => (
-              <AnalyticSelect
-                fnDefault={s.fnDefault}
-                label={s.label}
-                key={s.label}
-                query={query}
-                onChange={(value, fn) => {
-                  setData(undefined)
-                  s.onChange(value, fn)
-                }}
-              />
-            ))}
-            {!disableScale && (
-              <Box mt={6} display="flex" justifyContent="space-between">
-                <Typography variant="overline" style={{ marginRight: '1rem' }}>
-                  <b>Scale</b>
-                </Typography>
-                <Slider
-                  defaultValue={1}
-                  step={0.1}
-                  marks
-                  min={0}
-                  max={10}
-                  aria-labelledby="non-linear-slider"
-                  scale={(x) => (x < 1 ? x * 0.5 : x * 10)}
-                  onChange={(event: Event, value: number | number[]): void =>
-                    setScale(value as number)
-                  }
-                  valueLabelDisplay="on"
-                />
-              </Box>
-            )}
-          </Box>
-          <Box
-            color="text.primary"
-            display="flex"
-            justifyContent="space-between"
+        <Box mt={4} display="flex" justifyContent="space-between">
+          <Typography variant="overline">
+            <b>Chart options</b>
+          </Typography>
+          <Button
+            startIcon={<CustomPlayIcon />}
+            onClick={loadData}
+            key="submit-button"
+            type="submit"
+            color="primary"
+            size="small"
+            variant="contained"
           >
-            <Typography variant="overline">
-              <b>Filter options</b>
-            </Typography>
-            <CustomButton
-              startIcon={<Add />}
-              color="primary"
-              size="small"
-              title="Add Filter"
-              onClick={(): void =>
-                setFilters([
-                  ...filters,
-                  {
-                    property: undefined,
-                    value: undefined,
-                    function: FilterFunction.Equal,
-                    uuid: v4(),
-                  },
-                ])
-              }
+            {CustomTexts.generateChart}
+          </Button>
+        </Box>
+        <Box bgcolor="#f7f7f7" p={2} my={2}>
+          {children}
+          {selects.map((s) => (
+            <AnalyticSelect
+              fnDefault={s.fnDefault}
+              label={s.label}
+              key={s.label}
+              query={query}
+              onChange={(value, fn) => {
+                setData(undefined)
+                s.onChange(value, fn)
+              }}
             />
-          </Box>
-          <Box bgcolor="#f7f7f7" p={2} my={2}>
-            {filterElements()}
-          </Box>
-        </form>
+          ))}
+          {!disableScale && (
+            <Box mt={6} display="flex" justifyContent="space-between">
+              <Typography variant="overline" style={{ marginRight: '1rem' }}>
+                <b>Scale</b>
+              </Typography>
+              <Slider
+                defaultValue={1}
+                step={0.1}
+                marks
+                min={0}
+                max={10}
+                aria-labelledby="non-linear-slider"
+                scale={(x) => (x < 1 ? x * 0.5 : x * 10)}
+                onChange={(event: Event, value: number | number[]): void =>
+                  setScale(value as number)
+                }
+                valueLabelDisplay="on"
+              />
+            </Box>
+          )}
+        </Box>
+        <Box color="text.primary" display="flex" justifyContent="space-between">
+          <Typography variant="overline">
+            <b>Filter options</b>
+          </Typography>
+          <Button
+            startIcon={<CustomAddIcon />}
+            color="primary"
+            size="small"
+            title="Add Filter"
+            variant="contained"
+            onClick={(): void =>
+              setFilters([
+                ...filters,
+                {
+                  property: undefined,
+                  value: undefined,
+                  function: FilterFunction.Equal,
+                  uuid: v4(),
+                },
+              ])
+            }
+          >
+            {CustomTexts.addFilter}
+          </Button>
+        </Box>
+        <Box bgcolor="#f7f7f7" p={2} my={2}>
+          {filterElements()}
+        </Box>
       </Box>
       {loading && (
         <Box textAlign="center">

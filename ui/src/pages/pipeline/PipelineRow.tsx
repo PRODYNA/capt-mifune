@@ -1,17 +1,21 @@
-import React, { Dispatch, SetStateAction, useContext } from 'react'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import WarningIcon from '@mui/icons-material/Warning'
-import ClearIcon from '@mui/icons-material/Clear'
-import DoneIcon from '@mui/icons-material/Done'
+import { Dispatch, SetStateAction, useContext } from 'react'
+
 import { IconButton, TableCell, TableRow } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import StopIcon from '@mui/icons-material/Stop'
-import VisibilityIcon from '@mui/icons-material/Visibility'
+
 import { useTheme } from '@mui/material/styles'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
 import { DataApi, Domain } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
+import {
+  CustomCheckIcon,
+  CustomClearIcon,
+  CustomVisibilityIcon,
+  CustomWarningIcon,
+  CustomPlayIcon,
+  CustomStopIcon,
+} from '../../components/Icons/CustomIcons'
 
 interface IPipelineRow {
   domain: Domain
@@ -28,8 +32,9 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const dataApi = new DataApi(AXIOS_CONFIG())
 
   const valid = (isValid: boolean | undefined): JSX.Element => {
-    if (isValid) return <DoneIcon htmlColor={theme.palette.success.main} />
-    return <WarningIcon htmlColor={theme.palette.warning.main} />
+    if (isValid)
+      return <CustomCheckIcon htmlColor={theme.palette.success.main} />
+    return <CustomWarningIcon htmlColor={theme.palette.warning.main} />
   }
 
   const runImport = (): void => {
@@ -70,7 +75,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
         onClick={() => navigate(`/ui/pipeline/${domain.id}`)}
       >
         <IconButton size="small">
-          <VisibilityIcon htmlColor={theme.palette.grey[700]} />
+          <CustomVisibilityIcon htmlColor={theme.palette.grey[700]} />
         </IconButton>
       </TableCell>
       <TableCell align="left">{domain.name}</TableCell>
@@ -78,17 +83,17 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
       <TableCell align="center">{valid(domain.mappingValid)}</TableCell>
       <TableCell align="center">
         <IconButton size="small" disabled={cleanActive} onClick={runImport}>
-          <PlayArrowIcon htmlColor={theme.palette.primary.main} />
+          <CustomPlayIcon htmlColor={theme.palette.primary.main} />
         </IconButton>
       </TableCell>
       <TableCell align="center">
         <IconButton size="small" onClick={stopImport}>
-          <StopIcon htmlColor={theme.palette.info.main} />
+          <CustomStopIcon htmlColor={theme.palette.info.main} />
         </IconButton>
       </TableCell>
       <TableCell align="center">
         <IconButton size="small" onClick={clearDomain}>
-          <ClearIcon htmlColor={theme.palette.error.main} />
+          <CustomClearIcon htmlColor={theme.palette.error.main} />
         </IconButton>
       </TableCell>
       <TableCell align="left">{message}</TableCell>

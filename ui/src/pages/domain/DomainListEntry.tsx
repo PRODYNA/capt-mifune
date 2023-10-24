@@ -1,5 +1,7 @@
 import {
   Box,
+  Button,
+  ButtonGroup,
   FormControl,
   IconButton,
   ListItemIcon,
@@ -7,14 +9,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
-import React, { SyntheticEvent, useContext, useState } from 'react'
+import { SyntheticEvent, useContext, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
-import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord'
-import Delete from '@mui/icons-material/Delete'
-import Save from '@mui/icons-material/Save'
-import Add from '@mui/icons-material/Add'
-import Visibility from '@mui/icons-material/Visibility'
-import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import { NodeSelect } from './NodeSelect'
 import CustomAccordion from '../../components/Accordion/CustomAccordion'
 import { SnackbarContext } from '../../context/Snackbar'
@@ -24,6 +20,14 @@ import { GraphContext } from '../../context/GraphContext'
 import { D3Helper } from '../../helpers/D3Helper'
 import { Domain, GraphApi, GraphDelta } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
+import {
+  CustomAddIcon,
+  CustomDeleteIcon,
+  CustomRecordIcon,
+  CustomSaveIcon,
+  CustomVisibilityIcon,
+  CustomVisibilityOffIcon,
+} from '../../components/Icons/CustomIcons'
 
 interface DomainListEntryProps {
   domain: Domain
@@ -116,7 +120,7 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
   const buildBadge = (): JSX.Element => {
     return (
       <Tooltip arrow title={domain.modelValid ? 'valid' : 'invalid'}>
-        <FiberManualRecordIcon
+        <CustomRecordIcon
           sx={{
             fontSize: 20,
           }}
@@ -170,18 +174,22 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         isExpanded={expanded}
         summary={
           <>
-            <ListItemIcon style={{ minWidth: '2rem' }}>
+            <ListItemIcon sx={{ minWidth: '2rem' }}>
               {buildBadge()}
             </ListItemIcon>
             <ListItemIcon
-              style={{ minWidth: '2rem' }}
+              sx={{ minWidth: '2rem' }}
               onClick={(e): void => {
                 e.stopPropagation()
                 setIsVisible(!isVisible)
                 hideSelectedDomain()
               }}
             >
-              {isVisible ? <Visibility /> : <VisibilityOff />}
+              {isVisible ? (
+                <CustomVisibilityIcon />
+              ) : (
+                <CustomVisibilityOffIcon />
+              )}
             </ListItemIcon>
             <span
               style={{
@@ -197,23 +205,23 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
           </>
         }
         actions={
-          <>
+          <ButtonGroup variant="outlined" color="primary" disableElevation>
             <Tooltip arrow title="Delete Domain">
-              <IconButton onClick={() => setShowModal(true)}>
-                <Delete htmlColor={theme.palette.error.main} />
-              </IconButton>
+              <Button onClick={() => setShowModal(true)}>
+                <CustomDeleteIcon htmlColor={theme.palette.error.main} />
+              </Button>
             </Tooltip>
             <Tooltip arrow title="Add new Node to Domain">
-              <IconButton onClick={addDomainNode}>
-                <Add htmlColor={theme.palette.secondary.main} />
-              </IconButton>
+              <Button onClick={addDomainNode}>
+                <CustomAddIcon htmlColor={theme.palette.secondary.main} />
+              </Button>
             </Tooltip>
             <Tooltip arrow title="Save changes">
-              <IconButton onClick={updateDomain}>
-                <Save htmlColor={theme.palette.success.main} />
-              </IconButton>
+              <Button onClick={updateDomain}>
+                <CustomSaveIcon htmlColor={theme.palette.success.main} />
+              </Button>
             </Tooltip>
-          </>
+          </ButtonGroup>
         }
         onChange={(event: SyntheticEvent<Element, Event>): void => {
           event.preventDefault()
@@ -227,7 +235,6 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
         setOpen={setShowModal}
         title="Delete Domain"
         submitBtnText="Yes, Delete"
-        submitBtnColor={theme.palette.error.main}
         handleSubmit={deleteDomain}
       >
         <Typography variant="body1">

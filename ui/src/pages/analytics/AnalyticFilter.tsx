@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import {
   Checkbox,
   IconButton,
@@ -6,7 +6,6 @@ import {
   TextField,
   useTheme,
 } from '@mui/material'
-import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox'
 import { formatISO } from 'date-fns'
 import { DesktopDatePicker } from '@mui/x-date-pickers'
 import FormSelect from '../../components/Form/FormSelect'
@@ -20,6 +19,7 @@ import {
   StatisticApi,
 } from '../../services'
 import AXIOS_CONFIG from '../../openapi/axios-config'
+import { CustomCheckBoxIcon } from '../../components/Icons/CustomIcons'
 
 interface AnalyticFilterProps {
   onKeyChange: (key?: string) => void
@@ -214,7 +214,7 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
       )}
       <TableCell width={30}>
         <IconButton onClick={onDelete} style={{ padding: 0 }}>
-          <IndeterminateCheckBoxIcon htmlColor={theme.palette.error.main} />
+          <CustomCheckBoxIcon htmlColor={theme.palette.error.main} />
         </IconButton>
       </TableCell>
     </>
