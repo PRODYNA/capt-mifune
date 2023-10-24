@@ -3,7 +3,7 @@ import { Box, Button, Chip, Collapse, Switch, Typography } from '@mui/material'
 import * as d3 from 'd3'
 import { v4 } from 'uuid'
 import { D3Helper, D3Node, D3Relation } from '../../helpers/D3Helper'
-import { Graph, GraphApi, Node, Relation } from '../../services'
+import { Graph, Node, Relation } from '../../services'
 import {
   addSvgStyles,
   buildSimulation,
@@ -13,7 +13,7 @@ import {
   nodeMouseEvents,
   tick,
 } from '../../helpers/GraphHelper'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { graphApi } from '../../openapi/api'
 
 export interface QueryBuilderProps {
   onChange: (query: Query) => void
@@ -53,7 +53,6 @@ export const QueryBuilder = (props: QueryBuilderProps): JSX.Element => {
   const [showQuery, setShowQuery] = useState<boolean>(true)
 
   const d3Container = useRef(null)
-  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const handleResize = (): void => {
     setWidth(document?.getElementById('query-builder')?.clientWidth ?? 100)

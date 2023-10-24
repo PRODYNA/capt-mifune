@@ -1,12 +1,12 @@
-import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
+import { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { Checkbox, TableCell, TableRow, TextField } from '@mui/material'
-import { GraphApi, GraphDelta, Property, Relation } from '../../services'
+import { GraphDelta, Property, Relation } from '../../services'
 import { DomainSelect } from './DomainSelect'
 import Edit from './Edit'
 import CustomTable from '../../components/Table/CustomTable'
 import { tableStyles } from './NodeEdit'
 import { GraphContext } from '../../context/GraphContext'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { graphApi } from '../../openapi/api'
 
 interface RelationEditProps {
   relation: Relation
@@ -18,7 +18,6 @@ export const RelationEdit = (props: RelationEditProps): JSX.Element => {
   const { relations, domains, setSelected } = useContext(GraphContext)
   const [value, setValue] = useState<Relation>(relation)
   const [properties, setProperties] = useState<Property[]>([])
-  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const updateType = (event: ChangeEvent<HTMLInputElement>): void => {
     setValue((oldRel) => ({ ...oldRel, type: event.target.value }))

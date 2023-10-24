@@ -2,7 +2,7 @@ import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { BaseType, Selection } from 'd3'
 import { NodeEdit } from './NodeEdit'
-import { Domain, GraphApi, GraphDelta, Node, Relation } from '../../services'
+import { Domain, GraphDelta, Node, Relation } from '../../services'
 import { RelationEdit } from './RelationEdit'
 import { DomainList } from '../domain/DomainList'
 import {
@@ -28,8 +28,8 @@ import {
   svgStyle,
   tick,
 } from '../../helpers/GraphHelper'
-import AXIOS_CONFIG from '../../openapi/axios-config'
 import { GraphContext } from '../../context/GraphContext'
+import { graphApi } from '../../openapi/api'
 
 interface IGraph {
   openSidenav: boolean
@@ -61,7 +61,6 @@ export const Graph = (props: IGraph): JSX.Element => {
   const [width, setWidth] = useState<number>(800)
   const [height, setHeight] = useState<number>(600)
   const d3Container = useRef(null)
-  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const getVisibleNodes = (): D3Node<Node>[] => {
     let visibleNodes: D3Node<Node>[]

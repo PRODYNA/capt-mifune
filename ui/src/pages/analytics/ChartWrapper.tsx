@@ -14,7 +14,6 @@ import { Query } from './QueryBuilder'
 import CustomTable from '../../components/Table/CustomTable'
 import { ChartContext } from '../../context/ChartContext'
 import {
-  DataApi,
   Direction,
   Filter,
   FilterFunction,
@@ -22,15 +21,14 @@ import {
   PropertyType,
   QueryFunction,
   QueryResultDefinition,
-  StatisticApi,
 } from '../../services'
-import AXIOS_CONFIG from '../../openapi/axios-config'
 import { SnackbarContext } from '../../context/Snackbar'
 import {
   CustomAddIcon,
   CustomPlayIcon,
 } from '../../components/Icons/CustomIcons'
 import { CustomTexts } from '../../utils/CustomTexts'
+import { statisticResourceApi } from '../../openapi/api'
 
 export interface SelectProps {
   query: Query
@@ -61,8 +59,6 @@ export type ExtendedFilter = Filter & {
 export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
   const { results, orders, dataPreparation, selects, disableScale, children } =
     props
-  const dataResourceApi = new DataApi(AXIOS_CONFIG())
-  const statisticApi = new StatisticApi(AXIOS_CONFIG())
   const { setData, query } = useContext(ChartContext)
   const { openSnackbarError } = useContext(SnackbarContext)
   const [loading, setLoading] = useState<boolean>(false)
@@ -134,7 +130,7 @@ export const ChartWrapper = (props: ChartWrapperProps<any>): JSX.Element => {
 
   const loadData = (): void => {
     setLoading(true)
-    statisticApi
+    statisticResourceApi
       .query({
         nodes: query.nodes.map((n) => {
           return {

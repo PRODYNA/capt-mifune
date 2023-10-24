@@ -2,8 +2,6 @@ import { useContext } from 'react'
 import { Box, Fab, Tooltip } from '@mui/material'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import AXIOS_CONFIG from '../../openapi/axios-config'
-import { GraphApi } from '../../services'
 import { GraphContext } from '../../context/GraphContext'
 import { CustomTexts } from '../../utils/CustomTexts'
 import {
@@ -11,6 +9,7 @@ import {
   CustomDownloadIcon,
   CustomSaveIcon,
 } from '../../components/Icons/CustomIcons'
+import { graphApi } from '../../openapi/api'
 
 interface IDomainActions {
   downloadSVG: () => void
@@ -20,7 +19,6 @@ const DomainActions = (props: IDomainActions): JSX.Element => {
   const { downloadSVG } = props
   const { domains, setDomains, setSelectedDomain } = useContext(GraphContext)
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   return (
     <Box

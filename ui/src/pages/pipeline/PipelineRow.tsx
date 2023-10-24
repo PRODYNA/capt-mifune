@@ -1,13 +1,10 @@
 import { Dispatch, SetStateAction, useContext } from 'react'
-
 import { IconButton, TableCell, TableRow } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-
 import { useTheme } from '@mui/material/styles'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import { DataApi, Domain } from '../../services'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { Domain } from '../../services'
 import {
   CustomCheckIcon,
   CustomClearIcon,
@@ -16,6 +13,7 @@ import {
   CustomPlayIcon,
   CustomStopIcon,
 } from '../../components/Icons/CustomIcons'
+import { dataResourceApi } from '../../openapi/api'
 
 interface IPipelineRow {
   domain: Domain
@@ -29,7 +27,6 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const navigate = useNavigate()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const theme = useTheme()
-  const dataApi = new DataApi(AXIOS_CONFIG())
 
   const valid = (isValid: boolean | undefined): JSX.Element => {
     if (isValid)
@@ -40,7 +37,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
   const runImport = (): void => {
     setShowProgress(true)
     if (domain.id)
-      dataApi
+      dataResourceApi
         .importDomain(domain.id)
         .then(() => {
           openSnackbar(Translations.IMPORT_RUN, 'success')
@@ -54,7 +51,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
 
   const stopImport = (): void => {
     if (domain.id)
-      dataApi
+      dataResourceApi
         .cancelImport(domain.id)
         .then(() => openSnackbar(Translations.IMPORT_STOPPED, 'success'))
         .catch((e) => openSnackbarError(e))
@@ -62,7 +59,7 @@ const PipelineRow = (props: IPipelineRow): JSX.Element => {
 
   const clearDomain = (): void => {
     if (domain.id)
-      dataApi
+      dataResourceApi
         .clearDomain(domain.id)
         .then(() => openSnackbar(Translations.DOMAIN_CLEAR, 'success'))
         .catch((e) => openSnackbarError(e))

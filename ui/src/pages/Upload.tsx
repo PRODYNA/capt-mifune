@@ -3,16 +3,14 @@ import { Box, Button, Container, Typography } from '@mui/material'
 import { SnackbarContext } from '../context/Snackbar'
 import { Translations } from '../utils/Translations'
 import { CustomTexts } from '../utils/CustomTexts'
-import AXIOS_CONFIG from '../openapi/axios-config'
-import { SourceApi } from '../services'
 import { CustomUploadIcon } from '../components/Icons/CustomIcons'
+import { sourceApi } from '../openapi/api'
 
 const FileUpload = (): JSX.Element => {
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [file, setFile] = useState<{ file: File; loaded?: number } | undefined>(
     undefined
   )
-  const sourceApi = new SourceApi(AXIOS_CONFIG())
 
   return (
     <Container>

@@ -14,23 +14,19 @@ import {
   Typography,
   Button,
 } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { EventSourcePolyfill } from 'ng-event-source'
 import PipelineRow from './PipelineRow'
 import CustomDialog from '../../components/Dialog/CustomDialog'
-import { Domain, GraphApi, GraphStatistics } from '../../services'
-import AXIOS_CONFIG from '../../openapi/axios-config'
-import { EventApiImpl } from '../../helpers/event-api'
+import { Domain, GraphStatistics } from '../../services'
 import { CustomDeleteIcon } from '../../components/Icons/CustomIcons'
 import { CustomTexts } from '../../utils/CustomTexts'
+import { eventApi, graphApi } from '../../openapi/api'
 
 interface Message {
   [key: string]: number
 }
 
 const Pipelines = (): JSX.Element => {
-  const eventApi = new EventApiImpl(AXIOS_CONFIG())
-  const graphApi = new GraphApi(AXIOS_CONFIG())
   const [domains, setDomains] = useState<Domain[]>()
   const [showModal, setShowModal] = useState<boolean>(false)
   const [cleanActive, setCleanActive] = useState<boolean>(false)
@@ -91,8 +87,6 @@ const Pipelines = (): JSX.Element => {
       sseClient.close()
     }
   }
-
-  const theme = useTheme()
 
   return (
     <Container>

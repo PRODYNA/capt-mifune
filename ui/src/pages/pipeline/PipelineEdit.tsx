@@ -4,9 +4,9 @@ import { Grid } from '@mui/material'
 import FormSelect from '../../components/Form/FormSelect'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import { Domain, GraphApi, Source, SourceApi } from '../../services'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { Domain, Source } from '../../services'
 import ActionButtons from '../../components/Button/ActionButtons'
+import { graphApi, sourceApi } from '../../openapi/api'
 
 interface DomainEditProps {
   domain: Domain
@@ -14,8 +14,6 @@ interface DomainEditProps {
 
 const PipelineEdit = (props: DomainEditProps): JSX.Element => {
   const { domain } = props
-  const graphApi = new GraphApi(AXIOS_CONFIG())
-  const sourceApi = new SourceApi(AXIOS_CONFIG())
   const navigate = useNavigate()
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
   const [mapping, setMapping] = useState<{ [key: string]: string }>(

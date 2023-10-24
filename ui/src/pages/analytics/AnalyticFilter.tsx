@@ -12,14 +12,9 @@ import FormSelect from '../../components/Form/FormSelect'
 import { AnalyticSelect } from './AnalyticSelect'
 import { tableStyles } from '../graph/NodeEdit'
 import { ChartContext } from '../../context/ChartContext'
-import {
-  FilterFunction,
-  PropertyType,
-  QueryFunction,
-  StatisticApi,
-} from '../../services'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { FilterFunction, PropertyType, QueryFunction } from '../../services'
 import { CustomCheckBoxIcon } from '../../components/Icons/CustomIcons'
+import { statisticResourceApi } from '../../openapi/api'
 
 interface AnalyticFilterProps {
   onKeyChange: (key?: string) => void
@@ -41,7 +36,6 @@ export const AnalyticFilter = (props: AnalyticFilterProps): JSX.Element => {
   )
   const [values, setValues] = useState<string[]>()
   const theme = useTheme()
-  const statisticResourceApi = new StatisticApi(AXIOS_CONFIG())
 
   useEffect(() => {
     if (propertyType === PropertyType.Boolean) {

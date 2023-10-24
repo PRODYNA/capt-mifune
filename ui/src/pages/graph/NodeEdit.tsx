@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useContext, useEffect, useState } from 'react'
+import { ChangeEvent, useContext, useEffect, useState } from 'react'
 import { TableCell, TableRow, TextField } from '@mui/material'
-import { GraphApi, GraphDelta, Node, Property } from '../../services'
+import { GraphDelta, Node, Property } from '../../services'
 import { DomainSelect } from './DomainSelect'
 import { ColorPicker } from '../../components/ColorPicker/ColorPicker'
 import CustomTable from '../../components/Table/CustomTable'
@@ -8,7 +8,7 @@ import Edit from './Edit'
 import { GraphContext } from '../../context/GraphContext'
 import { SnackbarContext } from '../../context/Snackbar'
 import { Translations } from '../../utils/Translations'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { graphApi } from '../../openapi/api'
 
 interface NodeEditProps {
   node: Node
@@ -36,7 +36,6 @@ export const NodeEdit = (props: NodeEditProps): JSX.Element => {
   const [value, setValue] = useState<Node>(node)
   const [properties, setProperties] = useState<Property[]>([])
   const { openSnackbar, openSnackbarError } = useContext(SnackbarContext)
-  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const updateDomain = (newDomainIds: string[]): void => {
     setValue((oldNode) => ({ ...oldNode, domainIds: newDomainIds }))

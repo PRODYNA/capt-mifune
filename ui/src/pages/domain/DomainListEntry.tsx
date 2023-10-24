@@ -3,7 +3,6 @@ import {
   Button,
   ButtonGroup,
   FormControl,
-  IconButton,
   ListItemIcon,
   TextField,
   Tooltip,
@@ -18,8 +17,7 @@ import { Translations } from '../../utils/Translations'
 import CustomDialog from '../../components/Dialog/CustomDialog'
 import { GraphContext } from '../../context/GraphContext'
 import { D3Helper } from '../../helpers/D3Helper'
-import { Domain, GraphApi, GraphDelta } from '../../services'
-import AXIOS_CONFIG from '../../openapi/axios-config'
+import { Domain, GraphDelta } from '../../services'
 import {
   CustomAddIcon,
   CustomDeleteIcon,
@@ -28,6 +26,7 @@ import {
   CustomVisibilityIcon,
   CustomVisibilityOffIcon,
 } from '../../components/Icons/CustomIcons'
+import { graphApi } from '../../openapi/api'
 
 interface DomainListEntryProps {
   domain: Domain
@@ -54,7 +53,6 @@ export const DomainListEntry = (props: DomainListEntryProps): JSX.Element => {
     setSelectedDomain,
   } = useContext(GraphContext)
   const theme = useTheme()
-  const graphApi = new GraphApi(AXIOS_CONFIG())
 
   const handleChange = (): void => {
     if (domain.id) toggleAccordion(domain.id)
